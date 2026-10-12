@@ -393,7 +393,8 @@ function paletteEl(){
   if (!p) { p = document.createElement("div"); p.id = "hlpal"; p.setAttribute("role", "dialog"); p.setAttribute("aria-label", "Highlight this sentence"); p.hidden = true; document.body.appendChild(p); }
   return p;
 }
-let hlOpenFor = null;
+let hlOpenFor = null, hlPressing = false;
+document.addEventListener("pointerup", () => setTimeout(() => { hlPressing = false; }, 0), true);
 function openPalette(span){
   const p = paletteEl(), k = span.dataset.k, cur = (st.hl || {})[k];
   if (hlOpenFor) hlOpenFor.classList.remove("sel");
@@ -408,8 +409,13 @@ function openPalette(span){
     p.style.left = Math.max(8, Math.min(window.scrollX + r.left, window.scrollX + document.documentElement.clientWidth - w - 8)) + "px";
   } else { p.style.left = ""; p.style.top = ""; }
   (p.querySelector('.sw[aria-pressed="true"]') || p.querySelector(".sw")).focus();
-  p.onfocusout = e => { if (!e.relatedTarget || !p.contains(e.relatedTarget)) setTimeout(() => { if (!p.contains(document.activeElement)) closePalette(false); }, 0); };
+  // Safari (macOS and iOS) doesn't focus a button when it is clicked: focus leaves the palette on mousedown, before
+  // the click arrives. So a press inside the palette keeps focus where it is, and focusout ignores it.
+  p.onpointerdown = () => { hlPressing = true; };
+  p.onmousedown = e => { hlPressing = true; if (e.target.closest("button")) e.preventDefault(); };
+  p.onfocusout = e => { if (hlPressing) return; if (!e.relatedTarget || !p.contains(e.relatedTarget)) setTimeout(() => { if (!hlPressing && !p.contains(document.activeElement)) closePalette(false); }, 0); };
   p.onclick = e => {
+    hlPressing = false;
     const b = e.target.closest("button"); if (!b) return;
     if (b.classList.contains("x")) return closePalette(true);
     setHighlight(k, b.dataset.col || null); closePalette(true);
