@@ -34,6 +34,14 @@ button,select,textarea,input{font:inherit;color:inherit}
 .teacher{flex:none;font-size:.8rem;color:var(--ink-2);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:3px 10px;white-space:nowrap}
 .teacher:hover{color:var(--ink);border-color:var(--ink-2)}
 .who{font-size:.85rem;background:var(--panel);border-radius:999px;padding:3px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+/* phones: the role/player goes on its own line under the title, so neither gets cut off */
+@media (max-width:600px){
+  .bar .wrap{display:grid;grid-template-columns:1fr auto;column-gap:10px;row-gap:6px}
+  .bar .right{display:contents}
+  .bar .title{grid-column:1;grid-row:1;white-space:normal}
+  .teacher{grid-column:2;grid-row:1;align-self:start}
+  .who{grid-column:1 / -1;grid-row:2;justify-self:start;max-width:100%}
+}
 .tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding-bottom:0}
 .tabs::-webkit-scrollbar{display:none}
 .tab{border:0;background:none;padding:10px 12px;border-bottom:3px solid transparent;white-space:nowrap;cursor:pointer;color:var(--ink-2)}
