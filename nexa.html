@@ -247,6 +247,7 @@ footer{border-top:1px solid var(--line);padding:18px 0 40px;font-size:.85rem;col
 const S = JSON.parse(document.getElementById("scenario").textContent);
 const STORE = "simlearn:" + S.id + ":v" + S.version;
 const AE2 = S.format === "ae2";   // new AE format: drawers, tags, "which is the better argument?"
+const TAGS = !S.budget && (S.decisions || []).length > 0;   // highlights can be tagged with the decisions they matter for
 
 /* ---------- state (kept only in this browser tab, so a reload doesn't lose work) ---------- */
 let st = {mode:"3", role:null, tab:"context", choices:{}, firstLook:{}, mcq:{}, decisions:{}, however:{}, memo:"", consent:false, notes:"", hl:{}, hlLabels:{}, hlGroup:"colour", budget:{}, rationale:"", ack:false, opened:{}, drawOpen:{}, tags:{}, nbf:{}};
@@ -467,8 +468,8 @@ function openPalette(span){
   p.innerHTML = HL.map(([key, name, c]) => `<button type="button" class="sw" data-col="${key}" aria-pressed="${cur===key}" aria-label="${esc(name + (hlLabel(key) ? ": " + hlLabel(key) : ""))}"><i style="background:${c}"></i>${esc(hlLabel(key) || name)}</button>`).join("")
     + (cur ? `<button type="button" class="rm" data-col="">Remove</button>` : "")
     + `<button type="button" class="x" aria-label="Close">×</button>`
-    + (AE2 ? `<div class="lbl">Part of the argument</div><div class="row">${TAG_PARTS.map(x => `<button type="button" class="tg" data-part="${x}" aria-pressed="${t.p === x}">${x}</button>`).join("")}</div>
-        <div class="lbl">Matters for</div><div class="row">${S.decisions.map(d => `<button type="button" class="tg" data-dec="${d.id}" aria-pressed="${t.d.includes(d.id)}" title="${esc(d.title)}">Decision ${decNo(d.id)}</button>`).join("")}
+    + (AE2 ? `<div class="lbl">Part of the argument</div><div class="row">${TAG_PARTS.map(x => `<button type="button" class="tg" data-part="${x}" aria-pressed="${t.p === x}">${x}</button>`).join("")}</div>` : "")
+    + (TAGS ? `<div class="lbl">Matters for</div><div class="row">${S.decisions.map(d => `<button type="button" class="tg" data-dec="${d.id}" aria-pressed="${t.d.includes(d.id)}" title="${esc(d.title)}">Decision ${decNo(d.id)}</button>`).join("")}
         <button type="button" class="done">Done</button></div>` : "");
   p.hidden = false;
   if (!matchMedia("(max-width:600px)").matches) {
@@ -486,7 +487,7 @@ function openPalette(span){
     hlPressing = false;
     const b = e.target.closest("button"); if (!b) return;
     if (b.classList.contains("x") || b.classList.contains("done")) return closePalette(true);
-    if (AE2 && !b.classList.contains("rm")) {   // colour and tags: the palette stays open until Done
+    if (TAGS && !b.classList.contains("rm")) {   // colour and tags: the palette stays open until Done
       const sel = b.dataset.part ? `[data-part="${b.dataset.part}"]` : b.dataset.dec ? `[data-dec="${b.dataset.dec}"]` : `[data-col="${b.dataset.col}"]`;
       if (b.dataset.col) setHighlight(k, b.dataset.col);
       else { toggleTag(k, b.dataset.part, b.dataset.dec); if (!(st.hl || {})[k]) setHighlight(k, "yellow"); else refreshNotebook(); }
@@ -533,7 +534,7 @@ function notebookHTML(inSubmit){
   const tools = `<div class="tools"><span>Show by</span><button type="button" data-grp="colour" aria-pressed="${byColour}">colour</button><button type="button" data-grp="source" aria-pressed="${!byColour}">source</button>
     ${items.length ? `<button type="button" class="linkish" data-clear="1" style="margin-left:auto">Clear all highlights</button><span data-clearask hidden>Remove all ${items.length}? <button type="button" class="linkish" data-clearyes="1">Yes, clear them</button> · <button type="button" class="linkish" data-clearno="1">Keep them</button></span>` : ""}</div>`;
   let shown = items, filt = "";
-  if (AE2 && items.length) {   // one filter, in a single grouped list: part of the argument, decision, source, colour
+  if (items.length) {   // one filter, in a single grouped list: part of the argument (new AE format), decision, source, colour
     const f = (st.nbf || {}).one || "", names = [...new Set(items.map(x => x.src.name))];
     const [kind, val] = f ? [f.slice(0, 1), f.slice(2)] : ["", ""];
     shown = items.filter(x => { const t = tagsOf(x.k);
@@ -542,8 +543,8 @@ function notebookHTML(inSubmit){
     const opt = (v, t) => `<option value="${esc(v)}" ${f === v ? "selected" : ""}>${esc(t)}</option>`;
     const grp = (label, opts) => `<optgroup label="${esc(label)}">${opts.join("")}</optgroup>`;
     filt = `<div class="nbf"><label>Show <select data-f="one">${opt("", "all highlights")}
-      ${grp("Part of the argument", [...TAG_PARTS.map(x => opt("p:" + x, x)), opt("p:-", "no part tag yet")])}
-      ${grp("Decision", [...S.decisions.map(d => opt("d:" + d.id, "Decision " + decNo(d.id))), opt("d:-", "no decision tag yet")])}
+      ${AE2 ? grp("Part of the argument", [...TAG_PARTS.map(x => opt("p:" + x, x)), opt("p:-", "no part tag yet")]) : ""}
+      ${TAGS ? grp("Decision", [...S.decisions.map(d => opt("d:" + d.id, "Decision " + decNo(d.id))), opt("d:-", "no decision tag yet")]) : ""}
       ${grp("Source", names.map(n => opt("s:" + n, n)))}
       ${grp("Colour", HL.map(([k, name]) => opt("c:" + k, hlLabel(k) || name)))}</select></label>
       ${shown.length < items.length ? `<span>${shown.length} of ${items.length}</span>` : ""}</div>`;
@@ -556,7 +557,7 @@ function notebookHTML(inSubmit){
     const cite = inSubmit && S.course === "AE" && x.src.citation ? citeOf(x.src.citation) : "";
     return `<div class="nb-card" style="border-left-color:${HLC[x.col]}">
       <p class="s" role="button" tabindex="0" data-jump="${esc(x.k)}" title="Show this sentence where it came from">${esc(x.t)}</p>
-      <div class="src"><span>${esc(hlLabel(x.col) || hlName(x.col))}${AE2 ? tagChips(x.k) : ""} · ${esc(x.src.name)}${x.src.title ? ", " + esc(x.src.title) : ""}${x.src.option ? ` (“${esc(x.src.option)}”)` : ""}</span>
+      <div class="src"><span>${esc(hlLabel(x.col) || hlName(x.col))}${TAGS ? tagChips(x.k) : ""} · ${esc(x.src.name)}${x.src.title ? ", " + esc(x.src.title) : ""}${x.src.option ? ` (“${esc(x.src.option)}”)` : ""}</span>
         ${cite ? `<button type="button" class="citebtn" data-cite="${esc(cite)}" aria-label="Insert ${esc(cite)} into your text">Cite ${esc(cite)}</button>` : ""}</div>
       ${S.course === "AE" && x.src.citation ? `<div class="src">${esc(x.src.citation)}</div>` : ""}</div>`;
   };
@@ -644,7 +645,7 @@ const ALL_TABS = [["context","Context"],["firstlook","First look"],["listening",
 const TABS = ALL_TABS.filter(([k]) => k !== "listening" || (S.listening && S.listening.questions && S.listening.questions.length));
 function render(){
   closePalette(false);
-  $("#app").classList.toggle("wide", !!st.role && (st.tab === "submit" || (AE2 && st.tab === "decisions")));
+  $("#app").classList.toggle("wide", !!st.role && (st.tab === "submit" || st.tab === "decisions"));
   if (!st.role) return renderStart();
   if (!TABS.some(([k]) => k === st.tab)) st.tab = "context";
   hlDescs();
@@ -820,6 +821,7 @@ function tabBudget(){
   const totalHTML = () => { const tot = budgetTotal(), d = tot - B.target, ok = Math.abs(d) <= B.tolerance;
     return `<span>Total: ${money(tot)}</span><span class="${ok ? "on" : "off"}">${ok ? "✓ on target" : (d > 0 ? money(d) + " over" : money(-d) + " under")} (target ${money(B.target)})</span>`; };
   $("#main").innerHTML = `
+    <div class="writegrid"><div>
     <p>Agree how to split the <b>${money(B.target)}</b> ${pair() ? "together" : "as a group"}, then ${pair() ? "both of you enter" : "everyone enters"} the same numbers here. The total has to land within ${money(B.tolerance)} of the target.</p>
     <div class="bud">${B.items.map(it => `<div class="row">
         <label for="b_${it.id}"><span class="l">${esc(it.label)}</span><br><span class="u">${money(it.unit_cost)} per ${esc(it.unit || "unit")} · up to ${it.max}</span></label>
@@ -828,7 +830,9 @@ function tabBudget(){
     <div class="total" id="btotal" aria-live="polite">${totalHTML()}</div>
     <label class="small muted" for="rationale" style="display:block;margin-top:14px">Our reasoning (the main trade-off, and the biggest risk of this split)</label>
     <textarea id="rationale" style="width:100%;min-height:90px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-top:6px">${esc(st.rationale || "")}</textarea>
-    <div id="bflash">${flash()}</div>`;
+    <div id="bflash">${flash()}</div>
+    </div>${NB_PANEL()}</div>`;
+  wirePanel();
   let wasOK = budgetOK();
   $("#main").oninput = e => {
     const id = e.target.dataset.b;
@@ -843,6 +847,10 @@ function tabBudget(){
   };
 }
 
+// the student's highlights beside the decisions (or the budget), with the same filter as everywhere else
+const NB_PANEL = () => `<details class="nbpanel sticky" id="nbpanel" ${st.nbClosed ? "" : "open"}><summary id="nbhead">Your highlights<span id="nbcount"></span></summary><p id="nblive" class="small muted" aria-live="polite"></p><section class="nb" data-nb="decisions"></section></details>`;
+function wirePanel(){ $("#nbpanel").ontoggle = e => { st.nbClosed = !e.target.open; save(); }; refreshNotebook(); }
+const OBJECTION = AE2 ? "The strongest argument against your choice, and your answer to it" : "The biggest risk or strongest objection, and your answer to it";
 function tabDecisions(){
   if (B) return tabBudget();
   const all = S.decisions.every(d => st.decisions[d.id]);
@@ -855,27 +863,29 @@ function tabDecisions(){
         const head = d.group && d.group !== grp ? `<p class="decgroup">${esc(grp = d.group)}</p>` : "";
         return head + `<div class="dec"><h3>${esc(d.title)}</h3>
           ${["A","B"].map(o => `<label class="opt"><input type="radio" name="dec_${d.id}" value="${o}" ${st.decisions[d.id]===o?"checked":""}><span><b>${o}.</b> ${esc(d[o])}</span></label>`).join("")}
-          <label class="small muted" for="hw_${d.id}">The strongest argument against your choice, and your answer to it</label>
+          <label class="small muted" for="hw_${d.id}">${OBJECTION}</label>
           <textarea id="hw_${d.id}" data-hw="${d.id}">${esc(st.however[d.id]||"")}</textarea></div>`;
       }).join("")}</div>
-      <details class="nbpanel sticky" id="nbpanel" ${st.nbClosed ? "" : "open"}><summary id="nbhead">Your highlights<span id="nbcount"></span></summary><p id="nblive" class="small muted" aria-live="polite"></p><section class="nb" data-nb="decisions"></section></details>
+      ${NB_PANEL()}
       </div>`;
-    $("#nbpanel").ontoggle = e => { st.nbClosed = !e.target.open; save(); };
-    refreshNotebook();
+    wirePanel();
     $("#main").onchange = e => { if (e.target.name && e.target.name.startsWith("dec_")) { st.decisions[e.target.name.slice(4)] = e.target.value; save(); } };
     $("#main").oninput = e => { if (e.target.dataset.hw) { st.however[e.target.dataset.hw] = e.target.value; save(); } };
     return;
   }
   $("#main").innerHTML = `
-    <p>Agree the ${num(S.decisions.length)} decisions <b>${pair() ? "together" : "as a group"}</b>, then ${pair() ? "both of you enter" : "everyone enters"} the same answers here. For each one, note the biggest risk or objection — you'll need it in your writing.</p>
+    <p>Agree the ${num(S.decisions.length)} decisions <b>${pair() ? "together" : "as a group"}</b>, then ${pair() ? "both of you enter" : "everyone enters"} the same answers here. For each one, note the biggest risk or strongest objection and your answer to it: you'll need it in your writing. Your highlights are beside the decisions.</p>
+    <div class="writegrid"><div>
     ${S.decisions.map(d => `
       <div class="dec"><h3>${esc(d.title)}</h3>
         ${["A","B"].map(o => `<label class="opt"><input type="radio" name="dec_${d.id}" value="${o}" ${st.decisions[d.id]===o?"checked":""}><span><b>${o}.</b> ${esc(d[o])}</span></label>`).join("")}
-        <label class="small muted" for="hw_${d.id}">However… (the main risk or objection)</label>
+        <label class="small muted" for="hw_${d.id}">${OBJECTION}</label>
         <textarea id="hw_${d.id}" data-hw="${d.id}">${esc(st.however[d.id]||"")}</textarea>
       </div>`).join("")}
     ${!S.newsflash ? "" : all ? `<div class="flash"><b>Breaking news</b><div class="prose">${esc(unscramble(S.newsflash, `${S.salt}|newsflash`)).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>")}</div></div>`
-          : `<p class="muted small">When you've chosen all ${num(S.decisions.length)}, some breaking news will appear here.</p>`}`;
+          : `<p class="muted small">When you've chosen all ${num(S.decisions.length)}, some breaking news will appear here.</p>`}
+    </div>${NB_PANEL()}</div>`;
+  wirePanel();
   $("#main").onchange = e => { if (e.target.name && e.target.name.startsWith("dec_")) { st.decisions[e.target.name.slice(4)] = e.target.value; save(); render(); } };
   $("#main").oninput = e => { if (e.target.dataset.hw) { st.however[e.target.dataset.hw] = e.target.value; save(); } };
 }
