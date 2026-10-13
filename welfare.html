@@ -157,7 +157,8 @@ legend{font-weight:600;margin-bottom:.5rem}
 .tags{display:inline-flex;flex-wrap:wrap;gap:4px;margin-left:6px}
 .tags span{font-size:.72rem;border:1px solid var(--line);border-radius:999px;padding:1px 7px;background:#fff;color:var(--ink-2)}
 .nbf{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:4px 0 10px;font-size:.8rem;color:var(--ink-2)}
-.nbf select{font:inherit;font-size:.8rem;border:1px solid var(--line);border-radius:6px;padding:3px 6px;background:#fff;max-width:11em}
+.nbf select{font:inherit;font-size:.85rem;border:1px solid var(--line);border-radius:6px;padding:4px 8px;background:#fff;max-width:100%}
+.nbf label{display:flex;gap:8px;align-items:center;flex:1;min-width:0}
 
 /* listening */
 .mcq{margin:14px 0;padding-bottom:10px;border-bottom:1px solid var(--line)}
@@ -530,16 +531,20 @@ function notebookHTML(inSubmit){
   const tools = `<div class="tools"><span>Show by</span><button type="button" data-grp="colour" aria-pressed="${byColour}">colour</button><button type="button" data-grp="source" aria-pressed="${!byColour}">source</button>
     ${items.length ? `<button type="button" class="linkish" data-clear="1" style="margin-left:auto">Clear all highlights</button><span data-clearask hidden>Remove all ${items.length}? <button type="button" class="linkish" data-clearyes="1">Yes, clear them</button> · <button type="button" class="linkish" data-clearno="1">Keep them</button></span>` : ""}</div>`;
   let shown = items, filt = "";
-  if (AE2 && items.length) {
-    const f = st.nbf || {}, names = [...new Set(items.map(x => x.src.name))];
-    const sel = (key, label, opts) => `<label>${label} <select data-f="${key}"><option value="">all</option>${opts.map(([v, t]) => `<option value="${esc(v)}" ${f[key] === v ? "selected" : ""}>${esc(t)}</option>`).join("")}</select></label>`;
+  if (AE2 && items.length) {   // one filter, in a single grouped list: part of the argument, decision, source, colour
+    const f = (st.nbf || {}).one || "", names = [...new Set(items.map(x => x.src.name))];
+    const [kind, val] = f ? [f.slice(0, 1), f.slice(2)] : ["", ""];
     shown = items.filter(x => { const t = tagsOf(x.k);
-      return (!f.p || (f.p === "-" ? !t.p : t.p === f.p)) && (!f.d || (f.d === "-" ? !t.d.length : t.d.includes(f.d)))
-          && (!f.s || x.src.name === f.s) && (!f.c || x.col === f.c); });
-    filt = `<div class="nbf"><span>Filter:</span>${sel("p", "part", [...TAG_PARTS.map(x => [x, x]), ["-", "no part tag"]])}
-      ${sel("d", "decision", [...S.decisions.map(d => [d.id, "Decision " + decNo(d.id)]), ["-", "no decision tag"]])}
-      ${sel("s", "source", names.map(n => [n, n]))}${sel("c", "colour", HL.map(([k, name]) => [k, hlLabel(k) || name]))}
-      ${shown.length < items.length ? `<span>showing ${shown.length} of ${items.length}</span>` : ""}</div>`;
+      return !kind || (kind === "p" && (val === "-" ? !t.p : t.p === val)) || (kind === "d" && (val === "-" ? !t.d.length : t.d.includes(val)))
+          || (kind === "s" && x.src.name === val) || (kind === "c" && x.col === val); });
+    const opt = (v, t) => `<option value="${esc(v)}" ${f === v ? "selected" : ""}>${esc(t)}</option>`;
+    const grp = (label, opts) => `<optgroup label="${esc(label)}">${opts.join("")}</optgroup>`;
+    filt = `<div class="nbf"><label>Show <select data-f="one">${opt("", "all highlights")}
+      ${grp("Part of the argument", [...TAG_PARTS.map(x => opt("p:" + x, x)), opt("p:-", "no part tag yet")])}
+      ${grp("Decision", [...S.decisions.map(d => opt("d:" + d.id, "Decision " + decNo(d.id))), opt("d:-", "no decision tag yet")])}
+      ${grp("Source", names.map(n => opt("s:" + n, n)))}
+      ${grp("Colour", HL.map(([k, name]) => opt("c:" + k, hlLabel(k) || name)))}</select></label>
+      ${shown.length < items.length ? `<span>${shown.length} of ${items.length}</span>` : ""}</div>`;
   }
   if (!items.length) return tools + `<p class="nb-empty">Tap any sentence in the Context or Inbox to highlight it. Your highlights collect here${inSubmit ? "" : " and next to your writing"}.</p>`;
   const groups = [];
