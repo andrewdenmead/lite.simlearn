@@ -232,6 +232,8 @@ footer{border-top:1px solid var(--line);padding:18px 0 40px;font-size:.85rem;col
   .writegrid textarea.memo{min-height:60vh}
   .writegrid .nbpanel{margin:0}
   .writegrid .nbpanel .nb{max-height:calc(60vh - 40px)}
+  .writegrid .nbpanel.sticky{position:sticky;top:112px}
+  .writegrid .nbpanel.sticky .nb{max-height:calc(100vh - 180px)}
 }
 </style>
 </head>
@@ -642,7 +644,7 @@ const ALL_TABS = [["context","Context"],["firstlook","First look"],["listening",
 const TABS = ALL_TABS.filter(([k]) => k !== "listening" || (S.listening && S.listening.questions && S.listening.questions.length));
 function render(){
   closePalette(false);
-  $("#app").classList.toggle("wide", !!st.role && st.tab === "submit");
+  $("#app").classList.toggle("wide", !!st.role && (st.tab === "submit" || (AE2 && st.tab === "decisions")));
   if (!st.role) return renderStart();
   if (!TABS.some(([k]) => k === st.tab)) st.tab = "context";
   hlDescs();
@@ -844,19 +846,22 @@ function tabBudget(){
 function tabDecisions(){
   if (B) return tabBudget();
   const all = S.decisions.every(d => st.decisions[d.id]);
-  if (AE2) {
+  if (AE2) {   // decisions on the left, the student's highlights beside them (on wide screens)
     let grp = "";
     $("#main").innerHTML = `
-      <p>For each question, decide <b>which is the better argument</b>, ${pair() ? "together" : "as a group"}, then ${pair() ? "both of you enter" : "everyone enters"} the same answers here.</p>
-      <p class="small"><span class="kind bw" style="margin-left:0">Black and white</span> The evidence clearly favours one side: find it. &nbsp;
-        <span class="kind grey" style="margin-left:0">Shades of grey</span> Both sides can be argued well: weigh them, and be ready to answer the other side.</p>
+      <p>For each question, decide <b>which is the better argument</b>, ${pair() ? "together" : "as a group"}, then ${pair() ? "both of you enter" : "everyone enters"} the same answers here. Your highlights are beside the questions: filter them by decision to see your evidence.</p>
+      <div class="writegrid"><div>
       ${S.decisions.map(d => {
         const head = d.group && d.group !== grp ? `<p class="decgroup">${esc(grp = d.group)}</p>` : "";
-        return head + `<div class="dec"><h3>${esc(d.title)}<span class="kind ${d.kind}">${d.kind === "bw" ? "Black and white" : "Shades of grey"}</span></h3>
+        return head + `<div class="dec"><h3>${esc(d.title)}</h3>
           ${["A","B"].map(o => `<label class="opt"><input type="radio" name="dec_${d.id}" value="${o}" ${st.decisions[d.id]===o?"checked":""}><span><b>${o}.</b> ${esc(d[o])}</span></label>`).join("")}
-          <label class="small muted" for="hw_${d.id}">${d.kind === "grey" ? "The strongest argument on the other side, and your answer to it" : "However… (the main risk or objection)"}</label>
+          <label class="small muted" for="hw_${d.id}">The strongest argument against your choice, and your answer to it</label>
           <textarea id="hw_${d.id}" data-hw="${d.id}">${esc(st.however[d.id]||"")}</textarea></div>`;
-      }).join("")}`;
+      }).join("")}</div>
+      <details class="nbpanel sticky" id="nbpanel" ${st.nbClosed ? "" : "open"}><summary id="nbhead">Your highlights<span id="nbcount"></span></summary><p id="nblive" class="small muted" aria-live="polite"></p><section class="nb" data-nb="decisions"></section></details>
+      </div>`;
+    $("#nbpanel").ontoggle = e => { st.nbClosed = !e.target.open; save(); };
+    refreshNotebook();
     $("#main").onchange = e => { if (e.target.name && e.target.name.startsWith("dec_")) { st.decisions[e.target.name.slice(4)] = e.target.value; save(); } };
     $("#main").oninput = e => { if (e.target.dataset.hw) { st.however[e.target.dataset.hw] = e.target.value; save(); } };
     return;
