@@ -210,6 +210,10 @@ footer{border-top:1px solid var(--line);padding:18px 0 40px;font-size:.85rem;col
 .cc .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px 12px;padding:4px 12px 12px}
 .cc label{display:flex;gap:8px;align-items:center;font-size:.9rem}
 .cc input{flex:1;min-width:0;border:1px solid var(--line);border-radius:6px;padding:4px 8px;font-size:.9rem}
+.decstrip>summary::before{content:"▸";font-size:.8rem}
+.decstrip[open]>summary::before{content:"▾"}
+.decstrip ol{margin:0;padding:2px 12px 10px 30px;font-size:.92rem;list-style:none}
+.decstrip li{margin:3px 0}
 .nb{margin-top:28px}
 .nb h2{margin-top:0}
 .nb .tools{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:.85rem;color:var(--ink-2);margin:0 0 8px}
@@ -356,6 +360,8 @@ const HL_HINT = S.format === "ae2" ? ["Supports A","Supports B","Weak spot","Key
 // ae2: a highlight can also be tagged with a part of the argument and the decisions it matters for
 const TAG_PARTS = ["Position","Reasoning","Data","Counter","Concession","Example","Conclusion"];
 const decNo = id => S.decisions.findIndex(d => d.id === id) + 1;
+// what the sim itself calls a decision: "Decision 2" from "Decision 2 — …", "P1" from "P1 — …", else "Decision n"
+const decLabel = id => { const d = S.decisions.find(x => x.id === id); const m = d && d.title.match(/^([^—]{1,20}?)\s*—/); return m ? m[1].trim() : "Decision " + decNo(id); };
 const tagsOf = k => (st.tags || {})[k] || {p:"", d:[]};
 function toggleTag(k, part, dec){
   st.tags = st.tags || {};
@@ -365,7 +371,7 @@ function toggleTag(k, part, dec){
   save();
 }
 function tagChips(k){
-  const t = tagsOf(k), bits = [t.p, ...t.d.map(d => "Decision " + decNo(d))].filter(Boolean);
+  const t = tagsOf(k), bits = [t.p, ...t.d.map(d => decLabel(d))].filter(Boolean);
   return bits.length ? `<span class="tags">${bits.map(b => `<span>${esc(b)}</span>`).join("")}</span>` : "";
 }
 const hlName = k => { const i = HL.findIndex(x => x[0] === k); return i < 0 ? k : HL[i][1]; };
@@ -469,7 +475,7 @@ function openPalette(span){
     + (cur ? `<button type="button" class="rm" data-col="">Remove</button>` : "")
     + `<button type="button" class="x" aria-label="Close">×</button>`
     + (AE2 ? `<div class="lbl">Part of the argument</div><div class="row">${TAG_PARTS.map(x => `<button type="button" class="tg" data-part="${x}" aria-pressed="${t.p === x}">${x}</button>`).join("")}</div>` : "")
-    + (TAGS ? `<div class="lbl">Matters for</div><div class="row">${S.decisions.map(d => `<button type="button" class="tg" data-dec="${d.id}" aria-pressed="${t.d.includes(d.id)}" title="${esc(d.title)}">Decision ${decNo(d.id)}</button>`).join("")}
+    + (TAGS ? `<div class="lbl">Matters for</div><div class="row">${S.decisions.map(d => `<button type="button" class="tg" data-dec="${d.id}" aria-pressed="${t.d.includes(d.id)}" title="${esc(d.title)}">${esc(decLabel(d.id))}</button>`).join("")}
         <button type="button" class="done">Done</button></div>` : "");
   p.hidden = false;
   if (!matchMedia("(max-width:600px)").matches) {
@@ -544,7 +550,7 @@ function notebookHTML(inSubmit){
     const grp = (label, opts) => `<optgroup label="${esc(label)}">${opts.join("")}</optgroup>`;
     filt = `<div class="nbf"><label>Show <select data-f="one">${opt("", "all highlights")}
       ${AE2 ? grp("Part of the argument", [...TAG_PARTS.map(x => opt("p:" + x, x)), opt("p:-", "no part tag yet")]) : ""}
-      ${TAGS ? grp("Decision", [...S.decisions.map(d => opt("d:" + d.id, "Decision " + decNo(d.id))), opt("d:-", "no decision tag yet")]) : ""}
+      ${TAGS ? grp("Decision", [...S.decisions.map(d => opt("d:" + d.id, decLabel(d.id))), opt("d:-", "no decision tag yet")]) : ""}
       ${grp("Source", names.map(n => opt("s:" + n, n)))}
       ${grp("Colour", HL.map(([k, name]) => opt("c:" + k, hlLabel(k) || name)))}</select></label>
       ${shown.length < items.length ? `<span>${shown.length} of ${items.length}</span>` : ""}</div>`;
@@ -589,6 +595,14 @@ function jumpTo(k){
   sp.classList.remove("flashy"); void sp.offsetWidth; sp.classList.add("flashy"); sp.focus({preventScroll:true});
   setTimeout(() => sp.classList.remove("flashy"), 1300);
 }
+// a folded reminder of the decisions on the Inbox/Sources tab, so "Decision 2" means something while reading
+const decQuestion = d => d.title.includes("—") ? d.title.replace(/^[^—]*—\s*/, "") : d.title;
+function decStripHTML(){
+  if (!TAGS) return "";
+  return `<details class="cc decstrip" id="decstrip" ${st.decOpen ? "open" : ""}><summary><span>The ${num(S.decisions.length)} decisions you're reading for</span></summary>
+    <ol>${S.decisions.map(d => `<li><b>${esc(decLabel(d.id))}:</b> ${esc(decQuestion(d))}</li>`).join("")}</ol></details>`;
+}
+document.addEventListener("toggle", e => { if (e.target.id === "decstrip") { st.decOpen = e.target.open; save(); } }, true);
 function colourCodeHTML(){
   const set = HL.filter(([k]) => hlLabel(k)).length;
   return `<details class="cc"><summary>${HL.map(([,,c]) => `<i style="background:${c}"></i>`).join("")}<span>My colour code${set ? "" : " — tap any sentence to highlight it"}</span></summary>
@@ -744,7 +758,7 @@ function tabInbox(){
   const r = role();
   if (AE2) {
     $("#main").innerHTML = `
-      ${colourCodeHTML()}
+      ${colourCodeHTML()}${decStripHTML()}
       <p>Read your ${num(r.characters.length)} sources. Each one has <b>three drawers</b>: the data behind it, a counter text and another text like it. Open and close them whenever you like. As you read, <b>tap sentences</b> to highlight them and tag the part of the argument and the decision they matter for. Then tell ${pair() ? "your partner" : "your group"} what you found: they can't see your sources.</p>
       ${r.characters.map(c => sourceHTML(c)).join("")}
       <section class="nb"><h2 id="nbhead" tabindex="-1">Your highlights<span id="nbcount"></span></h2><p id="nblive" class="small muted" aria-live="polite"></p><div data-nb="inbox"></div></section>`;
@@ -758,7 +772,7 @@ function tabInbox(){
     return;
   }
   $("#main").innerHTML = `
-    ${colourCodeHTML()}
+    ${colourCodeHTML()}${decStripHTML()}
     <p>Each contact will tell you <b>one more thing</b> — you choose what. All three are useful, but some matter much more than others — and what matters most often depends on what ${pair() ? "your partner's" : "your teammates'"} contacts know. <b>Talk to ${pair() ? "your partner" : "your group"} before you choose.</b> Your choice is final.</p>
     ${r.characters.map(c => mailHTML(c)).join("")}
     <section class="nb"><h2 id="nbhead" tabindex="-1">Your highlights<span id="nbcount"></span></h2><p id="nblive" class="small muted" aria-live="polite"></p><div data-nb="inbox"></div></section>`;
