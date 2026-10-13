@@ -133,6 +133,31 @@ legend{font-weight:600;margin-bottom:.5rem}
 .flash{border:2px solid var(--amber);border-radius:12px;padding:14px 16px;margin-top:22px;background:var(--amber-bg)}
 .flash .prose{white-space:pre-line}
 .cite{font-size:.9rem;color:var(--ink-2);border-left:3px solid var(--line);padding:2px 0 2px 10px;margin:12px 0 0}
+/* new AE format (ae2): the start-screen disclaimer, drawers, decision kinds, tags and note filters */
+.ack{border:2px solid var(--amber);background:var(--amber-bg);border-radius:12px;padding:14px 16px;margin:0 0 18px}
+.ack p{margin:.4rem 0 .6rem}
+.ack label{display:flex;gap:10px;align-items:center;font-weight:600;cursor:pointer}
+.ack input{width:18px;height:18px}
+.drawers{margin-top:16px;display:grid;gap:8px}
+.drawer{border:1px solid #E6D3A6;border-radius:10px;background:var(--amber-bg)}
+.drawer>summary{cursor:pointer;padding:10px 14px;font-weight:600;font-size:.95rem;list-style:none;display:flex;justify-content:space-between;gap:10px}
+.drawer>summary::-webkit-details-marker{display:none}
+.drawer>summary::after{content:"Open";font-weight:400;font-size:.8rem;color:var(--ink-2)}
+.drawer[open]>summary::after{content:"Close"}
+.drawer .dbody{background:#fff;border-top:1px solid #E6D3A6;border-radius:0 0 10px 10px;padding:4px 14px 12px}
+.drawer .dbody .prose{white-space:pre-line;margin-top:10px}
+.kind{display:inline-block;font:600 .72rem/1 var(--sans);letter-spacing:.02em;border-radius:999px;padding:4px 9px;margin-left:6px;vertical-align:2px}
+.kind.bw{background:#1D2733;color:#fff}.kind.grey{background:#D4D9E1;color:#1D2733}
+.decgroup{font:600 .8rem/1 var(--sans);text-transform:uppercase;letter-spacing:.06em;color:var(--ink-2);margin:26px 0 -4px}
+#hlpal .row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;width:100%}
+#hlpal .lbl{font-size:.75rem;color:var(--ink-2);width:100%;margin-top:4px}
+#hlpal .tg{border:1px solid var(--line);border-radius:999px;padding:4px 10px;background:#fff;cursor:pointer;font-size:.82rem}
+#hlpal .tg[aria-pressed="true"]{background:var(--pine);border-color:var(--pine);color:#fff}
+#hlpal .done{margin-left:auto;border:0;background:var(--pine);color:#fff;border-radius:999px;padding:5px 12px;cursor:pointer;font-size:.85rem}
+.tags{display:inline-flex;flex-wrap:wrap;gap:4px;margin-left:6px}
+.tags span{font-size:.72rem;border:1px solid var(--line);border-radius:999px;padding:1px 7px;background:#fff;color:var(--ink-2)}
+.nbf{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:4px 0 10px;font-size:.8rem;color:var(--ink-2)}
+.nbf select{font:inherit;font-size:.8rem;border:1px solid var(--line);border-radius:6px;padding:3px 6px;background:#fff;max-width:11em}
 
 /* listening */
 .mcq{margin:14px 0;padding-bottom:10px;border-bottom:1px solid var(--line)}
@@ -218,9 +243,10 @@ footer{border-top:1px solid var(--line);padding:18px 0 40px;font-size:.85rem;col
 "use strict";
 const S = JSON.parse(document.getElementById("scenario").textContent);
 const STORE = "simlearn:" + S.id + ":v" + S.version;
+const AE2 = S.format === "ae2";   // new AE format: drawers, tags, "which is the better argument?"
 
 /* ---------- state (kept only in this browser tab, so a reload doesn't lose work) ---------- */
-let st = {mode:"3", role:null, tab:"context", choices:{}, firstLook:{}, mcq:{}, decisions:{}, however:{}, memo:"", consent:false, notes:"", hl:{}, hlLabels:{}, hlGroup:"colour", budget:{}, rationale:""};
+let st = {mode:"3", role:null, tab:"context", choices:{}, firstLook:{}, mcq:{}, decisions:{}, however:{}, memo:"", consent:false, notes:"", hl:{}, hlLabels:{}, hlGroup:"colour", budget:{}, rationale:"", ack:false, opened:{}, drawOpen:{}, tags:{}, nbf:{}};
 try { const raw = sessionStorage.getItem(STORE); if (raw) st = Object.assign(st, JSON.parse(raw)); } catch(e) {}
 function save(){ try { sessionStorage.setItem(STORE, JSON.stringify(st)); } catch(e) {} }
 
@@ -282,25 +308,30 @@ function renderStart(){
   <div class="wrap start">
     <h1>${esc(S.title)}</h1>
     <p class="lede">You work for ${esc(S.org)}. Your ${two ? "team of two" : "group"} has to ${B ? `split a ${money(B.target)} budget` : `make ${num(S.decisions.length)} decisions`} — and each of you holds information the other${two ? "" : "s"} ${two ? "doesn't" : "don't"} have.</p>
+    ${S.ack_disclaimer ? `<div class="ack"><b>Before you start</b><p>${esc(S.disclaimer)}</p>
+      <label><input type="checkbox" id="ack" ${st.ack ? "checked" : ""}> I understand</label></div>` : ""}
     <form id="startForm">
       <fieldset><legend>${two ? "Which player are you?" : "Your role"}</legend>
         <p class="muted small">${two ? "Decide between you who is Player 1 and who is Player 2." : "Agree in your group who takes which role. If there are more than three of you, two people can share a role."}</p>
         <div class="choices">${roles().map(r => `
           <label class="choice"><input type="radio" name="role" value="${r.id}" ${st.role===r.id?"checked":""}>
-            <span><b>${esc(roleName(r))}</b><br><span class="muted small">Your contacts: ${r.characters.map(c => esc(c.name)).join(", ")}</span></span></label>`).join("")}
+            <span><b>${esc(roleName(r))}</b><br><span class="muted small">Your ${AE2 ? "sources" : "contacts"}: ${r.characters.map(c => esc(c.name)).join(", ")}</span></span></label>`).join("")}
         </div></fieldset>
       <button type="button" class="btn" id="go" disabled>Start</button>
     </form>
     ${TWO ? `<p class="switch">${two
         ? `Three or more of you? <button type="button" class="linkish" id="mode">Switch to the group version</button>`
         : `Only two of you? <button type="button" class="linkish" id="mode">Switch to the two-player version</button>`}</p>` : ""}
-    <p class="muted small" style="margin-top:2rem">${esc(S.disclaimer)}</p>
+    ${S.ack_disclaimer ? "" : `<p class="muted small" style="margin-top:2rem">${esc(S.disclaimer)}</p>`}
   </div>`;
   const m = $("#mode");
   if (m) m.onclick = () => { st.mode = two ? "3" : "2"; st.role = null; save(); renderStart(); };
   const f = $("#startForm");
-  const upd = () => { $("#go").disabled = !f.querySelector("input[name=role]:checked"); };
-  f.addEventListener("change", upd); upd();
+  const ack = $("#ack");
+  const upd = () => { $("#go").disabled = !f.querySelector("input[name=role]:checked") || (ack && !ack.checked); };
+  f.addEventListener("change", upd);
+  if (ack) ack.addEventListener("change", () => { st.ack = ack.checked; save(); upd(); });
+  upd();
   f.addEventListener("submit", e => e.preventDefault());
   $("#go").addEventListener("click", () => {
     const r = f.querySelector("input[name=role]:checked");
@@ -314,9 +345,25 @@ function renderStart(){
 const HL = [["yellow","Yellow","#FFF176"],["green","Green","#B9F6CA"],["pink","Pink","#F8BBD0"],
             ["blue","Blue","#B3E5FC"],["orange","Orange","#FFE0B2"],["purple","Purple","#E1BEE7"]];
 const HLC = Object.fromEntries(HL.map(([k,,c]) => [k, c]));
-const HL_HINT = ({AE:["Position","Evidence","Reasoning","Counter-argument","Weak spot","Use in my brief"],
+const HL_HINT = S.format === "ae2" ? ["Supports A","Supports B","Weak spot","Key number","Question","Use in my writing"]
+             : ({AE:["Position","Evidence","Reasoning","Counter-argument","Weak spot","Use in my brief"],
                   EFD:["Constraint","User need","Idea","Risk","Question","Use in my pitch"]})[S.course]
                 || ["Number","Risk","Opportunity","Deadline","Question","Use in my memo"];
+// ae2: a highlight can also be tagged with a part of the argument and the decisions it matters for
+const TAG_PARTS = ["Position","Reasoning","Data","Counter","Concession","Example","Conclusion"];
+const decNo = id => S.decisions.findIndex(d => d.id === id) + 1;
+const tagsOf = k => (st.tags || {})[k] || {p:"", d:[]};
+function toggleTag(k, part, dec){
+  st.tags = st.tags || {};
+  const t = st.tags[k] = {p:"", d:[], ...(st.tags[k] || {})};
+  if (part) t.p = t.p === part ? "" : part;
+  if (dec) t.d = t.d.includes(dec) ? t.d.filter(x => x !== dec) : [...t.d, dec].sort((a, b) => decNo(a) - decNo(b));
+  save();
+}
+function tagChips(k){
+  const t = tagsOf(k), bits = [t.p, ...t.d.map(d => "Decision " + decNo(d))].filter(Boolean);
+  return bits.length ? `<span class="tags">${bits.map(b => `<span>${esc(b)}</span>`).join("")}</span>` : "";
+}
 const hlName = k => { const i = HL.findIndex(x => x[0] === k); return i < 0 ? k : HL[i][1]; };
 const hlLabel = k => ((st.hlLabels || {})[k] || "").trim();
 const ABBR = new Set("e.g i.e dr prof mr mrs ms st etc vs cf approx no nos fig figs p pp jr sr inc ltd co corp dept est al ca vol vols ed eds op mt ft gen col lt sgt rev govt univ assn bros nr tel ref".split(" "));
@@ -360,13 +407,18 @@ const isSentence = s => words(s) >= 3 && (/[.!?\u201D"')\]]\s*$/.test(s.trim()) 
 function hlSources(){
   const parts = [], c = S.context;
   c.text.split("\n\n").forEach((p, i) => parts.push({cid:"ctx", part:"p" + i, text:p, src:{name:"Context"}}));
-  parts.push({cid:"ctx", part:"scar", text:c.scar.text, src:{name:c.scar.label}});
-  parts.push({cid:"ctx", part:"proof", text:c.proof.text, src:{name:c.proof.label}});
-  parts.push({cid:"ctx", part:"clock", text:c.constraint, src:{name:"The clock"}});
+  if (c.scar) parts.push({cid:"ctx", part:"scar", text:c.scar.text, src:{name:c.scar.label}});
+  if (c.proof) parts.push({cid:"ctx", part:"proof", text:c.proof.text, src:{name:c.proof.label}});
+  if (c.constraint) parts.push({cid:"ctx", part:"clock", text:c.constraint, src:{name:"The clock"}});
   const r = st.role && role();
   (r ? r.characters : []).forEach(ch => {
     const src = {name:ch.name, title:ch.title, citation:ch.citation, cid:ch.id};
     parts.push({cid:ch.id, part:"email", text:ch.email, src});
+    if (AE2) {   // every drawer can be opened, so every drawer can hold highlights
+      ch.offers.forEach(o => parts.push({cid:ch.id, part:"d" + o.id, text:unscramble(o.text, `${S.salt}|${ch.id}|${o.id}`),
+                                         src:{name:o.author, citation:o.citation, cid:ch.id, option:o.title}}));
+      return;
+    }
     const o = st.choices[ch.id] && ch.offers.find(x => x.id === st.choices[ch.id]);
     if (o) parts.push({cid:ch.id, part:"opt", text:unscramble(o.text, `${S.salt}|${ch.id}|${o.id}`), src:{...src, option:o.title}});
   });
@@ -408,9 +460,13 @@ function openPalette(span){
   const p = paletteEl(), k = span.dataset.k, cur = (st.hl || {})[k];
   if (hlOpenFor) hlOpenFor.classList.remove("sel");
   hlOpenFor = span; span.classList.add("sel");
+  const t = tagsOf(k);
   p.innerHTML = HL.map(([key, name, c]) => `<button type="button" class="sw" data-col="${key}" aria-pressed="${cur===key}" aria-label="${esc(name + (hlLabel(key) ? ": " + hlLabel(key) : ""))}"><i style="background:${c}"></i>${esc(hlLabel(key) || name)}</button>`).join("")
     + (cur ? `<button type="button" class="rm" data-col="">Remove</button>` : "")
-    + `<button type="button" class="x" aria-label="Close">×</button>`;
+    + `<button type="button" class="x" aria-label="Close">×</button>`
+    + (AE2 ? `<div class="lbl">Part of the argument</div><div class="row">${TAG_PARTS.map(x => `<button type="button" class="tg" data-part="${x}" aria-pressed="${t.p === x}">${x}</button>`).join("")}</div>
+        <div class="lbl">Matters for</div><div class="row">${S.decisions.map(d => `<button type="button" class="tg" data-dec="${d.id}" aria-pressed="${t.d.includes(d.id)}" title="${esc(d.title)}">Decision ${decNo(d.id)}</button>`).join("")}
+        <button type="button" class="done">Done</button></div>` : "");
   p.hidden = false;
   if (!matchMedia("(max-width:600px)").matches) {
     const r = span.getBoundingClientRect(), w = p.offsetWidth;
@@ -426,7 +482,15 @@ function openPalette(span){
   p.onclick = e => {
     hlPressing = false;
     const b = e.target.closest("button"); if (!b) return;
-    if (b.classList.contains("x")) return closePalette(true);
+    if (b.classList.contains("x") || b.classList.contains("done")) return closePalette(true);
+    if (AE2 && !b.classList.contains("rm")) {   // colour and tags: the palette stays open until Done
+      const sel = b.dataset.part ? `[data-part="${b.dataset.part}"]` : b.dataset.dec ? `[data-dec="${b.dataset.dec}"]` : `[data-col="${b.dataset.col}"]`;
+      if (b.dataset.col) setHighlight(k, b.dataset.col);
+      else { toggleTag(k, b.dataset.part, b.dataset.dec); if (!(st.hl || {})[k]) setHighlight(k, "yellow"); else refreshNotebook(); }
+      const span = hlOpenFor; if (!span) return;
+      openPalette(span); const again = p.querySelector(sel); if (again) again.focus();
+      return;
+    }
     setHighlight(k, b.dataset.col || null); closePalette(true);
   };
 }
@@ -438,7 +502,7 @@ function closePalette(refocus){
 }
 function setHighlight(k, col){
   st.hl = st.hl || {};
-  if (col) st.hl[k] = col; else delete st.hl[k];
+  if (col) st.hl[k] = col; else { delete st.hl[k]; if (st.tags) delete st.tags[k]; }
   save();
   document.querySelectorAll(`.hs[data-k="${CSS.escape(k)}"]`).forEach(sp => {
     sp.classList.toggle("on", !!col); sp.style.background = col ? HLC[col] : "";
@@ -465,19 +529,32 @@ function notebookHTML(inSubmit){
   const byColour = st.hlGroup !== "source";
   const tools = `<div class="tools"><span>Show by</span><button type="button" data-grp="colour" aria-pressed="${byColour}">colour</button><button type="button" data-grp="source" aria-pressed="${!byColour}">source</button>
     ${items.length ? `<button type="button" class="linkish" data-clear="1" style="margin-left:auto">Clear all highlights</button><span data-clearask hidden>Remove all ${items.length}? <button type="button" class="linkish" data-clearyes="1">Yes, clear them</button> · <button type="button" class="linkish" data-clearno="1">Keep them</button></span>` : ""}</div>`;
+  let shown = items, filt = "";
+  if (AE2 && items.length) {
+    const f = st.nbf || {}, names = [...new Set(items.map(x => x.src.name))];
+    const sel = (key, label, opts) => `<label>${label} <select data-f="${key}"><option value="">all</option>${opts.map(([v, t]) => `<option value="${esc(v)}" ${f[key] === v ? "selected" : ""}>${esc(t)}</option>`).join("")}</select></label>`;
+    shown = items.filter(x => { const t = tagsOf(x.k);
+      return (!f.p || (f.p === "-" ? !t.p : t.p === f.p)) && (!f.d || (f.d === "-" ? !t.d.length : t.d.includes(f.d)))
+          && (!f.s || x.src.name === f.s) && (!f.c || x.col === f.c); });
+    filt = `<div class="nbf"><span>Filter:</span>${sel("p", "part", [...TAG_PARTS.map(x => [x, x]), ["-", "no part tag"]])}
+      ${sel("d", "decision", [...S.decisions.map(d => [d.id, "Decision " + decNo(d.id)]), ["-", "no decision tag"]])}
+      ${sel("s", "source", names.map(n => [n, n]))}${sel("c", "colour", HL.map(([k, name]) => [k, hlLabel(k) || name]))}
+      ${shown.length < items.length ? `<span>showing ${shown.length} of ${items.length}</span>` : ""}</div>`;
+  }
   if (!items.length) return tools + `<p class="nb-empty">Tap any sentence in the Context or Inbox to highlight it. Your highlights collect here${inSubmit ? "" : " and next to your writing"}.</p>`;
   const groups = [];
-  if (byColour) HL.forEach(([key, name, c]) => { const g = items.filter(x => x.col === key); if (g.length) groups.push({head:`<i style="background:${c}"></i>${esc(hlLabel(key) || name)}`, g}); });
-  else { const seen = []; items.forEach(x => { if (!seen.includes(x.src.name)) seen.push(x.src.name); }); seen.forEach(nm => groups.push({head:esc(nm), g:items.filter(x => x.src.name === nm)})); }
+  if (byColour) HL.forEach(([key, name, c]) => { const g = shown.filter(x => x.col === key); if (g.length) groups.push({head:`<i style="background:${c}"></i>${esc(hlLabel(key) || name)}`, g}); });
+  else { const seen = []; shown.forEach(x => { if (!seen.includes(x.src.name)) seen.push(x.src.name); }); seen.forEach(nm => groups.push({head:esc(nm), g:shown.filter(x => x.src.name === nm)})); }
   const card = x => {
     const cite = inSubmit && S.course === "AE" && x.src.citation ? citeOf(x.src.citation) : "";
     return `<div class="nb-card" style="border-left-color:${HLC[x.col]}">
       <p class="s" role="button" tabindex="0" data-jump="${esc(x.k)}" title="Show this sentence where it came from">${esc(x.t)}</p>
-      <div class="src"><span>${esc(hlLabel(x.col) || hlName(x.col))} · ${esc(x.src.name)}${x.src.title ? ", " + esc(x.src.title) : ""}${x.src.option ? ` (“${esc(x.src.option)}”)` : ""}</span>
+      <div class="src"><span>${esc(hlLabel(x.col) || hlName(x.col))}${AE2 ? tagChips(x.k) : ""} · ${esc(x.src.name)}${x.src.title ? ", " + esc(x.src.title) : ""}${x.src.option ? ` (“${esc(x.src.option)}”)` : ""}</span>
         ${cite ? `<button type="button" class="citebtn" data-cite="${esc(cite)}" aria-label="Insert ${esc(cite)} into your text">Cite ${esc(cite)}</button>` : ""}</div>
       ${S.course === "AE" && x.src.citation ? `<div class="src">${esc(x.src.citation)}</div>` : ""}</div>`;
   };
-  return tools + groups.map(G => `<div class="nb-group">${G.head}</div>` + G.g.map(card).join("")).join("");
+  return tools + filt + (shown.length ? "" : `<p class="nb-empty">No highlights match this filter.</p>`)
+    + groups.map(G => `<div class="nb-group">${G.head}</div>` + G.g.map(card).join("")).join("");
 }
 function refreshNotebook(){
   document.querySelectorAll("[data-nb]").forEach(el => { el.innerHTML = notebookHTML(el.dataset.nb === "submit"); });
@@ -514,7 +591,7 @@ document.addEventListener("click", e => {
   const p = document.getElementById("hlpal");
   const hs = e.target.closest(".hs");
   if (hs) { e.preventDefault(); openPalette(hs); return; }
-  if (p && !p.hidden && !e.target.closest("#hlpal")) closePalette(false);
+  if (p && !p.hidden && !e.composedPath().includes(p)) closePalette(false);   // (the palette may have redrawn under the click)
   const g = e.target.closest("[data-grp]");
   if (g) { const box0 = g.closest("[data-nb]"), grp = g.dataset.grp; st.hlGroup = grp; save(); refreshNotebook();
            const again = box0 && box0.querySelector(`[data-grp="${grp}"]`); if (again) again.focus(); return; }
@@ -544,13 +621,19 @@ document.addEventListener("keyup", e => {      // Space acts on release, so the 
   const t = e.target;
   if (e.key === " " && t.classList && (t.classList.contains("hs") || t.dataset.jump)) { if (t.classList.contains("hs")) openPalette(t); else jumpTo(t.dataset.jump); }
 });
+document.addEventListener("change", e => {   // ae2 note filters
+  const f = e.target.dataset && e.target.dataset.f; if (!f) return;
+  const box = e.target.closest("[data-nb]");
+  st.nbf = st.nbf || {}; st.nbf[f] = e.target.value; save(); refreshNotebook();
+  const again = box && box.querySelector(`select[data-f="${f}"]`); if (again) again.focus();
+});
 document.addEventListener("input", e => {
   const k = e.target.dataset && e.target.dataset.cc;
   if (k) { st.hlLabels = st.hlLabels || {}; st.hlLabels[k] = e.target.value; save(); refreshNotebook(); hlDescs(); }
 });
 
 /* ---------- main shell ---------- */
-const ALL_TABS = [["context","Context"],["firstlook","First look"],["listening","Listening"],["inbox","Inbox"],["decisions", B ? "Budget" : "Decisions"],["submit","Write & submit"]];
+const ALL_TABS = [["context","Context"],["firstlook","First look"],["listening","Listening"],["inbox", AE2 ? "Sources" : "Inbox"],["decisions", B ? "Budget" : "Decisions"],["submit","Write & submit"]];
 const TABS = ALL_TABS.filter(([k]) => k !== "listening" || (S.listening && S.listening.questions && S.listening.questions.length));
 function render(){
   closePalette(false);
@@ -559,7 +642,7 @@ function render(){
   if (!TABS.some(([k]) => k === st.tab)) st.tab = "context";
   hlDescs();
   const r = role();
-  const pending = r.characters.filter(c => !st.choices[c.id]).length;
+  const pending = AE2 ? 0 : r.characters.filter(c => !st.choices[c.id]).length;
   $("#app").innerHTML = `
   <header class="bar">${topBar(r.dept ? r.label + " · " + r.dept : r.label)}
     <div class="wrap"><nav class="tabs" role="tablist">${TABS.map(([k,l]) => `<button type="button" class="tab" role="tab" data-tab="${k}" aria-selected="${st.tab===k}">${l}${k==="inbox"&&pending?`<span class="dot" title="${pending} choice(s) still open"></span>`:""}</button>`).join("")}</nav></div></header>
@@ -572,7 +655,7 @@ function render(){
   $("#resetNo").onclick = () => { $("#resetAsk").hidden = true; $("#reset").hidden = false; };
   $("#resetYes").onclick = () => {
     try { sessionStorage.removeItem(STORE); } catch(e) {}
-    st = {mode:"3", role:null, tab:"context", choices:{}, firstLook:{}, mcq:{}, decisions:{}, however:{}, memo:"", consent:false, notes:"", hl:{}, hlLabels:{}, hlGroup:"colour", budget:{}, rationale:""};
+    st = {mode:"3", role:null, tab:"context", choices:{}, firstLook:{}, mcq:{}, decisions:{}, however:{}, memo:"", consent:false, notes:"", hl:{}, hlLabels:{}, hlGroup:"colour", budget:{}, rationale:"", ack:false, opened:{}, drawOpen:{}, tags:{}, nbf:{}};
     pendingPick = {}; render(); window.scrollTo(0,0);
   };
   ({context:tabContext, firstlook:tabFirstLook, listening:tabListening, inbox:tabInbox, decisions:tabDecisions, submit:tabSubmit})[st.tab]();
@@ -584,11 +667,11 @@ function tabContext(){
   $("#main").innerHTML = `
     ${S.image ? `<figure class="hero"><img src="${S.image.src}" alt="${esc(S.image.alt)}"></figure>` : ""}
     <div class="prose">${c.text.split("\n\n").map((p, i) => `<p>${hlHTML(p, "ctx", "p" + i)}</p>`).join("")}</div>
-    <div class="note scar"><b>${esc(c.scar.label)}</b><p class="prose">${hlHTML(c.scar.text, "ctx", "scar")}</p></div>
-    <div class="note proof"><b>${esc(c.proof.label)}</b><p class="prose">${hlHTML(c.proof.text, "ctx", "proof")}</p></div>
-    <div class="note clock"><b>The clock</b><p class="prose">${hlHTML(c.constraint, "ctx", "clock")}</p></div>
-    <h2>Who knows what</h2>
-    <p class="muted">You only see your own contacts. What the others know reaches you by talking to ${st.mode === "2" ? "your partner" : "your group"}.</p>
+    ${c.scar ? `<div class="note scar"><b>${esc(c.scar.label)}</b><p class="prose">${hlHTML(c.scar.text, "ctx", "scar")}</p></div>` : ""}
+    ${c.proof ? `<div class="note proof"><b>${esc(c.proof.label)}</b><p class="prose">${hlHTML(c.proof.text, "ctx", "proof")}</p></div>` : ""}
+    ${c.constraint ? `<div class="note clock"><b>The clock</b><p class="prose">${hlHTML(c.constraint, "ctx", "clock")}</p></div>` : ""}
+    <h2>${AE2 ? "Who's who" : "Who knows what"}</h2>
+    <p class="muted">You only see your own ${AE2 ? "sources" : "contacts"}. What the others know reaches you by talking to ${st.mode === "2" ? "your partner" : "your group"}.</p>
     <div class="contacts">${roles().map(r => `<div><b>${esc(roleName(r))}</b>${r.id===st.role?" (you)":""}<br><span class="muted">${r.characters.map(ch => `${esc(ch.name)}, ${esc(ch.title)}`).join(" · ")}</span></div>`).join("")}</div>`;
 }
 
@@ -651,6 +734,21 @@ function tabListening(){
 let pendingPick = {};   // cid -> offer id, chosen but not yet confirmed
 function tabInbox(){
   const r = role();
+  if (AE2) {
+    $("#main").innerHTML = `
+      ${colourCodeHTML()}
+      <p>Read your ${num(r.characters.length)} sources. Each one has <b>three drawers</b>: the data behind it, a counter text and another text like it. Open and close them whenever you like. As you read, <b>tap sentences</b> to highlight them and tag the part of the argument and the decision they matter for. Then tell ${pair() ? "your partner" : "your group"} what you found: they can't see your sources.</p>
+      ${r.characters.map(c => sourceHTML(c)).join("")}
+      <section class="nb"><h2 id="nbhead" tabindex="-1">Your highlights<span id="nbcount"></span></h2><p id="nblive" class="small muted" aria-live="polite"></p><div data-nb="inbox"></div></section>`;
+    document.querySelectorAll("details.drawer").forEach(d => d.addEventListener("toggle", () => {
+      const c = d.dataset.c, o = d.dataset.o;
+      st.drawOpen = st.drawOpen || {}; st.drawOpen[c + "|" + o] = d.open;
+      if (d.open) { st.opened = st.opened || {}; const had = st.opened[c] || ""; if (!had.includes(o)) st.opened[c] = [...had + o].sort().join(""); }
+      save();
+    }));
+    refreshNotebook();
+    return;
+  }
   $("#main").innerHTML = `
     ${colourCodeHTML()}
     <p>Each contact will tell you <b>one more thing</b> — you choose what. All three are useful, but some matter much more than others — and what matters most often depends on what ${pair() ? "your partner's" : "your teammates'"} contacts know. <b>Talk to ${pair() ? "your partner" : "your group"} before you choose.</b> Your choice is final.</p>
@@ -658,6 +756,15 @@ function tabInbox(){
     <section class="nb"><h2 id="nbhead" tabindex="-1">Your highlights<span id="nbcount"></span></h2><p id="nblive" class="small muted" aria-live="polite"></p><div data-nb="inbox"></div></section>`;
   r.characters.forEach(c => wireMail(c));
   refreshNotebook();
+}
+function sourceHTML(c){   // ae2: a primary text with three drawers the student opens and closes freely
+  const isOpen = o => !!(st.drawOpen || {})[c.id + "|" + o.id];
+  return `<details class="mail" id="m_${c.id}" open>
+    <summary><span><span class="from">${esc(c.name)}</span>, <span class="muted">${esc(c.title)}</span><br><span class="subj">${esc(c.subject)}</span></span></summary>
+    <div class="body"><div class="prose">${hlHTML(c.email, c.id, "email")}</div>${c.citation ? `<p class="cite"><b>Reference:</b> ${esc(c.citation)}</p>` : ""}
+      <div class="drawers">${c.offers.map(o => `<details class="drawer" data-c="${c.id}" data-o="${o.id}" ${isOpen(o) ? "open" : ""}><summary>${esc(o.title)}</summary>
+        <div class="dbody"><div class="prose">${hlHTML(unscramble(o.text, `${S.salt}|${c.id}|${o.id}`), c.id, "d" + o.id)}</div>
+        <p class="cite"><b>Reference:</b> ${esc(o.citation)}</p></div></details>`).join("")}</div></div></details>`;
 }
 function callName(n){   // "Dr. Elena Whitfield" -> "Dr. Whitfield"; "Freja Lund" -> "Freja"
   const m = n.match(/^(Dr\.?|Prof\.?|Professor)\s+.*\s(\S+)$/);
@@ -732,6 +839,23 @@ function tabBudget(){
 function tabDecisions(){
   if (B) return tabBudget();
   const all = S.decisions.every(d => st.decisions[d.id]);
+  if (AE2) {
+    let grp = "";
+    $("#main").innerHTML = `
+      <p>For each question, decide <b>which is the better argument</b>, ${pair() ? "together" : "as a group"}, then ${pair() ? "both of you enter" : "everyone enters"} the same answers here.</p>
+      <p class="small"><span class="kind bw" style="margin-left:0">Black and white</span> The evidence clearly favours one side: find it. &nbsp;
+        <span class="kind grey" style="margin-left:0">Shades of grey</span> Both sides can be argued well: weigh them, and be ready to answer the other side.</p>
+      ${S.decisions.map(d => {
+        const head = d.group && d.group !== grp ? `<p class="decgroup">${esc(grp = d.group)}</p>` : "";
+        return head + `<div class="dec"><h3>${esc(d.title)}<span class="kind ${d.kind}">${d.kind === "bw" ? "Black and white" : "Shades of grey"}</span></h3>
+          ${["A","B"].map(o => `<label class="opt"><input type="radio" name="dec_${d.id}" value="${o}" ${st.decisions[d.id]===o?"checked":""}><span><b>${o}.</b> ${esc(d[o])}</span></label>`).join("")}
+          <label class="small muted" for="hw_${d.id}">${d.kind === "grey" ? "The strongest argument on the other side, and your answer to it" : "However… (the main risk or objection)"}</label>
+          <textarea id="hw_${d.id}" data-hw="${d.id}">${esc(st.however[d.id]||"")}</textarea></div>`;
+      }).join("")}`;
+    $("#main").onchange = e => { if (e.target.name && e.target.name.startsWith("dec_")) { st.decisions[e.target.name.slice(4)] = e.target.value; save(); } };
+    $("#main").oninput = e => { if (e.target.dataset.hw) { st.however[e.target.dataset.hw] = e.target.value; save(); } };
+    return;
+  }
   $("#main").innerHTML = `
     <p>Agree the ${num(S.decisions.length)} decisions <b>${pair() ? "together" : "as a group"}</b>, then ${pair() ? "both of you enter" : "everyone enters"} the same answers here. For each one, note the biggest risk or objection — you'll need it in your writing.</p>
     ${S.decisions.map(d => `
@@ -896,7 +1020,7 @@ function makePdf({title, subtitle, body, note, footer, block, fileName}){
 function makeSubmission(){
   const r = role(), W = S.writing;
   const missing = [];
-  const openChars = r.characters.filter(c => !st.choices[c.id]);
+  const openChars = AE2 ? [] : r.characters.filter(c => !st.choices[c.id]);
   if (openChars.length) missing.push(`You haven't chosen what to ask ${openChars.map(c => c.name).join(", ")} yet (Inbox).`);
   const openDec = B ? (budgetOK() ? [] : ["budget"]) : S.decisions.filter(d => !st.decisions[d.id]);
   if (openDec.length) missing.push(B ? `Your group's budget isn't within ${money(B.tolerance)} of ${money(B.target)} yet (Budget).`
@@ -906,7 +1030,7 @@ function makeSubmission(){
   if (openDec.length || words(st.memo) < 50) { $("#out").innerHTML = ""; return; }
 
   const ai = st.consent ? "yes" : "no";
-  const choices = r.characters.map(c => `${c.id}=${st.choices[c.id] || "-"}`).join(", ");
+  const choices = r.characters.map(c => `${c.id}=${(AE2 ? (st.opened || {})[c.id] : st.choices[c.id]) || "-"}`).join(", ");   // ae2: the drawers opened, e.g. "ac"
   const decisions = B ? B.items.map(it => `${it.id}=${budgetVal(it.id)}`).join(", ")
                       : S.decisions.map(d => `${d.id}=${st.decisions[d.id]}`).join(", ");
   const memoText = st.memo.trim();

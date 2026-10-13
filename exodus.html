@@ -1,0 +1,1098 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<title>The Southern Crossing — SimLearn</title>
+<link rel="icon" href="/favicon.ico" sizes="any"><link rel="icon" type="image/png" href="/favicon-32.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<style>
+:root{
+  --ink:#1D2733; --ink-2:#4A5562; --paper:#FBFBF8; --panel:#ECEFF3; --line:#D4D9E1;
+  --pine:#2C5282; --pine-2:#1F3A5F;   /* navy brand (named pine from the first, green version) */ --amber:#C98A1B; --amber-bg:#FBF1DC; --warn:#9B2C2C;
+  --serif:Charter,"Bitstream Charter","Sitka Text",Cambria,Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 var(--sans)}
+.wrap{max-width:720px;margin:0 auto;padding:0 max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left))}
+h1{font:600 1.55rem/1.2 var(--sans);margin:0 0 .25rem}
+h2{font:600 1.2rem/1.3 var(--sans);margin:1.75rem 0 .5rem}
+h3{font:600 1rem/1.35 var(--sans);margin:1.25rem 0 .35rem}
+p{margin:.5rem 0}
+.muted{color:var(--ink-2)}
+.small{font-size:.875rem}
+button,select,textarea,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+
+/* top bar */
+.bar{position:sticky;top:0;z-index:5;background:var(--paper);border-bottom:1px solid var(--line)}
+.bar .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:10px;padding-bottom:10px}
+.bar .title{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:4em;flex:1 1 auto}
+.bar .right{display:flex;align-items:center;gap:10px;flex:0 1 auto;min-width:0}
+.teacher{flex:none;font-size:.8rem;color:var(--ink-2);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:3px 10px;white-space:nowrap}
+.teacher:hover{color:var(--ink);border-color:var(--ink-2)}
+.who{font-size:.85rem;background:var(--panel);border-radius:999px;padding:3px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+/* phones: the role/player goes on its own line under the title, so neither gets cut off */
+@media (max-width:600px){
+  .bar .wrap{display:grid;grid-template-columns:1fr auto;column-gap:10px;row-gap:6px}
+  .bar .right{display:contents}
+  .bar .title{grid-column:1;grid-row:1;white-space:normal}
+  .teacher{grid-column:2;grid-row:1;align-self:start}
+  .who{grid-column:1 / -1;grid-row:2;justify-self:start;max-width:100%}
+}
+.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding-bottom:0}
+.tabs::-webkit-scrollbar{display:none}
+.tab{border:0;background:none;padding:10px 12px;border-bottom:3px solid transparent;white-space:nowrap;cursor:pointer;color:var(--ink-2)}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--pine);font-weight:600}
+.tab .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--amber);margin-left:6px;vertical-align:middle}
+
+main.wrap{padding-top:24px;padding-bottom:64px}
+section[hidden]{display:none}
+
+/* start screen */
+.start{padding-top:32px}
+.start .lede{font:1.05rem/1.55 var(--serif);color:var(--ink-2)}
+fieldset{border:0;padding:0;margin:1.25rem 0}
+legend{font-weight:600;margin-bottom:.5rem}
+.choices{display:grid;gap:8px}
+.choice{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff;cursor:pointer}
+.choice input{margin-top:4px}
+.choice:has(input:checked){border-color:var(--pine);box-shadow:inset 0 0 0 1px var(--pine)}
+.grid-groups{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
+
+.btn{display:inline-block;border:0;border-radius:8px;padding:10px 16px;background:var(--pine);color:#fff;font-weight:600;cursor:pointer}
+.btn:hover{background:var(--pine-2)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn.quiet{background:var(--panel);color:var(--ink)}
+.btn.quiet:hover{background:#dfe4dc}
+.linkish{background:none;border:0;padding:0;color:var(--pine);text-decoration:underline;cursor:pointer}
+
+/* reading blocks */
+.prose{font:1.02rem/1.62 var(--serif)}
+.note{border-left:3px solid var(--line);padding:.25rem 0 .25rem 12px;margin:1rem 0}
+.note b{font-family:var(--sans)}
+.note.scar{border-color:var(--warn)}
+.note.proof{border-color:var(--pine)}
+.note.clock{border-color:var(--amber)}
+.contacts{border:1px solid var(--line);border-radius:10px;padding:4px 14px;background:#fff}
+.contacts div{padding:8px 0;border-top:1px solid var(--line)}
+.contacts div:first-child{border-top:0}
+
+.switch{margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--line)}
+
+/* scenario picture */
+.hero{margin:0 0 18px}
+.hero img{display:block;width:100%;height:auto;border-radius:12px}
+
+/* inbox */
+.mail{border:1px solid var(--line);border-radius:12px;background:#fff;margin:18px 0;overflow:hidden}
+.mail>summary{list-style:none;cursor:pointer;padding:14px 16px;display:flex;justify-content:space-between;gap:12px;align-items:baseline}
+.mail>summary::-webkit-details-marker{display:none}
+.mail .from{font-weight:600}
+.mail .subj{color:var(--ink-2);font-size:.92rem}
+.mail .state{font-size:.8rem;white-space:nowrap;color:var(--ink-2)}
+.mail .state.todo{color:var(--amber);font-weight:600}
+.mail .body{padding:0 16px 16px;border-top:1px solid var(--line)}
+.mail .body .prose{white-space:pre-line;margin-top:14px}
+
+/* the three folded notes — the one memorable moment */
+.offers{margin-top:18px;background:var(--amber-bg);border-radius:10px;padding:14px}
+.offers .ask{font-weight:600;margin:0 0 10px}
+.offer{position:relative;display:block;width:100%;text-align:left;border:1px solid #E6D3A6;background:#fff;border-radius:8px;padding:12px 14px 12px 40px;margin:8px 0;cursor:pointer;transition:transform .15s ease,opacity .3s ease}
+.offer::before{content:"";position:absolute;left:14px;top:15px;width:14px;height:10px;border:1.5px solid var(--amber);border-radius:2px;background:linear-gradient(to bottom right,transparent 47%,var(--amber) 48%,var(--amber) 52%,transparent 53%),linear-gradient(to bottom left,transparent 47%,var(--amber) 48%,var(--amber) 52%,transparent 53%)}
+.offer:hover{transform:translateY(-1px);border-color:var(--amber)}
+.offer[aria-pressed="true"]{border-color:var(--amber);box-shadow:inset 0 0 0 1px var(--amber)}
+.confirm{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.offers.done{background:none;padding:0}
+.offers.done .offer{cursor:default}
+.offers.done .offer.closed{opacity:.5;transform:none;padding:8px 14px 8px 40px;font-size:.9rem}
+.offers.done .offer.closed::before{display:none}
+.offers.done .offer.closed{padding-left:14px}
+.offers.done .offer.closed::after{content:"Not chosen";display:block;font-size:.75rem;color:var(--ink-2);margin-top:2px}
+.opened{border:1px solid var(--amber);border-radius:10px;background:#fff;padding:14px 16px;margin-top:10px;animation:unfold .45s ease-out}
+.opened .t{font-weight:600;margin:0 0 6px}
+@keyframes unfold{from{clip-path:inset(0 0 100% 0);opacity:.2}to{clip-path:inset(0 0 0 0);opacity:1}}
+@media (prefers-reduced-motion:reduce){.opened{animation:none}.offer{transition:none}}
+
+/* decisions */
+.dec{border:1px solid var(--line);border-radius:12px;background:#fff;padding:14px 16px;margin:16px 0}
+.dec .opt{display:flex;gap:10px;align-items:flex-start;padding:8px 0}
+.dec .opt input{margin-top:5px}
+.dec textarea{width:100%;min-height:70px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-top:6px}
+.bud{border:1px solid var(--line);border-radius:12px;background:#fff;padding:6px 16px;margin:16px 0}
+.bud .row{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.bud .row:first-child{border-top:0}
+.bud .row .l{font-size:.95rem}
+.bud .row .u{font-size:.8rem;color:var(--ink-2)}
+.bud .row input{width:5.5em;text-align:right;border:1px solid var(--line);border-radius:6px;padding:6px 8px;font:inherit}
+.bud .row .sub{grid-column:1/-1;font-size:.8rem;color:var(--ink-2);text-align:right}
+.total{position:sticky;bottom:0;background:var(--paper);border-top:2px solid var(--pine);padding:10px 0;margin-top:8px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-weight:600}
+.total .off{color:var(--warn)} .total .on{color:var(--pine)}
+.flash{border:2px solid var(--amber);border-radius:12px;padding:14px 16px;margin-top:22px;background:var(--amber-bg)}
+.flash .prose{white-space:pre-line}
+.cite{font-size:.9rem;color:var(--ink-2);border-left:3px solid var(--line);padding:2px 0 2px 10px;margin:12px 0 0}
+/* new AE format (ae2): the start-screen disclaimer, drawers, decision kinds, tags and note filters */
+.ack{border:2px solid var(--amber);background:var(--amber-bg);border-radius:12px;padding:14px 16px;margin:0 0 18px}
+.ack p{margin:.4rem 0 .6rem}
+.ack label{display:flex;gap:10px;align-items:center;font-weight:600;cursor:pointer}
+.ack input{width:18px;height:18px}
+.drawers{margin-top:16px;display:grid;gap:8px}
+.drawer{border:1px solid #E6D3A6;border-radius:10px;background:var(--amber-bg)}
+.drawer>summary{cursor:pointer;padding:10px 14px;font-weight:600;font-size:.95rem;list-style:none;display:flex;justify-content:space-between;gap:10px}
+.drawer>summary::-webkit-details-marker{display:none}
+.drawer>summary::after{content:"Open";font-weight:400;font-size:.8rem;color:var(--ink-2)}
+.drawer[open]>summary::after{content:"Close"}
+.drawer .dbody{background:#fff;border-top:1px solid #E6D3A6;border-radius:0 0 10px 10px;padding:4px 14px 12px}
+.drawer .dbody .prose{white-space:pre-line;margin-top:10px}
+.kind{display:inline-block;font:600 .72rem/1 var(--sans);letter-spacing:.02em;border-radius:999px;padding:4px 9px;margin-left:6px;vertical-align:2px}
+.kind.bw{background:#1D2733;color:#fff}.kind.grey{background:#D4D9E1;color:#1D2733}
+.decgroup{font:600 .8rem/1 var(--sans);text-transform:uppercase;letter-spacing:.06em;color:var(--ink-2);margin:26px 0 -4px}
+#hlpal .row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;width:100%}
+#hlpal .lbl{font-size:.75rem;color:var(--ink-2);width:100%;margin-top:4px}
+#hlpal .tg{border:1px solid var(--line);border-radius:999px;padding:4px 10px;background:#fff;cursor:pointer;font-size:.82rem}
+#hlpal .tg[aria-pressed="true"]{background:var(--pine);border-color:var(--pine);color:#fff}
+#hlpal .done{margin-left:auto;border:0;background:var(--pine);color:#fff;border-radius:999px;padding:5px 12px;cursor:pointer;font-size:.85rem}
+.tags{display:inline-flex;flex-wrap:wrap;gap:4px;margin-left:6px}
+.tags span{font-size:.72rem;border:1px solid var(--line);border-radius:999px;padding:1px 7px;background:#fff;color:var(--ink-2)}
+.nbf{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:4px 0 10px;font-size:.8rem;color:var(--ink-2)}
+.nbf select{font:inherit;font-size:.8rem;border:1px solid var(--line);border-radius:6px;padding:3px 6px;background:#fff;max-width:11em}
+
+/* listening */
+.mcq{margin:14px 0;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.mcq b{display:block;margin-bottom:6px}
+.mcq label{display:flex;gap:8px;align-items:flex-start;margin:6px 0;cursor:pointer}
+.mcq label input{margin-top:4px;flex:none}
+.mcq label.right span{color:var(--pine);font-weight:600}
+.mcq label.wrong span{color:var(--warn);text-decoration:line-through}
+.mcq .res{font-size:.9rem;margin:2px 0 0}
+.mcq .res.ok{color:var(--pine)} .mcq .res.no{color:var(--warn)}
+.score{border:2px solid var(--pine);border-radius:12px;padding:12px 16px;margin-top:18px;font-weight:600}
+
+/* writing + submit */
+textarea.memo{width:100%;min-height:340px;border:1px solid var(--line);border-radius:10px;padding:12px 14px;font:1rem/1.6 var(--serif);background:#fff}
+.count{font-size:.85rem;color:var(--ink-2);text-align:right}
+.rubric{border:1px solid var(--line);background:#fff;border-radius:12px;padding:0 16px;margin:0 0 16px}
+.rubric>summary{cursor:pointer;padding:12px 0;font-weight:600}
+.rubric h3{font-size:1rem;margin:12px 0 2px}.rubric .aim{margin:0 0 4px;color:var(--ink-2)}
+.rubric ul{margin:0 0 8px;padding-left:20px}.rubric>p:last-child{margin-bottom:14px}
+.consent{border:1px solid var(--line);background:#fff;border-radius:12px;padding:14px 16px;margin:20px 0}
+.consent label{display:flex;gap:10px;align-items:flex-start;font-weight:600;margin-top:8px}
+.consent input{margin-top:5px;width:18px;height:18px}
+.issues{color:var(--warn);font-size:.92rem}
+.block{width:100%;min-height:260px;font:13px/1.45 ui-monospace,Menlo,Consolas,monospace;border:2px solid var(--pine);border-radius:10px;padding:10px 12px;background:#fff;white-space:pre-wrap}
+.ok{color:var(--pine);font-weight:600}
+footer{border-top:1px solid var(--line);padding:18px 0 40px;font-size:.85rem;color:var(--ink-2)}
+
+/* highlighter: quiet until a sentence is tapped */
+.hs{cursor:pointer;border-radius:3px;-webkit-box-decoration-break:clone;box-decoration-break:clone;transition:background-color .15s ease}
+@media (hover:hover){.hs:hover{background:#F1EFE4}}
+.hs.sel{background:#F1EFE4;box-shadow:0 0 0 2px var(--amber)}
+.hs:focus-visible{outline:2px solid var(--amber);outline-offset:1px}
+.hs.on{padding:0 1px}
+.hs.flashy{animation:hsflash 1.2s ease-out}
+@keyframes hsflash{0%{box-shadow:0 0 0 4px var(--amber)}100%{box-shadow:0 0 0 0 transparent}}
+@media (prefers-reduced-motion:reduce){.hs{transition:none}.hs.flashy{animation:none;outline:2px solid var(--amber)}}
+#hlpal{position:absolute;z-index:20;display:flex;flex-wrap:wrap;gap:6px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px;box-shadow:0 6px 24px rgba(29,39,51,.18);max-width:min(420px,calc(100vw - 24px))}
+#hlpal[hidden]{display:none}
+#hlpal .sw{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:5px 10px 5px 6px;background:#fff;cursor:pointer;font-size:.85rem;max-width:12em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#hlpal .sw i,.cc i,.nb-card i{display:inline-block;flex:none;width:16px;height:16px;border-radius:50%;border:1px solid rgba(0,0,0,.15)}
+#hlpal .sw[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+#hlpal .rm{border:0;background:none;color:var(--warn);text-decoration:underline;cursor:pointer;font-size:.85rem;padding:5px 6px}
+#hlpal .x{border:0;background:none;cursor:pointer;font-size:1.1rem;line-height:1;padding:4px 8px;color:var(--ink-2);margin-left:auto}
+@media (max-width:600px){#hlpal{position:fixed;left:0;right:0;bottom:0;top:auto!important;max-width:none;border-radius:14px 14px 0 0;padding:10px 12px calc(10px + env(safe-area-inset-bottom));justify-content:flex-start}}
+.cc{border:1px solid var(--line);border-radius:10px;background:#fff;margin:6px 0 4px}
+.cc>summary{list-style:none;cursor:pointer;padding:8px 12px;display:flex;gap:8px;align-items:center;font-size:.9rem;color:var(--ink-2)}
+.cc>summary::-webkit-details-marker{display:none}
+.cc>summary i{width:12px;height:12px}
+.cc .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px 12px;padding:4px 12px 12px}
+.cc label{display:flex;gap:8px;align-items:center;font-size:.9rem}
+.cc input{flex:1;min-width:0;border:1px solid var(--line);border-radius:6px;padding:4px 8px;font-size:.9rem}
+.nb{margin-top:28px}
+.nb h2{margin-top:0}
+.nb .tools{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:.85rem;color:var(--ink-2);margin:0 0 8px}
+.nb .tools button[aria-pressed]{border:1px solid var(--line);background:#fff;border-radius:999px;padding:2px 10px;cursor:pointer;font-size:.85rem}
+.nb .tools button[aria-pressed="true"]{border-color:var(--pine);color:var(--pine);font-weight:600}
+.nb-group{margin:12px 0 4px;font-weight:600;font-size:.9rem;display:flex;gap:6px;align-items:center}
+.nb-group i{display:inline-block;width:12px;height:12px;border-radius:50%;border:1px solid rgba(0,0,0,.15)}
+.nb-card{border:1px solid var(--line);border-left-width:6px;border-radius:8px;background:#fff;padding:8px 10px;margin:6px 0}
+.nb-card .s{font:.95rem/1.5 var(--serif);cursor:pointer;margin:0}
+.nb-card .src{font-size:.8rem;color:var(--ink-2);margin-top:4px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.nb-card .citebtn{margin-left:auto;border:1px solid var(--pine);color:var(--pine);background:#fff;border-radius:6px;padding:1px 8px;font-size:.8rem;cursor:pointer}
+.nb-empty{font-size:.9rem;color:var(--ink-2)}
+.writegrid{display:block}
+.nbpanel{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:2px 12px;margin:12px 0}
+.nbpanel>summary{cursor:pointer;padding:8px 0;font-weight:600}
+.nbpanel .nb{margin-top:0;max-height:60vh;overflow:auto;padding-bottom:8px}
+@media (min-width:1060px){
+  #app.wide .wrap{max-width:1100px}
+  .writegrid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:24px;align-items:start}
+  .writegrid textarea.memo{min-height:60vh}
+  .writegrid .nbpanel{margin:0}
+  .writegrid .nbpanel .nb{max-height:calc(60vh - 40px)}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<noscript><p class="wrap">This activity needs JavaScript switched on in your browser.</p></noscript>
+
+<script id="scenario" type="application/json">{"id":"exodus","version":1,"course":"AE","week":3,"format":"ae2","title":"The Southern Crossing","org":"the North African Joint Reception Commission","level":"C2","disclaimer":"This is a thought experiment. The countries and cities are real, but the disaster, the Commission, every person quoted, every study and every number are invented for this classroom exercise. Nobody in this scenario is a real person, and nothing here describes what any real government has said or done. Practise citing these sources as if they were real, but never cite them, or any 'fact' from this scenario, in real academic work.","ack_disclaimer":true,"context":{"text":"Eighteen months ago, scientists confirmed that a slow contamination was spreading through the groundwater beneath most of Europe. Nobody is ill yet. But the models agree: within a year, anyone still living there will begin to be poisoned through their water, their food and the soil. Europe has to be evacuated.\n\nSome destinations are choosy. The United States and Canada are taking several million Europeans a year, but only through strict points systems that favour the young, the skilled and the wealthy. Australia and New Zealand have similar rules and long waiting lists. Other countries are open but far away, expensive to reach or unattractive to most Europeans.\n\nNorth Africa is close. It is reachable by ferry and small boat, and its borders are still open. In the last eight months, around 2.4 million Europeans have arrived in Morocco, 1.1 million in Tunisia and 300,000 in Egypt. Tens of millions more are expected.\n\nThe governments of Morocco, Tunisia and Egypt have set up the North African Joint Reception Commission. You are advisers to the Commission. Your recommendation will shape how three countries treat the largest movement of people in modern history.","constraint":"Anyone still in Europe in twelve months will begin to be poisoned. The Commission must agree its framework within weeks, before the next wave of crossings."},"roles":[{"id":"A","label":"Role A","dept":"Morocco","characters":[{"id":"elidrissi","name":"Dr Samira El Idrissi","title":"Urban economist, Tangier Institute for Urban Studies","subject":"Tangier is running out of water and homes","email":"Tangier had about one million residents two years ago. Today it has nearly 1.6 million. Most of the newcomers arrived in the last eight months. The city was not built for this. Water is the most serious problem. Morocco was already short of water before the crisis. Our reservoirs were at a third of their capacity last summer. Now the city's demand has risen by more than forty per cent. Housing is the second problem. Rents in Tangier have risen by 41 per cent since January. Many European families can pay these rents. Many Moroccan families cannot. Young couples are moving back in with their parents. Some workers now travel two hours to their jobs. Schools and clinics are also under pressure. Waiting times at the main hospital have doubled. I do not blame the Europeans for coming. They had no choice. But Tangier is carrying this alone. Most arrivals land here because the ferries land here. That is not a plan. It is geography. If the arrivals stay where they land, Tangier will break. The pressure must be shared.","citation":"El Idrissi, S. (2032) Tangier under Pressure: Water, Housing and the Arrivals. Tangier: Tangier Institute for Urban Studies.","offers":[{"id":"a","title":"Show me the data","author":"Tangier Municipal Observatory","citation":"Tangier Municipal Observatory (2032) Quarterly Indicators: Water, Housing and Services, Q3. Tangier: TMO.","text":"X0204R5Cmm2bcnh/e8dozpubM0FVGLNeidt8lx3qWuWppcZeHKKkVyxnY8qW58lf8lII/y9bCD5zkt9rWR9WWUSmDP/1BB47w76xm/Hmurfyn/juerm7tVSH87fAO2bvn21pbKvnykzhqtufm+GpdQkAaf62hbyfaVhD20gNau+n7Non/eFCR4rGPnZTFvPBSQORdo7tPb5OYbh3d8LfY/edweMb5N47zORitsB/ew2VrlnP3iA7815SykOP/NgCEHxSMw0a5NMdUPvEW8lcOxc/JU2oFAelYyvrBxL8tBMCp9Jogx4drsNCg/FfdZ7rYjjFyxfPrp27cpf/gv8yF/oa7edpvGWeRF475yFgofgvH9XdZCjRm94YXv0xfGBhhrm6k6eEVlhkjIxSCB0wgCUTApAR3K29LXooFDYaiiKUVY3YUSCuYQYrjXvswylVX4jp0pPIW7rjOBDXPYxK4LHgJlK2eYEkKsU8y14IXE3kddc5dqdaSOI/qrQ/6sTTwVOZfTbgpPabhGU7ZZcpGctkzdwDifIqd6COQDEacNBAS2owfMlI0nPnV48pLZmY7cKQTzrGBfrewqkUeVqZYi2oh1GF/1lcy51c5KPfcLK4e4wSp7O/EotuyZJboKAjv6CvjxE6mKPRQZsjx/wEmm/AeN9KV0UmFj6bRZt0lRW+sXf18Sg7ZUIYAcbgcDdxD5VsFCT1rc5hVt/t7XE2xsjawwlkLdnBXAeETb+JfCdypM6eXrOu+Q86C6KyaiC1fao/feLw1yCDVIWeeOx4xfxVFoHHJSxxyZVCiuhW+JhTQZkdT38PeyOSkSTe5h1v6XR4MYlsaexmcP5P21sgEAjdMTvz7C8/on/Jw6rfBQF+e8rzaO9sPOCOn7u/"},{"id":"b","title":"Give me a counter text","author":"Omar Chraibi","citation":"Chraibi, O. (2032) 'Velocity, voice and the receiving neighbourhood', Maghreb Journal of Social Research, 14(2), pp. 41–63.","text":"6qK6X1MhogXibcAhnC+N3kHDj5U1VR0OO9kUPW2RceDCrCuSb74+sMyIhINyDwLH9c4GVwaLkMvxa1HeaEZCjJ6PsrPazKVev/b5INJ/HQVqlBsRREnFTTy+33cwZOAZYqVm331Ob+3Js7AhHoJTge2mllXEFbqcPpobIayN22jgRyjQRjk9fY2fe7sRpg3O0kqy1b92uh8UWfAB2zddBVs4I/9U7b2VDJP1HlZwm1AXFcD1lqcHfGyVXI0uQKXKiHjgtuLo4CP7Yxv3E3MNEqPy2I1OrIy1/ZdR089Ad5RxuJetXu4/mJ29jfy76W/uRzD9RTXA2Yxh/ffx6qKr/3a/W8fnUfYoFoSf852WC9GMKzf8jFKa72lqjpJOh+KhwbEwKTsd7IKKs8LeP0kd7teZtbG9k5Nr668iBOWHs/uwHCrQ5CYg7Xrz49U9KTpg7/xR5v6Nd+d8zmcvzawu70JpwQI1k2iApTrd5ZApb+Sztxn8bTa17QREBS98SRtiq15UKnCgp/pHW4Wqb8tdUb2uDG6escpg7Svn/gk1d9fZcHCp9QwyCX7tyDDS0lfz0VH4yUw5r2+2fegJRLbt4cAWtwvaZx2D/vfI5uy8Ovo5gZHhLW0k031sInVEb+sqKvwhoXvftyKW0fHoUAnwJkLK8oqQeaiLSEz+aI9CGZm7A+/6yytf27ayO9cXLTwB6xekWOWxSseBxwy2YEJo9tOqlO1FjBceNrDv+ha6uHyRfMpboY3+M3jmCNyU2em5VN51BjgfQLBnRF/66IkfR3qcCFr0YLL/WEzHFA=="},{"id":"c","title":"Give me another one of these","author":"Sonia Gharbi","citation":"Gharbi, S. (2032) Water Stress and Social Strain in Coastal Tunisia. Tunis: Institut Méditerranéen des Ressources.","text":"srUfqkkLyBs355TaxPE6UTgxEWUvuIhB5vUzQ+6qxAFeMLBdOD2LEzOqf/9NkOypMxhPWTllLAQKlrcVO5vMcVrPJ6FSGwv4VsGr/n7tZsM/ct304ZtPBdKxHPd34ggaYxB4PdCReHO2UUhSdaUWrLdYmtZOX5yYauPsxw19VQmTkZPc1wKrLiygesabnpJX+fXfJOiPOExech8OWGgnUk7vObY7qgy9SRzkzF0LDrgVgZDPKgoVx2usseCh1vA1L1M1R/8dra31OtzNj3nCLJbq98GAxXGzb+W1BlJoCsLq7A4ilM/o71nLjMfCaEM8bTC0uQUS7zeeV5+0rzmpaNtj1+U3B6wwK7BWxhH1feheuyBLqvVWUzuAo14DwEGKp6Gl39dzN1cuSoJlU+ePIw25Zxj5WJDBmzGph61N5KY7KdJQHA3bJ4RRfxkh+xbkdXKyY4obINZpIVXtKosN81mlNJeOeZxsEd/z4Z8JNbRHsSXXg0DbzWVj670RlJ8vIg5YjpB0jbAMicE6kyBEmEhO6kSNKPVZb4ChZAAjTTiZOBozzRV0QPRUI39EAWOR+e79mdl3gwdTDQbOxCocdBpGFjwW6exyqjB1rmIANojjnVDhW9CVPzlD/8BJ0GbqqKrB3faUgeA/E/waoYgPWUSNRtyK0U4YaB36apOVJi8PUcW0w2Ws+060Cs0bGq2fs0d3VjEysgxVUC3sTc9sfjI8NbZB3ZUtL1j0WTBOj+4="}]},{"id":"amrani","name":"Youssef Amrani","title":"Secondary-school teacher and chair of a neighbourhood association, Tangier","subject":"Our neighbourhood changed in a summer","email":"I teach history at a secondary school in the old town. I have lived in this neighbourhood all my life. Last year, it was a quiet place. Families knew each other. Children played in the street. This year, nearly half the flats are rented by Europeans. Many of them are kind people. Some of them help at the school. But the change has been very fast, and nobody asked us. Three new bars have opened on the street that leads to my school. My students walk past people drinking beer at eight in the morning. In summer, some Europeans walk through the medina in swimwear. When neighbours complain, some Europeans say, \"We are refugees, not tourists. Give us a break.\" Very few of them are learning Arabic or French. Many of them live in the same few streets now. People call one area \"Little Lyon\". I understand that they are frightened. They lost their homes. But respect is not a luxury. We are not asking them to become Moroccan. We are asking them to remember that this is somebody's home.","citation":"Amrani, Y. (2032) 'Our neighbourhood changed in a summer', Tangier Neighbourhood Associations Bulletin, 9, pp. 2–3.","offers":[{"id":"a","title":"Show me the data","author":"Commission Statistical Unit","citation":"Commission Statistical Unit (2032a) Integration Indicators: First Report. Rabat: North African Joint Reception Commission.","text":"ZZmeBOzlVTSFz2ZNGlXwDD3+EFXEy1LOymGE6oxcQkDm7nlJCgp1qale596yD0sqzTnzAifZjVttmv2tZBkG9qzcuhSvKba98fSynnZFVNPMdbnjOhE2CnGAGIzJrnGYO/H7U6fUe5n0UG2z0h3p6tc4VOPFcuf4Fzq9t5kzE7p53yF5ORwUCobLr5WrYx5LK69vNCl+iyyrzJ2WM6ELxirJEqgBroeX4s1SUEltZkAaEJp7XlNCw61WBf6hUmYEh54wr9yrOjQgItUoKj/99j+yM1AYDzhu4FJhCAgDuI95kJTuwJtl7H2BEczRPrfd9DVh0I/AATbbYXvTc3fiMg6IaGk5JTu8arj8z90Ly4jnUCX4gjVvSwvy7DzWhih4xsInw91Xz4rYzVP7on+xEqfaL0wqSQXwJUgBOJwdnDyPidaSJoDin7sIkdcJs6z7FvE3mR8YHJvW+Lu24RFPcBb7aSY9Csq9SxAsiZ32NsV5Kd9WjLT0Rteq4spRoavhg8dZe2YhmST5jxoKYJmZ05scNgE2cQ61R7S/p0CvTqfT+6dzy0ZTgrcN6dUsYJMSFxHtdreVRFQtU+eKQGHt/4UcsptDFQgmdWsyKNuRNfRD+B+xOB6+EL9AHHRuQEMgMeMNxDSyotBrTyr+fApkSBcoHM53wiSYozIBq3eWWnafKAJPDdPpGJFaIa8l1tp8pwmqN3kD0f85TI1qkHDdRgXFjsJbFYmGBfrwEHojHRBejNSFV1SsGA3YmoAwIw=="},{"id":"b","title":"Give me a counter text","author":"Hicham Benkirane","citation":"Benkirane, H. (2032) 'Who lives where? Allocation, density and conflict in Tangier', Urban Studies Review, 8(1), pp. 3–24.","text":"9roV6TFka3iojuKNfV6YSa4Yo7/Yx4i/Zv9T3sFIWDjIf2uS3oSBK5uFOOBs7ytHGF/tjW+89rNJXyFQC20ln2IZazmt+dyS04pfa4JVRh5ng5QLh27vEXxm4uc6eJICjzMjRpsW8iHkmSnoWkQXkISbxpbWfPDMN2AbnXlW3gd+Gw5RgLDm8v9zcWeyUj/Dh4kTbYIx6rwRmOrvVunW9iyeatNdFmJSRAQH0oGrNv3Qo9JRaIapJKChS2PbXp2OK1vFghouwtJv/R9r+256Xov4+payXteDT6qO0llDpho4ZqVcmB3QLz0KprWUwY37bQxzmHC3M6dRoyexSvFF6YJd7ouzv9sV1WI+sngpwMQIbH3yMkGcjUYfGjyxD/2NlbdNmg1+mUbPDwSUFLiS7tTrPP6veL3Oz8H88taZejmwBQ0eR5sLVCPEtwUKTAUoEMtFKsPY0W+Jbt+bJQi48vkBBHk8557kU6SnGxLFykw1GlCiMrYSmfKy1LxuYUOXWz2wevKYl8vyxH3sKYBZd42ma0npl9lcD6KovH011bDrz0j97T54aRo2qQuFs/QJEX29uL5QSreNciew5mM7YsWVvzuBwaIoJu+32Zeyy9pOIXOOxqRxTn1L5ORU25OYMkvaB/cQiE8CFFNM1WabayXtwQOclCbA5h2nHb8NioFNzZWd6duUbPckQUKRzk6U38PdqrR18qxG9BskgqyUmyreIYXtT0yMtGyuojaZlUht94rM2Wxpsis5z7RJAfwb/nhyhgBfImxqgnRQ+a72uw=="},{"id":"c","title":"Give me another one of these","author":"Mona Hassan and Katarzyna Lewandowska","citation":"Hassan, M. and Lewandowska, K. (2032) Reception and Recognition: Focus Group Evidence from Alexandria. Cairo: Centre for Mediterranean Futures.","text":"Ake53YqH7/Z2gf65o7wAP6hBFXEbS+StsTJdOGQMsg8Hf9E/AfRC92UtPQxHJly0mebdxooNkinNWL9y8V/TJeX4FLcHXXBCKgj/EclyoTCeCY7gwKTCo4LfvZxGsYOKDBt7aQV4UMjG28ZkEIXTWoXDaRYPsHHpVKrEKM4j2HEzBttM3EQ07cC1/JPscmIZ0vwfHqj7g1J7ioCsLBspEFdmWivx13n1aJYVpAgZiXb6M0J6m6MBk/gDacgLqtZhTjW5+DR9w8Y3fMEbX/5HPgFXxqxWwQ1lK3s52qgRvpEdz//o7OLbyEdJWOB7DPJtr2I8KKyRIuq1lfOLN+tmiWa8aOyyBCScQ75iLR6b21xEuw04UH0/0pPShjrUXWV8phsgfxrTT0QThJCHSpuFMze8+mkIXXxQj7Kwib6ye4GSEwSFK2kZGuX2pm1npDdtpf3a6J/Irdk6jGvl1sOpEdSJOlcqx8LsLOch/7M6eNVMp/KUHh5CCPo13p+k2pxA7NeKlv6uHYiOuz2yWudhsnzfl1YF05Eo/dFDAaxY/OMkD0Teh6AS4dB/oy1GzNUr5uMlE1bxHqv3+W/pmElu3vpj2vG/sJpFnmOzoAhK7SaFkKfxo4bTolPL+uNimbnuXPVs0W3CkS3YKCQuczCA3kabTyHVfxyFpBDbFEg+/lrJ1XjiJFNFI4G7SMV49QdIpctiatwj09c9+7ZdXxctqSBAvHlHMRXCbdD9RQ9vPv6Q7Y/WhJD+r6aAzjvWf2h6/8ddHxqR/SgNtjATzfuRzplaXXXnqFMpEGCA5iW1"}]}]},{"id":"B","label":"Role B","dept":"Tunisia","characters":[{"id":"bensalem","name":"Prof Leila Ben Salem","title":"International lawyer, Carthage Centre for Migration Law","subject":"Not every person in danger is a refugee in law","email":"Everyone calls the Europeans \"refugees\". In everyday language, that makes sense. They are fleeing a deadly danger. But in law, the word has a precise meaning. The 1951 Refugee Convention protects people who fear persecution. The persecution must be because of race, religion, nationality, political opinion or membership of a particular social group. A poisoned water supply is not persecution. Nobody is targeting the Europeans. The danger is real, but it comes from the water, not from a persecutor. So most of them do not qualify as refugees under the Convention. This is not a technicality. If we call them refugees, the Convention will not hold. Courts will reject the claims one by one. That would leave millions of people with no clear status at all. There is a better route. The three countries can agree a new, shared form of protection. It would give the arrivals the right to stay, to work and to move between our countries. It would be designed for disaster, not for persecution. Europe did something similar for Ukrainians in 2022. We can do it better.","citation":"Ben Salem, L. (2032) 'Not every person in danger is a refugee in law', Carthage Centre for Migration Law Briefing, 4.","offers":[{"id":"a","title":"Show me the data","author":"Carthage Centre for Migration Law","citation":"Carthage Centre for Migration Law (2032) Asylum Adjudication Monitor, Issue 2. Tunis: CCML.","text":"PvX4IGUvDdo/wm3g95G7RWDORZU7VFNOX8ANrhDBjyA3tw3MtFyjA+Up5pawrkCD6AnKPlL5ECqPCmtimFyEDEBNFptPdt79YZDT2D3JWbHnSe2uKOLZYwUC7/pTM6AhERuBl3gNyIqVG7CDrEh68I4dzMpkVoa1C3ZIyIiX+SkyzavUrFDZxDyBsUpv2T7lr7GtjWh0fYKaPgt2k7yf1QvQ+ijrq2SITj0DtJnHRbGOZzLOAvIVwJMDazqFuSfCtwosTB+dzVLMriaD8eez3+31QNSGFWPrEgU7GCA8CupwVsPTsSzdQh6MyjEeQShQkpHEUtWCPg+V2zAobJkWyjXB+oVow/1oyUkl4paTKlTtCREOrh4/PjTYqGecBvI3f77Xph6Jqc5G30ErIqHfUojq9Lt44lGHHr7k55Q8sqPRGAQyAxUMAoOT/u/b1PjgO/vCMrQNWKZ3eay+8nIp9cFSrz9TtXF7paxiyyR4r/bZqCc6LvZYPiTI65FrpvtDT9pBzE3D6aWEF/dvL/tGV0a2KWGaSnDqPN83S0xtSrn3RRgzRTZUnhjeieZtxB/0Kh1eM+Tc/PSLEekbaz2vwrFK+15HQAQtnzZXG5V9rBI06jtheJ3rbfiixW3ik40PADqTnRnVijsd5r0phT/CKnN1GA=="},{"id":"b","title":"Give me a counter text","author":"Amel Mestiri","citation":"Mestiri, A. (2032) 'The name of refugee', Journal of Applied Ethics and Displacement, 3(4), pp. 201–219.","text":"61/G+JmLMQygEHEKvxykCB+EcDd/q8iit7S1xof1d+gFFWDrGcjt5QZjQ0NMYVE6zMYJgGG1zTOon0cdF7lvhRf1prijlWQwZGNQQzegvMnTX7lvcrN+PqC1eHFPZ91fFszOHBxlHfwsDjwQVkHTRrn7RFJv0rUTAVew3TXGVOGr1dHNb+W6GgC7aa7GK6t+xANhY5Ku/b3MzcQkhoMF/jejwAHj7wit5g0l2yySSExCR8c7nm5OtaWAVdGnx3wiTEvlaCxr/nhdMbiXr1fftHSHOFxjrodnwgcqtrmqxkD+QMrBGCg//R0qAwQVeB4mJgj9r1DLrzTQSnryYNoZZSivPLTvlIakxAlR7+4nk2SCQtPxa7wnKRHs2iUQczsnlATXe4ozkvwfRalkrrXOTSnipzQT/qdpp8b93+3AMVoljAVzOMbM/BFzebWu/WpiSSv1LOAan+K9pAgDUNVXO+yvBnIyln68dFzL5NMc/n1C3hhbRlSJiVkORl2ijavc7mgkdraOPaI7fqq64J5YDdsGRwCyI0DYNSY3gzZsNqlCCFKxV0sNKVF0FuP3h0vLuNkEBC0fSLe1FtPGkQO+RT0TLaz1Z2QShaiV9kVU1Pcrnz6sfYIi8s46mTxC8fJkWyAIJz8Bp/tJ363UHlOS85Q80eraU3QqyBfu1dXHLOu1vnJoQzF6SqZ5J9LQTuKgx5aCKxh/O9sWmcpSUGuPQo59kWWi+M2lJ8XaAtSXMaRICQJ4BF7Vx6RDMGqR9j1+HTi9vw=="},{"id":"c","title":"Give me another one of these","author":"Leila Ben Salem and Chidi Okafor","citation":"Ben Salem, L. and Okafor, C. (2032) Protection without Persecution: Legal Options for Disaster Displacement. Tunis: CCML.","text":"10BPNQEjcdgO8AGe/oocgtP2sMOE7uiCakXtZpJrTeVhVFk3K2g2mo5vPBKp4zYz1DM0DD+S9Z6i1ifsvns1Er5H0rdqPAbvGB+4lRch+9GEPbw6orvoLkYl2dq7GwEXFQl5xBTarLW3jX42MdoS/E84GpBOnWt+WIVmXjGHO3WEMumsFbAWM/PXu+3XeTkWXAjqoSaM8A40fzLhVLbOaLqaIRqLWNnYGcKcDCxC5zdlp/TTPR7giXLfylaAhxEm7REOv4ppN4ZCQIh7YUYfeEgi/PdiJKYGepaMd26TTCmt8Uz+Am13RXybAy2PNEhhMPAIvwdzYW6sH4KkwXr7E2BOAbo77jE/JEXxUwUnJ4f7CHnxuR3kSvGXkm6DtlA5vRsDdoan9H2K9tMw2XELlfbt3K2s7OI94WR2JUnPg92ceLFGkpstQSIB1Ey1M/96xQzhYkFr7a9Iqebm/MbMz/MgP0NaO79IZ7J+4QA0co6b82qtMiPIPjeXx2y9UP5iF2ezxs/cLYP7lcgaaObfxzoRDjqjjC4KyfL/BcSwlf3AnVDbLTwB2k7vmyy/IVF76HundgIzvcr+mfr1vNn9gv147cpL/yV7wuOxqXqDvQJ94nSU5hlMD0VyNth32XQrH79XS5+oXxXQhiZ3uHxH+qP/T6bQMBD6o3wb9SHWQyT9oykGC+cM"}]},{"id":"trabelsi","name":"Karim Trabelsi","title":"Regional reception coordinator, Sfax","subject":"Sfax cannot be the door for everyone","email":"I coordinate reception in Sfax. Most boats from Sicily and southern Italy land on our coast. The Commission's interim rules say that the country of first arrival is responsible for each person. That means Tunisia. Tunisia has twelve million people. We have already received 1.1 million Europeans. That is almost one in ten of our population. Egypt has a hundred and ten million people. It has received 300,000. The rule makes no sense when one country is the door for everyone. And the rule is already failing. Most arrivals do not want to stay in Sfax. They have family in Tunis. They have work offers in Cairo or Casablanca, a short flight away. So they move on, without papers. More than half of the people registered here have already left. We no longer know where they are. That is bad for them and bad for us. The answer is a shared system. Each country takes a fair share, based on population and economy. Arrivals register once and can move legally. We would know who is where. Nobody would need to disappear.","citation":"Trabelsi, K. (2032) Statement to the North African Joint Reception Commission, Sfax hearing, 2 July.","offers":[{"id":"a","title":"Show me the data","author":"Commission Statistical Unit","citation":"Commission Statistical Unit (2032b) Registration and Onward Movement: Sfax Governorate. Rabat: North African Joint Reception Commission.","text":"2HFvJffucS0kr1yE/X8avrUIO+hMoOiv04820tp5pQufvgBXhd3c/4HV/sQL3wqD4dRh7Onfxm7VP1cULb1KyCqaMVbDYuIhPj1N/laeUE7AP1xxvrNYzNvESnTIH6Yk2niTECa1XgKMR+tc8sjS+Ncz/6cjVXtBqYB4dTP8zvfeyTToILssAmeZQvSgeXqstndaQXPcTCdFFyaMZwtitgNYxU/DKnz/zO3XODLKLGV4/bhiGc1D4EBw45h7Z4vRFx3vrVJ+aMfyAxlgZLk9dysSOoPUVsp9uNV8QybJDuttUbdj0pXQhSdP5FhX2XpDdsTinmpBclnqD8iPnCFofmJTmsMjMmtiYfCy0Yq1httrZmLuODxJFmx3McCquHOqR7vHz/qz6oMH0whQgfeSOUgf50bMc33GC0r6oPBs3GSmFPRXTrF+3bid4fUqCF3Eocvtm5NU0Lq0+3yXJ9DrtuV4yPqwZEg6sC7/VRDkxUgTqg+bmkOi4QKuyb+LE5bOl3+l4rn1w2CxxYgz4o5lpFAlDm8+ZgsXWaJ/tCk8hzF7BgLHOBaAgLlULRjQyriImkdIQC8DD/fMXDxtQC0XNcyugCvG+Ppw5Oc+toxJk0v/NDMIiVqJfTXdS1Lfjq/xsRlfcaViC1QNSRQW68QgSyCYaaY+RRXihljh/sKJPEjRoaMe/nvPiDcZosg11BsropnW+JXY6RDgp2cO1l74"},{"id":"b","title":"Give me a counter text","author":"Tarek Abdelrahman","citation":"Abdelrahman, T. (2032) 'Solidarity without redistribution', Egyptian Review of Public Policy, 22(3), pp. 77–95.","text":"UthntHbKb9KQoq8Uxe16I7YGg+wVU5oRnKMJFdh3cAnirVYu0sbHi10uYvorU4gmBnsRXYvkXiGlLbiIe+87xJ8p8Z3MXk2dYSMhVigqn8FtKGiRH9G9O0Qqzmn+ATCbhM9k+z0Lse9fp/9y8W1utw6n66fHZxP6YmEKgip1Bpx5oy24GeQvH5C6WOvPUr+mFZy6DeZOtVwd4ege5t0l5VPKtN7A3dsmTHMtSnLKWgsSBWK4jbbmwJUizMoH6MKSe6s8Erjd2SHaRHfQuIyiX1USFyAYOnnw+TpyNzKkXaxHj4/NbZIjJWDS/IdpR5rH6dIa08aN2H3H+Y0MWrdy3pAXHK116mZDdsCbAYMcEjQwE3GSVAKcHjQs38hNrha/jIx4A6kT6p5dMJIfkTASSRixbr1sy9bRvSTgkQlzm/6gEr4E/NKVfbyXRdfCjAlcYftcZDXWtV3pSt3g0V6a4PICD3P++RKXJ2mGptHeoOXsPSN3ywRE0JCqli9kyOd9RvIJchRWhmDyOFprwqeVhgK1tBau24XPZ6gcw3+2ZmvkPXb9TqARgB2irZ8tTGGAF68pwmkyU6BiOZIY6OJxrJgBQhv79L/vqk7D02wGtECSfqPRcuw6ZxJugkRqIOnaNRHnDaTn+hOpz6dc61yXKSVLVRQ79jQk9Ve803SOxy0fLN1sLn8if5VS3u4P9v7oQxwLIizJ2mOyRGeBbB/Dq8ZU9LXCdmafJ0T7TqfGjmw7znqphLjFvA=="},{"id":"c","title":"Give me another one of these","author":"Chidi Okafor","citation":"Okafor, C. (2032) Designing Fair Shares: Lessons from Europe for North Africa. Accra: Institute for Comparative Migration.","text":"29z/giCbGYqr1M0IFxn18h46Pdm3zrguqHpCekYvzHKNEn5XjWxqKLtQANSUK6g9i2+B5VV/XBwsBL92oIgQljjuTBaiGSPE9AK34UItsrQ/1SAqGD2aSWVEm/sI+n4okoAUFt5oxhmkf/f1twMKw6O//gp9taaSpBZqytphUEpUt9jqgTaPVFsCp5z+ruuTGDnK6MhF1urOLFQNiMMtiRaBB+lB1AF4vWYoiutaH62SEuu7sjEqWB8KwHX6tqzqZTuKB1zCDshLW0ChCa+kcf8m+o0oV/iQbDwN+JjSYIri7BPfn2gaJk6JGKAdKW6LL8ICctQFJtH3S+bcDczineSWLna2ggTw32bFI8L6WePJ04OQIhUK3qAgajFmJzYz8NnZsK0AGAWKdhQTOr+00sIGEdTCzzLrm18eO+oT1EdFGfHGbYjJwh+Gk6pn3HYi8oO9Y+LPCmkbsT19HwcaEQ0RMzDaUgvsXw7ybxrCx0O6ce2kUjmatfykc6tT4SD2/SYdRYBkWoh0iE9j5iuFe/gwfRe1NPqfIv9DZWwGRH9qEUvfIftDPTlcKUT+r2DSv8ITbv2xcZkbvFhFp4G9oFteqGxDYnKf1fAR1+2bPqL2VpThYIMTczRJSY87PQVpvjMbYlguM8hhcLNUlEfNpIGsYz3FDz/8hVxSec2w4TvNuxKjliDkJOsbKn2scBIT8WMT5KTUxnL+SBl3PdyfOPMiSDDX"}]}]},{"id":"C","label":"Role C","dept":"Egypt","characters":[{"id":"mansour","name":"Dr Hany Mansour","title":"Labour economist, Cairo Institute for Labour Economics","subject":"Choose the people who can help us cope","email":"Egypt wants to help. But help must be realistic. Our hospitals are short of doctors. Our schools are short of teachers. Our power stations need engineers. Europe is full of these people. The United States and Canada know this. They are choosing the best-qualified Europeans first. If we take everyone else, we will carry the costs and they will gain the skills. That is not fair, and it is not wise. I propose a simple rule. In the first year, we give priority to people with skills we need. A European doctor can treat thousands of patients, Egyptian and European. A European engineer can help build the housing and the water plants that every arrival needs. Skilled arrivals do not take resources from the system. They add to it. This is not a cold choice. It is how we make room for more people later. Every skilled arrival who works today makes it easier to receive a family tomorrow.","citation":"Mansour, H. (2032) 'Choose the people who can help us cope', Cairo Policy Forum Commentary, 17.","offers":[{"id":"a","title":"Show me the data","author":"Cairo Institute for Labour Economics","citation":"Cairo Institute for Labour Economics (2032) Skills, Shortages and the European Arrivals. Cairo: CILE.","text":"VAS6GdAh11D7UYZru2HMZcSHBhc+e3BTJ/GjR6F4Inr9LjsQyIdBRCJyadTgZJ8pNL6HRjDXLS1TDpzUhMh5L4EtxjayDz0PKaP0JOlTg45f8HGwXI8fwcMDWdwjm4eNiiv2FCRkZLvD6Li03nZewdefJFyboTIr5s5sXhMiFa4bBKBSPT1SkdjMrb36LoNEHd0mXPWALa4b5Ih3323zhqcltw4ZMEDwl86CoBC53zMEWTqwahDxVg71uX51IiGJC0qzRpVITp+9QSxPGIK+YvokbxBao+7XcpI1B1ggU9UXLA/aXiy1Rv6ArwMEgz0mwFYXlX016Jtn9XMqiPeIvYV323lNU7TyX9J7EjJvKioetupp5ynz8lNQKJ2TYAgPflX+aIW+Xgbw2wqKMhxfZDTLIaDHUJmzE8nl0rd0msYovVOglDnp21toaWO74XUT6L5qzeg6xMAc1XZEM9EaCToqRVZlk4jftGlIOSHkn/IcIaFuZaJZjYnrJLZEg0Lt6WejJiTE0hNQTf1cOdglCjQHOUIuSsYWCKdQyWEA6d4lVlzgaszBFYxSkJP1iwR6GkVtTjpWMjV996VJYnzHPr3qXBKxJVXSvBTaxJhQFTkj7Cj96ajy3TVZvnGGgC8UoZcnVm9RjuyNK1G/Ifd3TlLIIXd7M4c/0XmQLm9wm5CFniTxkyTz7X3hmACOGhNlIZT7LdDIGeALJPOvFLdJSpdGCn6p"},{"id":"b","title":"Give me a counter text","author":"Nadia Fawzy","citation":"Fawzy, N. (2031) 'The second filter', Humanitarian Policy Quarterly, 9(2), pp. 112–130.","text":"V1+Jdu08m9nPsA9BG6doRuuF0fESgmw0jep298UmP94JwTDl4cfEcdT5uBDFC2/wgA53bpJ73ydSyqx65eJ2jiYye4M1qW/WatMpFmeQkLdVRdV/4J0L89PyWnKV6REmReKc0QtiXDvBsy1zER1ytD6qIpptIZtDi8tHxmBs/OlCV7aNLy9YNczadQm+at3tfX+zBFiDLN4ocBi1sqNddoW5fziiSuKRdIiCiPVfPDdmaaPcG8JDaMtiFx20hroiFn2OhzaVWRkkAx8C0zQdZGGpSlsRgWPh03VCm05H6Bxr8A0V0JONrtZcwDDdgh+vSN7GVlJi2AFyyBrhqq8F7AQ6/mI/4f5BzJpI/ckQO6am4lJjRkDf5j4hsaXu7kDlEu6k8QjhQPp/hu5eS2n3r9eSvrDAmraFB/yloVjREUZ2Un4At3Gu+iy2LcG8+0AiTbyQ6R1BkwpkxNXFuSuCFrUvf/YMgJ+pOEGEpC2lr82PH6hf+3B6oRRR3XkezXFUfTkUUUoeogJX4ep2nLBLL4XXSezM7S5lw5QYuHTAv/M9pt49NCbBG3Ct/BTq2vAPVXB94q9k9cgCmDubWRU6teWR87Z0KXUcxq/6JcMucWcelifFjZyfaSEwv+bM+dqMbk+K"},{"id":"c","title":"Give me another one of these","author":"Rachida Alaoui and Felix Brandt","citation":"Alaoui, R. and Brandt, F. (2032) 'Fast-track recognition and hospital capacity: the Rabat pilot', Health Systems in Transition, 11(1), pp. 9–30.","text":"lW3hOJ5kWlKLEkM3xadek6KMrBs5C01ussgWeZ08ZbIGuBIe6ltwpFl66BFnCMhNkPeCuoqVlOw74vDxvmdggnvl21c/01xzavq5Cg+yioGnCzE38HQQC0EolXFe+exQE9eWZRdAn62TuB9pBw++8k2y9rs8oolasVyYOUNAdIpz8n5FrcSQv4LgtcGyatLqsC/GySLO8rp12cgce+j7uNTO+UA1eZJ/2pGbo+Xxu7nJK3wOB18IiTmSnFLvwuXsvQHQvW24TPiUlqc3BhYYJdDzX3YCE4e4EyquxSk4NqO4aT6V3nrkuWhhDBRnF1H88SBPhWiRN+5qfSUHcDahtOX2XMQjUWiA7bQQhMuwkFvFCx15bA3xc7/tBzhu4OvYxT4TyQ+8uH6eAEUesN2Zos3DpEuZI2MA9gXj5AD73fe4bDUd4rLc6g6Ga8B36fYM6rR3E+46FgrNvE9BJ0VA73z+VndIIyypuj1vumKDIVhWVLBbq34iapAkpQxEFdWvF0S8mPJvz0g5dtWbD0sWgOx9z5an7nz80TBODOMiU/0+rahqh8VpRBz1SE8Yu1htTpa+Wnr/7cAhtUUy9gccrhMh/gDzNpDIqCeENoqOS6icYTrKH0Ll8vMUcwh0bqqB5Go1JpY1+ufUWS7EIjeB7P7ju+yLmBSS4NHnZae8USTxn2oc"}]},{"id":"fawzy","name":"Nadia Fawzy","title":"Resettlement coordinator, North African Joint Reception Commission, Alexandria","subject":"The people nobody else will take","email":"I work for the Commission in Alexandria. Every day, I meet the people the other countries did not choose. An eighty-year-old woman from Naples. A family of five from Marseille with no university degrees. A man in a wheelchair from Rotterdam. The United States and Canada said no to all of them. Some countries have made special promises. Canada, Australia, New Zealand and several Latin American countries now give priority to LGBTQ Europeans. Same-sex relationships are illegal in much of North Africa, so these countries are the safer choice for them. That is a real help. But for most people, North Africa is the last open door. If we choose only doctors and engineers, these people have nowhere left to go. In a year, they will start to be poisoned. I understand the economic argument. Skilled people can help us. But we can recruit skills in other ways. We cannot recruit time. Those with no other option must come first. Our countries have argued for years that Europe should not choose only the migrants it finds useful. We should not make the same choice now.","citation":"Fawzy, N. (2032) Field Report: The Residual Arrivals in Alexandria. Alexandria: NAJRC Resettlement Office.","offers":[{"id":"a","title":"Show me the data","author":"Commission Statistical Unit","citation":"Commission Statistical Unit (2032c) Who Remains? Selective Admission and the Residual Population. Rabat: North African Joint Reception Commission.","text":"xfciuqe91vJQA0OjsbUW2zFVLFqcPAv7WKX0yCDQpSBFDtJeKR0bk8MdRCG8YEUihPkvNy45Bm/i/bmM63+Mi4kjCdc+6LvQPsOAwgOpFAJjn/CkRv6ZOlFiRC8QzBMn81noHh5YS1qsndE8CLijVjv1XvYtGAuv/oeaI6m44ujBV6FxfTc2zAnwJwWii63lDDG7v83AKYwpk9XL06CVcERd5Qg3Uij2/cEdEb7jkmC/iJ0uj3Nfrh6Zqd7+Q/Cot6t3BNhh3zLQKEFCEyBHjjKIZScNoAZ72L4qaebNGZq94/CVdkCdc6Jw6xugjtFTzWqtNo25CUl6HRwDQN0u+XtNyvtEOVLY5Hl287u7RRtp2dfdIS9uSk6+mENeMi4npNvwME9LrwJnB2Xev/P/pofUWLmU/Pt81SCGG8i+EipLtxRw3LecvSWZ0yeDzpJP7aRy+6hkuEtNz8dkpn/Wqk75pPZuz5HwNXGrp+xQ0G2GgLxaz76Q1OlRutMOWQeDYWgH1mJ9LvkrzMK+WPHo0AvtsK/oWE0RZg+1LkhvNrfQUEWyQJTSy6I56kd8EJ6om6sl9vf67YaU/nYXUWnrewEEYv2oDfE8PiQyA0vbBkoPjxVOj44URlRkKVE5wFXgM2ene8Swi3l+gzhJ8oRmZHF6hxJtPTfZPjOWK/oqSB3+sQ0ADbpN8PPUx6isRSlt"},{"id":"b","title":"Give me a counter text","author":"Hany Mansour","citation":"Mansour, H. (2031) 'Capacity first', Egyptian Review of Public Policy, 21(4), pp. 5–19.","text":"GAd4c2ZH1xFl4lXenv204QBfeToejJyQAJZgv5R+MzjrgE2b99vaRRPAmEqDazYeQ3asbG2JYa7szDNs3TC3R+50WqHAEFhCgByVI8uZEzwiUuUzMlR9++WejCeI9du/Sk0v6ZpumKFj47QsPBDq1KocctUr9XP4I7rvY7NbIFAWHytXWspkRK68wKtwG95imfn7zWZgC2XLzrAkkf8a9Yt8jS67it2wpWM2b/GbeM17bZey3XcDWYGfVjKSlerzSfRsQTOQAv9gDbR5YGagjPhoqjtenbnn2s9IoV6m1L83HjaCjBIb2R3rfBNtQK+H6QIIrErGqakcRj8p4rkHMKQqiIP8UbfY1/AXlcXE85q5GrmNhJLaHknqneqV6wv6yR9Kk9bwE59i95UbLr/GWf4qkBau2X/XRg4yijf65coAQ19VNjNWjDIffn1tZMCTmj6kpMBnG2BKnBsls5wDYbVj7ROcMOw+S2yOj5IuYrNpCU5GXIVfVwLAVEaL7q0OFf6yHEQxv9v9dsz51HE2H00KgdvkcPE06cDZpBGlvQRCpwenEpG2QD928SKckm+oNSqM02C0hcWEdaEWExZINLO/UKEcGauhpMuqeA/COULGgZnWIPWJSpZALY0YoEMlk1A8n7fpIsm3+lbXvbXAcv+yXdBpi9z9aEoh4C24q8Yc32u1ZVI+L9eQd+DC3ijZ"},{"id":"c","title":"Give me another one of these","author":"Faten Jaziri and Émilie Moreau","citation":"Jaziri, F. and Moreau, E. (2032) Families First? Early Outcomes from Tunisian Reception. Tunis: Réseau Tunisien d'Accueil.","text":"wtrWv+SXHMCSGABaRlZOOQhRpPcENAkMfYI3pvPk9oG3QZJdcOtJVu/C1W9dhJQQiHEgFLzfAh1P/LM7rfvhwLwjtddHn2I4UvDaHFQyYBOqH/E1iMCU/KYGG+TXE+WU5VR0aw3g60AOsIWpPWPRBMqyC6ARV9bbTzs0tdiKHDdRA3IoU03SPbuFPRQ3VQaqJJhKHEMSaYZDzJvNoSIxVkGP7II+1W82uyibWMsinVqJAhs5p38/sJw3gBJFJAXnWEbS0IIYxtIJgnjjxG55Pcz89Xf9rq2nXKXifmWvAM4TXgG4b3LASgbKM5sNQrKLlH6fHwUSUO6eCkY/WHasVazL6J7dEncCC3XjsHg+EDBizhu+OkKJJd6Eut1/tnBnpwS7YTITbrBnBV5lZp2qSKY9VAp6ZXARksINYHu6+6lyXnr/z/cYsoqvbiuI0i77gyOeuA9TfatZNCoNODiMnSfQeomCxrOTIutTXNSDcbK9GptEkFDaiPw0+7VlDWphn/QHdipKauwqx4XWDY5McMPPDUlGGtj8xmOuZunTMbSkyaX339H8kjd9DaSQrySAS0ll0e433qHMX/yoGUMQq8lGJnIzQnchCsNp6c1tevQzCafu/hFe6h3FbwsUUF8MeB0r526zkK0Wfgv2VfjzCJMS4MmO6dQAcc8B95o54/NJm1XYAfCXTcxy1XJ9MlphVCxtyJy0cxhtMRPYx2pow0PtJpf41FvS7XXrmy6H"}]}]}],"decisions":[{"id":"D1","kind":"bw","group":"Explaining the situation","title":"Decision 1 — What status should the arrivals have?","A":"They are refugees: the Refugee Convention should cover people fleeing deadly danger.","B":"They are not Convention refugees: they need a new, agreed form of protection.","short":{"A":"Convention refugees","B":"New protection"}},{"id":"D2","kind":"grey","group":"Explaining the situation","title":"Decision 2 — What best explains the growing resistance among residents?","A":"Material pressure: water, rents, jobs and public services.","B":"The speed of change: neighbourhoods transformed within months, without residents being asked.","short":{"A":"Material pressure","B":"Speed of change"}},{"id":"D3","kind":"bw","group":"Implications","title":"Decision 3 — Who should be responsible for the arrivals?","A":"The country where they first arrive, as the Commission's interim rules say.","B":"A shared system across the three countries, weighted by population and economic strength.","short":{"A":"First arrival","B":"Shared system"}},{"id":"D4","kind":"grey","group":"Implications","title":"Decision 4 — Who should be admitted first?","A":"Those with the skills the host countries need: doctors, engineers, teachers, technicians.","B":"Those with nowhere else to go: families, the elderly, people the selective countries turned away.","short":{"A":"Skills first","B":"Need first"}}],"writing":{"type":"recommendation","label":"recommendation","addressee":"Commissioner Rachid Haddad, Chair of the North African Joint Reception Commission","words":420,"instructions":["Take a clear position on each of the four questions: which argument is better, and why","Cite sources in Harvard style (Author, Year) whenever you use a claim, a figure or a position, including your teammates' sources","On the two shades-of-grey questions, show that you have weighed the strongest argument on the other side","Point out at least one weakness in the evidence: a flaw in the data, or a claim that only holds under a condition","End with the main risk of your recommendation and how the Commission could reduce it"]},"two_player":{"roles":[{"id":"P1","label":"Player 1","dept":"","characters":["elidrissi","bensalem","mansour"]},{"id":"P2","label":"Player 2","dept":"","characters":["amrani","trabelsi","fawzy"]}]},"teacher_url":"https://teacher.lite.simlearn.online/","salt":"9bb755c5"}</script>
+<script>
+"use strict";
+const S = JSON.parse(document.getElementById("scenario").textContent);
+const STORE = "simlearn:" + S.id + ":v" + S.version;
+const AE2 = S.format === "ae2";   // new AE format: drawers, tags, "which is the better argument?"
+
+/* ---------- state (kept only in this browser tab, so a reload doesn't lose work) ---------- */
+let st = {mode:"3", role:null, tab:"context", choices:{}, firstLook:{}, mcq:{}, decisions:{}, however:{}, memo:"", consent:false, notes:"", hl:{}, hlLabels:{}, hlGroup:"colour", budget:{}, rationale:"", ack:false, opened:{}, drawOpen:{}, tags:{}, nbf:{}};
+try { const raw = sessionStorage.getItem(STORE); if (raw) st = Object.assign(st, JSON.parse(raw)); } catch(e) {}
+function save(){ try { sessionStorage.setItem(STORE, JSON.stringify(st)); } catch(e) {} }
+
+/* ---------- helpers ---------- */
+const $ = (sel, el=document) => el.querySelector(sel);
+// Inbox options and the breaking news are scrambled in the page source (see scramble() in build.py),
+// so tools that read the whole page can't see them. Each is unscrambled only when the student reaches it.
+function unscramble(b64, label){
+  try {
+    let x = 0x811C9DC5;
+    for (const b of new TextEncoder().encode(label)) x = Math.imul(x ^ b, 0x01000193) >>> 0;
+    if (!x) x = 1;
+    const bin = atob(b64), out = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) {
+      x ^= x << 13; x >>>= 0; x ^= x >>> 17; x ^= x << 5; x >>>= 0;
+      out[i] = bin.charCodeAt(i) ^ (x & 0xFF);
+    }
+    return new TextDecoder("utf-8").decode(out);
+  } catch (e) { return ""; }
+}
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function words(t){ return (t.trim().match(/\S+/g) || []).length; }
+const CHAR = Object.fromEntries(S.roles.flatMap(r => r.characters.map(c => [c.id, c])));
+const TWO = S.two_player ? S.two_player.roles.map(r => ({...r, characters: r.characters.map(id => CHAR[id])})) : null;
+const roles = () => (st.mode === "2" && TWO) ? TWO : S.roles;
+const role = () => roles().find(r => r.id === st.role);
+const pair = () => st.mode === "2";
+const num = n => ["zero","one","two","three","four","five","six"][n] || String(n);
+const roleName = r => r.dept ? `${r.label} — ${r.dept}` : r.label;
+function fnv(str){ let h = 0x811c9dc5; for (const ch of new TextEncoder().encode(str)) { h ^= ch; h = Math.imul(h, 0x01000193) >>> 0; } return h >>> 0; }
+function checkCode(parts){
+  const A = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
+  const s = parts.join("|");
+  const four = h => { let n = h % 923521, o = ""; for (let i = 0; i < 4; i++) { o += A[n % 31]; n = Math.floor(n / 31); } return o; };
+  return four(fnv(s)) + "-" + four(fnv(s + "#"));
+}
+const norm = t => t.replace(/\s+/g, " ").trim();
+
+/* ---------- budget cartridges: allocate a fixed fund across line items instead of A/B decisions ---------- */
+const B = S.budget || null;
+const money = n => (B ? B.currency || "£" : "£") + Math.round(n).toLocaleString("en-GB");
+const budgetVal = id => { const v = parseInt((st.budget || {})[id], 10); return isNaN(v) ? 0 : v; };
+const budgetTotal = () => B ? B.items.reduce((s, it) => s + budgetVal(it.id) * it.unit_cost, 0) : 0;
+const budgetOK = () => B && Math.abs(budgetTotal() - B.target) <= (B.tolerance || 0);
+
+/* ---------- the top bar: same place on every screen ---------- */
+function teacherLink(){
+  return S.teacher_url ? `<a class="teacher" href="${esc(S.teacher_url.replace(/\/?$/, "/") + "?sim=" + encodeURIComponent(S.id))}" target="_blank" rel="noopener" title="Opens the teacher tool (password needed)">Teacher</a>` : "";
+}
+function topBar(who){
+  return `<div class="wrap"><span class="title">${esc(S.title)}</span><span class="right">${who ? `<span class="who">${esc(who)}</span>` : ""}${teacherLink()}</span></div>`;
+}
+
+/* ---------- start screen ---------- */
+function renderStart(){
+  const two = st.mode === "2" && TWO;
+  $("#app").innerHTML = `
+  <header class="bar">${topBar("")}</header>
+  <div class="wrap start">
+    <h1>${esc(S.title)}</h1>
+    <p class="lede">You work for ${esc(S.org)}. Your ${two ? "team of two" : "group"} has to ${B ? `split a ${money(B.target)} budget` : `make ${num(S.decisions.length)} decisions`} — and each of you holds information the other${two ? "" : "s"} ${two ? "doesn't" : "don't"} have.</p>
+    ${S.ack_disclaimer ? `<div class="ack"><b>Before you start</b><p>${esc(S.disclaimer)}</p>
+      <label><input type="checkbox" id="ack" ${st.ack ? "checked" : ""}> I understand</label></div>` : ""}
+    <form id="startForm">
+      <fieldset><legend>${two ? "Which player are you?" : "Your role"}</legend>
+        <p class="muted small">${two ? "Decide between you who is Player 1 and who is Player 2." : "Agree in your group who takes which role. If there are more than three of you, two people can share a role."}</p>
+        <div class="choices">${roles().map(r => `
+          <label class="choice"><input type="radio" name="role" value="${r.id}" ${st.role===r.id?"checked":""}>
+            <span><b>${esc(roleName(r))}</b><br><span class="muted small">Your ${AE2 ? "sources" : "contacts"}: ${r.characters.map(c => esc(c.name)).join(", ")}</span></span></label>`).join("")}
+        </div></fieldset>
+      <button type="button" class="btn" id="go" disabled>Start</button>
+    </form>
+    ${TWO ? `<p class="switch">${two
+        ? `Three or more of you? <button type="button" class="linkish" id="mode">Switch to the group version</button>`
+        : `Only two of you? <button type="button" class="linkish" id="mode">Switch to the two-player version</button>`}</p>` : ""}
+    ${S.ack_disclaimer ? "" : `<p class="muted small" style="margin-top:2rem">${esc(S.disclaimer)}</p>`}
+  </div>`;
+  const m = $("#mode");
+  if (m) m.onclick = () => { st.mode = two ? "3" : "2"; st.role = null; save(); renderStart(); };
+  const f = $("#startForm");
+  const ack = $("#ack");
+  const upd = () => { $("#go").disabled = !f.querySelector("input[name=role]:checked") || (ack && !ack.checked); };
+  f.addEventListener("change", upd);
+  if (ack) ack.addEventListener("change", () => { st.ack = ack.checked; save(); upd(); });
+  upd();
+  f.addEventListener("submit", e => e.preventDefault());
+  $("#go").addEventListener("click", () => {
+    const r = f.querySelector("input[name=role]:checked");
+    if (!r) return;
+    st.role = r.value; st.tab = "context"; save(); render(); window.scrollTo(0,0);
+  });
+}
+
+/* ---------- highlighter: tap a sentence, give it a colour; nothing is right or wrong ---------- */
+// Lives only in this tab (sessionStorage, as the rest of the state). Never part of the submission block.
+const HL = [["yellow","Yellow","#FFF176"],["green","Green","#B9F6CA"],["pink","Pink","#F8BBD0"],
+            ["blue","Blue","#B3E5FC"],["orange","Orange","#FFE0B2"],["purple","Purple","#E1BEE7"]];
+const HLC = Object.fromEntries(HL.map(([k,,c]) => [k, c]));
+const HL_HINT = S.format === "ae2" ? ["Supports A","Supports B","Weak spot","Key number","Question","Use in my writing"]
+             : ({AE:["Position","Evidence","Reasoning","Counter-argument","Weak spot","Use in my brief"],
+                  EFD:["Constraint","User need","Idea","Risk","Question","Use in my pitch"]})[S.course]
+                || ["Number","Risk","Opportunity","Deadline","Question","Use in my memo"];
+// ae2: a highlight can also be tagged with a part of the argument and the decisions it matters for
+const TAG_PARTS = ["Position","Reasoning","Data","Counter","Concession","Example","Conclusion"];
+const decNo = id => S.decisions.findIndex(d => d.id === id) + 1;
+const tagsOf = k => (st.tags || {})[k] || {p:"", d:[]};
+function toggleTag(k, part, dec){
+  st.tags = st.tags || {};
+  const t = st.tags[k] = {p:"", d:[], ...(st.tags[k] || {})};
+  if (part) t.p = t.p === part ? "" : part;
+  if (dec) t.d = t.d.includes(dec) ? t.d.filter(x => x !== dec) : [...t.d, dec].sort((a, b) => decNo(a) - decNo(b));
+  save();
+}
+function tagChips(k){
+  const t = tagsOf(k), bits = [t.p, ...t.d.map(d => "Decision " + decNo(d))].filter(Boolean);
+  return bits.length ? `<span class="tags">${bits.map(b => `<span>${esc(b)}</span>`).join("")}</span>` : "";
+}
+const hlName = k => { const i = HL.findIndex(x => x[0] === k); return i < 0 ? k : HL[i][1]; };
+const hlLabel = k => ((st.hlLabels || {})[k] || "").trim();
+const ABBR = new Set("e.g i.e dr prof mr mrs ms st etc vs cf approx no nos fig figs p pp jr sr inc ltd co corp dept est al ca vol vols ed eds op mt ft gen col lt sgt rev govt univ assn bros nr tel ref".split(" "));
+const OPEN_Q = "\u201C\u2018\"", CLOSE_Q = "\u201D\u2019\"'", OPEN_B = "([", CLOSE_B = ")]";
+// Split text into sentences: returns [{s, gap}] where gap is the whitespace before the sentence (text = all joined).
+function splitSentences(text){
+  const out = [], n = text.length;
+  let start = 0, i = 0, quoteEnd = -1, depth = 0;
+  const push = (end) => { const raw = text.slice(start, end); if (raw) out.push(raw); start = end; };
+  while (i < n) {
+    const ch = text[i];
+    if (ch === "\n") { push(i); let j = i; while (j < n && /\s/.test(text[j])) j++; push(j); i = j; continue; }
+    if (OPEN_B.includes(ch)) { const close = text.indexOf(ch === "(" ? ")" : "]", i); if (close > i && close - i < 240 && !text.slice(i, close).includes("\n")) depth++; }
+    else if (CLOSE_B.includes(ch) && depth > 0) depth--;
+    if (i > quoteEnd && (ch === "\u201C" || (ch === '"' && (i === 0 || /[\s(\[]/.test(text[i-1]))))) {
+      const close = text.indexOf(ch === "\u201C" ? "\u201D" : '"', i + 1);
+      if (close > i && close - i < 200 && !text.slice(i, close).includes("\n")) quoteEnd = close;
+    }
+    if (".!?".includes(ch)) {
+      let j = i + 1;
+      while (j < n && (CLOSE_Q + CLOSE_B + ".!?").includes(text[j])) { if (CLOSE_B.includes(text[j]) && depth > 0) depth--; j++; }
+      const inside = depth > 0 || (quoteEnd >= j);
+      if (!inside && j < n && /\s/.test(text[j])) {
+        let k = j; while (k < n && /[ \t]/.test(text[k])) k++;
+        const next = text[k] || "";
+        const word = (text.slice(Math.max(0, i - 12), i).match(/([A-Za-z.]+)$/) || ["",""])[1].toLowerCase().replace(/^\.+/, "");
+        const pre = text[i - word.length - 1] || "";
+        const initial = /^[a-z]$/i.test(word) && !/['\u2019\w]/.test(pre);   // "Oduya, B." but not "don't."
+        const isAbbr = ch === "." && (ABBR.has(word) || initial || /^([a-z]\.)+[a-z]$/i.test(word));
+        if (!isAbbr && (next === "\n" || /[A-Z0-9\u00C0-\u024F\u201C\u2018"(\[\u2014\u2013\u20AC\u00A3$-]/.test(next))) { push(j); let m = j; while (m < n && /[ \t]/.test(text[m])) m++; push(m); i = m; continue; }
+      }
+      i = j; continue;
+    }
+    i++;
+  }
+  push(n);
+  return out;
+}
+const isSentence = s => words(s) >= 3 && (/[.!?\u201D"')\]]\s*$/.test(s.trim()) || words(s) >= 5);
+// Sentence registry for everything this student can highlight: context + own contacts' emails + the opened option.
+function hlSources(){
+  const parts = [], c = S.context;
+  c.text.split("\n\n").forEach((p, i) => parts.push({cid:"ctx", part:"p" + i, text:p, src:{name:"Context"}}));
+  if (c.scar) parts.push({cid:"ctx", part:"scar", text:c.scar.text, src:{name:c.scar.label}});
+  if (c.proof) parts.push({cid:"ctx", part:"proof", text:c.proof.text, src:{name:c.proof.label}});
+  if (c.constraint) parts.push({cid:"ctx", part:"clock", text:c.constraint, src:{name:"The clock"}});
+  const r = st.role && role();
+  (r ? r.characters : []).forEach(ch => {
+    const src = {name:ch.name, title:ch.title, citation:ch.citation, cid:ch.id};
+    parts.push({cid:ch.id, part:"email", text:ch.email, src});
+    if (AE2) {   // every drawer can be opened, so every drawer can hold highlights
+      ch.offers.forEach(o => parts.push({cid:ch.id, part:"d" + o.id, text:unscramble(o.text, `${S.salt}|${ch.id}|${o.id}`),
+                                         src:{name:o.author, citation:o.citation, cid:ch.id, option:o.title}}));
+      return;
+    }
+    const o = st.choices[ch.id] && ch.offers.find(x => x.id === st.choices[ch.id]);
+    if (o) parts.push({cid:ch.id, part:"opt", text:unscramble(o.text, `${S.salt}|${ch.id}|${o.id}`), src:{...src, option:o.title}});
+  });
+  return parts;
+}
+function hlKey(cid, part, idx, s){ return `${cid}|${part}|${idx}|${fnv(s.trim()).toString(36)}`; }
+function hlRegistry(){
+  const reg = {}; let order = 0;
+  hlSources().forEach(p => {
+    let idx = 0;
+    splitSentences(p.text).forEach(s => { if (isSentence(s)) { reg[hlKey(p.cid, p.part, idx, s)] = {t:s.trim(), src:p.src, cid:p.cid, n:order++}; idx++; } });
+  });
+  return reg;
+}
+// Text -> HTML with each sentence wrapped in a tappable span (the text itself is unchanged).
+function hlHTML(text, cid, part){
+  let idx = 0;
+  return splitSentences(text).map(s => {
+    if (!isSentence(s)) return esc(s);
+    const k = hlKey(cid, part, idx++, s), col = (st.hl || {})[k];
+    const on = col && HLC[col];
+    return `<span class="hs${on ? " on" : ""}" role="button" tabindex="0" data-k="${esc(k)}"${on ? ` style="background:${HLC[col]}" aria-describedby="hld-${col}"` : ""}>${esc(s)}</span>`;
+  }).join("");
+}
+// Hidden descriptions read out after a highlighted sentence ("Highlighted yellow: Evidence").
+function hlDescs(){
+  let d = document.getElementById("hldesc");
+  if (!d) { d = document.createElement("div"); d.id = "hldesc"; d.hidden = true; document.body.appendChild(d); }
+  d.innerHTML = HL.map(([k, name]) => `<span id="hld-${k}">Highlighted ${name.toLowerCase()}${hlLabel(k) ? ": " + esc(hlLabel(k)) : ""}</span>`).join("");
+}
+function paletteEl(){
+  let p = document.getElementById("hlpal");
+  if (!p) { p = document.createElement("div"); p.id = "hlpal"; p.setAttribute("role", "dialog"); p.setAttribute("aria-label", "Highlight this sentence"); p.hidden = true; document.body.appendChild(p); }
+  return p;
+}
+let hlOpenFor = null, hlPressing = false;
+document.addEventListener("pointerup", () => setTimeout(() => { hlPressing = false; }, 0), true);
+function openPalette(span){
+  const p = paletteEl(), k = span.dataset.k, cur = (st.hl || {})[k];
+  if (hlOpenFor) hlOpenFor.classList.remove("sel");
+  hlOpenFor = span; span.classList.add("sel");
+  const t = tagsOf(k);
+  p.innerHTML = HL.map(([key, name, c]) => `<button type="button" class="sw" data-col="${key}" aria-pressed="${cur===key}" aria-label="${esc(name + (hlLabel(key) ? ": " + hlLabel(key) : ""))}"><i style="background:${c}"></i>${esc(hlLabel(key) || name)}</button>`).join("")
+    + (cur ? `<button type="button" class="rm" data-col="">Remove</button>` : "")
+    + `<button type="button" class="x" aria-label="Close">×</button>`
+    + (AE2 ? `<div class="lbl">Part of the argument</div><div class="row">${TAG_PARTS.map(x => `<button type="button" class="tg" data-part="${x}" aria-pressed="${t.p === x}">${x}</button>`).join("")}</div>
+        <div class="lbl">Matters for</div><div class="row">${S.decisions.map(d => `<button type="button" class="tg" data-dec="${d.id}" aria-pressed="${t.d.includes(d.id)}" title="${esc(d.title)}">Decision ${decNo(d.id)}</button>`).join("")}
+        <button type="button" class="done">Done</button></div>` : "");
+  p.hidden = false;
+  if (!matchMedia("(max-width:600px)").matches) {
+    const r = span.getBoundingClientRect(), w = p.offsetWidth;
+    p.style.top = (window.scrollY + r.bottom + 6) + "px";
+    p.style.left = Math.max(8, Math.min(window.scrollX + r.left, window.scrollX + document.documentElement.clientWidth - w - 8)) + "px";
+  } else { p.style.left = ""; p.style.top = ""; }
+  (p.querySelector('.sw[aria-pressed="true"]') || p.querySelector(".sw")).focus();
+  // Safari (macOS and iOS) doesn't focus a button when it is clicked: focus leaves the palette on mousedown, before
+  // the click arrives. So a press inside the palette keeps focus where it is, and focusout ignores it.
+  p.onpointerdown = () => { hlPressing = true; };
+  p.onmousedown = e => { hlPressing = true; if (e.target.closest("button")) e.preventDefault(); };
+  p.onfocusout = e => { if (hlPressing) return; if (!e.relatedTarget || !p.contains(e.relatedTarget)) setTimeout(() => { if (!hlPressing && !p.contains(document.activeElement)) closePalette(false); }, 0); };
+  p.onclick = e => {
+    hlPressing = false;
+    const b = e.target.closest("button"); if (!b) return;
+    if (b.classList.contains("x") || b.classList.contains("done")) return closePalette(true);
+    if (AE2 && !b.classList.contains("rm")) {   // colour and tags: the palette stays open until Done
+      const sel = b.dataset.part ? `[data-part="${b.dataset.part}"]` : b.dataset.dec ? `[data-dec="${b.dataset.dec}"]` : `[data-col="${b.dataset.col}"]`;
+      if (b.dataset.col) setHighlight(k, b.dataset.col);
+      else { toggleTag(k, b.dataset.part, b.dataset.dec); if (!(st.hl || {})[k]) setHighlight(k, "yellow"); else refreshNotebook(); }
+      const span = hlOpenFor; if (!span) return;
+      openPalette(span); const again = p.querySelector(sel); if (again) again.focus();
+      return;
+    }
+    setHighlight(k, b.dataset.col || null); closePalette(true);
+  };
+}
+function closePalette(refocus){
+  const p = document.getElementById("hlpal"); if (p) p.hidden = true;
+  if (hlOpenFor) hlOpenFor.classList.remove("sel");
+  if (refocus && hlOpenFor && document.body.contains(hlOpenFor)) hlOpenFor.focus({preventScroll:true});
+  hlOpenFor = null;
+}
+function setHighlight(k, col){
+  st.hl = st.hl || {};
+  if (col) st.hl[k] = col; else { delete st.hl[k]; if (st.tags) delete st.tags[k]; }
+  save();
+  document.querySelectorAll(`.hs[data-k="${CSS.escape(k)}"]`).forEach(sp => {
+    sp.classList.toggle("on", !!col); sp.style.background = col ? HLC[col] : "";
+    if (col) sp.setAttribute("aria-describedby", "hld-" + col); else sp.removeAttribute("aria-describedby");
+  });
+  refreshNotebook();
+}
+// Harvard in-text citation from a reference: one author (Smith, 2024), two (Smith and Jones, 2024),
+// three or more (Smith et al., 2024), or a body with no comma (World Bank, 2023).
+function citeOf(citation){
+  const y = (citation || "").match(/\((\d{4}[a-z]?)\)/);
+  if (!y) return "";
+  const who = citation.slice(0, y.index).trim().replace(/,$/, "");
+  const names = who.split(/\s*(?:&|\band\b)\s*|,\s*(?=[^,]*,)/)
+                   .map(s => s.replace(/,\s*([A-Z]\.?\s*)+$/, "").replace(/\s+([A-Z]\.\s*)+$/, "").replace(/,$/, "").trim())
+                   .filter(s => s && !/^([A-Z]\.\s*)+$/.test(s));
+  if (!names.length) return "";
+  const auth = names.length === 1 ? names[0] : names.length === 2 ? `${names[0]} and ${names[1]}` : `${names[0]} et al.`;
+  return `(${auth}, ${y[1]})`;
+}
+function notebookHTML(inSubmit){
+  const reg = hlRegistry();
+  const items = Object.entries(st.hl || {}).filter(([k, col]) => reg[k] && HLC[col]).map(([k, col]) => ({k, col, ...reg[k]})).sort((a, b) => a.n - b.n);
+  const byColour = st.hlGroup !== "source";
+  const tools = `<div class="tools"><span>Show by</span><button type="button" data-grp="colour" aria-pressed="${byColour}">colour</button><button type="button" data-grp="source" aria-pressed="${!byColour}">source</button>
+    ${items.length ? `<button type="button" class="linkish" data-clear="1" style="margin-left:auto">Clear all highlights</button><span data-clearask hidden>Remove all ${items.length}? <button type="button" class="linkish" data-clearyes="1">Yes, clear them</button> · <button type="button" class="linkish" data-clearno="1">Keep them</button></span>` : ""}</div>`;
+  let shown = items, filt = "";
+  if (AE2 && items.length) {
+    const f = st.nbf || {}, names = [...new Set(items.map(x => x.src.name))];
+    const sel = (key, label, opts) => `<label>${label} <select data-f="${key}"><option value="">all</option>${opts.map(([v, t]) => `<option value="${esc(v)}" ${f[key] === v ? "selected" : ""}>${esc(t)}</option>`).join("")}</select></label>`;
+    shown = items.filter(x => { const t = tagsOf(x.k);
+      return (!f.p || (f.p === "-" ? !t.p : t.p === f.p)) && (!f.d || (f.d === "-" ? !t.d.length : t.d.includes(f.d)))
+          && (!f.s || x.src.name === f.s) && (!f.c || x.col === f.c); });
+    filt = `<div class="nbf"><span>Filter:</span>${sel("p", "part", [...TAG_PARTS.map(x => [x, x]), ["-", "no part tag"]])}
+      ${sel("d", "decision", [...S.decisions.map(d => [d.id, "Decision " + decNo(d.id)]), ["-", "no decision tag"]])}
+      ${sel("s", "source", names.map(n => [n, n]))}${sel("c", "colour", HL.map(([k, name]) => [k, hlLabel(k) || name]))}
+      ${shown.length < items.length ? `<span>showing ${shown.length} of ${items.length}</span>` : ""}</div>`;
+  }
+  if (!items.length) return tools + `<p class="nb-empty">Tap any sentence in the Context or Inbox to highlight it. Your highlights collect here${inSubmit ? "" : " and next to your writing"}.</p>`;
+  const groups = [];
+  if (byColour) HL.forEach(([key, name, c]) => { const g = shown.filter(x => x.col === key); if (g.length) groups.push({head:`<i style="background:${c}"></i>${esc(hlLabel(key) || name)}`, g}); });
+  else { const seen = []; shown.forEach(x => { if (!seen.includes(x.src.name)) seen.push(x.src.name); }); seen.forEach(nm => groups.push({head:esc(nm), g:shown.filter(x => x.src.name === nm)})); }
+  const card = x => {
+    const cite = inSubmit && S.course === "AE" && x.src.citation ? citeOf(x.src.citation) : "";
+    return `<div class="nb-card" style="border-left-color:${HLC[x.col]}">
+      <p class="s" role="button" tabindex="0" data-jump="${esc(x.k)}" title="Show this sentence where it came from">${esc(x.t)}</p>
+      <div class="src"><span>${esc(hlLabel(x.col) || hlName(x.col))}${AE2 ? tagChips(x.k) : ""} · ${esc(x.src.name)}${x.src.title ? ", " + esc(x.src.title) : ""}${x.src.option ? ` (“${esc(x.src.option)}”)` : ""}</span>
+        ${cite ? `<button type="button" class="citebtn" data-cite="${esc(cite)}" aria-label="Insert ${esc(cite)} into your text">Cite ${esc(cite)}</button>` : ""}</div>
+      ${S.course === "AE" && x.src.citation ? `<div class="src">${esc(x.src.citation)}</div>` : ""}</div>`;
+  };
+  return tools + filt + (shown.length ? "" : `<p class="nb-empty">No highlights match this filter.</p>`)
+    + groups.map(G => `<div class="nb-group">${G.head}</div>` + G.g.map(card).join("")).join("");
+}
+function refreshNotebook(){
+  document.querySelectorAll("[data-nb]").forEach(el => { el.innerHTML = notebookHTML(el.dataset.nb === "submit"); });
+  const n = Object.keys(hlRegistry()).filter(k => (st.hl || {})[k]).length, c = document.getElementById("nbcount");
+  if (c) c.textContent = n ? ` (${n})` : "";
+}
+let memoPos = null;   // where Cite inserts: the last cursor position in the memo
+function insertCite(cite){
+  const m = document.getElementById("memo"); if (!m) return;
+  const v = m.value, pos = memoPos == null ? v.length : Math.min(memoPos, v.length);
+  const before = v.slice(0, pos), after = v.slice(pos);
+  const ins = (before && !/[\s(]$/.test(before) ? " " : "") + cite;
+  m.value = before + ins + after; st.memo = m.value; save();
+  memoPos = pos + ins.length; m.focus(); m.setSelectionRange(memoPos, memoPos);
+  m.dispatchEvent(new Event("input"));
+}
+function jumpTo(k){
+  const tab = k.startsWith("ctx|") ? "context" : "inbox";
+  if (st.tab !== tab) { st.tab = tab; save(); render(); }
+  const sp = document.querySelector(`.hs[data-k="${CSS.escape(k)}"]`);
+  if (!sp) return;
+  const d = sp.closest("details"); if (d) d.open = true;
+  sp.scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block:"center"});
+  sp.classList.remove("flashy"); void sp.offsetWidth; sp.classList.add("flashy"); sp.focus({preventScroll:true});
+  setTimeout(() => sp.classList.remove("flashy"), 1300);
+}
+function colourCodeHTML(){
+  const set = HL.filter(([k]) => hlLabel(k)).length;
+  return `<details class="cc"><summary>${HL.map(([,,c]) => `<i style="background:${c}"></i>`).join("")}<span>My colour code${set ? "" : " — tap any sentence to highlight it"}</span></summary>
+    <div class="grid">${HL.map(([k, name, c], i) => `<label><i style="background:${c}"></i><span class="sr" style="position:absolute;left:-9999px">${name}</span><input type="text" data-cc="${k}" maxlength="24" value="${esc(hlLabel(k))}" placeholder="${esc(HL_HINT[i])}" aria-label="${name} means"></label>`).join("")}</div></details>`;
+}
+// One set of listeners for all highlight interactions (click handlers only; no forms).
+document.addEventListener("click", e => {
+  const p = document.getElementById("hlpal");
+  const hs = e.target.closest(".hs");
+  if (hs) { e.preventDefault(); openPalette(hs); return; }
+  if (p && !p.hidden && !e.composedPath().includes(p)) closePalette(false);   // (the palette may have redrawn under the click)
+  const g = e.target.closest("[data-grp]");
+  if (g) { const box0 = g.closest("[data-nb]"), grp = g.dataset.grp; st.hlGroup = grp; save(); refreshNotebook();
+           const again = box0 && box0.querySelector(`[data-grp="${grp}"]`); if (again) again.focus(); return; }
+  const j = e.target.closest("[data-jump]"); if (j) { jumpTo(j.dataset.jump); return; }
+  const c = e.target.closest("[data-cite]"); if (c) { insertCite(c.dataset.cite); return; }
+  const box = e.target.closest("[data-nb]");
+  if (e.target.closest("[data-clear]")) { box.querySelector("[data-clearask]").hidden = false; e.target.hidden = true; box.querySelector("[data-clearno]").focus(); return; }
+  const head = () => { const h = document.getElementById("nbhead"); if (h) h.focus(); };
+  if (e.target.closest("[data-clearno]")) { refreshNotebook(); head(); return; }
+  if (e.target.closest("[data-clearyes]")) {
+    st.hl = {}; save();
+    document.querySelectorAll(".hs.on").forEach(sp => { sp.classList.remove("on"); sp.style.background = ""; sp.removeAttribute("aria-describedby"); });
+    refreshNotebook(); head();
+    const live = document.getElementById("nblive"); if (live) { live.textContent = ""; setTimeout(() => { live.textContent = "All highlights cleared."; }, 50); }
+    return;
+  }
+});
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") { const p = document.getElementById("hlpal"); if (p && !p.hidden) { closePalette(true); return; } }
+  const t = e.target;
+  if ((e.key === "Enter" || e.key === " ") && t.classList && (t.classList.contains("hs") || t.dataset.jump)) {
+    e.preventDefault();                         // Space would scroll the page
+    if (e.key === "Enter") { if (t.classList.contains("hs")) openPalette(t); else jumpTo(t.dataset.jump); }
+  }
+});
+document.addEventListener("keyup", e => {      // Space acts on release, so the palette doesn't catch the same key
+  const t = e.target;
+  if (e.key === " " && t.classList && (t.classList.contains("hs") || t.dataset.jump)) { if (t.classList.contains("hs")) openPalette(t); else jumpTo(t.dataset.jump); }
+});
+document.addEventListener("change", e => {   // ae2 note filters
+  const f = e.target.dataset && e.target.dataset.f; if (!f) return;
+  const box = e.target.closest("[data-nb]");
+  st.nbf = st.nbf || {}; st.nbf[f] = e.target.value; save(); refreshNotebook();
+  const again = box && box.querySelector(`select[data-f="${f}"]`); if (again) again.focus();
+});
+document.addEventListener("input", e => {
+  const k = e.target.dataset && e.target.dataset.cc;
+  if (k) { st.hlLabels = st.hlLabels || {}; st.hlLabels[k] = e.target.value; save(); refreshNotebook(); hlDescs(); }
+});
+
+/* ---------- main shell ---------- */
+const ALL_TABS = [["context","Context"],["firstlook","First look"],["listening","Listening"],["inbox", AE2 ? "Sources" : "Inbox"],["decisions", B ? "Budget" : "Decisions"],["submit","Write & submit"]];
+const TABS = ALL_TABS.filter(([k]) => k !== "listening" || (S.listening && S.listening.questions && S.listening.questions.length));
+function render(){
+  closePalette(false);
+  $("#app").classList.toggle("wide", !!st.role && st.tab === "submit");
+  if (!st.role) return renderStart();
+  if (!TABS.some(([k]) => k === st.tab)) st.tab = "context";
+  hlDescs();
+  const r = role();
+  const pending = AE2 ? 0 : r.characters.filter(c => !st.choices[c.id]).length;
+  $("#app").innerHTML = `
+  <header class="bar">${topBar(r.dept ? r.label + " · " + r.dept : r.label)}
+    <div class="wrap"><nav class="tabs" role="tablist">${TABS.map(([k,l]) => `<button type="button" class="tab" role="tab" data-tab="${k}" aria-selected="${st.tab===k}">${l}${k==="inbox"&&pending?`<span class="dot" title="${pending} choice(s) still open"></span>`:""}</button>`).join("")}</nav></div></header>
+  <main class="wrap" id="main"></main>
+  <footer class="wrap">${esc(S.disclaimer)}<br>Nothing you type here leaves this browser tab unless you copy it yourself.
+    <button type="button" class="linkish" id="reset">Start again (choose a new role)</button>
+    <span id="resetAsk" hidden> This clears everything you've done, including your text. <button type="button" class="linkish" id="resetYes">Yes, clear it</button> · <button type="button" class="linkish" id="resetNo">Keep my work</button></span></footer>`;
+  document.querySelectorAll(".tab").forEach(b => b.onclick = () => { st.tab = b.dataset.tab; save(); render(); window.scrollTo(0,0); });
+  $("#reset").onclick = () => { $("#resetAsk").hidden = false; $("#reset").hidden = true; };
+  $("#resetNo").onclick = () => { $("#resetAsk").hidden = true; $("#reset").hidden = false; };
+  $("#resetYes").onclick = () => {
+    try { sessionStorage.removeItem(STORE); } catch(e) {}
+    st = {mode:"3", role:null, tab:"context", choices:{}, firstLook:{}, mcq:{}, decisions:{}, however:{}, memo:"", consent:false, notes:"", hl:{}, hlLabels:{}, hlGroup:"colour", budget:{}, rationale:"", ack:false, opened:{}, drawOpen:{}, tags:{}, nbf:{}};
+    pendingPick = {}; render(); window.scrollTo(0,0);
+  };
+  ({context:tabContext, firstlook:tabFirstLook, listening:tabListening, inbox:tabInbox, decisions:tabDecisions, submit:tabSubmit})[st.tab]();
+}
+
+/* ---------- tabs ---------- */
+function tabContext(){
+  const c = S.context;
+  $("#main").innerHTML = `
+    ${S.image ? `<figure class="hero"><img src="${S.image.src}" alt="${esc(S.image.alt)}"></figure>` : ""}
+    <div class="prose">${c.text.split("\n\n").map((p, i) => `<p>${hlHTML(p, "ctx", "p" + i)}</p>`).join("")}</div>
+    ${c.scar ? `<div class="note scar"><b>${esc(c.scar.label)}</b><p class="prose">${hlHTML(c.scar.text, "ctx", "scar")}</p></div>` : ""}
+    ${c.proof ? `<div class="note proof"><b>${esc(c.proof.label)}</b><p class="prose">${hlHTML(c.proof.text, "ctx", "proof")}</p></div>` : ""}
+    ${c.constraint ? `<div class="note clock"><b>The clock</b><p class="prose">${hlHTML(c.constraint, "ctx", "clock")}</p></div>` : ""}
+    <h2>${AE2 ? "Who's who" : "Who knows what"}</h2>
+    <p class="muted">You only see your own ${AE2 ? "sources" : "contacts"}. What the others know reaches you by talking to ${st.mode === "2" ? "your partner" : "your group"}.</p>
+    <div class="contacts">${roles().map(r => `<div><b>${esc(roleName(r))}</b>${r.id===st.role?" (you)":""}<br><span class="muted">${r.characters.map(ch => `${esc(ch.name)}, ${esc(ch.title)}`).join(" · ")}</span></div>`).join("")}</div>`;
+}
+
+function tabFirstLook(){
+  if (B) return tabFirstLookBudget();
+  $("#main").innerHTML = `
+    <p>Before you read anything else, go with your gut. Nobody sees these answers — they're for ${pair() ? "talking with your partner" : "your group discussion"}.</p>
+    ${S.decisions.map(d => `
+      <div class="dec"><h3>${esc(d.title)}</h3>
+        ${["A","B","Unsure"].map(o => `<label class="opt"><input type="radio" name="fl_${d.id}" value="${o}" ${st.firstLook[d.id]===o?"checked":""}>
+          <span>${o==="Unsure" ? "<i>Not sure yet</i>" : `<b>${o}.</b> ${esc(d[o])}`}</span></label>`).join("")}
+      </div>`).join("")}
+    <p><b>Discuss:</b> Where do you disagree? Which decision feels hardest right now, and why?</p>`;
+  $("#main").onchange = e => { const [, id] = e.target.name.split("_"); st.firstLook[id] = e.target.value; save(); };
+}
+
+function tabFirstLookBudget(){
+  const opts = ["More than typical", "About the same", "Cut it", "Unsure"];
+  $("#main").innerHTML = `
+    <p>Before you read anything else, go with your gut: how much of the ${money(B.target)} should go to each area? Nobody sees these answers — they're for ${pair() ? "talking with your partner" : "your group discussion"}.</p>
+    ${(B.first_look || []).map(c => `
+      <div class="dec"><h3>${esc(c.label)}</h3>
+        ${opts.map(o => `<label class="opt"><input type="radio" name="fl_${c.id}" value="${o}" ${st.firstLook[c.id]===o?"checked":""}><span>${o === "Unsure" ? "<i>Not sure yet</i>" : esc(o)}</span></label>`).join("")}
+      </div>`).join("")}
+    <p><b>Discuss:</b> Where do you disagree? Which area feels hardest to call right now, and why?</p>`;
+  $("#main").onchange = e => { const id = e.target.name.slice(3); st.firstLook[id] = e.target.value; save(); };
+}
+
+function listeningAnswers(){
+  try { return S.lc ? JSON.parse(unscramble(S.lc, `${S.salt}|listening`)) : null; } catch(e) { return null; }
+}
+function tabListening(){
+  const L = S.listening, key = listeningAnswers(), done = !!(st.mcqDone && key);
+  const n = L.questions.length, right = done ? L.questions.filter((q,i) => st.mcq[i] === key[i]).length : 0;
+  $("#main").innerHTML = `
+    <p>Your teacher will play <b>${esc(L.name)}</b>. Answer while you listen${key ? ", then press <b>Check my answers</b>" : " — your teacher will go through the answers afterwards"}.</p>
+    ${L.questions.map((q,i) => `<div class="mcq"><b>${i+1}. ${esc(q.q)}</b>
+      ${Object.entries(q.options).map(([k,v]) => {
+        const cls = !done ? "" : (k === key[i] ? "right" : (st.mcq[i] === k ? "wrong" : ""));
+        return `<label class="${cls}"><input type="radio" name="mcq_${i}" value="${k}" ${st.mcq[i]===k?"checked":""} ${done?"disabled":""}><span>${k}: ${esc(v)}</span></label>`;
+      }).join("")}
+      ${done ? (st.mcq[i] === key[i] ? `<p class="res ok">✓ Correct</p>` : `<p class="res no">✗ ${st.mcq[i] ? "Not quite" : "No answer"} — the answer is ${key[i]}</p>`) : ""}</div>`).join("")}
+    ${!key ? "" : done
+      ? `<div class="score">You got ${right} of ${n} right.</div>`
+      : `<p style="margin-top:18px"><button type="button" class="btn" id="checkL">Check my answers</button>
+           <span class="muted small">You can't change your answers afterwards.</span></p><p id="checkMsg" class="small" aria-live="polite"></p>`}`;
+  if (done) return;
+  $("#main").onchange = e => { if (e.target.name && e.target.name.startsWith("mcq_")) { st.mcq[e.target.name.split("_")[1]] = e.target.value; save(); } };
+  const b = $("#checkL");
+  if (b) b.onclick = () => {
+    const missing = L.questions.map((q,i) => st.mcq[i] ? null : i+1).filter(Boolean);
+    if (missing.length && !b.dataset.sure) {
+      $("#checkMsg").textContent = `You haven't answered question${missing.length>1?"s":""} ${missing.join(", ")}. Press the button again to check anyway.`;
+      b.dataset.sure = "1"; return;
+    }
+    st.mcqDone = true; save(); tabListening();
+  };
+}
+
+let pendingPick = {};   // cid -> offer id, chosen but not yet confirmed
+function tabInbox(){
+  const r = role();
+  if (AE2) {
+    $("#main").innerHTML = `
+      ${colourCodeHTML()}
+      <p>Read your ${num(r.characters.length)} sources. Each one has <b>three drawers</b>: the data behind it, a counter text and another text like it. Open and close them whenever you like. As you read, <b>tap sentences</b> to highlight them and tag the part of the argument and the decision they matter for. Then tell ${pair() ? "your partner" : "your group"} what you found: they can't see your sources.</p>
+      ${r.characters.map(c => sourceHTML(c)).join("")}
+      <section class="nb"><h2 id="nbhead" tabindex="-1">Your highlights<span id="nbcount"></span></h2><p id="nblive" class="small muted" aria-live="polite"></p><div data-nb="inbox"></div></section>`;
+    document.querySelectorAll("details.drawer").forEach(d => d.addEventListener("toggle", () => {
+      const c = d.dataset.c, o = d.dataset.o;
+      st.drawOpen = st.drawOpen || {}; st.drawOpen[c + "|" + o] = d.open;
+      if (d.open) { st.opened = st.opened || {}; const had = st.opened[c] || ""; if (!had.includes(o)) st.opened[c] = [...had + o].sort().join(""); }
+      save();
+    }));
+    refreshNotebook();
+    return;
+  }
+  $("#main").innerHTML = `
+    ${colourCodeHTML()}
+    <p>Each contact will tell you <b>one more thing</b> — you choose what. All three are useful, but some matter much more than others — and what matters most often depends on what ${pair() ? "your partner's" : "your teammates'"} contacts know. <b>Talk to ${pair() ? "your partner" : "your group"} before you choose.</b> Your choice is final.</p>
+    ${r.characters.map(c => mailHTML(c)).join("")}
+    <section class="nb"><h2 id="nbhead" tabindex="-1">Your highlights<span id="nbcount"></span></h2><p id="nblive" class="small muted" aria-live="polite"></p><div data-nb="inbox"></div></section>`;
+  r.characters.forEach(c => wireMail(c));
+  refreshNotebook();
+}
+function sourceHTML(c){   // ae2: a primary text with three drawers the student opens and closes freely
+  const isOpen = o => !!(st.drawOpen || {})[c.id + "|" + o.id];
+  return `<details class="mail" id="m_${c.id}" open>
+    <summary><span><span class="from">${esc(c.name)}</span>, <span class="muted">${esc(c.title)}</span><br><span class="subj">${esc(c.subject)}</span></span></summary>
+    <div class="body"><div class="prose">${hlHTML(c.email, c.id, "email")}</div>${c.citation ? `<p class="cite"><b>Reference:</b> ${esc(c.citation)}</p>` : ""}
+      <div class="drawers">${c.offers.map(o => `<details class="drawer" data-c="${c.id}" data-o="${o.id}" ${isOpen(o) ? "open" : ""}><summary>${esc(o.title)}</summary>
+        <div class="dbody"><div class="prose">${hlHTML(unscramble(o.text, `${S.salt}|${c.id}|${o.id}`), c.id, "d" + o.id)}</div>
+        <p class="cite"><b>Reference:</b> ${esc(o.citation)}</p></div></details>`).join("")}</div></div></details>`;
+}
+function callName(n){   // "Dr. Elena Whitfield" -> "Dr. Whitfield"; "Freja Lund" -> "Freja"
+  const m = n.match(/^(Dr\.?|Prof\.?|Professor)\s+.*\s(\S+)$/);
+  return m ? `${m[1]} ${m[2]}` : n.split(" ")[0];
+}
+function mailHTML(c){
+  const chosen = st.choices[c.id];
+  const open = !chosen;
+  let offers;
+  if (chosen) {
+    const o = c.offers.find(x => x.id === chosen);
+    offers = `<div class="offers done">
+        <div class="opened"><p class="t">${esc(o.title)}</p><div class="prose">${hlHTML(unscramble(o.text, `${S.salt}|${c.id}|${o.id}`), c.id, "opt")}</div></div>
+        ${c.offers.filter(x => x.id !== chosen).map(x => `<div class="offer closed" aria-disabled="true">${esc(x.title)}</div>`).join("")}
+      </div>`;
+  } else {
+    const pick = pendingPick[c.id];
+    offers = `<div class="offers"><p class="ask">${esc(callName(c.name))} can tell you one more thing. Which do you want to know?</p>
+      ${c.offers.map(o => `<button type="button" class="offer" data-c="${c.id}" data-o="${o.id}" aria-pressed="${pick===o.id}">${esc(o.title)}</button>`).join("")}
+      ${pick ? `<div class="confirm"><button type="button" class="btn" data-confirm="${c.id}">Ask about this</button><span class="muted small">You can't change this afterwards.</span></div>` : ""}
+    </div>`;
+  }
+  return `<details class="mail" id="m_${c.id}" ${open || st.tab==="inbox" ? "open" : ""}>
+    <summary><span><span class="from">${esc(c.name)}</span>, <span class="muted">${esc(c.title)}</span><br><span class="subj">${esc(c.subject)}</span></span>
+      <span class="state ${chosen?"":"todo"}">${chosen ? "Answered" : "Choose one"}</span></summary>
+    <div class="body"><div class="prose">${hlHTML(c.email, c.id, "email")}</div>${c.citation ? `<p class="cite"><b>Reference:</b> ${esc(c.citation)}</p>` : ""}${offers}</div></details>`;
+}
+function wireMail(c){
+  const box = $("#m_" + c.id);
+  box.querySelectorAll(".offer[data-o]").forEach(b => b.onclick = () => { pendingPick[c.id] = b.dataset.o; rerenderMail(c); });
+  const cf = box.querySelector("[data-confirm]");
+  if (cf) cf.onclick = () => { st.choices[c.id] = pendingPick[c.id]; delete pendingPick[c.id]; save(); rerenderMail(c); updateDot(); };
+}
+function rerenderMail(c){
+  const old = $("#m_" + c.id); const tmp = document.createElement("div"); tmp.innerHTML = mailHTML(c);
+  old.replaceWith(tmp.firstElementChild); wireMail(c); refreshNotebook();
+  const btn = $("#m_" + c.id + " [data-confirm]"); if (btn) btn.focus();
+}
+function updateDot(){ const pending = role().characters.filter(c => !st.choices[c.id]).length; const t = document.querySelector('.tab[data-tab="inbox"] .dot'); if (t && !pending) t.remove(); }
+
+function tabBudget(){
+  const flash = () => !S.newsflash ? "" : budgetOK()
+    ? `<div class="flash"><b>Breaking news</b><div class="prose">${esc(unscramble(S.newsflash, `${S.salt}|newsflash`)).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>")}</div>
+       <p class="small" style="margin-bottom:0">Does this change anything? You can still adjust your numbers above — keep the total within ${money(B.tolerance)} of ${money(B.target)}.</p></div>`
+    : `<p class="muted small">When your total is within ${money(B.tolerance)} of ${money(B.target)}, some breaking news will appear here.</p>`;
+  const totalHTML = () => { const tot = budgetTotal(), d = tot - B.target, ok = Math.abs(d) <= B.tolerance;
+    return `<span>Total: ${money(tot)}</span><span class="${ok ? "on" : "off"}">${ok ? "✓ on target" : (d > 0 ? money(d) + " over" : money(-d) + " under")} (target ${money(B.target)})</span>`; };
+  $("#main").innerHTML = `
+    <p>Agree how to split the <b>${money(B.target)}</b> ${pair() ? "together" : "as a group"}, then ${pair() ? "both of you enter" : "everyone enters"} the same numbers here. The total has to land within ${money(B.tolerance)} of the target.</p>
+    <div class="bud">${B.items.map(it => `<div class="row">
+        <label for="b_${it.id}"><span class="l">${esc(it.label)}</span><br><span class="u">${money(it.unit_cost)} per ${esc(it.unit || "unit")} · up to ${it.max}</span></label>
+        <input id="b_${it.id}" data-b="${it.id}" type="number" inputmode="numeric" min="0" max="${it.max}" step="1" value="${budgetVal(it.id) || ""}" placeholder="0">
+        <span class="sub" id="bs_${it.id}">${budgetVal(it.id) ? money(budgetVal(it.id) * it.unit_cost) : ""}</span></div>`).join("")}</div>
+    <div class="total" id="btotal" aria-live="polite">${totalHTML()}</div>
+    <label class="small muted" for="rationale" style="display:block;margin-top:14px">Our reasoning (the main trade-off, and the biggest risk of this split)</label>
+    <textarea id="rationale" style="width:100%;min-height:90px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-top:6px">${esc(st.rationale || "")}</textarea>
+    <div id="bflash">${flash()}</div>`;
+  let wasOK = budgetOK();
+  $("#main").oninput = e => {
+    const id = e.target.dataset.b;
+    if (id) {
+      const it = B.items.find(x => x.id === id);
+      let v = parseInt(e.target.value, 10); if (isNaN(v) || v < 0) v = 0; if (v > it.max) { v = it.max; e.target.value = v; }
+      st.budget = st.budget || {}; st.budget[id] = v; save();
+      $("#bs_" + id).textContent = v ? money(v * it.unit_cost) : "";
+      $("#btotal").innerHTML = totalHTML();
+      if (budgetOK() !== wasOK) { wasOK = budgetOK(); $("#bflash").innerHTML = flash(); }
+    } else if (e.target.id === "rationale") { st.rationale = e.target.value; save(); }
+  };
+}
+
+function tabDecisions(){
+  if (B) return tabBudget();
+  const all = S.decisions.every(d => st.decisions[d.id]);
+  if (AE2) {
+    let grp = "";
+    $("#main").innerHTML = `
+      <p>For each question, decide <b>which is the better argument</b>, ${pair() ? "together" : "as a group"}, then ${pair() ? "both of you enter" : "everyone enters"} the same answers here.</p>
+      <p class="small"><span class="kind bw" style="margin-left:0">Black and white</span> The evidence clearly favours one side: find it. &nbsp;
+        <span class="kind grey" style="margin-left:0">Shades of grey</span> Both sides can be argued well: weigh them, and be ready to answer the other side.</p>
+      ${S.decisions.map(d => {
+        const head = d.group && d.group !== grp ? `<p class="decgroup">${esc(grp = d.group)}</p>` : "";
+        return head + `<div class="dec"><h3>${esc(d.title)}<span class="kind ${d.kind}">${d.kind === "bw" ? "Black and white" : "Shades of grey"}</span></h3>
+          ${["A","B"].map(o => `<label class="opt"><input type="radio" name="dec_${d.id}" value="${o}" ${st.decisions[d.id]===o?"checked":""}><span><b>${o}.</b> ${esc(d[o])}</span></label>`).join("")}
+          <label class="small muted" for="hw_${d.id}">${d.kind === "grey" ? "The strongest argument on the other side, and your answer to it" : "However… (the main risk or objection)"}</label>
+          <textarea id="hw_${d.id}" data-hw="${d.id}">${esc(st.however[d.id]||"")}</textarea></div>`;
+      }).join("")}`;
+    $("#main").onchange = e => { if (e.target.name && e.target.name.startsWith("dec_")) { st.decisions[e.target.name.slice(4)] = e.target.value; save(); } };
+    $("#main").oninput = e => { if (e.target.dataset.hw) { st.however[e.target.dataset.hw] = e.target.value; save(); } };
+    return;
+  }
+  $("#main").innerHTML = `
+    <p>Agree the ${num(S.decisions.length)} decisions <b>${pair() ? "together" : "as a group"}</b>, then ${pair() ? "both of you enter" : "everyone enters"} the same answers here. For each one, note the biggest risk or objection — you'll need it in your writing.</p>
+    ${S.decisions.map(d => `
+      <div class="dec"><h3>${esc(d.title)}</h3>
+        ${["A","B"].map(o => `<label class="opt"><input type="radio" name="dec_${d.id}" value="${o}" ${st.decisions[d.id]===o?"checked":""}><span><b>${o}.</b> ${esc(d[o])}</span></label>`).join("")}
+        <label class="small muted" for="hw_${d.id}">However… (the main risk or objection)</label>
+        <textarea id="hw_${d.id}" data-hw="${d.id}">${esc(st.however[d.id]||"")}</textarea>
+      </div>`).join("")}
+    ${!S.newsflash ? "" : all ? `<div class="flash"><b>Breaking news</b><div class="prose">${esc(unscramble(S.newsflash, `${S.salt}|newsflash`)).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>")}</div></div>`
+          : `<p class="muted small">When you've chosen all ${num(S.decisions.length)}, some breaking news will appear here.</p>`}`;
+  $("#main").onchange = e => { if (e.target.name && e.target.name.startsWith("dec_")) { st.decisions[e.target.name.slice(4)] = e.target.value; save(); render(); } };
+  $("#main").oninput = e => { if (e.target.dataset.hw) { st.however[e.target.dataset.hw] = e.target.value; save(); } };
+}
+
+function tabSubmit(){
+  const W = S.writing;
+  $("#main").innerHTML = `
+    <h2 style="margin-top:0">Your ${esc(W.label)} to ${esc(W.addressee)}</h2>
+    <p>About ${W.words} words. Your ${esc(W.label)} should:</p>
+    <ul>${W.instructions.map(i => `<li>${esc(i)}</li>`).join("")}</ul>
+    ${S.rubric ? `<details class="rubric" id="rubric" ${st.rubricOpen ? "open" : ""}><summary>What makes a strong ${esc(W.label)}</summary>
+      ${S.rubric.map(c => `<h3>${esc(c.name)}</h3><p class="aim small">${esc(c.aim)}</p><ul class="small">${c.look_for.map(x => `<li>${esc(x)}</li>`).join("")}</ul>`).join("")}
+      <p class="small muted">Your teacher uses these same points for feedback and for exams.</p></details>` : ""}
+    <div class="writegrid"><div>
+      <textarea class="memo" id="memo" placeholder="Write here. Your text is kept in this tab until you close it.">${esc(st.memo)}</textarea>
+      <div class="count" id="count"></div></div>
+      <details class="nbpanel" id="nbpanel" ${st.nbClosed ? "" : "open"}><summary id="nbhead">Your highlights<span id="nbcount"></span></summary><p id="nblive" class="small muted" aria-live="polite"></p><section class="nb" data-nb="submit"></section></details>
+    </div>
+
+    <div class="consent">
+      <b>Can your teacher check your text with AI?</b>
+      <p class="small">Your teacher may use the SimLearn teacher tool, which can ask an AI system (Claude, by Anthropic) to suggest feedback on your writing. Only your text and your group's choices would be sent — not your name. Your teacher always makes the final decision about your grade. If you say no, your teacher marks your text by hand. Saying no has no effect on your grade.</p>
+      <label><input type="checkbox" id="consent" ${st.consent?"checked":""}> Yes, my teacher may check my text with AI.</label>
+    </div>
+
+    <div id="issues" class="issues"></div>
+    <button type="button" class="btn" id="make">Create my submission</button>
+    <div id="out"></div>`;
+  const memo = $("#memo"), count = () => { const n = words(memo.value); $("#count").textContent = `${n} word${n===1?"":"s"}`; };
+  memo.oninput = () => { st.memo = memo.value; save(); count(); }; count();
+  const keep = () => { memoPos = memo.selectionStart; };
+  ["keyup","click","select","input","blur"].forEach(ev => memo.addEventListener(ev, keep));
+  memoPos = null; refreshNotebook();
+  $("#nbpanel").ontoggle = e => { st.nbClosed = !e.target.open; save(); };
+  const rb = $("#rubric"); if (rb) rb.ontoggle = () => { st.rubricOpen = rb.open; save(); };
+  $("#consent").onchange = e => { st.consent = e.target.checked; save(); $("#out").innerHTML = ""; };
+  $("#make").onclick = makeSubmission;
+}
+
+/* ---------- PDF of the submission (made here in the browser; nothing is sent anywhere) ----------
+   A plain A4 PDF in Helvetica: the memo for Moodle's viewer, and the SimLearn block as an attached
+   text file (plus a copy in the document info) for the teacher tool. Without AI consent the attached
+   block holds no text, exactly like the pasted block. */
+const PDFW = {"R":[278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584,761,556,0,222,556,333,1000,556,556,333,1000,667,333,1000,0,611,0,0,222,222,333,333,350,556,1000,333,1000,500,333,944,0,500,667,278,333,556,556,556,556,260,556,333,737,370,556,584,333,737,333,400,584,333,333,333,556,537,278,333,333,365,556,834,834,834,611,667,667,667,667,667,667,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,500,556,556,556,556,278,278,278,278,556,556,556,556,556,556,556,584,611,556,556,556,556,500,556,500],"B":[278,333,474,556,556,889,722,238,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,333,333,584,584,584,611,975,722,722,722,722,667,611,778,722,278,556,722,611,833,722,778,667,778,722,667,611,722,667,944,667,667,611,333,278,333,584,556,333,556,611,556,611,556,333,611,611,278,278,556,278,889,611,611,611,611,389,556,333,611,556,778,556,556,500,389,280,389,584,761,556,0,278,556,500,1000,556,556,333,1000,667,333,1000,0,611,0,0,278,278,500,500,350,556,1000,333,1000,556,333,944,0,500,667,278,333,556,556,556,556,280,556,333,737,370,556,584,333,737,333,400,584,333,333,333,611,556,278,333,333,365,556,834,834,834,611,722,722,722,722,722,722,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,556,556,556,556,556,278,278,278,278,611,611,611,611,611,611,611,584,611,611,611,611,611,556,611,556]};
+const PDF_WIN = {"8364":128,"8218":130,"402":131,"8222":132,"8230":133,"8224":134,"8225":135,"710":136,"8240":137,"352":138,"8249":139,"338":140,"381":142,"8216":145,"8217":146,"8220":147,"8221":148,"8226":149,"8211":150,"8212":151,"732":152,"8482":153,"353":154,"8250":155,"339":156,"382":158,"376":159};   // Unicode -> WinAnsi byte, for 0x80-0x9F
+const PDF_ALT = {"Ł":"L","ł":"l","Đ":"D","đ":"d","ı":"i","ħ":"h","‐":"-","‑":"-","−":"-","′":"'","″":"\"","\u2009":" ","\u202f":" ","→":"->","←":"<-","≈":"~","≤":"<=","≥":">="};
+function pdfByte(ch){
+  const u = ch.codePointAt(0);
+  if (u >= 32 && u <= 126) return u;
+  if (u >= 160 && u <= 255) return u;
+  if (PDF_WIN[u] !== undefined) return PDF_WIN[u];
+  if (u === 9) return 32;
+  const base = ch.normalize("NFKD").replace(/[̀-ͯ]/g, "");   // ł, ő, ş… fall back to the plain letter
+  if (base && base !== ch && base.length === 1) return pdfByte(base);
+  return 63;   // ?
+}
+// Letters the PDF font can't show: a few by hand, then compatibility forms (ﬁ -> fi, ² -> 2), else "?".
+const pdfClean = s => [...String(s).replace(/[ŁłĐđıħ‐‑−′″\u2009\u202f→←≈≤≥]/g, c => PDF_ALT[c])].map(c => {
+  if (c === "\n" || pdfByte(c) !== 63 || c === "?") return c;
+  const k = c.normalize("NFKD").replace(/[\u0300-\u036f]/g, "");
+  return k && [...k].every(x => pdfByte(x) !== 63) ? k : c;
+}).join("");
+function pdfWidth(text, font, size){
+  let w = 0; for (const ch of text) { const b = pdfByte(ch); w += PDFW[font][b - 32] || 556; } return w * size / 1000;
+}
+function pdfStr(text){   // a PDF literal string in WinAnsi, with octal escapes
+  let out = "(";
+  for (const ch of text) {
+    const b = pdfByte(ch);
+    if (b === 40 || b === 41 || b === 92) out += "\\" + String.fromCharCode(b);
+    else if (b > 126) out += "\\" + b.toString(8).padStart(3, "0");
+    else out += String.fromCharCode(b);
+  }
+  return out + ")";
+}
+function pdfWrap(text, font, size, width){
+  const lines = [];
+  text.split("\n").forEach(par => {
+    if (!par.trim()) { lines.push(""); return; }
+    let line = "";
+    par.split(/\s+/).filter(Boolean).forEach(word => {
+      const tryLine = line ? line + " " + word : word;
+      if (pdfWidth(tryLine, font, size) <= width) { line = tryLine; return; }
+      if (line) lines.push(line);
+      while (pdfWidth(word, font, size) > width) {          // a very long word: break it (one pass per line)
+        const chars = [...word]; let n = 0, w = 0;
+        while (n < chars.length) { const cw = pdfWidth(chars[n], font, size); if (n > 0 && w + cw > width) break; w += cw; n++; }
+        lines.push(chars.slice(0, n).join("")); word = chars.slice(n).join("");
+      }
+      line = word;
+    });
+    lines.push(line);
+  });
+  return lines;
+}
+function utf16Hex(text){
+  let h = "FEFF";
+  for (let i = 0; i < text.length; i++) h += text.charCodeAt(i).toString(16).padStart(4, "0").toUpperCase();
+  return "<" + h + ">";
+}
+function makePdf({title, subtitle, body, note, footer, block, fileName}){
+  [title, subtitle, body, note, footer] = [title, subtitle, body, note, footer].map(pdfClean);
+  const W = 595.28, H = 841.89, M = 64, TW = W - 2 * M;
+  const pages = []; let ops = [], y = H - M;
+  const newPage = () => { if (ops.length) pages.push(ops); ops = []; y = H - M; };
+  const text = (s, font, size, x, yy, grey) => ops.push(`BT /${font} ${size} Tf ${grey ? "0.4 0.45 0.5 rg" : "0.11 0.15 0.2 rg"} ${x.toFixed(2)} ${yy.toFixed(2)} Td ${pdfStr(s)} Tj ET`);
+  const para = (s, font, size, lead, grey) => pdfWrap(s, font, size, TW).forEach(l => {
+    if (y - lead < M + 20) newPage();
+    y -= lead; if (l) text(l, font, size, M, y, grey);
+  });
+  para(title, "B", 16, 21);
+  para(subtitle, "R", 9.5, 13, true);
+  y -= 14;
+  para(body, "R", 11, 15.5);
+  y -= 18;
+  para(note, "R", 8, 11, true);
+  newPage();
+  // objects: 1 catalog, 2 pages, 3 font R, 4 font B, 5 embedded file, 6 filespec, 7 info, then page/content pairs
+  const objs = [];
+  const enc = new TextEncoder(), blockBytes = enc.encode(block);
+  const kids = pages.map((_, i) => `${8 + i * 2} 0 R`).join(" ");
+  objs[1] = `<< /Type /Catalog /Pages 2 0 R /Names << /EmbeddedFiles << /Names [${pdfStr(fileName)} 6 0 R] >> >> /PageMode /UseNone >>`;
+  objs[2] = `<< /Type /Pages /Kids [${kids}] /Count ${pages.length} >>`;
+  objs[3] = `<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>`;
+  objs[4] = `<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>`;
+  objs[5] = {dict: `<< /Type /EmbeddedFile /Subtype /text#2Fplain /Length ${blockBytes.length} >>`, data: blockBytes};
+  objs[6] = `<< /Type /Filespec /F ${pdfStr(fileName)} /UF ${utf16Hex(fileName)} /EF << /F 5 0 R >> /Desc ${pdfStr("SimLearn answers for the teacher tool")} >>`;
+  objs[7] = `<< /Title ${utf16Hex(title)} /Creator (SimLearn) /Producer (SimLearn) /SimLearnSubmission ${utf16Hex(block)} >>`;
+  pages.forEach((p, i) => {
+    const foot = `BT /R 7.5 Tf 0.4 0.45 0.5 rg ${M} 36 Td ${pdfStr(footer + (pages.length > 1 ? ` · page ${i + 1} of ${pages.length}` : ""))} Tj ET`;
+    const content = enc.encode([...p, foot].join("\n").split("").map(c => c.charCodeAt(0) < 256 ? c : "?").join(""));
+    objs[8 + i * 2] = `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${W} ${H}] /Resources << /Font << /R 3 0 R /B 4 0 R >> >> /Contents ${9 + i * 2} 0 R >>`;
+    objs[9 + i * 2] = {dict: `<< /Length ${content.length} >>`, data: content};
+  });
+  // assemble with byte offsets (all strings here are ASCII)
+  const parts = [], offs = []; let len = 0;
+  const add = b => { parts.push(b); len += b.length; };
+  add(enc.encode("%PDF-1.7\n")); add(new Uint8Array([0x25, 0xE2, 0xE3, 0xCF, 0xD3, 0x0A]));   // marks the file as binary
+  for (let n = 1; n < objs.length; n++) {
+    offs[n] = len;
+    const o = objs[n];
+    if (typeof o === "string") add(enc.encode(`${n} 0 obj\n${o}\nendobj\n`));
+    else { add(enc.encode(`${n} 0 obj\n${o.dict}\nstream\n`)); add(o.data); add(enc.encode(`\nendstream\nendobj\n`)); }
+  }
+  const xref = len;
+  let x = `xref\n0 ${objs.length}\n0000000000 65535 f \n`;
+  for (let n = 1; n < objs.length; n++) x += String(offs[n]).padStart(10, "0") + " 00000 n \n";
+  add(enc.encode(x + `trailer\n<< /Size ${objs.length} /Root 1 0 R /Info 7 0 R >>\nstartxref\n${xref}\n%%EOF\n`));
+  return new Blob(parts, {type: "application/pdf"});
+}
+
+function makeSubmission(){
+  const r = role(), W = S.writing;
+  const missing = [];
+  const openChars = AE2 ? [] : r.characters.filter(c => !st.choices[c.id]);
+  if (openChars.length) missing.push(`You haven't chosen what to ask ${openChars.map(c => c.name).join(", ")} yet (Inbox).`);
+  const openDec = B ? (budgetOK() ? [] : ["budget"]) : S.decisions.filter(d => !st.decisions[d.id]);
+  if (openDec.length) missing.push(B ? `Your group's budget isn't within ${money(B.tolerance)} of ${money(B.target)} yet (Budget).`
+                                      : `Your group's answer is missing for ${openDec.map(d => d.title.split(" — ")[0]).join(", ")} (Decisions).`);
+  if (words(st.memo) < 50) missing.push("Your text is very short — write your " + W.label + " first.");
+  $("#issues").innerHTML = missing.map(m => `<p>${esc(m)}</p>`).join("");
+  if (openDec.length || words(st.memo) < 50) { $("#out").innerHTML = ""; return; }
+
+  const ai = st.consent ? "yes" : "no";
+  const choices = r.characters.map(c => `${c.id}=${(AE2 ? (st.opened || {})[c.id] : st.choices[c.id]) || "-"}`).join(", ");   // ae2: the drawers opened, e.g. "ac"
+  const decisions = B ? B.items.map(it => `${it.id}=${budgetVal(it.id)}`).join(", ")
+                      : S.decisions.map(d => `${d.id}=${st.decisions[d.id]}`).join(", ");
+  const memoText = st.memo.trim();
+  const code = checkCode([S.id, S.version, r.id, choices, decisions, ai, ai === "yes" ? norm(memoText) : ""]);
+  const head = [
+    "=== SIMLEARN SUBMISSION ===",
+    ai === "yes" ? "AI check: ALLOWED" : "AI check: NOT ALLOWED - grade by hand",
+    `Scenario: ${S.id} v${S.version} (${S.title})`,
+    `Role: ${r.id} (${r.dept || "two-player"})`,
+    `Info choices: ${choices}`,
+    `Group decisions: ${decisions}`,
+    `Check: ${code}`,
+  ];
+  let block;
+  if (ai === "yes") {
+    block = [...head, `--- ${W.label} to ${W.addressee} (${words(memoText)} words) ---`, memoText, "=== END ==="].join("\n");
+  } else {
+    block = [...head, "=== END ===", "", `My ${W.label} to ${W.addressee} (${words(memoText)} words):`, "", memoText].join("\n");
+  }
+  $("#out").innerHTML = `
+    <h2>Your submission</h2>
+    <p>Hand it in the way your <b>Moodle assignment</b> asks for:</p>
+    <p><b>A file upload?</b> Download your PDF and upload it to the assignment.</p>
+    <p><button type="button" class="btn" id="pdf">Download my submission (PDF)</button> <span id="pdfmsg" class="ok" aria-live="polite"></span></p>
+    <p><b>A text box?</b> Copy everything in the box below and paste it in. ${ai==="yes" ? "" : "Your text sits below the SimLearn part, so your teacher can mark it by hand."}</p>
+    <textarea class="block" id="block" readonly>${esc(block)}</textarea>
+    <p><button type="button" class="btn" id="copy">Copy to clipboard</button> <span id="copied" class="ok" aria-live="polite"></span></p>
+    <p class="muted small">If you change your text or your answers later, create your submission again before you hand it in.</p>`;
+  $("#pdf").onclick = () => {
+    const blockOnly = ai === "yes" ? block : [...head, "=== END ==="].join("\n");   // no text without AI consent
+    const cap = W.label.charAt(0).toUpperCase() + W.label.slice(1);
+    const today = new Date().toLocaleDateString("en-GB", {day: "numeric", month: "long", year: "numeric"});
+    const blob = makePdf({
+      title: `${cap} to ${W.addressee}`,
+      subtitle: `${S.title} · Role ${r.id}${r.dept ? " (" + r.dept + ")" : ""} · ${words(memoText)} words · ${today}`,
+      body: memoText,
+      note: (ai === "yes"
+        ? "This file also carries your SimLearn answers for your teacher's SimLearn tool: your information choices, your group's decisions and a copy of your text. You agreed that your teacher may check your text with AI."
+        : "This file also carries your SimLearn answers for your teacher's SimLearn tool: your information choices and your group's decisions, but not your text. You did not agree to an AI check, so your teacher will mark your text by hand.")
+        + ` Check code: ${code}.`,
+      footer: `SimLearn · ${S.title}`,
+      block: blockOnly, fileName: "simlearn-submission.txt"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = `simlearn-${S.id}-role-${r.id}.pdf`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 120000);
+    $("#pdfmsg").textContent = "Look in your Downloads, then upload the file to Moodle. If nothing downloaded, open this page in Safari, Chrome or Firefox (not inside an app), or use the text box below.";
+  };
+  $("#copy").onclick = async () => {
+    const ta = $("#block");
+    const done = () => { $("#copied").textContent = "Copied — now paste it into Moodle."; };
+    try { await navigator.clipboard.writeText(ta.value); return done(); } catch(e) {}
+    // older method: still works in many embedded frames where the modern one is blocked
+    ta.focus(); ta.select(); ta.setSelectionRange(0, ta.value.length);
+    let ok = false; try { ok = document.execCommand("copy"); } catch(e) {}
+    if (ok) return done();
+    $("#copied").textContent = "Your browser blocked copying. The text is selected — press Ctrl+C (or ⌘C) to copy it.";
+  };
+  $("#block").scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center"});
+}
+
+render();
+</script>
+</body>
+</html>
