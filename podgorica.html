@@ -186,6 +186,29 @@ textarea.memo{width:100%;min-height:340px;border:1px solid var(--line);border-ra
 .issues{color:var(--warn);font-size:.92rem}
 .block{width:100%;min-height:260px;font:13px/1.45 ui-monospace,Menlo,Consolas,monospace;border:2px solid var(--pine);border-radius:10px;padding:10px 12px;background:#fff;white-space:pre-wrap}
 .ok{color:var(--pine);font-weight:600}
+/* exam: sources beside the questions; the questions keep their own scroll on wide screens */
+.examgrid{display:block}
+.qpanel h2{margin-top:0}
+.qpart{border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:0 0 16px;background:#fff}
+.qpart h3{margin:0 0 4px;font-size:1rem}
+.qpart .inst{margin:0 0 8px;color:var(--ink-2);font-size:.92rem}
+.qitem{margin:10px 0;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.qitem:last-child{border-bottom:0}
+.qitem .qq{display:block;margin-bottom:4px}
+.qitem label{display:flex;gap:8px;align-items:flex-start;margin:4px 0;cursor:pointer}
+.qitem label input{margin-top:4px;flex:none}
+.qitem .row{display:flex;flex-wrap:wrap;gap:6px 16px}
+.qitem select,.gaptext select{font:inherit;border:1px solid var(--line);border-radius:6px;padding:3px 6px;background:#fff;max-width:100%}
+.qitem input[type=text]{font:inherit;border:1px solid var(--line);border-radius:6px;padding:5px 8px;width:100%;max-width:340px}
+.gaptext{line-height:2}
+.gapopts{margin:8px 0 0;padding-left:0;list-style:none}
+.gapopts li{margin:4px 0}
+.qcount{font-size:.9rem;color:var(--ink-2)}
+.examstart .times{margin:12px 0 20px;padding-left:1.2rem}
+@media (min-width:1000px){
+  .examgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(340px,44%);gap:24px;align-items:start}
+  .qpanel{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto;padding-right:4px}
+}
 /* hand-over ("parachute"): a leaving student's work, opened by a teammate in another tab */
 .handin{border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:18px 0;background:#fff;color:var(--ink)}
 .handin.first{border:2px solid var(--amber);background:var(--amber-bg)}
@@ -259,10 +282,11 @@ footer{border-top:1px solid var(--line);padding:18px 0 40px;font-size:.85rem;col
 const S = JSON.parse(document.getElementById("scenario").textContent);
 const STORE = "simlearn:" + S.id + ":v" + S.version;
 const AE2 = S.format === "ae2";   // new AE format: drawers, tags, "which is the better argument?"
+const EXAM = S.format === "exam", EX = S.exam || null;   // written exam: one candidate, questions, no answers in the page
 const TAGS = !S.budget && (S.decisions || []).length > 0;   // highlights can be tagged with the decisions they matter for
 
 /* ---------- state (kept only in this browser tab, so a reload doesn't lose work) ---------- */
-const fresh = () => ({mode:"3", role:null, tab:"context", choices:{}, firstLook:{}, mcq:{}, decisions:{}, however:{}, memo:"", consent:false, notes:"", hl:{}, hlLabels:{}, hlGroup:"colour", budget:{}, rationale:"", ack:false, opened:{}, drawOpen:{}, tags:{}, nbf:{}});
+const fresh = () => ({mode:"3", role:null, tab:"context", choices:{}, firstLook:{}, mcq:{}, decisions:{}, however:{}, memo:"", consent:false, notes:"", hl:{}, hlLabels:{}, hlGroup:"colour", budget:{}, rationale:"", ack:false, opened:{}, drawOpen:{}, tags:{}, nbf:{}, ans:{}});
 let st = fresh();
 try { const raw = sessionStorage.getItem(STORE); if (raw) st = Object.assign(st, JSON.parse(raw)); } catch(e) {}
 if (location.hash === "#handover" && !st.handover) {   // opened to take a hand-over: start empty, whatever was copied in
@@ -412,12 +436,36 @@ const budgetOK = () => B && Math.abs(budgetTotal() - B.target) <= (B.tolerance |
 function teacherLink(){
   return S.teacher_url ? `<a class="teacher" href="${esc(S.teacher_url.replace(/\/?$/, "/") + "?sim=" + encodeURIComponent(S.id))}" target="_blank" rel="noopener" title="Opens the teacher tool (password needed)">Teacher</a>` : "";
 }
-function topBar(who){
-  return `<div class="wrap"><span class="title">${esc(S.title)}</span><span class="right">${who ? `<span class="who">${esc(who)}</span>` : ""}${teacherLink()}</span></div>`;
+function topBar(who){   // no Teacher link in an exam: one less thing to click away to
+  return `<div class="wrap"><span class="title">${esc(S.title)}</span><span class="right">${who ? `<span class="who">${esc(who)}</span>` : ""}${EXAM ? "" : teacherLink()}</span></div>`;
 }
 
 /* ---------- start screen ---------- */
+function renderExamStart(){
+  const m = EX.minutes || {};
+  $("#app").innerHTML = `
+  <header class="bar">${topBar("")}</header>
+  <div class="wrap start examstart">
+    <h1>${esc(S.title)}</h1>
+    <p class="lede">This is an exam. You work <b>on your own</b>: everything you need is on this page.</p>
+    <ul class="times">
+      <li><b>Reading</b>${m.reading ? ` (about ${m.reading} minutes)` : ""}: read the situation and the ${num(role0().characters.length)} documents, and answer the questions beside them.</li>
+      <li><b>Listening</b>${m.listening ? ` (about ${m.listening} minutes)` : ""}: your teacher plays the recording; answer the questions as you listen.</li>
+      <li><b>Writing</b>${m.writing ? ` (about ${m.writing} minutes)` : ""}: make the decisions and write your ${esc(S.writing.label)}.</li>
+    </ul>
+    <p>You can move between the tabs at any time and change your answers until you create your submission. You can highlight sentences as in the simulations.</p>
+    ${S.ack_disclaimer ? `<div class="ack"><b>Before you start</b><p>${esc(S.disclaimer)}</p>
+      <label><input type="checkbox" id="ack" ${st.ack ? "checked" : ""}> I understand</label></div>` : `<p class="muted small">${esc(S.disclaimer)}</p>`}
+    <button type="button" class="btn" id="go">Start the exam</button>
+  </div>`;
+  const ack = $("#ack"), upd = () => { $("#go").disabled = !!(ack && !ack.checked); };
+  if (ack) ack.addEventListener("change", () => { st.ack = ack.checked; save(); upd(); });
+  upd();
+  $("#go").onclick = () => { st.mode = "3"; st.role = role0().id; st.tab = "context"; save(); render(); window.scrollTo(0, 0); };
+}
+const role0 = () => S.roles[0];
 function renderStart(){
+  if (EXAM) return renderExamStart();
   const two = st.mode === "2" && TWO;
   $("#app").innerHTML = `
   <header class="bar">${topBar("")}</header>
@@ -767,10 +815,11 @@ document.addEventListener("input", e => {
 
 /* ---------- main shell ---------- */
 const ALL_TABS = [["context","Context"], ...(AE2 ? [["listening","Listening"],["firstlook","First look"]] : [["firstlook","First look"],["listening","Listening"]]),["inbox", AE2 ? "Research" : "Inbox"],["decisions", B ? "Budget" : "Decisions"],["submit","Write & submit"]];
-const TABS = ALL_TABS.filter(([k]) => k !== "listening" || (S.listening && S.listening.questions && S.listening.questions.length));
+const TABS = EXAM ? [["context","Situation"],["reading","Reading"], ...(EX.listening ? [["listening","Listening"]] : []),["decisions","Decisions"],["submit","Write & submit"]]
+  : ALL_TABS.filter(([k]) => k !== "listening" || (S.listening && S.listening.questions && S.listening.questions.length));
 function render(){
   closePalette(false);
-  $("#app").classList.toggle("wide", !!st.role && (st.tab === "submit" || st.tab === "decisions"));
+  $("#app").classList.toggle("wide", !!st.role && (st.tab === "submit" || st.tab === "decisions" || st.tab === "reading"));
   if (!st.role) { document.title = S.title; return renderStart(); }
   const HO = st.handover, tabs = TABS.filter(([k]) => !(HO && k === "submit"));   // no submitting from a hand-over tab
   if (!tabs.some(([k]) => k === st.tab)) st.tab = "context";
@@ -778,20 +827,20 @@ function render(){
   const r = role();
   const hoName = HO ? (HO.from || "A teammate") : "";
   document.title = HO ? `${hoName}'s work · ${S.title}` : S.title;
-  const pending = AE2 ? 0 : r.characters.filter(c => !st.choices[c.id]).length;
+  const pending = AE2 || EXAM ? 0 : r.characters.filter(c => !st.choices[c.id]).length;
   $("#app").innerHTML = `
-  <header class="bar">${topBar((HO ? "Hand-over: " + hoName + " · " : "") + (r.dept ? r.label + " · " + r.dept : r.label))}
+  <header class="bar">${topBar(EXAM ? "Exam" : (HO ? "Hand-over: " + hoName + " · " : "") + (r.dept ? r.label + " · " + r.dept : r.label))}
     <div class="wrap"><nav class="tabs" role="tablist">${tabs.map(([k,l]) => `<button type="button" class="tab" role="tab" data-tab="${k}" aria-selected="${st.tab===k}">${l}${k==="inbox"&&pending?`<span class="dot" title="${pending} choice(s) still open"></span>`:""}</button>`).join("")}</nav></div></header>
   ${HO ? `<div class="wrap"><div class="handbanner"><b>Hand-over from ${esc(hoName)}</b> (${esc(roleName(r))})${handoverWhen(HO.made) ? ", saved " + esc(handoverWhen(HO.made)) : ""}.
     This tab shows their ${AE2 ? "papers" : "emails"}, what they chose and their highlights. Use it to tell your group what they found.
     Their own writing isn't included. You can't submit from this tab, and changes here don't count.${HO.older ? " The simulation has been updated since they saved this, so some highlights may be missing." : ""}</div></div>` : ""}
   <main class="wrap" id="main"></main>
   <footer class="wrap">${esc(S.disclaimer)}<br>Nothing you type here leaves this browser tab unless you copy it yourself.<br>
-    ${HO ? "" : `<button type="button" class="linkish" id="hoOut">Leaving early? Hand over your work</button>`}
-    <a class="linkish" href="${esc(location.pathname + location.search)}#handover" target="_blank" rel="noopener">Open a teammate's hand-over (new tab)</a>
-    <button type="button" class="linkish" id="reset">${HO ? "Close this hand-over" : "Start again (choose a new role)"}</button>
+    ${HO || EXAM ? "" : `<button type="button" class="linkish" id="hoOut">Leaving early? Hand over your work</button>
+    <a class="linkish" href="${esc(location.pathname + location.search)}#handover" target="_blank" rel="noopener">Open a teammate's hand-over (new tab)</a>`}
+    <button type="button" class="linkish" id="reset">${HO ? "Close this hand-over" : EXAM ? "Clear everything and start again" : "Start again (choose a new role)"}</button>
     <span id="resetAsk" hidden> ${HO ? "This clears the hand-over from this tab." : "This clears everything you've done, including your text."} <button type="button" class="linkish" id="resetYes">Yes, clear it</button> · <button type="button" class="linkish" id="resetNo">${HO ? "Keep it" : "Keep my work"}</button></span>
-    ${HO ? "" : `<div id="hoPanel" class="handin" hidden><b>Hand over your work</b>
+    ${HO || EXAM ? "" : `<div id="hoPanel" class="handin" hidden><b>Hand over your work</b>
       <p class="small">This saves what you've done so far in a small file: the ${AE2 ? "papers you opened" : "information you chose"}, your highlights and colour codes, your answers and your group's decisions. Your own writing isn't included. Send the file to a teammate by email, a chat app or AirDrop. They open it with "Open a teammate's hand-over" at the bottom of their page.</p>
       <label class="small">Your first name, so your team knows whose work it is: <input type="text" id="hoName" maxlength="40" autocomplete="given-name"></label>
       <button type="button" class="btn" id="hoGo">Download hand-over file</button>
@@ -817,7 +866,7 @@ function render(){
     st = fresh();
     pendingPick = {}; render(); window.scrollTo(0,0);
   };
-  ({context:tabContext, firstlook:tabFirstLook, listening:tabListening, inbox:tabInbox, decisions:tabDecisions, submit:tabSubmit})[st.tab]();
+  ({context:tabContext, firstlook:tabFirstLook, listening:EXAM ? tabExamListening : tabListening, inbox:tabInbox, reading:tabReading, decisions:tabDecisions, submit:tabSubmit})[st.tab]();
 }
 
 /* ---------- tabs ---------- */
@@ -829,9 +878,10 @@ function tabContext(){
     ${c.scar ? `<div class="note scar"><b>${esc(c.scar.label)}</b><p class="prose">${hlHTML(c.scar.text, "ctx", "scar")}</p></div>` : ""}
     ${c.proof ? `<div class="note proof"><b>${esc(c.proof.label)}</b><p class="prose">${hlHTML(c.proof.text, "ctx", "proof")}</p></div>` : ""}
     ${c.constraint ? `<div class="note clock"><b>The clock</b><p class="prose">${hlHTML(c.constraint, "ctx", "clock")}</p></div>` : ""}
+    ${EXAM ? `<h2>Your documents</h2><p class="muted">On the Reading tab, from: ${role0().characters.map(ch => `${esc(ch.name)}, ${esc(ch.title)}`).join(" · ")}.</p>` : `
     <h2>${AE2 ? "Who's who" : "Who knows what"}</h2>
     <p class="muted">You only see your own ${AE2 ? "papers" : "contacts"}. What the others know reaches you by talking to ${st.mode === "2" ? "your partner" : "your group"}.</p>
-    <div class="contacts">${roles().map(r => `<div><b>${esc(roleName(r))}</b>${r.id===st.role?" (you)":""}<br><span class="muted">${r.characters.map(ch => `${esc(ch.name)}, ${esc(ch.title)}`).join(" · ")}</span></div>`).join("")}</div>`;
+    <div class="contacts">${roles().map(r => `<div><b>${esc(roleName(r))}</b>${r.id===st.role?" (you)":""}<br><span class="muted">${r.characters.map(ch => `${esc(ch.name)}, ${esc(ch.title)}`).join(" · ")}</span></div>`).join("")}</div>`}`;
 }
 
 function tabFirstLook(){
@@ -888,6 +938,76 @@ function tabListening(){
     }
     st.mcqDone = true; save(); tabListening();
   };
+}
+
+/* ---------- exam questions (no answers in the page: the teacher tool marks them) ---------- */
+const qItems = sec => ((EX && EX[sec] && EX[sec].parts) || []).flatMap(p => p.items.map(it => ({...it, part: p})));
+const QN = {};   // question numbers run through each section, as on a paper (reading 1–n, listening 1–n)
+["reading", "listening"].forEach(sec => qItems(sec).forEach((it, i) => { QN[it.id] = i + 1; }));
+const answered = it => String((st.ans || {})[it.id] || "").trim() !== "";
+function qCount(sec){ const a = qItems(sec); return `${a.filter(answered).length} of ${a.length} answered`; }
+const initials = t => t.trim().split(/\s+/).map(w => w.charAt(0)).join("").toUpperCase();   // "Not given" -> "NG": no need to show the key
+function qOptsHTML(it, opts){
+  const v = (st.ans || {})[it.id] || "", ent = Object.entries(opts);
+  const long = ent.length > 4 || ent.some(([, t]) => t.length > 60) && ent.length > 3;
+  if (long) return `<select data-q="${esc(it.id)}" aria-label="Answer to question ${QN[it.id]}"><option value="">Choose…</option>${ent.map(([k, t]) => `<option value="${esc(k)}" ${v === k ? "selected" : ""}>${esc(k)}. ${esc(t)}</option>`).join("")}</select>`;
+  const short = ent.every(([, t]) => t.length <= 24);
+  return `<div class="${short ? "row" : ""}">${ent.map(([k, t]) => `<label><input type="radio" name="q_${esc(it.id)}" data-q="${esc(it.id)}" value="${esc(k)}" ${v === k ? "checked" : ""}><span>${initials(t) === k.toUpperCase() ? "" : `<b>${esc(k)}</b> `}${esc(t)}</span></label>`).join("")}</div>`;
+}
+function qPartHTML(p){
+  const num = it => QN[it.id];
+  let body;
+  if (p.type === "gap") {
+    const opts = Object.entries(p.options);
+    const sel = id => { const v = (st.ans || {})[id] || ""; return `<select data-q="${esc(id)}" aria-label="Question ${QN[id]}"><option value="">–</option>${opts.map(([k]) => `<option value="${esc(k)}" ${v === k ? "selected" : ""}>${esc(k)}</option>`).join("")}</select>`; };
+    const ids = Object.fromEntries(p.items.map(it => [it.id.split(".").pop(), it.id]));   // [[2]] in the text = item R4.2
+    body = `<div class="prose gaptext">${p.text.split("\n\n").map(par => `<p>${esc(par).replace(/\[\[(\d+)\]\]/g, (m, n) => ids[n] ? `<b>(${QN[ids[n]]})</b> ${sel(ids[n])}` : m)}</p>`).join("")}</div>
+      <ul class="gapopts">${opts.map(([k, t]) => `<li><b>${esc(k)}</b> ${esc(t)}</li>`).join("")}</ul>`;
+  } else {
+    body = p.items.map(it => `<div class="qitem"><span class="qq"><b>${esc(num(it))}.</b> ${esc(it.q || "")}</span>
+      ${p.type === "short" ? `<input type="text" data-q="${esc(it.id)}" maxlength="80" autocomplete="off" spellcheck="false" value="${esc((st.ans || {})[it.id] || "")}" aria-label="Answer to question ${QN[it.id]}">`
+        : qOptsHTML(it, p.type === "shared" ? p.options : (it.options || {}))}</div>`).join("");
+  }
+  return `<section class="qpart" id="qp_${esc(p.id)}"><h3>${esc(p.title)}</h3>${p.instructions ? `<p class="inst">${esc(p.instructions)}</p>` : ""}${body}</section>`;
+}
+function wireQuestions(sec){
+  const upd = e => {
+    const id = e.target.dataset && e.target.dataset.q;
+    if (!id) return false;
+    st.ans = st.ans || {}; st.ans[id] = e.target.value; save();
+    const c = $("#qcount"); if (c) c.textContent = qCount(sec);
+    return true;
+  };
+  $("#main").addEventListener("change", upd);
+  $("#main").addEventListener("input", e => { if (e.target.type === "text") upd(e); });
+}
+function examMailHTML(c){
+  return `<details class="mail" id="m_${c.id}" open>
+    <summary><span><span class="from">${esc(c.name)}</span>, <span class="muted">${esc(c.title)}</span><br><span class="subj">${esc(c.subject)}</span></span></summary>
+    <div class="body"><div class="prose">${hlHTML(c.email, c.id, "email")}</div></div></details>`;
+}
+function tabReading(){
+  const R = EX.reading;
+  $("#main").innerHTML = `
+    ${colourCodeHTML()}
+    <div class="examgrid"><div>
+      <p>${esc(R.intro || "Read the documents and answer the questions.")} <b>Tap sentences</b> to highlight them.</p>
+      ${role0().characters.map(examMailHTML).join("")}
+      <section class="nb"><h2 id="nbhead" tabindex="-1">Your highlights<span id="nbcount"></span></h2><p id="nblive" class="small muted" aria-live="polite"></p><div data-nb="inbox"></div></section>
+    </div>
+    <div class="qpanel"><h2>Reading questions</h2><p class="qcount" id="qcount" aria-live="polite">${qCount("reading")}</p>
+      ${R.parts.map(qPartHTML).join("")}</div></div>`;
+  wireQuestions("reading");
+  refreshNotebook();
+}
+function tabExamListening(){
+  const L = EX.listening;
+  $("#main").innerHTML = `
+    <h2 style="margin-top:0">${esc(L.name || "Listening")}</h2>
+    <p>${esc(L.intro || "Your teacher will play the recording. You will hear each part twice.")} Read the questions before each part begins.</p>
+    <p class="qcount" id="qcount" aria-live="polite">${qCount("listening")}</p>
+    ${L.parts.map(qPartHTML).join("")}`;
+  wireQuestions("listening");
 }
 
 let pendingPick = {};   // cid -> offer id, chosen but not yet confirmed
@@ -1025,7 +1145,8 @@ function tabDecisions(){
     return;
   }
   $("#main").innerHTML = `
-    <p>Agree the ${num(S.decisions.length)} decisions <b>${pair() ? "together" : "as a group"}</b>, then ${pair() ? "both of you enter" : "everyone enters"} the same answers here. For each one, note the biggest risk or strongest objection and your answer to it: you'll need it in your writing. Your highlights are beside the decisions.</p>
+    <p>${EXAM ? `Make the ${num(S.decisions.length)} decisions <b>on your own</b>, using what you read and heard. For each one, you can note the biggest risk or strongest objection and your answer to it: these notes are only for you and aren't handed in.`
+               : `Agree the ${num(S.decisions.length)} decisions <b>${pair() ? "together" : "as a group"}</b>, then ${pair() ? "both of you enter" : "everyone enters"} the same answers here. For each one, note the biggest risk or strongest objection and your answer to it: you'll need it in your writing.`} Your highlights are beside the decisions.</p>
     <div class="writegrid"><div>
     ${S.decisions.map(d => `
       <div class="dec"><h3>${esc(d.title)}</h3>
@@ -1058,7 +1179,7 @@ function tabSubmit(){
 
     <div class="consent">
       <b>Can your teacher check your text with AI?</b>
-      <p class="small">Your teacher may use the SimLearn teacher tool, which can ask an AI system (Claude, by Anthropic) to suggest feedback on your writing. Only your text and your group's choices would be sent — not your name. Your teacher always makes the final decision about your grade. If you say no, your teacher marks your text by hand. Saying no has no effect on your grade.</p>
+      <p class="small">Your teacher may use the SimLearn teacher tool, which can ask an AI system (Claude, by Anthropic) to suggest feedback on your writing. Only your text and ${EXAM ? "your decisions" : "your group's choices"} would be sent — not your name. Your teacher always makes the final decision about your grade. If you say no, your teacher marks your text by hand. Saying no has no effect on your grade.</p>
       <label><input type="checkbox" id="consent" ${st.consent?"checked":""}> Yes, my teacher may check my text with AI.</label>
     </div>
 
@@ -1191,11 +1312,15 @@ function makePdf({title, subtitle, body, note, footer, block, fileName}){
 function makeSubmission(){
   const r = role(), W = S.writing;
   const missing = [];
-  const openChars = AE2 ? [] : r.characters.filter(c => !st.choices[c.id]);
+  const openChars = AE2 || EXAM ? [] : r.characters.filter(c => !st.choices[c.id]);
+  if (EXAM) {   // unanswered questions: a reminder, not a stop
+    const left = ["reading", "listening"].map(sec => [sec, qItems(sec).filter(it => !answered(it)).length]).filter(([, n]) => n);
+    if (left.length) missing.push("Not answered yet: " + left.map(([sec, n]) => `${n} ${sec} question${n > 1 ? "s" : ""}`).join(" and ") + ". You can still hand in, but unanswered questions get no marks.");
+  }
   if (openChars.length) missing.push(`You haven't chosen what to ask ${openChars.map(c => c.name).join(", ")} yet (Inbox).`);
   const openDec = B ? (budgetOK() ? [] : ["budget"]) : S.decisions.filter(d => !st.decisions[d.id]);
   if (openDec.length) missing.push(B ? `Your group's budget isn't within ${money(B.tolerance)} of ${money(B.target)} yet (Budget).`
-                                      : `Your group's answer is missing for ${openDec.map(d => d.title.split(" — ")[0]).join(", ")} (Decisions).`);
+                                      : `${EXAM ? "Your" : "Your group's"} answer is missing for ${openDec.map(d => d.title.split(" — ")[0]).join(", ")} (Decisions).`);
   if (words(st.memo) < 50) missing.push("Your text is very short — write your " + W.label + " first.");
   $("#issues").innerHTML = missing.map(m => `<p>${esc(m)}</p>`).join("");
   if (openDec.length || words(st.memo) < 50) { $("#out").innerHTML = ""; return; }
@@ -1205,14 +1330,21 @@ function makeSubmission(){
   const decisions = B ? B.items.map(it => `${it.id}=${budgetVal(it.id)}`).join(", ")
                       : S.decisions.map(d => `${d.id}=${st.decisions[d.id]}`).join(", ");
   const memoText = st.memo.trim();
-  const code = checkCode([S.id, S.version, r.id, choices, decisions, ai, ai === "yes" ? norm(memoText) : ""]);
+  // exam: every choice item in order ("-" = no answer), and the typed answers as one line of JSON
+  const answers = EXAM ? [...qItems("reading"), ...qItems("listening")].filter(it => it.part.type !== "short")
+                           .map(it => `${it.id}=${String((st.ans || {})[it.id] || "-").replace(/[^A-Za-z0-9]/g, "") || "-"}`).join(", ") : "";
+  const shorts = EXAM ? JSON.stringify(Object.fromEntries([...qItems("reading"), ...qItems("listening")].filter(it => it.part.type === "short" && answered(it))
+                           .map(it => [it.id, String(st.ans[it.id]).replace(/\s+/g, " ").trim().slice(0, 80)]))) : "";
+  const parts = [S.id, S.version, r.id, choices, decisions, ai, ai === "yes" ? norm(memoText) : ""];
+  const code = checkCode(EXAM ? [...parts, answers, shorts] : parts);
   const head = [
     "=== SIMLEARN SUBMISSION ===",
     ai === "yes" ? "AI check: ALLOWED" : "AI check: NOT ALLOWED - grade by hand",
     `Scenario: ${S.id} v${S.version} (${S.title})`,
-    `Role: ${r.id} (${r.dept || "two-player"})`,
+    `Role: ${r.id} (${EXAM ? "exam" : r.dept || "two-player"})`,
     `Info choices: ${choices}`,
     `Group decisions: ${decisions}`,
+    ...(EXAM ? [`Answers: ${answers}`, `Short answers: ${shorts}`] : []),
     `Check: ${code}`,
   ];
   let block;
@@ -1236,9 +1368,12 @@ function makeSubmission(){
     const today = new Date().toLocaleDateString("en-GB", {day: "numeric", month: "long", year: "numeric"});
     const blob = makePdf({
       title: `${cap} to ${W.addressee}`,
-      subtitle: `${S.title} · Role ${r.id}${r.dept ? " (" + r.dept + ")" : ""} · ${words(memoText)} words · ${today}`,
+      subtitle: `${S.title} · ${EXAM ? "Exam" : "Role " + r.id + (r.dept ? " (" + r.dept + ")" : "")} · ${words(memoText)} words · ${today}`,
       body: memoText,
-      note: (ai === "yes"
+      note: EXAM ? (ai === "yes"
+        ? "This file also carries your exam answers for your teacher's SimLearn tool: your reading and listening answers, your decisions and a copy of your text. You agreed that your teacher may check your text with AI."
+        : "This file also carries your exam answers for your teacher's SimLearn tool: your reading and listening answers and your decisions, but not your text. You did not agree to an AI check, so your teacher will mark your text by hand.")
+        + ` Check code: ${code}.` : (ai === "yes"
         ? "This file also carries your SimLearn answers for your teacher's SimLearn tool: your information choices, your group's decisions and a copy of your text. You agreed that your teacher may check your text with AI."
         : "This file also carries your SimLearn answers for your teacher's SimLearn tool: your information choices and your group's decisions, but not your text. You did not agree to an AI check, so your teacher will mark your text by hand.")
         + ` Check code: ${code}.`,
