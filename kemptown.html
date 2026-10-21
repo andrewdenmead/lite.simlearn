@@ -186,6 +186,12 @@ textarea.memo{width:100%;min-height:340px;border:1px solid var(--line);border-ra
 .issues{color:var(--warn);font-size:.92rem}
 .block{width:100%;min-height:260px;font:13px/1.45 ui-monospace,Menlo,Consolas,monospace;border:2px solid var(--pine);border-radius:10px;padding:10px 12px;background:#fff;white-space:pre-wrap}
 .ok{color:var(--pine);font-weight:600}
+/* hand-over ("parachute"): a leaving student's work, opened by a teammate in another tab */
+.handin{border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:18px 0;background:#fff;color:var(--ink)}
+.handin.first{border:2px solid var(--amber);background:var(--amber-bg)}
+.handin input[type=text]{border:1px solid var(--line);border-radius:6px;padding:6px 8px;margin:0 8px 8px 0}
+.handbanner{border:2px solid var(--amber);background:var(--amber-bg);border-radius:10px;padding:10px 14px;margin:12px auto 0;font-size:.92rem}
+footer .linkish{margin-right:14px}
 footer{border-top:1px solid var(--line);padding:18px 0 40px;font-size:.85rem;color:var(--ink-2)}
 
 /* highlighter: quiet until a sentence is tapped */
@@ -256,9 +262,109 @@ const AE2 = S.format === "ae2";   // new AE format: drawers, tags, "which is the
 const TAGS = !S.budget && (S.decisions || []).length > 0;   // highlights can be tagged with the decisions they matter for
 
 /* ---------- state (kept only in this browser tab, so a reload doesn't lose work) ---------- */
-let st = {mode:"3", role:null, tab:"context", choices:{}, firstLook:{}, mcq:{}, decisions:{}, however:{}, memo:"", consent:false, notes:"", hl:{}, hlLabels:{}, hlGroup:"colour", budget:{}, rationale:"", ack:false, opened:{}, drawOpen:{}, tags:{}, nbf:{}};
+const fresh = () => ({mode:"3", role:null, tab:"context", choices:{}, firstLook:{}, mcq:{}, decisions:{}, however:{}, memo:"", consent:false, notes:"", hl:{}, hlLabels:{}, hlGroup:"colour", budget:{}, rationale:"", ack:false, opened:{}, drawOpen:{}, tags:{}, nbf:{}});
+let st = fresh();
 try { const raw = sessionStorage.getItem(STORE); if (raw) st = Object.assign(st, JSON.parse(raw)); } catch(e) {}
+if (location.hash === "#handover" && !st.handover) {   // opened to take a hand-over: start empty, whatever was copied in
+  let reload = false; try { reload = performance.getEntriesByType("navigation")[0].type === "reload"; } catch(e) {}
+  if (!reload) st = fresh();
+}
 function save(){ try { sessionStorage.setItem(STORE, JSON.stringify(st)); } catch(e) {} }
+
+/* ---------- hand-over ("parachute") ----------
+   A student who has to leave downloads their work as a small file (no text, no consent); a teammate opens the
+   sim in a new tab (link in the footer, or #handover) and loads it there. Nothing goes through a server. */
+// Never the student's own writing: not memo, however (objections) or rationale (budget reasoning), and not consent.
+const HANDOVER_KEYS = ["mode","role","choices","firstLook","mcq","decisions","hl","hlLabels","hlGroup",
+                       "budget","opened","drawOpen","tags","nbf","nbClosed"];
+const HANDOVER_OPEN = location.hash === "#handover";
+const HANDOVER_MAX = 1000000;   // bytes; a real file is a few KB
+function cleanVal(v, d){   // only plain data from a file someone else made: strings, numbers, true/false, small objects
+  if (typeof v === "string") return v.slice(0, 20000);
+  if (typeof v === "number") return isFinite(v) ? v : 0;
+  if (typeof v === "boolean") return v;
+  if (d > 3 || v === null || typeof v !== "object") return undefined;
+  if (Array.isArray(v)) return v.slice(0, 500).map(x => cleanVal(x, d + 1)).filter(x => x !== undefined);
+  const o = {};
+  Object.keys(v).slice(0, 3000).forEach(k => {
+    if (k.length > 200 || k === "__proto__" || k === "constructor" || k === "prototype") return;
+    const c = cleanVal(v[k], d + 1); if (c !== undefined) o[k] = c;
+  });
+  return o;
+}
+function handoverFile(name){
+  const state = {};
+  HANDOVER_KEYS.forEach(k => { if (st[k] !== undefined) state[k] = st[k]; });
+  return JSON.stringify({simlearn_handover: 1, sim: S.id, version: S.version, title: S.title,
+                         from: name, made: new Date().toISOString(), state});
+}
+function openHandover(text){   // returns "" when it worked, otherwise what to tell the student
+  const bad = "This isn't a SimLearn hand-over file. Ask your teammate for the file the page downloaded for them.";
+  let h; try { h = JSON.parse(text); } catch(e) { return bad; }
+  if (!h || h.simlearn_handover !== 1 || !h.state || typeof h.state !== "object") return bad;
+  if (h.sim !== S.id) return "This hand-over is for a different simulation" + (h.title ? ` (${String(h.title).slice(0, 80)})` : "") + ". Open it on that simulation's page.";
+  const s = handoverShape(cleanVal(h.state, 0) || {});
+  const mode = s.mode === "2" && TWO ? "2" : "3";
+  if (!(mode === "2" ? TWO : S.roles).some(r => r.id === s.role)) return "This hand-over doesn't fit this version of the simulation.";
+  const keep = st;
+  st = {...fresh(), ...s, mode, tab: "context", memo: "", consent: false,
+        handover: {from: String(h.from || "").trim().slice(0, 40), made: String(h.made || "").slice(0, 40),
+                   older: h.version !== S.version}};
+  try { render(); }
+  catch (e) { st = keep; save(); render(); return "This hand-over doesn't fit this version of the simulation."; }
+  save(); window.scrollTo(0, 0);
+  try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {}
+  return "";
+}
+// Keep only what this page knows, each value in the shape the page expects; anything else is dropped.
+function handoverShape(s){
+  const own = k => typeof k === "string" && !(k in {});   // never "toString", "constructor"…
+  const map = (o, ok) => { const r = {}; if (o && typeof o === "object" && !Array.isArray(o)) Object.keys(o).forEach(k => { if (own(k) && ok(o[k], k)) r[k] = o[k]; }); return r; };
+  const str = v => typeof v === "string";
+  const out = {};
+  if (str(s.mode)) out.mode = s.mode;
+  if (str(s.role)) out.role = s.role;
+  if (str(s.hlGroup)) out.hlGroup = s.hlGroup;
+  if (typeof s.nbClosed === "boolean") out.nbClosed = s.nbClosed;
+  out.choices = map(s.choices, str);
+  out.firstLook = map(s.firstLook, str);
+  out.mcq = map(s.mcq, str);
+  out.decisions = map(s.decisions, v => v === "A" || v === "B");
+  out.hl = map(s.hl, v => str(v) && Object.prototype.hasOwnProperty.call(HLC, v));
+  out.hlLabels = map(s.hlLabels, (v, k) => str(v) && Object.prototype.hasOwnProperty.call(HLC, k));
+  out.nbf = map(s.nbf, str);
+  out.opened = map(s.opened, str);
+  out.drawOpen = map(s.drawOpen, v => typeof v === "boolean");
+  out.budget = map(s.budget, v => typeof v === "number" || (str(v) && /^\d{0,7}$/.test(v)));
+  out.tags = map(s.tags, v => v && typeof v === "object" && !Array.isArray(v) && str(v.p || "") && Array.isArray(v.d) && v.d.every(str));
+  Object.values(out.tags).forEach(t => { t.p = t.p || ""; });
+  return out;
+}
+function handoverWhen(iso){
+  const d = new Date(iso);
+  return isNaN(d) ? "" : d.toLocaleString("en-GB", {weekday: "short", hour: "2-digit", minute: "2-digit"});
+}
+function handoverBox(first){
+  return `<div class="handin${first ? " first" : ""}"><b>${first ? "Open a teammate's hand-over" : "Taking over from a teammate who had to leave?"}</b>
+    <p class="small">Open the hand-over file they sent you. ${first ? "This tab will show their work; your own stays in your other tab." : "Do this in a new tab, so your own work stays where it is."}</p>
+    <button type="button" class="btn${first ? "" : " quiet"}" id="hoPick">Open a hand-over file</button>
+    <input type="file" id="hoFile" hidden>
+    <p id="hoMsg" class="small issues" aria-live="polite"></p></div>`;
+}
+function wireHandoverBox(){
+  const pick = $("#hoPick"), file = $("#hoFile");
+  if (!pick) return;
+  pick.onclick = () => file.click();
+  file.onchange = () => {
+    const fl = file.files && file.files[0];
+    if (!fl) return;
+    if (fl.size > HANDOVER_MAX) { $("#hoMsg").textContent = "This file is far too big to be a SimLearn hand-over."; return; }
+    const rd = new FileReader();
+    rd.onload = () => { const msg = openHandover(String(rd.result || "")); if (msg) $("#hoMsg").textContent = msg; };
+    rd.onerror = () => { $("#hoMsg").textContent = "That file couldn't be opened. Try again, or ask for it again."; };
+    rd.readAsText(fl);
+  };
+}
 
 /* ---------- helpers ---------- */
 const $ = (sel, el=document) => el.querySelector(sel);
@@ -317,6 +423,7 @@ function renderStart(){
   <header class="bar">${topBar("")}</header>
   <div class="wrap start">
     <h1>${esc(S.title)}</h1>
+    ${HANDOVER_OPEN ? handoverBox(true) : ""}
     <p class="lede">You work for ${esc(S.org)}. Your ${two ? "team of two" : "group"} has to ${B ? `split a ${money(B.target)} budget` : `make ${num(S.decisions.length)} decisions`} — and each of you holds information the other${two ? "" : "s"} ${two ? "doesn't" : "don't"} have.</p>
     ${S.ack_disclaimer ? `<div class="ack"><b>Before you start</b><p>${esc(S.disclaimer)}</p>
       <label><input type="checkbox" id="ack" ${st.ack ? "checked" : ""}> I understand</label></div>` : ""}
@@ -332,8 +439,10 @@ function renderStart(){
     ${TWO ? `<p class="switch">${two
         ? `Three or more of you? <button type="button" class="linkish" id="mode">Switch to the group version</button>`
         : `Only two of you? <button type="button" class="linkish" id="mode">Switch to the two-player version</button>`}</p>` : ""}
+    ${HANDOVER_OPEN ? "" : handoverBox(false)}
     ${S.ack_disclaimer ? "" : `<p class="muted small" style="margin-top:2rem">${esc(S.disclaimer)}</p>`}
   </div>`;
+  wireHandoverBox();
   const m = $("#mode");
   if (m) m.onclick = () => { st.mode = two ? "3" : "2"; st.role = null; save(); renderStart(); };
   const f = $("#startForm");
@@ -662,24 +771,50 @@ const TABS = ALL_TABS.filter(([k]) => k !== "listening" || (S.listening && S.lis
 function render(){
   closePalette(false);
   $("#app").classList.toggle("wide", !!st.role && (st.tab === "submit" || st.tab === "decisions"));
-  if (!st.role) return renderStart();
-  if (!TABS.some(([k]) => k === st.tab)) st.tab = "context";
+  if (!st.role) { document.title = S.title; return renderStart(); }
+  const HO = st.handover, tabs = TABS.filter(([k]) => !(HO && k === "submit"));   // no submitting from a hand-over tab
+  if (!tabs.some(([k]) => k === st.tab)) st.tab = "context";
   hlDescs();
   const r = role();
+  const hoName = HO ? (HO.from || "A teammate") : "";
+  document.title = HO ? `${hoName}'s work · ${S.title}` : S.title;
   const pending = AE2 ? 0 : r.characters.filter(c => !st.choices[c.id]).length;
   $("#app").innerHTML = `
-  <header class="bar">${topBar(r.dept ? r.label + " · " + r.dept : r.label)}
-    <div class="wrap"><nav class="tabs" role="tablist">${TABS.map(([k,l]) => `<button type="button" class="tab" role="tab" data-tab="${k}" aria-selected="${st.tab===k}">${l}${k==="inbox"&&pending?`<span class="dot" title="${pending} choice(s) still open"></span>`:""}</button>`).join("")}</nav></div></header>
+  <header class="bar">${topBar((HO ? "Hand-over: " + hoName + " · " : "") + (r.dept ? r.label + " · " + r.dept : r.label))}
+    <div class="wrap"><nav class="tabs" role="tablist">${tabs.map(([k,l]) => `<button type="button" class="tab" role="tab" data-tab="${k}" aria-selected="${st.tab===k}">${l}${k==="inbox"&&pending?`<span class="dot" title="${pending} choice(s) still open"></span>`:""}</button>`).join("")}</nav></div></header>
+  ${HO ? `<div class="wrap"><div class="handbanner"><b>Hand-over from ${esc(hoName)}</b> (${esc(roleName(r))})${handoverWhen(HO.made) ? ", saved " + esc(handoverWhen(HO.made)) : ""}.
+    This tab shows their ${AE2 ? "papers" : "emails"}, what they chose and their highlights. Use it to tell your group what they found.
+    Their own writing isn't included. You can't submit from this tab, and changes here don't count.${HO.older ? " The simulation has been updated since they saved this, so some highlights may be missing." : ""}</div></div>` : ""}
   <main class="wrap" id="main"></main>
-  <footer class="wrap">${esc(S.disclaimer)}<br>Nothing you type here leaves this browser tab unless you copy it yourself.
-    <button type="button" class="linkish" id="reset">Start again (choose a new role)</button>
-    <span id="resetAsk" hidden> This clears everything you've done, including your text. <button type="button" class="linkish" id="resetYes">Yes, clear it</button> · <button type="button" class="linkish" id="resetNo">Keep my work</button></span></footer>`;
+  <footer class="wrap">${esc(S.disclaimer)}<br>Nothing you type here leaves this browser tab unless you copy it yourself.<br>
+    ${HO ? "" : `<button type="button" class="linkish" id="hoOut">Leaving early? Hand over your work</button>`}
+    <a class="linkish" href="${esc(location.pathname + location.search)}#handover" target="_blank" rel="noopener">Open a teammate's hand-over (new tab)</a>
+    <button type="button" class="linkish" id="reset">${HO ? "Close this hand-over" : "Start again (choose a new role)"}</button>
+    <span id="resetAsk" hidden> ${HO ? "This clears the hand-over from this tab." : "This clears everything you've done, including your text."} <button type="button" class="linkish" id="resetYes">Yes, clear it</button> · <button type="button" class="linkish" id="resetNo">${HO ? "Keep it" : "Keep my work"}</button></span>
+    ${HO ? "" : `<div id="hoPanel" class="handin" hidden><b>Hand over your work</b>
+      <p class="small">This saves what you've done so far in a small file: the ${AE2 ? "papers you opened" : "information you chose"}, your highlights and colour codes, your answers and your group's decisions. Your own writing isn't included. Send the file to a teammate by email, a chat app or AirDrop. They open it with "Open a teammate's hand-over" at the bottom of their page.</p>
+      <label class="small">Your first name, so your team knows whose work it is: <input type="text" id="hoName" maxlength="40" autocomplete="given-name"></label>
+      <button type="button" class="btn" id="hoGo">Download hand-over file</button>
+      <p id="hoDone" class="small ok" aria-live="polite"></p></div>`}</footer>`;
   document.querySelectorAll(".tab").forEach(b => b.onclick = () => { st.tab = b.dataset.tab; save(); render(); window.scrollTo(0,0); });
   $("#reset").onclick = () => { $("#resetAsk").hidden = false; $("#reset").hidden = true; };
+  const hoOut = $("#hoOut");
+  if (hoOut) hoOut.onclick = () => { $("#hoPanel").hidden = !$("#hoPanel").hidden; if (!$("#hoPanel").hidden) $("#hoName").focus(); };
+  const hoGo = $("#hoGo");
+  if (hoGo) hoGo.onclick = () => {
+    const name = $("#hoName").value.trim().slice(0, 40);
+    const slug = (name || "teammate").normalize("NFD").replace(/[^A-Za-z0-9]+/g, "-").replace(/^-|-$/g, "").toLowerCase() || "teammate";
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([handoverFile(name)], {type: "application/json"}));
+    a.download = `handover-${S.id}-${slug}.json`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 120000);
+    $("#hoDone").textContent = "Look in your Downloads and send the file to a teammate. Your work is still here too. If nothing downloaded, open this page in Safari, Chrome or Firefox (not inside an app) and try again.";
+  };
   $("#resetNo").onclick = () => { $("#resetAsk").hidden = true; $("#reset").hidden = false; };
   $("#resetYes").onclick = () => {
     try { sessionStorage.removeItem(STORE); } catch(e) {}
-    st = {mode:"3", role:null, tab:"context", choices:{}, firstLook:{}, mcq:{}, decisions:{}, however:{}, memo:"", consent:false, notes:"", hl:{}, hlLabels:{}, hlGroup:"colour", budget:{}, rationale:"", ack:false, opened:{}, drawOpen:{}, tags:{}, nbf:{}};
+    st = fresh();
     pendingPick = {}; render(); window.scrollTo(0,0);
   };
   ({context:tabContext, firstlook:tabFirstLook, listening:tabListening, inbox:tabInbox, decisions:tabDecisions, submit:tabSubmit})[st.tab]();
