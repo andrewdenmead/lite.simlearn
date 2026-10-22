@@ -208,6 +208,10 @@ textarea.memo{width:100%;min-height:340px;border:1px solid var(--line);border-ra
 .ptsbadge{font-family:var(--sans);font-size:.8rem;font-weight:600;color:var(--pine);border:1px solid var(--line);border-radius:999px;padding:1px 8px;margin-left:6px;vertical-align:middle;white-space:nowrap}
 .pn{display:inline-block;min-width:1.4em;color:var(--ink-2);font-family:var(--sans);font-size:.85rem}
 .examstart .times{margin:12px 0 20px;padding-left:1.2rem}
+.choices.row{grid-template-columns:repeat(auto-fit,minmax(110px,1fr))}
+.clip{margin:10px 0 12px;padding:10px 12px;border-radius:10px;background:var(--panel, #ECEFF3)}
+.clip .btn{margin-right:10px}
+.steps li{margin:.35rem 0}
 @media (min-width:1000px){
   .examgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(340px,44%);gap:24px;align-items:start}
   .qpanel{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto;padding-right:4px}
@@ -286,10 +290,11 @@ const S = JSON.parse(document.getElementById("scenario").textContent);
 const STORE = "simlearn:" + S.id + ":v" + S.version;
 const AE2 = S.format === "ae2";   // new AE format: drawers, tags, "which is the better argument?"
 const EXAM = S.format === "exam", EX = S.exam || null;   // written exam: one candidate, questions, no answers in the page
+const SPEAK = S.format === "speaking", SP = S.speaking || null;   // speaking exam: roles prepared alone, listening marked by the tool
 const TAGS = !S.budget && (S.decisions || []).length > 0;   // highlights can be tagged with the decisions they matter for
 
 /* ---------- state (kept only in this browser tab, so a reload doesn't lose work) ---------- */
-const fresh = () => ({mode:"3", role:null, tab:"context", choices:{}, firstLook:{}, mcq:{}, decisions:{}, however:{}, memo:"", consent:false, notes:"", hl:{}, hlLabels:{}, hlGroup:"colour", budget:{}, rationale:"", ack:false, opened:{}, drawOpen:{}, tags:{}, nbf:{}, ans:{}});
+const fresh = () => ({mode:"3", role:null, tab:"context", choices:{}, firstLook:{}, mcq:{}, decisions:{}, however:{}, memo:"", consent:false, notes:"", hl:{}, hlLabels:{}, hlGroup:"colour", budget:{}, rationale:"", ack:false, group:null, pick:null, plays:{}, opened:{}, drawOpen:{}, tags:{}, nbf:{}, ans:{}});
 let st = fresh();
 try { const raw = sessionStorage.getItem(STORE); if (raw) st = Object.assign(st, JSON.parse(raw)); } catch(e) {}
 if (location.hash === "#handover" && !st.handover) {   // opened to take a hand-over: start empty, whatever was copied in
@@ -440,7 +445,7 @@ function teacherLink(){
   return S.teacher_url ? `<a class="teacher" href="${esc(S.teacher_url.replace(/\/?$/, "/") + "?sim=" + encodeURIComponent(S.id))}" target="_blank" rel="noopener" title="Opens the teacher tool (password needed)">Teacher</a>` : "";
 }
 function topBar(who){   // no Teacher link in an exam: one less thing to click away to
-  return `<div class="wrap"><span class="title">${esc(S.title)}</span><span class="right">${who ? `<span class="who">${esc(who)}</span>` : ""}${EXAM ? "" : teacherLink()}</span></div>`;
+  return `<div class="wrap"><span class="title">${esc(S.title)}</span><span class="right">${who ? `<span class="who">${esc(who)}</span>` : ""}${EXAM || SPEAK ? "" : teacherLink()}</span></div>`;
 }
 
 /* ---------- start screen ---------- */
@@ -474,6 +479,7 @@ function renderExamStart(){
 const role0 = () => S.roles[0];
 function renderStart(){
   if (EXAM) return renderExamStart();
+  if (SPEAK) return renderSpeakStart();
   const two = st.mode === "2" && TWO;
   $("#app").innerHTML = `
   <header class="bar">${topBar("")}</header>
@@ -589,6 +595,7 @@ function hlSources(){
   if (c.constraint) parts.push({cid:"ctx", part:"clock", text:c.constraint, src:{name:"The clock"}});
   if (EXAM && EX.article) EX.article.text.split("\n\n").forEach((p, i) => parts.push({cid:"art", part:"p" + i, text:p, src:{name:EX.article.title}}));
   const r = st.role && role();
+  if (SPEAK && r && r.brief) r.brief.split("\n\n").forEach((p, i) => parts.push({cid:"brief", part:"p" + i, text:p, src:{name:"Your brief"}}));
   (r ? r.characters : []).forEach(ch => {
     const src = {name:ch.name, title:ch.title, citation:ch.citation, cid:ch.id};
     parts.push({cid:ch.id, part:"email", text:ch.email, src});
@@ -828,11 +835,13 @@ const partTab = p => p.tab || "emails";
 const EXAM_TABS = EXAM ? (EX.article
   ? [["context","Situation"], ...(EX.listening ? [["listening","Listening"]] : []), ["article","Article"], ["reading","Emails"], ["decisions","Decisions"], ["submit","Write & submit"]]
   : [["context","Situation"], ["reading","Reading"], ...(EX.listening ? [["listening","Listening"]] : []), ["decisions","Decisions"], ["submit","Write & submit"]]) : [];
-const TABS = EXAM ? EXAM_TABS
+const SPEAK_TABS = [["context","Your brief"], ["reading","Emails"], ["listening","Listening"], ["deal","Deal sheet"], ["submit","Hand in"]];
+const TABS = SPEAK ? SPEAK_TABS : EXAM ? EXAM_TABS
   : ALL_TABS.filter(([k]) => k !== "listening" || (S.listening && S.listening.questions && S.listening.questions.length));
 function render(){
   closePalette(false);
-  $("#app").classList.toggle("wide", !!st.role && (st.tab === "submit" || st.tab === "decisions" || st.tab === "reading" || st.tab === "article"));
+  document.querySelectorAll("audio").forEach(x => x.pause());   // a recording stops (and remembers where) when the tab changes
+  $("#app").classList.toggle("wide", !!st.role && !SPEAK && (st.tab === "submit" || st.tab === "decisions" || st.tab === "reading" || st.tab === "article"));
   if (!st.role) { document.title = S.title; return renderStart(); }
   const HO = st.handover, tabs = TABS.filter(([k]) => !(HO && k === "submit"));   // no submitting from a hand-over tab
   if (!tabs.some(([k]) => k === st.tab)) st.tab = "context";
@@ -840,20 +849,21 @@ function render(){
   const r = role();
   const hoName = HO ? (HO.from || "A teammate") : "";
   document.title = HO ? `${hoName}'s work · ${S.title}` : S.title;
-  const pending = AE2 || EXAM ? 0 : r.characters.filter(c => !st.choices[c.id]).length;
+  numberQuestions();
+  const pending = AE2 || EXAM || SPEAK ? 0 : r.characters.filter(c => !st.choices[c.id]).length;
   $("#app").innerHTML = `
-  <header class="bar">${topBar(EXAM ? "Exam" : (HO ? "Hand-over: " + hoName + " · " : "") + (r.dept ? r.label + " · " + r.dept : r.label))}
+  <header class="bar">${topBar(SPEAK ? `Speaking exam · ${r.id}: ${roleName(r)}` : EXAM ? "Exam" : (HO ? "Hand-over: " + hoName + " · " : "") + (r.dept ? r.label + " · " + r.dept : r.label))}
     <div class="wrap"><nav class="tabs" role="tablist">${tabs.map(([k,l]) => `<button type="button" class="tab" role="tab" data-tab="${k}" aria-selected="${st.tab===k}">${l}${k==="inbox"&&pending?`<span class="dot" title="${pending} choice(s) still open"></span>`:""}</button>`).join("")}</nav></div></header>
   ${HO ? `<div class="wrap"><div class="handbanner"><b>Hand-over from ${esc(hoName)}</b> (${esc(roleName(r))})${handoverWhen(HO.made) ? ", saved " + esc(handoverWhen(HO.made)) : ""}.
     This tab shows their ${AE2 ? "papers" : "emails"}, what they chose and their highlights. Use it to tell your group what they found.
     Their own writing isn't included. You can't submit from this tab, and changes here don't count.${HO.older ? " The simulation has been updated since they saved this, so some highlights may be missing." : ""}</div></div>` : ""}
   <main class="wrap" id="main"></main>
   <footer class="wrap">${esc(S.disclaimer)}<br>Nothing you type here leaves this browser tab unless you copy it yourself.<br>
-    ${HO || EXAM ? "" : `<button type="button" class="linkish" id="hoOut">Leaving early? Hand over your work</button>
+    ${HO || EXAM || SPEAK ? "" : `<button type="button" class="linkish" id="hoOut">Leaving early? Hand over your work</button>
     <a class="linkish" href="${esc(location.pathname + location.search)}#handover" target="_blank" rel="noopener">Open a teammate's hand-over (new tab)</a>`}
-    <button type="button" class="linkish" id="reset">${HO ? "Close this hand-over" : EXAM ? "Clear everything and start again" : "Start again (choose a new role)"}</button>
+    <button type="button" class="linkish" id="reset">${HO ? "Close this hand-over" : EXAM || SPEAK ? "Clear everything and start again" : "Start again (choose a new role)"}</button>
     <span id="resetAsk" hidden> ${HO ? "This clears the hand-over from this tab." : "This clears everything you've done, including your text."} <button type="button" class="linkish" id="resetYes">Yes, clear it</button> · <button type="button" class="linkish" id="resetNo">${HO ? "Keep it" : "Keep my work"}</button></span>
-    ${HO || EXAM ? "" : `<div id="hoPanel" class="handin" hidden><b>Hand over your work</b>
+    ${HO || EXAM || SPEAK ? "" : `<div id="hoPanel" class="handin" hidden><b>Hand over your work</b>
       <p class="small">This saves what you've done so far in a small file: the ${AE2 ? "papers you opened" : "information you chose"}, your highlights and colour codes, your answers and your group's decisions. Your own writing isn't included. Send the file to a teammate by email, a chat app or AirDrop. They open it with "Open a teammate's hand-over" at the bottom of their page.</p>
       <label class="small">Your first name, so your team knows whose work it is: <input type="text" id="hoName" maxlength="40" autocomplete="given-name"></label>
       <button type="button" class="btn" id="hoGo">Download hand-over file</button>
@@ -877,9 +887,11 @@ function render(){
   $("#resetYes").onclick = () => {
     try { sessionStorage.removeItem(STORE); } catch(e) {}
     st = fresh();
+    for (const k in clipPos) delete clipPos[k];
     pendingPick = {}; render(); window.scrollTo(0,0);
   };
-  ({context:tabContext, firstlook:tabFirstLook, listening:EXAM ? tabExamListening : tabListening, inbox:tabInbox, reading:tabReading, article:tabArticle, decisions:tabDecisions, submit:tabSubmit})[st.tab]();
+  (SPEAK ? {context:tabSpeakBrief, reading:tabSpeakEmails, listening:tabSpeakListening, deal:tabDeal, submit:tabSpeakSubmit}
+   : {context:tabContext, firstlook:tabFirstLook, listening:EXAM ? tabExamListening : tabListening, inbox:tabInbox, reading:tabReading, article:tabArticle, decisions:tabDecisions, submit:tabSubmit})[st.tab]();
 }
 
 /* ---------- tabs ---------- */
@@ -954,9 +966,13 @@ function tabListening(){
 }
 
 /* ---------- exam questions (no answers in the page: the teacher tool marks them) ---------- */
-const qItems = sec => ((EX && EX[sec] && EX[sec].parts) || []).flatMap(p => p.items.map(it => ({...it, part: p})));
+// speaking exam: listening only, the shared parts plus this role's own
+const qParts = sec => SPEAK ? (sec === "listening" ? SP.listening.parts.filter(p => !p.roles || p.roles.includes(st.role)) : [])
+                            : ((EX && EX[sec] && EX[sec].parts) || []);
+const qItems = sec => qParts(sec).flatMap(p => p.items.map(it => ({...it, part: p})));
 const QN = {};   // question numbers run through each section, as on a paper (reading 1–n, listening 1–n)
-["reading", "listening"].forEach(sec => qItems(sec).forEach((it, i) => { QN[it.id] = i + 1; }));
+function numberQuestions(){ ["reading", "listening"].forEach(sec => qItems(sec).forEach((it, i) => { QN[it.id] = i + 1; })); }
+numberQuestions();
 const answered = it => String((st.ans || {})[it.id] || "").trim() !== "";
 function qCount(sec){ const a = qItems(sec); return `${a.filter(answered).length} of ${a.length} answered`; }
 const pts = n => `${n} point${n === 1 ? "" : "s"}`;
@@ -1052,6 +1068,192 @@ function tabExamListening(){
     <p class="qcount" id="qcount" aria-live="polite">${qCount("listening")} · listening: ${pts(qItems("listening").length)}</p>
     ${L.parts.map(qPartHTML).join("")}`;
   wireQuestions("listening");
+}
+
+/* ---------- speaking exam ("format": "speaking"): preparation on the student's own laptop ---------- */
+// Each student prepares one role alone (brief, emails, recordings with questions), hands in the listening answers,
+// then negotiates with their group in front of the examiner. The speaking itself is marked live in the teacher tool.
+const spGroup = () => (SP && SP.groups[st.group]) || [];
+const spOthers = () => spGroup().filter(id => id !== st.role).map(id => S.roles.find(r => r.id === id));
+function renderSpeakStart(){
+  const m = SP.minutes || {}, P = SP.points || {};
+  const sizes = Object.keys(SP.groups).sort();
+  const g = SP.groups[st.group];
+  $("#app").innerHTML = `
+  <header class="bar">${topBar("")}</header>
+  <div class="wrap start examstart">
+    <h1>${esc(S.title)}</h1>
+    <p class="lede">This is the preparation for your speaking exam. You prepare <b>on your own</b>, with headphones${m.prep ? `, for about ${m.prep} minutes` : ""}. Then you meet your group and negotiate in front of the examiner.</p>
+    <ul class="times">
+      <li><b>Your brief</b>: who you are and what you want. Each person in your group has a different role.</li>
+      <li><b>Emails</b> and <b>recordings</b> with information only you have. Answer the listening questions: they count for your mark.</li>
+      <li><b>Deal sheet</b>: the points your group has to agree on.</li>
+      <li><b>Hand in</b> your listening answers before the speaking part.</li>
+    </ul>
+    ${P.listening ? `<p><b>Points:</b> listening ${pts(P.listening)} (one per question, here) · speaking ${pts(P.speaking)} (in the exam room) · <b>${pts(P.listening + P.speaking)} in all</b>.</p>` : ""}
+    ${S.ack_disclaimer ? `<div class="ack"><b>Before you start</b><p>${esc(S.disclaimer)}</p>
+      <label><input type="checkbox" id="ack" ${st.ack ? "checked" : ""}> I understand</label></div>` : `<p class="muted small">${esc(S.disclaimer)}</p>`}
+    <form id="startForm">
+      <fieldset><legend>How many people are in your exam group?</legend>
+        <p class="muted small">Your teacher has told you your group and your role.</p>
+        <div class="choices row">${sizes.map(n => `<label class="choice"><input type="radio" name="group" value="${n}" ${st.group === n ? "checked" : ""}><span><b>${n}</b> people</span></label>`).join("")}</div></fieldset>
+      ${g ? `<fieldset><legend>Your role</legend><div class="choices">${g.map(id => S.roles.find(r => r.id === id)).map(r => `
+          <label class="choice"><input type="radio" name="role" value="${r.id}" ${st.pick === r.id ? "checked" : ""}>
+            <span><b>${esc(r.id)}: ${esc(roleName(r))}</b></span></label>`).join("")}</div></fieldset>` : ""}
+      <button type="button" class="btn" id="go" disabled>Start preparing</button>
+    </form>
+  </div>`;
+  const f = $("#startForm"), ack = $("#ack");
+  const upd = () => { $("#go").disabled = !st.group || !g || !f.querySelector("input[name=role]:checked") || !!(ack && !ack.checked); };
+  f.addEventListener("change", e => {
+    if (e.target.name === "group") { st.group = e.target.value; if (!SP.groups[st.group].includes(st.pick)) st.pick = null; save(); return renderSpeakStart(); }
+    if (e.target.name === "role") { st.pick = e.target.value; save(); }
+    upd();
+  });
+  if (ack) ack.addEventListener("change", () => { st.ack = ack.checked; save(); upd(); });
+  upd();
+  $("#go").onclick = () => { const r = f.querySelector("input[name=role]:checked"); if (!r) return; st.role = r.value; st.tab = "context"; save(); render(); window.scrollTo(0, 0); };
+}
+function tabSpeakBrief(){
+  const r = role(), others = spOthers();
+  $("#main").innerHTML = `
+    ${S.image ? `<figure class="hero"><img src="${S.image.src}" alt="${esc(S.image.alt)}"></figure>` : ""}
+    <h2 style="margin-top:0">The situation</h2>
+    <div class="prose">${S.context.text.split("\n\n").map((p, i) => `<p>${hlHTML(p, "ctx", "p" + i)}</p>`).join("")}</div>
+    <div class="note"><b>Your role: ${esc(roleName(r))}</b>
+      <div class="prose">${r.brief.split("\n\n").map((p, i) => `<p>${hlHTML(p, "brief", "p" + i)}</p>`).join("")}</div></div>
+    <h2>Your group</h2>
+    <p>You are a group of ${num(spGroup().length)}. You will meet: ${others.map(o => `<b>${esc(roleName(o))}</b>`).join(", ")}. They have their own information: you only find out what they know by talking to them.</p>
+    <h2>In the exam room</h2>
+    <ol class="steps">
+      <li><b>Your opening</b> (about one minute each): who you are, what you want and the most important thing you've found out.</li>
+      <li><b>The negotiation</b>: agree on the deal sheet together. Something new may come up while you talk.</li>
+      <li><b>Questions from the examiner</b> about the deal you made.</li>
+    </ol>
+    <p class="small muted">Use your own words: pass on what you read and heard, don't read it out. You can bring short notes (key words and numbers), not full sentences.</p>
+    ${S.speaking_rubric ? `<h2>What the examiner listens for</h2><ul>${S.speaking_rubric.map(c => `<li><b>${esc(c.name)}</b>: ${esc(c.aim)}</li>`).join("")}</ul>` : ""}
+    <h2>Your notes</h2>
+    <p class="small muted">Only for you: they stay in this browser tab and are never handed in.</p>
+    <textarea id="spnotes" rows="8" style="width:100%" placeholder="Key words and numbers…">${esc(st.notes || "")}</textarea>`;
+  $("#spnotes").addEventListener("input", e => { st.notes = e.target.value; save(); });
+}
+function tabSpeakEmails(){
+  const r = role();
+  $("#main").innerHTML = `
+    ${colourCodeHTML()}
+    <p>Read your emails. Only you have this information. <b>Tap sentences</b> to highlight them.</p>
+    ${r.characters.map(examMailHTML).join("")}
+    <section class="nb"><h2 id="nbhead" tabindex="-1">Your highlights<span id="nbcount"></span></h2><p id="nblive" class="small muted" aria-live="polite"></p><div data-nb="inbox"></div></section>`;
+  refreshNotebook();
+}
+const PLAYS = () => SP.listening.plays || 2;
+const timesWord = n => n === 1 ? "once" : n === 2 ? "twice" : num(n) + " times";
+// where a paused (or interrupted) recording stopped: kept in the page only, so a student can check an email and
+// carry on without losing a play. Leaving the tab removes the player, so the position is kept here.
+const clipPos = {};
+function clipState(id){
+  const used = (st.plays || {})[id] || 0, left = PLAYS() - used, pos = clipPos[id] || 0;
+  if (pos > 0) return {label: "▶ Continue", off: false, msg: left > 0 ? `Paused. You can still start it ${left === 1 ? "once more" : timesWord(left)} after this.` : "Paused. This is your last play."};
+  if (left <= 0) return {label: `Played ${timesWord(PLAYS())}`, off: true, msg: `You've heard this recording ${timesWord(PLAYS())}.`};
+  return {label: used ? "▶ Play again" : "▶ Play", off: false, msg: `You can play it ${left === PLAYS() ? timesWord(left) : left === 1 ? "once more" : timesWord(left) + " more"}.`};
+}
+function clipHTML(p){
+  if (!p.src) return `<p class="clip muted small">The recording isn't on this page yet. Tell your teacher.</p>`;
+  const s = clipState(p.id);
+  return `<div class="clip" data-clip="${esc(p.id)}"><audio preload="none" src="${esc(p.src)}"></audio>
+    <button type="button" class="btn" data-play="${esc(p.id)}" ${s.off ? "disabled" : ""}>${s.label}</button>
+    <span class="small muted" data-left="${esc(p.id)}">${s.msg}</span>
+    <progress max="1" value="0" data-prog="${esc(p.id)}" style="width:100%;margin-top:6px"></progress></div>`;
+}
+function tabSpeakListening(){
+  const L = SP.listening;
+  $("#main").innerHTML = `
+    <h2 style="margin-top:0">Your recordings <span class="ptsbadge">${pts(qItems("listening").length)}</span></h2>
+    <p>${esc(L.intro || "Listen with headphones.")} Read the questions before you press play. You can pause and continue (also after looking at another tab); each new start from the beginning counts as one play.</p>
+    <p class="qcount" id="qcount" aria-live="polite">${qCount("listening")}</p>
+    ${qParts("listening").map(p => qPartHTML(p).replace("</h3>", "</h3>" + clipHTML(p))).join("")}`;
+  wireQuestions("listening");
+  document.querySelectorAll(".clip[data-clip]").forEach(box => {
+    const id = box.dataset.clip, a = box.querySelector("audio"), b = box.querySelector("[data-play]"),
+          prog = box.querySelector("progress"), msg = box.querySelector("[data-left]");
+    let starting = false;   // a new play asked for, counted only once the sound really starts
+    const show = () => { const s = clipState(id); b.textContent = s.label; b.disabled = s.off; msg.textContent = s.msg; };
+    a.addEventListener("timeupdate", () => { if (a.duration) prog.value = a.currentTime / a.duration; if (!a.ended && a.currentTime > 0) clipPos[id] = a.currentTime; });
+    a.addEventListener("playing", () => {
+      if (starting) { starting = false; st.plays = st.plays || {}; st.plays[id] = (st.plays[id] || 0) + 1; save(); }
+      b.textContent = "❚❚ Pause"; b.disabled = false;
+      msg.textContent = PLAYS() - st.plays[id] > 0 ? "Playing. You can play it once more afterwards." : "Playing: this is your last play.";
+    });
+    a.addEventListener("pause", () => { if (!a.ended) { clipPos[id] = a.currentTime; show(); } });
+    a.addEventListener("ended", () => { delete clipPos[id]; prog.value = 1; show(); });
+    a.addEventListener("error", () => { starting = false; show(); msg.textContent = "The recording didn't load (this didn't use up a play). Check your internet connection and try again, or tell your teacher."; });
+    b.onclick = () => {
+      if (!a.paused) { a.pause(); return; }
+      const pos = clipPos[id] || 0;
+      const go = t => { const run = () => { try { a.currentTime = t; } catch(e) {} a.play().catch(() => { starting = false; show(); }); };
+        if (t > 0 && a.readyState < 1) { a.addEventListener("loadedmetadata", run, {once: true}); a.load(); } else run(); };
+      if (pos > 0) return go(pos);   // continuing: not a new play
+      if (((st.plays || {})[id] || 0) >= PLAYS()) return;
+      starting = true; b.disabled = true; msg.textContent = "Loading…";
+      go(0);
+    };
+  });
+}
+function tabDeal(){
+  const D = SP.deal, fixed = (D.fixed || {})[st.group] || [];
+  $("#main").innerHTML = `
+    <h2 style="margin-top:0">The deal sheet</h2>
+    <p>${esc(D.intro || "Your group has to agree on every point below.")}</p>
+    ${D.issues.map((it, i) => `<div class="dec"><h3>${i + 1}. ${esc(it.title)}</h3>${it.text ? `<p>${esc(it.text)}</p>` : ""}
+      ${it.options ? `<p class="small muted">For example:</p><ul>${it.options.map(o => `<li>${esc(o)}</li>`).join("")}</ul>` : ""}</div>`).join("")}
+    ${fixed.length ? `<div class="note"><b>Already settled for a group of ${num(spGroup().length)}</b><ul>${fixed.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>` : ""}
+    <p class="small muted">Think about what you want on each point, what you could give up, and what you need from the others.</p>`;
+}
+function tabSpeakSubmit(){
+  $("#main").innerHTML = `
+    <h2 style="margin-top:0">Hand in your listening answers</h2>
+    <p>${qCount("listening")}. You can change your answers until you create your submission. Hand it in <b>before</b> the speaking part.</p>
+    <p><button type="button" class="btn" id="make">Create my submission</button></p>
+    <div id="issues" class="issues" aria-live="polite"></div><div id="out"></div>`;
+  $("#make").onclick = makeSpeakSubmission;
+}
+function makeSpeakSubmission(){
+  const r = role(), left = qItems("listening").filter(it => !answered(it)).length;
+  $("#issues").innerHTML = left ? `<p>Not answered yet: ${left} listening question${left > 1 ? "s" : ""}. You can still hand in, but unanswered questions get no marks.</p>` : "";
+  const all = qItems("listening");
+  const answers = all.filter(it => it.part.type !== "short").map(it => `${it.id}=${String((st.ans || {})[it.id] || "-").replace(/[^A-Za-z0-9]/g, "") || "-"}`).join(", ");
+  const shorts = JSON.stringify(Object.fromEntries(all.filter(it => it.part.type === "short" && answered(it)).map(it => [it.id, String(st.ans[it.id]).replace(/\s+/g, " ").trim().slice(0, 80)])));
+  const choices = `group=${st.group}`;
+  const code = checkCode([S.id, S.version, r.id, choices, "", "no", "", answers, shorts]);
+  const block = ["=== SIMLEARN SUBMISSION ===", "AI check: NOT ALLOWED - grade by hand", `Scenario: ${S.id} v${S.version} (${S.title})`,
+    `Role: ${r.id} (speaking exam, group of ${st.group})`, `Info choices: ${choices}`, "Group decisions: ", `Answers: ${answers}`, `Short answers: ${shorts}`,
+    `Check: ${code}`, "=== END ==="].join("\n");
+  $("#out").innerHTML = `
+    <h2>Your submission</h2>
+    <p>Hand it in the way your <b>Moodle assignment</b> asks for:</p>
+    <p><b>A file upload?</b> <button type="button" class="btn" id="pdf">Download my submission (PDF)</button> <span id="pdfmsg" class="ok" aria-live="polite"></span></p>
+    <p><b>A text box?</b> Copy everything in the box below and paste it in.</p>
+    <textarea class="block" id="block" readonly>${esc(block)}</textarea>
+    <p><button type="button" class="btn" id="copy">Copy to clipboard</button> <span id="copied" class="ok" aria-live="polite"></span></p>
+    <p class="muted small">If you change an answer later, create your submission again before you hand it in.</p>`;
+  $("#pdf").onclick = () => {
+    const today = new Date().toLocaleDateString("en-GB", {day: "numeric", month: "long", year: "numeric"});
+    const blob = makePdf({title: "Speaking exam: listening answers", subtitle: `${S.title} · Role ${r.id} (${roleName(r)}) · group of ${st.group} · ${today}`,
+      body: `Role ${r.id}: ${roleName(r)}\nGroup of ${st.group}\n${all.length - left} of ${all.length} listening questions answered.`,
+      note: `This file carries your listening answers for your teacher's SimLearn tool. Check code: ${code}.`,
+      footer: `SimLearn · ${S.title}`, block, fileName: "simlearn-submission.txt"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = `simlearn-${S.id}-role-${r.id}.pdf`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 120000);
+    $("#pdfmsg").textContent = "Look in your Downloads, then upload the file to Moodle.";
+  };
+  $("#copy").onclick = async () => {
+    const ta = $("#block"), done = () => { $("#copied").textContent = "Copied — now paste it into Moodle."; };
+    try { await navigator.clipboard.writeText(ta.value); return done(); } catch(e) {}
+    ta.focus(); ta.select(); let ok = false; try { ok = document.execCommand("copy"); } catch(e) {}
+    $("#copied").textContent = ok ? "Copied — now paste it into Moodle." : "Your browser blocked copying. The text is selected — press Ctrl+C (or ⌘C) to copy it.";
+  };
 }
 
 let pendingPick = {};   // cid -> offer id, chosen but not yet confirmed
