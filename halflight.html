@@ -212,6 +212,7 @@ textarea.memo{width:100%;min-height:340px;border:1px solid var(--line);border-ra
 .clip{margin:10px 0 12px;padding:10px 12px;border-radius:10px;background:var(--panel, #ECEFF3)}
 .clip .btn{margin-right:10px}
 .steps li{margin:.35rem 0}
+.spmore{margin:12px 0}.dec.settled{opacity:.6}
 @media (min-width:1000px){
   .examgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(340px,44%);gap:24px;align-items:start}
   .qpanel{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto;padding-right:4px}
@@ -595,6 +596,7 @@ function hlSources(){
   if (c.constraint) parts.push({cid:"ctx", part:"clock", text:c.constraint, src:{name:"The clock"}});
   if (EXAM && EX.article) EX.article.text.split("\n\n").forEach((p, i) => parts.push({cid:"art", part:"p" + i, text:p, src:{name:EX.article.title}}));
   const r = st.role && role();
+  if (SPEAK && SP.offer) SP.offer.text.split("\n\n").forEach((p, i) => parts.push({cid:"offer", part:"p" + i, text:p, src:{name:SP.offer.title}}));
   if (SPEAK && r && r.brief) r.brief.split("\n\n").forEach((p, i) => parts.push({cid:"brief", part:"p" + i, text:p, src:{name:"Your brief"}}));
   (r ? r.characters : []).forEach(ch => {
     const src = {name:ch.name, title:ch.title, citation:ch.citation, cid:ch.id};
@@ -835,7 +837,9 @@ const partTab = p => p.tab || "emails";
 const EXAM_TABS = EXAM ? (EX.article
   ? [["context","Situation"], ...(EX.listening ? [["listening","Listening"]] : []), ["article","Article"], ["reading","Emails"], ["decisions","Decisions"], ["submit","Write & submit"]]
   : [["context","Situation"], ["reading","Reading"], ...(EX.listening ? [["listening","Listening"]] : []), ["decisions","Decisions"], ["submit","Write & submit"]]) : [];
-const SPEAK_TABS = [["context","Your brief"], ["reading","Emails"], ["listening","Listening"], ["deal","Deal sheet"], ["submit","Hand in"]];
+const SPEAK_LISTEN = !!(SP && SP.listening && (SP.listening.parts || []).length);   // without recordings: nothing to hand in
+const SPEAK_TABS = SPEAK_LISTEN ? [["context","Your brief"], ["reading","Emails"], ["listening","Listening"], ["deal","Deal sheet"], ["submit","Hand in"]]
+                                : [["context","Your brief"], ["reading","Emails"], ["deal","Deal sheet"]];
 const TABS = SPEAK ? SPEAK_TABS : EXAM ? EXAM_TABS
   : ALL_TABS.filter(([k]) => k !== "listening" || (S.listening && S.listening.questions && S.listening.questions.length));
 function render(){
@@ -967,9 +971,11 @@ function tabListening(){
 
 /* ---------- exam questions (no answers in the page: the teacher tool marks them) ---------- */
 // speaking exam: listening only, the shared parts plus this role's own
-const qParts = sec => SPEAK ? (sec === "listening" ? SP.listening.parts.filter(p => !p.roles || p.roles.includes(st.role)) : [])
+const qParts = sec => SPEAK ? (sec === "listening" ? ((SP.listening || {}).parts || []).filter(p => !p.roles || p.roles.includes(st.role)) : [])
                             : ((EX && EX[sec] && EX[sec].parts) || []);
 const qItems = sec => qParts(sec).flatMap(p => p.items.map(it => ({...it, part: p})));
+// "mixed" parts (speaking exams): an item with options is multiple choice, one without is typed in
+const isShort = it => it.part.type === "short" || (it.part.type === "mixed" && !it.options);
 const QN = {};   // question numbers run through each section, as on a paper (reading 1–n, listening 1–n)
 function numberQuestions(){ ["reading", "listening"].forEach(sec => qItems(sec).forEach((it, i) => { QN[it.id] = i + 1; })); }
 numberQuestions();
@@ -986,7 +992,7 @@ function qOptsHTML(it, opts){
   const v = (st.ans || {})[it.id] || "", ent = Object.entries(opts);
   const long = ent.length > 6;   // a long list (e.g. seven headings): a drop-down; otherwise every option stays visible
   if (long) return `<select data-q="${esc(it.id)}" aria-label="Answer to question ${QN[it.id]}"><option value="">Choose…</option>${ent.map(([k, t]) => `<option value="${esc(k)}" ${v === k ? "selected" : ""}>${esc(k)}. ${esc(t)}</option>`).join("")}</select>`;
-  const short = ent.every(([, t]) => t.length <= 12);   // in a row only for True / False / Not given and the like
+  const short = false;   // always one option under another (Andrew, 22 Oct 2026)
   return `<div class="${short ? "row" : ""}">${ent.map(([k, t]) => `<label><input type="radio" name="q_${esc(it.id)}" data-q="${esc(it.id)}" value="${esc(k)}" ${v === k ? "checked" : ""}><span>${initials(t) === k.toUpperCase() ? "" : `<b>${esc(k)}</b> `}${esc(t)}</span></label>`).join("")}</div>`;
 }
 function qPartHTML(p){
@@ -1007,7 +1013,7 @@ function qPartHTML(p){
     }).join("");
   } else {
     body = p.items.map(it => `<div class="qitem"><span class="qq"><b>${esc(num(it))}.</b> ${esc(it.q || "")}</span>
-      ${p.type === "short" ? `<input type="text" data-q="${esc(it.id)}" maxlength="80" autocomplete="off" spellcheck="false" value="${esc((st.ans || {})[it.id] || "")}" aria-label="Answer to question ${QN[it.id]}">`
+      ${isShort({...it, part: p}) ? `<input type="text" data-q="${esc(it.id)}" maxlength="80" autocomplete="off" spellcheck="false" value="${esc((st.ans || {})[it.id] || "")}" aria-label="Answer to question ${QN[it.id]}">`
         : qOptsHTML(it, p.type === "shared" ? p.options : (it.options || {}))}</div>`).join("");
   }
   return `<section class="qpart" id="qp_${esc(p.id)}"><h3>${esc(p.title)} <span class="ptsbadge">${pts(p.items.length)}</span></h3>${p.instructions ? `<p class="inst">${esc(p.instructions)}</p>` : ""}${body}</section>`;
@@ -1083,13 +1089,14 @@ function renderSpeakStart(){
   <header class="bar">${topBar("")}</header>
   <div class="wrap start examstart">
     <h1>${esc(S.title)}</h1>
-    <p class="lede">This is the preparation for your speaking exam. You prepare <b>on your own</b>, with headphones${m.prep ? `, for about ${m.prep} minutes` : ""}. Then you meet your group and negotiate in front of the examiner.</p>
+    <p class="lede">This is the preparation for your speaking exam. You prepare <b>on your own</b>${SPEAK_LISTEN ? ", with headphones" : ""}${m.prep ? `, for about ${m.prep} minutes` : ""}. Then you meet your group and negotiate in front of the examiner.</p>
     <ul class="times">
-      <li><b>Your brief</b>: who you are and what you want. Each person in your group has a different role.</li>
-      <li><b>Emails</b> and <b>recordings</b> with information only you have. Answer the listening questions: they count for your mark.</li>
+      <li><b>Your brief</b>: who you represent and what they want. Each person in your group has a different role.</li>
+      ${SPEAK_LISTEN ? `<li><b>Emails</b> and <b>recordings</b> with information only you have. Answer the listening questions: they count for your mark.</li>` : `<li><b>Emails and messages</b> with information only you have.</li>`}
       <li><b>Deal sheet</b>: the points your group has to agree on.</li>
-      <li><b>Hand in</b> your listening answers before the speaking part.</li>
+      ${SPEAK_LISTEN ? `<li><b>Hand in</b> your listening answers before the speaking part.</li>` : `<li>Nothing to hand in: the examiner marks how you speak in the exam room.</li>`}
     </ul>
+    ${!P.listening && P.speaking ? `<p><b>Points:</b> speaking ${pts(P.speaking)}, marked in the exam room on the five points under "What the examiner listens for".</p>` : ""}
     ${P.listening ? `<p><b>Points:</b> listening ${pts(P.listening)} (one per question, here) · speaking ${pts(P.speaking)} (in the exam room) · <b>${pts(P.listening + P.speaking)} in all</b>.</p>` : ""}
     ${S.ack_disclaimer ? `<div class="ack"><b>Before you start</b><p>${esc(S.disclaimer)}</p>
       <label><input type="checkbox" id="ack" ${st.ack ? "checked" : ""}> I understand</label></div>` : `<p class="muted small">${esc(S.disclaimer)}</p>`}
@@ -1120,30 +1127,28 @@ function tabSpeakBrief(){
     ${S.image ? `<figure class="hero"><img src="${S.image.src}" alt="${esc(S.image.alt)}"></figure>` : ""}
     <h2 style="margin-top:0">The situation</h2>
     <div class="prose">${S.context.text.split("\n\n").map((p, i) => `<p>${hlHTML(p, "ctx", "p" + i)}</p>`).join("")}</div>
+    ${SP.offer ? `<div class="note proof"><b>${esc(SP.offer.title)}</b><div class="prose">${SP.offer.text.split("\n\n").map((p, i) => `<p>${hlHTML(p, "offer", "p" + i)}</p>`).join("")}</div></div>` : ""}
     <div class="note"><b>Your role: ${esc(roleName(r))}</b>
       <div class="prose">${r.brief.split("\n\n").map((p, i) => `<p>${hlHTML(p, "brief", "p" + i)}</p>`).join("")}</div></div>
-    <h2>Your group</h2>
-    <p>You are a group of ${num(spGroup().length)}. You will meet: ${others.map(o => `<b>${esc(roleName(o))}</b>`).join(", ")}. They have their own information: you only find out what they know by talking to them.</p>
-    <h2>In the exam room</h2>
-    <ol class="steps">
-      <li><b>Your opening</b> (about one minute each): who you are, what you want and the most important thing you've found out.</li>
-      <li><b>The negotiation</b>: agree on the deal sheet together. Something new may come up while you talk.</li>
-      <li><b>Questions from the examiner</b> about the deal you made.</li>
-    </ol>
-    <p class="small muted">Use your own words: pass on what you read and heard, don't read it out. You can bring short notes (key words and numbers), not full sentences.</p>
-    ${S.speaking_rubric ? `<h2>What the examiner listens for</h2><ul>${S.speaking_rubric.map(c => `<li><b>${esc(c.name)}</b>: ${esc(c.aim)}</li>`).join("")}</ul>` : ""}
-    <h2>Your notes</h2>
-    <p class="small muted">Only for you: they stay in this browser tab and are never handed in.</p>
-    <textarea id="spnotes" rows="8" style="width:100%" placeholder="Key words and numbers…">${esc(st.notes || "")}</textarea>`;
-  $("#spnotes").addEventListener("input", e => { st.notes = e.target.value; save(); });
+    <details class="mail spmore"><summary><span class="subj">Your group</span></summary><div class="body">
+      <p>You are a group of ${num(spGroup().length)}. You will meet: ${others.map(o => `<b>${esc(roleName(o))}</b>`).join(", ")}. They have their own information: you only find out what they know by talking to them.</p></div></details>
+    <details class="mail spmore"><summary><span class="subj">In the exam room</span></summary><div class="body">
+      <ol class="steps">
+        <li><b>Your opening</b> (about one minute each): who you represent, what they want and the most important thing you've found out.</li>
+        <li><b>The negotiation</b>: agree on the deal sheet together. Something new may come up while you talk.</li>
+        <li><b>Questions from the examiner</b> about the deal you made.</li>
+      </ol>
+      <p class="small muted">Use your own words: pass on what you read, don't read it out. You can bring short notes (key words and numbers), not full sentences.</p></div></details>
+    ${S.speaking_rubric ? `<details class="mail spmore"><summary><span class="subj">What the examiner listens for</span></summary><div class="body"><ul>${S.speaking_rubric.map(c => `<li><b>${esc(c.name)}</b>: ${esc(c.aim)}</li>`).join("")}</ul></div></details>` : ""}`;
 }
 function tabSpeakEmails(){
   const r = role();
   $("#main").innerHTML = `
     ${colourCodeHTML()}
-    <p>Read your emails. Only you have this information. <b>Tap sentences</b> to highlight them.</p>
-    ${r.characters.map(examMailHTML).join("")}
+    <p>Read your emails. Only you have this information. <b>Tap sentences</b> to highlight them.${r.characters.some(c => c.offers.length) ? ` Some of your contacts can tell you <b>one more thing</b>: you choose what, and you can't change your choice afterwards. Think about what your client needs for the deal sheet.` : ""}</p>
+    ${r.characters.map(c => c.offers.length ? mailHTML(c) : examMailHTML(c)).join("")}
     <section class="nb"><h2 id="nbhead" tabindex="-1">Your highlights<span id="nbcount"></span></h2><p id="nblive" class="small muted" aria-live="polite"></p><div data-nb="inbox"></div></section>`;
+  r.characters.filter(c => c.offers.length).forEach(wireMail);   // the sims' "one more thing" (good, better, best)
   refreshNotebook();
 }
 const PLAYS = () => SP.listening.plays || 2;
@@ -1159,11 +1164,11 @@ function clipState(id){
 }
 function clipHTML(p){
   if (!p.src) return `<p class="clip muted small">The recording isn't on this page yet. Tell your teacher.</p>`;
-  const s = clipState(p.id);
-  return `<div class="clip" data-clip="${esc(p.id)}"><audio preload="none" src="${esc(p.src)}"></audio>
-    <button type="button" class="btn" data-play="${esc(p.id)}" ${s.off ? "disabled" : ""}>${s.label}</button>
-    <span class="small muted" data-left="${esc(p.id)}">${s.msg}</span>
-    <progress max="1" value="0" data-prog="${esc(p.id)}" style="width:100%;margin-top:6px"></progress></div>`;
+  const s = clipState(p.audio);   // counted per recording, not per part
+  return `<div class="clip" data-clip="${esc(p.audio)}"><audio preload="none" src="${esc(p.src)}"></audio>
+    <button type="button" class="btn" data-play="${esc(p.audio)}" ${s.off ? "disabled" : ""}>${s.label}</button>
+    <span class="small muted" data-left="${esc(p.audio)}">${s.msg}</span>
+    <progress max="1" value="0" data-prog="${esc(p.audio)}" style="width:100%;margin-top:6px"></progress></div>`;
 }
 function tabSpeakListening(){
   const L = SP.listening;
@@ -1171,7 +1176,7 @@ function tabSpeakListening(){
     <h2 style="margin-top:0">Your recordings <span class="ptsbadge">${pts(qItems("listening").length)}</span></h2>
     <p>${esc(L.intro || "Listen with headphones.")} Read the questions before you press play. You can pause and continue (also after looking at another tab); each new start from the beginning counts as one play.</p>
     <p class="qcount" id="qcount" aria-live="polite">${qCount("listening")}</p>
-    ${qParts("listening").map(p => qPartHTML(p).replace("</h3>", "</h3>" + clipHTML(p))).join("")}`;
+    ${(seen => qParts("listening").map(p => { const first = !seen.has(p.audio); seen.add(p.audio); return first ? qPartHTML(p).replace("</h3>", "</h3>" + clipHTML(p)) : qPartHTML(p); }).join(""))(new Set())}`;
   wireQuestions("listening");
   document.querySelectorAll(".clip[data-clip]").forEach(box => {
     const id = box.dataset.clip, a = box.querySelector("audio"), b = box.querySelector("[data-play]"),
@@ -1201,13 +1206,17 @@ function tabSpeakListening(){
 }
 function tabDeal(){
   const D = SP.deal, fixed = (D.fixed || {})[st.group] || [];
+  const issues = D.issues.filter(it => !it.groups || it.groups.includes(st.group));   // a decision can be for some group sizes only
   $("#main").innerHTML = `
     <h2 style="margin-top:0">The deal sheet</h2>
     <p>${esc(D.intro || "Your group has to agree on every point below.")}</p>
-    ${D.issues.map((it, i) => `<div class="dec"><h3>${i + 1}. ${esc(it.title)}</h3>${it.text ? `<p>${esc(it.text)}</p>` : ""}
-      ${it.options ? `<p class="small muted">For example:</p><ul>${it.options.map(o => `<li>${esc(o)}</li>`).join("")}</ul>` : ""}</div>`).join("")}
-    ${fixed.length ? `<div class="note"><b>Already settled for a group of ${num(spGroup().length)}</b><ul>${fixed.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>` : ""}
-    <p class="small muted">Think about what you want on each point, what you could give up, and what you need from the others.</p>`;
+    ${issues.map((it, i) => { const set = Array.isArray(fixed) ? null : fixed[it.id];   // A/B decisions, as in the sims
+      return `<div class="dec${set ? " settled" : ""}"><h3>Decision ${i + 1} — ${esc(it.title)}</h3>${it.text ? `<p>${esc(it.text)}</p>` : ""}
+      ${it.A ? ["A", "B"].map(o => `<p class="opt"><b>${o}.</b> ${esc(it[o])}</p>`).join("") : ""}
+      ${it.options ? `<p class="small muted">For example:</p><ul>${it.options.map(o => `<li>${esc(o)}</li>`).join("")}</ul>` : ""}
+      ${set ? `<p class="small"><b>Already settled for a group of ${num(spGroup().length)}: ${esc(set)}.</b></p>` : ""}</div>`; }).join("")}
+    ${Array.isArray(fixed) && fixed.length ? `<div class="note"><b>Already settled for a group of ${num(spGroup().length)}</b><ul>${fixed.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>` : ""}
+    <p class="small muted">Think about which option your client needs on each decision, what you could give up, and what you need from the others.</p>`;
 }
 function tabSpeakSubmit(){
   $("#main").innerHTML = `
@@ -1221,8 +1230,8 @@ function makeSpeakSubmission(){
   const r = role(), left = qItems("listening").filter(it => !answered(it)).length;
   $("#issues").innerHTML = left ? `<p>Not answered yet: ${left} listening question${left > 1 ? "s" : ""}. You can still hand in, but unanswered questions get no marks.</p>` : "";
   const all = qItems("listening");
-  const answers = all.filter(it => it.part.type !== "short").map(it => `${it.id}=${String((st.ans || {})[it.id] || "-").replace(/[^A-Za-z0-9]/g, "") || "-"}`).join(", ");
-  const shorts = JSON.stringify(Object.fromEntries(all.filter(it => it.part.type === "short" && answered(it)).map(it => [it.id, String(st.ans[it.id]).replace(/\s+/g, " ").trim().slice(0, 80)])));
+  const answers = all.filter(it => !isShort(it)).map(it => `${it.id}=${String((st.ans || {})[it.id] || "-").replace(/[^A-Za-z0-9]/g, "") || "-"}`).join(", ");
+  const shorts = JSON.stringify(Object.fromEntries(all.filter(it => isShort(it) && answered(it)).map(it => [it.id, String(st.ans[it.id]).replace(/\s+/g, " ").trim().slice(0, 80)])));
   const choices = `group=${st.group}`;
   const code = checkCode([S.id, S.version, r.id, choices, "", "no", "", answers, shorts]);
   const block = ["=== SIMLEARN SUBMISSION ===", "AI check: NOT ALLOWED - grade by hand", `Scenario: ${S.id} v${S.version} (${S.title})`,
@@ -1302,13 +1311,17 @@ function mailHTML(c){
   if (chosen) {
     const o = c.offers.find(x => x.id === chosen);
     offers = `<div class="offers done">
-        <div class="opened"><p class="t">${esc(o.title)}</p><div class="prose">${hlHTML(unscramble(o.text, `${S.salt}|${c.id}|${o.id}`), c.id, "opt")}</div></div>
+        <div class="opened"><p class="t">${esc(o.title)}</p>${o.src ? `
+          <p class="small muted">🎧 ${esc(callName(c.name))} left you a voice message. Listen with headphones: the others can't hear it.${o.text && !(st.heard || {})[c.id] ? " Once you've listened to the end, you can also read it." : ""}</p>
+          <audio controls preload="none" src="${esc(o.src)}" style="width:100%"></audio>
+          ${o.text ? `<details class="vmtext" ${(st.heard || {})[c.id] ? "" : "hidden"}><summary class="small">Show the text</summary><div class="prose">${hlHTML(unscramble(o.text, `${S.salt}|${c.id}|${o.id}`), c.id, "opt")}</div></details>` : ""}`
+          : `<div class="prose">${hlHTML(unscramble(o.text, `${S.salt}|${c.id}|${o.id}`), c.id, "opt")}</div>`}</div>
         ${c.offers.filter(x => x.id !== chosen).map(x => `<div class="offer closed" aria-disabled="true">${esc(x.title)}</div>`).join("")}
       </div>`;
   } else {
     const pick = pendingPick[c.id];
     offers = `<div class="offers"><p class="ask">${esc(callName(c.name))} can tell you one more thing. Which do you want to know?</p>
-      ${c.offers.map(o => `<button type="button" class="offer" data-c="${c.id}" data-o="${o.id}" aria-pressed="${pick===o.id}">${esc(o.title)}</button>`).join("")}
+      ${c.offers.map(o => `<button type="button" class="offer" data-c="${c.id}" data-o="${o.id}" aria-pressed="${pick===o.id}">${o.src ? `<span title="The answer is a voice message">🎧</span> ` : ""}${esc(o.title)}</button>`).join("")}
       ${pick ? `<div class="confirm"><button type="button" class="btn" data-confirm="${c.id}">Ask about this</button><span class="muted small">You can't change this afterwards.</span></div>` : ""}
     </div>`;
   }
@@ -1319,6 +1332,11 @@ function mailHTML(c){
 }
 function wireMail(c){
   const box = $("#m_" + c.id);
+  const au = box.querySelector("audio");   // a voice message: the text appears only after one full listen
+  if (au) au.addEventListener("ended", () => {
+    st.heard = st.heard || {}; st.heard[c.id] = true; save();
+    const d = box.querySelector("details.vmtext"); if (d) d.hidden = false;
+  });
   box.querySelectorAll(".offer[data-o]").forEach(b => b.onclick = () => { pendingPick[c.id] = b.dataset.o; rerenderMail(c); });
   const cf = box.querySelector("[data-confirm]");
   if (cf) cf.onclick = () => { st.choices[c.id] = pendingPick[c.id]; delete pendingPick[c.id]; save(); rerenderMail(c); updateDot(); };
@@ -1580,9 +1598,9 @@ function makeSubmission(){
                       : S.decisions.map(d => `${d.id}=${st.decisions[d.id]}`).join(", ");
   const memoText = st.memo.trim();
   // exam: every choice item in order ("-" = no answer), and the typed answers as one line of JSON
-  const answers = EXAM ? [...qItems("reading"), ...qItems("listening")].filter(it => it.part.type !== "short")
+  const answers = EXAM ? [...qItems("reading"), ...qItems("listening")].filter(it => !isShort(it))
                            .map(it => `${it.id}=${String((st.ans || {})[it.id] || "-").replace(/[^A-Za-z0-9]/g, "") || "-"}`).join(", ") : "";
-  const shorts = EXAM ? JSON.stringify(Object.fromEntries([...qItems("reading"), ...qItems("listening")].filter(it => it.part.type === "short" && answered(it))
+  const shorts = EXAM ? JSON.stringify(Object.fromEntries([...qItems("reading"), ...qItems("listening")].filter(it => isShort(it) && answered(it))
                            .map(it => [it.id, String(st.ans[it.id]).replace(/\s+/g, " ").trim().slice(0, 80)]))) : "";
   const parts = [S.id, S.version, r.id, choices, decisions, ai, ai === "yes" ? norm(memoText) : ""];
   const code = checkCode(EXAM ? [...parts, answers, shorts] : parts);
