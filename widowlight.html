@@ -1190,14 +1190,14 @@ function tabDecisions(){
   }
   $("#main").innerHTML = `
     ${EXAM && readingParts("decisions").length ? `<div class="examq"><p class="qcount" id="qcount" aria-live="polite">${qCount("reading")} (all reading)</p>${readingParts("decisions").map(qPartHTML).join("")}</div>` : ""}
-    <p>${EXAM ? `Make the ${num(S.decisions.length)} decisions <b>on your own</b>, using what you read and heard. For each one, you can note the biggest risk or strongest objection and your answer to it: these notes are only for you and aren't handed in.`
+    <p>${EXAM ? `Make the ${num(S.decisions.length)} decisions <b>on your own</b>, using what you read and heard. Your choices aren't marked here: what counts is how you explain them in your ${esc(S.writing.label)}.`
                : `Agree the ${num(S.decisions.length)} decisions <b>${pair() ? "together" : "as a group"}</b>, then ${pair() ? "both of you enter" : "everyone enters"} the same answers here. For each one, note the biggest risk or strongest objection and your answer to it: you'll need it in your writing.`} Your highlights are beside the decisions.</p>
     <div class="writegrid"><div>
     ${S.decisions.map(d => `
       <div class="dec"><h3>${esc(d.title)}</h3>
         ${["A","B"].map(o => `<label class="opt"><input type="radio" name="dec_${d.id}" value="${o}" ${st.decisions[d.id]===o?"checked":""}><span><b>${o}.</b> ${esc(d[o])}</span></label>`).join("")}
-        <label class="small muted" for="hw_${d.id}">${OBJECTION}</label>
-        <textarea id="hw_${d.id}" data-hw="${d.id}">${esc(st.however[d.id]||"")}</textarea>
+        ${EXAM ? "" : `<label class="small muted" for="hw_${d.id}">${OBJECTION}</label>
+        <textarea id="hw_${d.id}" data-hw="${d.id}">${esc(st.however[d.id]||"")}</textarea>`}
       </div>`).join("")}
     ${!S.newsflash ? "" : all ? `<div class="flash"><b>Breaking news</b><div class="prose">${esc(unscramble(S.newsflash, `${S.salt}|newsflash`)).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>")}</div></div>`
           : `<p class="muted small">When you've chosen all ${num(S.decisions.length)}, some breaking news will appear here.</p>`}
