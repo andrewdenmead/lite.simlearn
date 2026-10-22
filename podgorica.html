@@ -962,7 +962,7 @@ function qOptsHTML(it, opts){
   const v = (st.ans || {})[it.id] || "", ent = Object.entries(opts);
   const long = ent.length > 6;   // a long list (e.g. seven headings): a drop-down; otherwise every option stays visible
   if (long) return `<select data-q="${esc(it.id)}" aria-label="Answer to question ${QN[it.id]}"><option value="">Choose…</option>${ent.map(([k, t]) => `<option value="${esc(k)}" ${v === k ? "selected" : ""}>${esc(k)}. ${esc(t)}</option>`).join("")}</select>`;
-  const short = ent.every(([, t]) => t.length <= 24);
+  const short = ent.every(([, t]) => t.length <= 12);   // in a row only for True / False / Not given and the like
   return `<div class="${short ? "row" : ""}">${ent.map(([k, t]) => `<label><input type="radio" name="q_${esc(it.id)}" data-q="${esc(it.id)}" value="${esc(k)}" ${v === k ? "checked" : ""}><span>${initials(t) === k.toUpperCase() ? "" : `<b>${esc(k)}</b> `}${esc(t)}</span></label>`).join("")}</div>`;
 }
 function qPartHTML(p){
@@ -1040,7 +1040,7 @@ function tabExamListening(){
   const L = EX.listening;
   $("#main").innerHTML = `
     <h2 style="margin-top:0">${esc(L.name || "Listening")}</h2>
-    <p>${esc(L.intro || "Your teacher will play the recording. You will hear each part twice.")} Read the questions before each part begins.</p>
+    <p>${esc(L.intro || "Your teacher will play the recording. You will hear each part twice.")} Read the questions before ${L.parts.length > 1 ? "each part begins" : "the recording starts"}.</p>
     <p class="qcount" id="qcount" aria-live="polite">${qCount("listening")}</p>
     ${L.parts.map(qPartHTML).join("")}`;
   wireQuestions("listening");
