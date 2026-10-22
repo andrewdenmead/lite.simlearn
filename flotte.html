@@ -205,6 +205,7 @@ textarea.memo{width:100%;min-height:340px;border:1px solid var(--line);border-ra
 .gapopts li{margin:4px 0}
 .qcount{font-size:.9rem;color:var(--ink-2)}
 .examq{margin:0 0 18px}
+.ptsbadge{font-family:var(--sans);font-size:.8rem;font-weight:600;color:var(--pine);border:1px solid var(--line);border-radius:999px;padding:1px 8px;margin-left:6px;vertical-align:middle;white-space:nowrap}
 .pn{display:inline-block;min-width:1.4em;color:var(--ink-2);font-family:var(--sans);font-size:.85rem}
 .examstart .times{margin:12px 0 20px;padding-left:1.2rem}
 @media (min-width:1000px){
@@ -453,12 +454,13 @@ function renderExamStart(){
     <ul class="times">${EX.article ? `
       <li><b>Situation</b>: a short introduction. Read it first.</li>
       ${EX.listening ? `<li><b>Listening</b>${m.listening ? ` (about ${m.listening} minutes)` : ""}: your teacher plays the recording at the start; answer the questions as you listen.</li>` : ""}
-      <li><b>Reading</b>${m.reading ? ` (about ${m.reading} minutes)` : ""}: an article, ${num(role0().characters.length)} emails and a few questions on the Decisions tab.</li>
+      <li><b>Reading</b>${m.reading ? ` (about ${m.reading} minutes)` : ""}: an article and ${num(role0().characters.length)} emails${readingParts("decisions").length ? ", and a few questions on the Decisions tab" : ""}.</li>
       <li><b>Writing</b>${m.writing ? ` (about ${m.writing} minutes)` : ""}: make the decisions and write your ${esc(S.writing.label)}.</li>` : `
       <li><b>Reading</b>${m.reading ? ` (about ${m.reading} minutes)` : ""}: read the situation and the ${num(role0().characters.length)} documents, and answer the questions beside them.</li>
       <li><b>Listening</b>${m.listening ? ` (about ${m.listening} minutes)` : ""}: your teacher plays the recording; answer the questions as you listen.</li>
       <li><b>Writing</b>${m.writing ? ` (about ${m.writing} minutes)` : ""}: make the decisions and write your ${esc(S.writing.label)}.</li>`}
     </ul>
+    ${EX.points ? `<p><b>Points:</b> listening ${pts(EX.points.listening)} · reading ${pts(EX.points.reading)} · writing ${pts(EX.points.writing)} · <b>${pts(EX.points.listening + EX.points.reading + EX.points.writing)} in all</b>. Every listening and reading question is worth one point.</p>` : ""}
     <p>You can move between the tabs at any time and change your answers until you create your submission. You can highlight sentences as in the simulations.</p>
     ${S.ack_disclaimer ? `<div class="ack"><b>Before you start</b><p>${esc(S.disclaimer)}</p>
       <label><input type="checkbox" id="ack" ${st.ack ? "checked" : ""}> I understand</label></div>` : `<p class="muted small">${esc(S.disclaimer)}</p>`}
@@ -957,6 +959,12 @@ const QN = {};   // question numbers run through each section, as on a paper (re
 ["reading", "listening"].forEach(sec => qItems(sec).forEach((it, i) => { QN[it.id] = i + 1; }));
 const answered = it => String((st.ans || {})[it.id] || "").trim() !== "";
 function qCount(sec){ const a = qItems(sec); return `${a.filter(answered).length} of ${a.length} answered`; }
+const pts = n => `${n} point${n === 1 ? "" : "s"}`;
+// "3 of 15 answered on this tab · reading: 25 points in all" (one point per question)
+function tabCount(parts, sec){
+  const a = parts.flatMap(p => p.items), all = qItems(sec).length;
+  return `${a.filter(answered).length} of ${a.length} answered on this tab · ${sec}: ${pts(all)} in all`;
+}
 const initials = t => t.trim().split(/\s+/).map(w => w.charAt(0)).join("").toUpperCase();   // "Not given" -> "NG": no need to show the key
 function qOptsHTML(it, opts){
   const v = (st.ans || {})[it.id] || "", ent = Object.entries(opts);
@@ -975,8 +983,8 @@ function qPartHTML(p){
     body = `<div class="prose gaptext">${p.text.split("\n\n").map(par => `<p>${esc(par).replace(/\[\[(\d+)\]\]/g, (m, n) => ids[n] ? `<b>(${QN[ids[n]]})</b> ${sel(ids[n])}` : m)}</p>`).join("")}</div>
       <ul class="gapopts">${opts.map(([k, t]) => `<li><b>${esc(k)}</b> ${esc(t)}</li>`).join("")}</ul>`;
   } else if (p.type === "shared" && Object.keys(p.options).length > 6) {   // e.g. headings: the list once, a letter per item
-    const opts = Object.entries(p.options);
-    body = `<ul class="gapopts">${opts.map(([k, t]) => `<li><b>${esc(k)}</b> ${esc(t)}</li>`).join("")}</ul>` + p.items.map(it => {
+    const opts = Object.entries(p.options);   // "paragraphs": the options are paragraph numbers, so no list is needed
+    body = (p.paragraphs ? "" : `<ul class="gapopts">${opts.map(([k, t]) => `<li><b>${esc(k)}</b> ${esc(t)}</li>`).join("")}</ul>`) + p.items.map(it => {
       const v = (st.ans || {})[it.id] || "";
       return `<div class="qitem"><label><span class="qq" style="margin:0"><b>${esc(num(it))}.</b> ${esc(it.q || "")}</span>
         <select data-q="${esc(it.id)}" aria-label="Answer to question ${QN[it.id]}"><option value="">–</option>${opts.map(([k]) => `<option value="${esc(k)}" ${v === k ? "selected" : ""}>${esc(k)}</option>`).join("")}</select></label></div>`;
@@ -986,14 +994,14 @@ function qPartHTML(p){
       ${p.type === "short" ? `<input type="text" data-q="${esc(it.id)}" maxlength="80" autocomplete="off" spellcheck="false" value="${esc((st.ans || {})[it.id] || "")}" aria-label="Answer to question ${QN[it.id]}">`
         : qOptsHTML(it, p.type === "shared" ? p.options : (it.options || {}))}</div>`).join("");
   }
-  return `<section class="qpart" id="qp_${esc(p.id)}"><h3>${esc(p.title)}</h3>${p.instructions ? `<p class="inst">${esc(p.instructions)}</p>` : ""}${body}</section>`;
+  return `<section class="qpart" id="qp_${esc(p.id)}"><h3>${esc(p.title)} <span class="ptsbadge">${pts(p.items.length)}</span></h3>${p.instructions ? `<p class="inst">${esc(p.instructions)}</p>` : ""}${body}</section>`;
 }
 function wireQuestions(sec){
   const upd = e => {
     const id = e.target.dataset && e.target.dataset.q;
     if (!id) return false;
     st.ans = st.ans || {}; st.ans[id] = e.target.value; save();
-    const c = $("#qcount"); if (c) c.textContent = qCount(sec);
+    const c = $("#qcount"); if (c) c.textContent = c.dataset.parts ? tabCount(JSON.parse(c.dataset.parts).map(id => [...(EX.reading.parts || []), ...((EX.listening || {}).parts || [])].find(p => p.id === id)), sec) : qCount(sec);
     return true;
   };
   $("#main").addEventListener("change", upd);
@@ -1014,7 +1022,7 @@ function tabReading(){
       ${role0().characters.map(examMailHTML).join("")}
       <section class="nb"><h2 id="nbhead" tabindex="-1">Your highlights<span id="nbcount"></span></h2><p id="nblive" class="small muted" aria-live="polite"></p><div data-nb="inbox"></div></section>
     </div>
-    <div class="qpanel"><h2>${EX.article ? "Questions on the emails" : "Reading questions"}</h2><p class="qcount" id="qcount" aria-live="polite">${qCount("reading")} (all reading)</p>
+    <div class="qpanel"><h2>${EX.article ? "Questions on the emails" : "Reading questions"}</h2><p class="qcount" id="qcount" aria-live="polite" data-parts="${esc(JSON.stringify(parts.map(p => p.id)))}">${tabCount(parts, "reading")}</p>
       ${parts.map(qPartHTML).join("")}</div></div>`;
   wireQuestions("reading");
   refreshNotebook();
@@ -1032,7 +1040,7 @@ function tabArticle(){
         <div class="prose">${A.text.split("\n\n").map((p, i) => `<p>${A.numbered ? `<b class="pn">${i + 1}</b> ` : ""}${hlHTML(p, "art", "p" + i)}</p>`).join("")}</div>
       </div></article>
     </div>
-    <div class="qpanel"><h2>Questions on the article</h2><p class="qcount" id="qcount" aria-live="polite">${qCount("reading")} (all reading)</p>
+    <div class="qpanel"><h2>Questions on the article</h2><p class="qcount" id="qcount" aria-live="polite" data-parts="${esc(JSON.stringify(parts.map(p => p.id)))}">${tabCount(parts, "reading")}</p>
       ${parts.map(qPartHTML).join("")}</div></div>`;
   wireQuestions("reading");
 }
@@ -1041,7 +1049,7 @@ function tabExamListening(){
   $("#main").innerHTML = `
     <h2 style="margin-top:0">${esc(L.name || "Listening")}</h2>
     <p>${esc(L.intro || "Your teacher will play the recording. You will hear each part twice.")} Read the questions before ${L.parts.length > 1 ? "each part begins" : "the recording starts"}.</p>
-    <p class="qcount" id="qcount" aria-live="polite">${qCount("listening")}</p>
+    <p class="qcount" id="qcount" aria-live="polite">${qCount("listening")} · listening: ${pts(qItems("listening").length)}</p>
     ${L.parts.map(qPartHTML).join("")}`;
   wireQuestions("listening");
 }
@@ -1203,7 +1211,8 @@ function tabDecisions(){
 function tabSubmit(){
   const W = S.writing;
   $("#main").innerHTML = `
-    <h2 style="margin-top:0">Your ${esc(W.label)} to ${esc(W.addressee)}</h2>
+    <h2 style="margin-top:0">Your ${esc(W.label)} to ${esc(W.addressee)}${EXAM && EX.points ? ` <span class="ptsbadge">${pts(EX.points.writing)}</span>` : ""}</h2>
+    ${EXAM && EX.points ? `<p class="small muted">Marked on the five points under "What makes a strong ${esc(W.label)}", equally.</p>` : ""}
     <p>About ${W.words} words. Your ${esc(W.label)} should:</p>
     <ul>${W.instructions.map(i => `<li>${esc(i)}</li>`).join("")}</ul>
     ${S.rubric ? `<details class="rubric" id="rubric" ${st.rubricOpen ? "open" : ""}><summary>What makes a strong ${esc(W.label)}</summary>
