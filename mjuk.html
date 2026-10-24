@@ -955,7 +955,7 @@ function render(){
   numberQuestions();
   const pending = AE2 || EXAM || SPEAK ? 0 : r.characters.filter(c => !st.choices[c.id]).length;
   $("#app").innerHTML = `
-  <header class="bar">${topBar(SPEAK ? `Speaking exam · ${r.id}: ${roleName(r)}` : EXAM ? "Exam" : (HO ? "Hand-over: " + hoName + " · " : "") + (r.dept ? r.label + " · " + r.dept : r.label))}
+  <header class="bar">${topBar(SPEAK ? `Speaking exam · ${r.id}: ${roleName(r)}` : EXAM ? "Written exam" : (HO ? "Hand-over: " + hoName + " · " : "") + (r.dept ? r.label + " · " + r.dept : r.label))}
     <div class="wrap"><nav class="tabs" role="tablist">${tabs.map(([k,l]) => `<button type="button" class="tab" role="tab" data-tab="${k}" aria-selected="${st.tab===k}">${l}${k==="inbox"&&pending?`<span class="dot" title="${pending} choice(s) still open"></span>`:""}</button>`).join("")}</nav></div></header>
   ${HO ? `<div class="wrap"><div class="handbanner"><b>Hand-over from ${esc(hoName)}</b> (${esc(roleName(r))})${handoverWhen(HO.made) ? ", saved " + esc(handoverWhen(HO.made)) : ""}.
     This tab shows their ${AE2 ? "papers" : "emails"}, what they chose and their highlights. Use it to tell your group what they found.
@@ -1734,7 +1734,7 @@ function makeSubmission(){
     const today = new Date().toLocaleDateString("en-GB", {day: "numeric", month: "long", year: "numeric"});
     const blob = makePdf({
       title: `${cap} to ${W.addressee}`,
-      subtitle: `${S.title} · ${EXAM ? "Exam" : "Role " + r.id + (r.dept ? " (" + r.dept + ")" : "")} · ${words(memoText)} words · ${today}`,
+      subtitle: `${S.title} · ${EXAM ? "Written exam" : "Role " + r.id + (r.dept ? " (" + r.dept + ")" : "")} · ${words(memoText)} words · ${today}`,
       body: memoText,
       note: EXAM ? (ai === "yes"
         ? "This file also carries your exam answers for your teacher's SimLearn tool: your reading and listening answers, your decisions and a copy of your text. You agreed that your teacher may check your text with AI."
