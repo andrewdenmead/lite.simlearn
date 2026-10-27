@@ -1014,6 +1014,7 @@ function tabContext(){
 
 function tabFirstLook(){
   if (B) return tabFirstLookBudget();
+  if (S.first_look && S.first_look.questions) return tabFirstLookHunches();
   $("#main").innerHTML = `
     <p>Before you read anything else, go with your gut. Nobody sees these answers — they're for ${pair() ? "talking with your partner" : "your group discussion"}.</p>
     ${S.decisions.map(d => `
@@ -1023,6 +1024,21 @@ function tabFirstLook(){
       </div>`).join("")}
     <p><b>Discuss:</b> Where do you disagree? Which decision feels hardest right now, and why?</p>`;
   $("#main").onchange = e => { const [, id] = e.target.name.split("_"); st.firstLook[id] = e.target.value; save(); };
+}
+
+// Diagnosis sims (from 27 Oct 2026): the decisions need the emails, so First look asks hunch questions instead,
+// answerable from the context alone ("first_look": {"questions": [{"id", "q", "options": [...]}]}).
+function tabFirstLookHunches(){
+  const F = S.first_look;
+  $("#main").innerHTML = `
+    <p>${esc(F.intro || "Before you read anything else, go with your gut. Nobody sees these answers.")} They're for ${pair() ? "talking with your partner" : "your group discussion"}.</p>
+    ${F.questions.map(q => `
+      <div class="dec"><h3>${esc(q.q)}</h3>
+        ${[...q.options, "Unsure"].map((o, i) => `<label class="opt"><input type="radio" name="fl_${q.id}" value="${i === q.options.length ? "Unsure" : esc(o)}" ${st.firstLook[q.id] === (i === q.options.length ? "Unsure" : o) ? "checked" : ""}>
+          <span>${i === q.options.length ? "<i>Not sure yet</i>" : esc(o)}</span></label>`).join("")}
+      </div>`).join("")}
+    <p><b>Discuss:</b> ${esc(F.discuss || "Where do you disagree? Remember your hunch: when you've read the emails, check whether the evidence supports it.")}</p>`;
+  $("#main").onchange = e => { const id = e.target.name.slice(3); st.firstLook[id] = e.target.value; save(); };
 }
 
 function tabFirstLookBudget(){
