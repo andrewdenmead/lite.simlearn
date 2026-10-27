@@ -100,6 +100,16 @@ legend{font-weight:600;margin-bottom:.5rem}
 .mail .state.todo{color:var(--amber);font-weight:600}
 .mail .body{padding:0 16px 16px;border-top:1px solid var(--line)}
 .mail .body .prose{white-space:pre-line;margin-top:14px}
+.attach{display:flex;flex-wrap:wrap;gap:12px;margin:14px 0 4px}
+.attach figure{margin:0;flex:1 1 220px;max-width:340px}
+.attach .att{display:block;width:100%;padding:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff;cursor:zoom-in}
+.attach img{display:block;width:100%;height:170px;object-fit:cover}
+.attach figcaption{font-size:.85rem;color:var(--ink-2);margin-top:5px}
+#lightbox{border:none;padding:0;max-width:96vw;max-height:94vh;background:transparent}
+#lightbox::backdrop{background:rgba(0,0,0,.78)}
+#lightbox img{display:block;max-width:96vw;max-height:86vh;border-radius:6px}
+#lightbox p{color:#fff;margin:8px 4px 0;font-size:.92rem}
+#lightbox button{position:absolute;top:8px;right:8px;border:none;border-radius:999px;padding:6px 12px;background:#fff;cursor:pointer}
 
 /* the three folded notes — the one memorable moment */
 .offers{margin-top:18px;background:var(--amber-bg);border-radius:10px;padding:14px}
@@ -1443,8 +1453,26 @@ function mailHTML(c){
   return `<details class="mail" id="m_${c.id}" ${open || st.tab==="inbox" ? "open" : ""}>
     <summary><span><span class="from">${esc(c.name)}</span>, <span class="muted">${esc(c.title)}</span><br><span class="subj">${esc(c.subject)}</span></span>
       <span class="state ${chosen?"":"todo"}">${chosen ? "Answered" : "Choose one"}</span></summary>
-    <div class="body"><div class="prose">${hlHTML(c.email, c.id, "email")}</div>${c.citation ? `<p class="cite"><b>Reference:</b> ${esc(c.citation)}</p>` : ""}${offers}</div></details>`;
+    <div class="body"><div class="prose">${hlHTML(c.email, c.id, "email")}</div>${attachHTML(c)}${c.citation ? `<p class="cite"><b>Reference:</b> ${esc(c.citation)}</p>` : ""}${offers}</div></details>`;
 }
+// Pictures attached to an email (from 27 Oct 2026, design sims): "attachments": [{"src", "alt", "caption"}] on a
+// character; build.py embeds them. Tap a picture to see it full size.
+function attachHTML(c){
+  if (!c.attachments || !c.attachments.length) return "";
+  return `<div class="attach">${c.attachments.map((a, i) => `<figure><button type="button" class="att" data-c="${c.id}" data-i="${i}" aria-label="Enlarge: ${esc(a.caption || a.alt)}"><img src="${a.src}" alt="${esc(a.alt)}" loading="lazy"></button>
+    <figcaption>📎 ${esc(a.caption || "")}</figcaption></figure>`).join("")}</div>`;
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest(".att");
+  if (!b) return;
+  const ch = CHAR[b.dataset.c], a = ch && ch.attachments && ch.attachments[+b.dataset.i];
+  if (!a) return;
+  let d = $("#lightbox");
+  if (!d) { d = document.createElement("dialog"); d.id = "lightbox"; document.body.appendChild(d);
+            d.addEventListener("click", ev => { if (ev.target === d || ev.target.tagName === "BUTTON") d.close(); }); }
+  d.innerHTML = `<button type="button">Close ✕</button><img src="${a.src}" alt="${esc(a.alt)}"><p>${esc(a.caption || "")}</p>`;
+  d.showModal ? d.showModal() : d.setAttribute("open", "");
+});
 function wireMail(c){
   const box = $("#m_" + c.id);
   const au = box.querySelector("audio");   // a voice message: the text appears only after one full listen
