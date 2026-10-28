@@ -185,6 +185,7 @@ legend{font-weight:600;margin-bottom:.5rem}
 .mcq label.wrong span{color:var(--warn);text-decoration:line-through}
 .mcq .res{font-size:.9rem;margin:2px 0 0}
 .mcq .res.ok{color:var(--pine)} .mcq .res.no{color:var(--warn)}
+h3.lpart{margin:26px 0 4px;font-size:1rem;color:var(--pine)}
 .score{border:2px solid var(--pine);border-radius:12px;padding:12px 16px;margin-top:18px;font-weight:600}
 
 /* writing + submit */
@@ -415,7 +416,7 @@ const SPEAK = S.format === "speaking", SP = S.speaking || null;   // speaking ex
 const TAGS = !S.budget && (S.decisions || []).length > 0;   // highlights can be tagged with the decisions they matter for
 
 /* ---------- state (kept only in this browser tab, so a reload doesn't lose work) ---------- */
-const fresh = () => ({mode:"3", role:null, tab:"context", choices:{}, firstLook:{}, mcq:{}, decisions:{}, however:{}, memo:"", consent:false, notes:[], hlNotes:{}, hl:{}, hlLabels:{}, hlGroup:"colour", budget:{}, rationale:"", ack:false, group:null, pick:null, plays:{}, opened:{}, drawOpen:{}, tags:{}, nbf:{}, ans:{}});
+const fresh = () => ({mode:"3", role:null, tab:"context", choices:{}, firstLook:{}, mcq:{}, decisions:{}, however:{}, memo:"", consent:false, notes:[], hlNotes:{}, hl:{}, hlLabels:{}, hlGroup:"colour", rq:{}, budget:{}, rationale:"", ack:false, group:null, pick:null, plays:{}, opened:{}, drawOpen:{}, tags:{}, nbf:{}, ans:{}});
 let st = fresh();
 try { const raw = sessionStorage.getItem(STORE); if (raw) st = Object.assign(st, JSON.parse(raw)); } catch(e) {}
 if (!Array.isArray(st.notes)) st.notes = [];   // (older tabs kept notes:"")
@@ -430,7 +431,7 @@ function save(){ try { sessionStorage.setItem(STORE, JSON.stringify(st)); } catc
    A student who has to leave downloads their work as a small file (no text, no consent); a teammate opens the
    sim in a new tab (link in the footer, or #handover) and loads it there. Nothing goes through a server. */
 // Never the student's own writing: not memo, however (objections) or rationale (budget reasoning), and not consent.
-const HANDOVER_KEYS = ["mode","role","choices","firstLook","mcq","decisions","hl","hlLabels","hlGroup",
+const HANDOVER_KEYS = ["mode","role","choices","firstLook","mcq","rq","decisions","hl","hlLabels","hlGroup",
                        "budget","opened","drawOpen","tags","nbf","nbClosed"];
 const HANDOVER_OPEN = location.hash === "#handover";
 const HANDOVER_MAX = 1000000;   // bytes; a real file is a few KB
@@ -716,7 +717,8 @@ function hlSources(){
   if (c.scar) parts.push({cid:"ctx", part:"scar", text:c.scar.text, src:{name:c.scar.label}});
   if (c.proof) parts.push({cid:"ctx", part:"proof", text:c.proof.text, src:{name:c.proof.label}});
   if (c.constraint) parts.push({cid:"ctx", part:"clock", text:c.constraint, src:{name:"The clock"}});
-  if (EXAM && EX.article) EX.article.text.split("\n\n").forEach((p, i) => parts.push({cid:"art", part:"p" + i, text:p, src:{name:EX.article.title}}));
+  const ART = EXAM ? EX.article : S.reading && S.reading.article;   // the exam's article, or a sim's Reading tab (GUIDE 2j)
+  if (ART) ART.text.split("\n\n").forEach((p, i) => parts.push({cid:"art", part:"p" + i, text:p, src:{name:ART.title}}));
   const r = st.role && role();
   if (SPEAK && SP.offer) SP.offer.text.split("\n\n").forEach((p, i) => parts.push({cid:"offer", part:"p" + i, text:p, src:{name:SP.offer.title}}));
   if (SPEAK && r && r.brief) r.brief.split("\n\n").forEach((p, i) => parts.push({cid:"brief", part:"p" + i, text:p, src:{name:"Your brief"}}));
@@ -946,7 +948,7 @@ function insertCite(cite){
   m.dispatchEvent(new Event("input"));
 }
 function jumpTo(k){
-  const tab = k.startsWith("ctx|") ? "context" : "inbox";
+  const tab = k.startsWith("ctx|") || (SPEAK && /^(brief|offer)\|/.test(k)) ? "context" : k.startsWith("art|") ? "article" : EXAM || SPEAK ? "reading" : "inbox";
   if (st.tab !== tab) { st.tab = tab; save(); render(); }
   const sp = document.querySelector(`.hs[data-k="${CSS.escape(k)}"]`);
   if (!sp) return;
@@ -1023,7 +1025,7 @@ document.addEventListener("input", e => {
 });
 
 /* ---------- main shell ---------- */
-const ALL_TABS = [["context","Context"], ...(AE2 ? [["listening","Listening"],["firstlook","First look"]] : [["firstlook","First look"],["listening","Listening"]]),["inbox", AE2 ? "Research" : "Inbox"],["decisions", B ? "Budget" : "Decisions"],["submit","Write & submit"]];
+const ALL_TABS = [["context","Context"], ...(AE2 ? [["listening","Listening"],["firstlook","First look"]] : [["firstlook","First look"],["listening","Listening"],["article","Reading"]]),["inbox", AE2 ? "Research" : "Inbox"],["decisions", B ? "Budget" : "Decisions"],["submit","Write & submit"]];
 const partTab = p => p.tab || "emails";
 const EXAM_TABS = EXAM ? (EX.article
   ? [["context","Situation"], ...(EX.listening ? [["listening","Listening"]] : []), ["article","Article"], ["reading","Emails"], ["decisions","Decisions"], ["submit","Write & submit"]]
@@ -1032,7 +1034,8 @@ const SPEAK_LISTEN = !!(SP && SP.listening && (SP.listening.parts || []).length)
 const SPEAK_TABS = SPEAK_LISTEN ? [["context","Your brief"], ["reading","Emails"], ["listening","Listening"], ["deal","Deal sheet"], ["submit","Hand in"]]
                                 : [["context","Your brief"], ["reading","Emails"], ["deal","Deal sheet"]];
 const TABS = SPEAK ? SPEAK_TABS : EXAM ? EXAM_TABS
-  : ALL_TABS.filter(([k]) => k !== "listening" || (S.listening && S.listening.questions && S.listening.questions.length));
+  : ALL_TABS.filter(([k]) => (k !== "listening" || (S.listening && S.listening.questions && S.listening.questions.length))
+                         && (k !== "article" || (S.reading && S.reading.questions && S.reading.questions.length)));
 function render(){
   closePalette(false);
   document.querySelectorAll("audio").forEach(x => x.pause());   // a recording stops (and remembers where) when the tab changes
@@ -1086,7 +1089,7 @@ function render(){
     pendingPick = {}; render(); window.scrollTo(0,0);
   };
   (SPEAK ? {context:tabSpeakBrief, reading:tabSpeakEmails, listening:tabSpeakListening, deal:tabDeal, submit:tabSpeakSubmit}
-   : {context:tabContext, firstlook:tabFirstLook, listening:EXAM ? tabExamListening : tabListening, inbox:tabInbox, reading:tabReading, article:tabArticle, decisions:tabDecisions, submit:tabSubmit})[st.tab]();
+   : {context:tabContext, firstlook:tabFirstLook, listening:EXAM ? tabExamListening : tabListening, inbox:tabInbox, reading:tabReading, article:EXAM ? tabArticle : tabSimReading, decisions:tabDecisions, submit:tabSubmit})[st.tab]();
 }
 
 /* ---------- tabs ---------- */
@@ -1153,7 +1156,7 @@ function tabListening(){
   const n = L.questions.length, right = done ? L.questions.filter((q,i) => st.mcq[i] === key[i]).length : 0;
   $("#main").innerHTML = `
     <p>Your teacher will play <b>${esc(L.name)}</b>. Answer while you listen${key ? ", then press <b>Check my answers</b>" : " — your teacher will go through the answers afterwards"}.</p>
-    ${L.questions.map((q,i) => `<div class="mcq"><b>${i+1}. ${esc(q.q)}</b>
+    ${L.questions.map((q,i) => `${q.part && q.part !== (L.questions[i-1] || {}).part ? `<h3 class="lpart">${esc(q.part)}</h3>` : ""}<div class="mcq"><b>${i+1}. ${esc(q.q)}</b>
       ${Object.entries(q.options).map(([k,v]) => {
         const cls = !done ? "" : (k === key[i] ? "right" : (st.mcq[i] === k ? "wrong" : ""));
         return `<label class="${cls}"><input type="radio" name="mcq_${i}" value="${k}" ${st.mcq[i]===k?"checked":""} ${done?"disabled":""}><span>${k}: ${esc(v)}</span></label>`;
@@ -1173,6 +1176,52 @@ function tabListening(){
       b.dataset.sure = "1"; return;
     }
     st.mcqDone = true; save(); tabListening();
+  };
+}
+
+/* ---------- a sim's Reading tab (GUIDE 2j): a magazine article with context, questions checked like the listening ---------- */
+function readingAnswers(){
+  try { return S.rc ? JSON.parse(unscramble(S.rc, `${S.salt}|reading`)) : null; } catch(e) { return null; }
+}
+function tabSimReading(){
+  const R = S.reading, A = R.article, key = readingAnswers(), done = !!(st.rqDone && key);
+  st.rq = st.rq || {};
+  const n = R.questions.length, right = done ? R.questions.filter((q, i) => st.rq[i] === key[i]).length : 0;
+  $("#main").innerHTML = `
+    ${colourCodeHTML()}
+    <div class="examgrid"><div>
+      <p>${esc(R.intro || "Read the article for the background to your decisions, and answer the questions.")} <b>Tap sentences</b> to highlight them.</p>
+      <article class="mail paper"><div class="body">
+        ${A.source ? `<p class="muted small" style="margin:0 0 6px">${esc(A.source)}</p>` : ""}
+        <h2 style="margin:0 0 6px">${esc(A.title)}</h2>
+        ${A.standfirst ? `<p class="lede" style="margin:0 0 14px"><i>${esc(A.standfirst)}</i></p>` : ""}
+        <div class="prose">${A.text.split("\n\n").map((p, i) => `<p>${A.numbered ? `<b class="pn">${i + 1}</b> ` : ""}${hlHTML(p, "art", "p" + i)}</p>`).join("")}</div>
+      </div></article>
+    </div>
+    <div class="qpanel"><h2>Questions on the article</h2>
+      ${R.questions.map((q, i) => `<div class="mcq"><b>${i + 1}. ${esc(q.q)}</b>
+        ${Object.entries(q.options).map(([k, v]) => {
+          const cls = !done ? "" : (k === key[i] ? "right" : (st.rq[i] === k ? "wrong" : ""));
+          return `<label class="${cls}"><input type="radio" name="rq_${i}" value="${k}" ${st.rq[i] === k ? "checked" : ""} ${done ? "disabled" : ""}><span>${k}: ${esc(v)}</span></label>`;
+        }).join("")}
+        ${done ? (st.rq[i] === key[i] ? `<p class="res ok">✓ Correct</p>` : `<p class="res no">✗ ${st.rq[i] ? "Not quite" : "No answer"} — the answer is ${key[i]}</p>`) : ""}</div>`).join("")}
+      ${!key ? "" : done
+        ? `<div class="score">You got ${right} of ${n} right.</div>`
+        : `<p style="margin-top:18px"><button type="button" class="btn" id="checkR">Check my answers</button>
+             <span class="muted small">You can't change your answers afterwards.</span></p><p id="checkMsgR" class="small" aria-live="polite"></p>`}
+    </div></div>
+    <section class="nb"><h2 id="nbhead" tabindex="-1">${NB_TITLE}<span id="nbcount"></span></h2><p id="nblive" class="small muted" aria-live="polite"></p><div data-nb="inbox"></div></section>`;
+  refreshNotebook();
+  if (done) return;
+  $("#main").addEventListener("change", e => { if (e.target.name && e.target.name.startsWith("rq_")) { st.rq[e.target.name.split("_")[1]] = e.target.value; save(); } });
+  const b = $("#checkR");
+  if (b) b.onclick = () => {
+    const missing = R.questions.map((q, i) => st.rq[i] ? null : i + 1).filter(Boolean);
+    if (missing.length && !b.dataset.sure) {
+      $("#checkMsgR").textContent = `You haven't answered question${missing.length > 1 ? "s" : ""} ${missing.join(", ")}. Press the button again to check anyway.`;
+      b.dataset.sure = "1"; return;
+    }
+    st.rqDone = true; save(); tabSimReading();
   };
 }
 
