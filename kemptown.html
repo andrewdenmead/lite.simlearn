@@ -279,6 +279,17 @@ footer{border-top:1px solid var(--line);padding:18px 0 40px;font-size:.85rem;col
 .nb-card .src{font-size:.8rem;color:var(--ink-2);margin-top:4px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .nb-card .citebtn{margin-left:auto;border:1px solid var(--pine);color:var(--pine);background:#fff;border-radius:6px;padding:1px 8px;font-size:.8rem;cursor:pointer}
 .nb-empty{font-size:.9rem;color:var(--ink-2)}
+.nb .tools .addnote{border:1px solid var(--pine);color:var(--pine);background:#fff;border-radius:999px;padding:2px 10px;cursor:pointer;font-size:.85rem;font-weight:600}
+.nb-edit{border:1px solid var(--pine);border-radius:8px;background:#fff;padding:8px 10px;margin:6px 0}
+.nb-edit textarea{display:block;width:100%;box-sizing:border-box;font:.95rem/1.5 var(--serif);border:1px solid var(--line);border-radius:6px;padding:6px 8px;resize:vertical;min-height:4.5em}
+.nb-edit .row{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;margin-top:6px;font-size:.85rem}
+.nb-edit .sw{border:1px solid var(--line);background:#fff;border-radius:999px;width:28px;height:28px;padding:0;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.nb-edit .sw[aria-pressed="true"]{border:2px solid var(--pine)}
+.nb-edit .sw i{width:16px;height:16px;border-radius:50%;border:1px solid rgba(0,0,0,.15)}
+.nb-edit .save{margin-left:auto;border:1px solid var(--pine);background:var(--pine);color:#fff;border-radius:6px;padding:3px 12px;font-size:.85rem;cursor:pointer}
+.nb-card.mine .s{cursor:default;white-space:pre-wrap}
+.nb-card .hlnote{font-size:.9rem;margin:6px 0 0;padding:4px 8px;background:#f5f5f0;border-radius:6px;white-space:pre-wrap}
+.nb-card .acts{display:inline-flex;gap:10px;margin-left:auto}
 .writegrid{display:block}
 .nbpanel{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:2px 12px;margin:12px 0}
 .nbpanel>summary{cursor:pointer;padding:8px 0;font-weight:600}
@@ -404,9 +415,11 @@ const SPEAK = S.format === "speaking", SP = S.speaking || null;   // speaking ex
 const TAGS = !S.budget && (S.decisions || []).length > 0;   // highlights can be tagged with the decisions they matter for
 
 /* ---------- state (kept only in this browser tab, so a reload doesn't lose work) ---------- */
-const fresh = () => ({mode:"3", role:null, tab:"context", choices:{}, firstLook:{}, mcq:{}, decisions:{}, however:{}, memo:"", consent:false, notes:"", hl:{}, hlLabels:{}, hlGroup:"colour", budget:{}, rationale:"", ack:false, group:null, pick:null, plays:{}, opened:{}, drawOpen:{}, tags:{}, nbf:{}, ans:{}});
+const fresh = () => ({mode:"3", role:null, tab:"context", choices:{}, firstLook:{}, mcq:{}, decisions:{}, however:{}, memo:"", consent:false, notes:[], hlNotes:{}, hl:{}, hlLabels:{}, hlGroup:"colour", budget:{}, rationale:"", ack:false, group:null, pick:null, plays:{}, opened:{}, drawOpen:{}, tags:{}, nbf:{}, ans:{}});
 let st = fresh();
 try { const raw = sessionStorage.getItem(STORE); if (raw) st = Object.assign(st, JSON.parse(raw)); } catch(e) {}
+if (!Array.isArray(st.notes)) st.notes = [];   // (older tabs kept notes:"")
+if (!st.hlNotes || typeof st.hlNotes !== "object" || Array.isArray(st.hlNotes)) st.hlNotes = {};
 if (location.hash === "#handover" && !st.handover) {   // opened to take a hand-over: start empty, whatever was copied in
   let reload = false; try { reload = performance.getEntriesByType("navigation")[0].type === "reload"; } catch(e) {}
   if (!reload) st = fresh();
@@ -798,7 +811,7 @@ function closePalette(refocus){
 }
 function setHighlight(k, col){
   st.hl = st.hl || {};
-  if (col) st.hl[k] = col; else { delete st.hl[k]; if (st.tags) delete st.tags[k]; }
+  if (col) st.hl[k] = col; else { delete st.hl[k]; if (st.tags) delete st.tags[k]; if (st.hlNotes) delete st.hlNotes[k]; if (nbEdit && nbEdit.kind === "hl" && nbEdit.k === k) nbEdit = null; }
   save();
   document.querySelectorAll(`.hs[data-k="${CSS.escape(k)}"]`).forEach(sp => {
     sp.classList.toggle("on", !!col); sp.style.background = col ? HLC[col] : "";
@@ -819,46 +832,107 @@ function citeOf(citation){
   const auth = names.length === 1 ? names[0] : names.length === 2 ? `${names[0]} and ${names[1]}` : `${names[0]} et al.`;
   return `(${auth}, ${y[1]})`;
 }
-function notebookHTML(inSubmit){
+// Notes of the student's own (not in speaking exams: Andrew wants no notes box there): free notes in the notebook
+// (st.notes = [{id, t, col}]) and a note on any highlight (st.hlNotes = {key: text}). Private: never in the hand-in.
+const NOTES = !SPEAK;
+const MINE = "My notes";
+const NB_TITLE = NOTES ? "Your highlights and notes" : "Your highlights";
+let nbEdit = null;     // the note being written or edited: {kind: "new" | "free" | "hl", box, id, k, t, col}
+let nbAsk = null;      // the note whose Delete was pressed once: "n:<id>" or "h:<key>"
+const noteItems = () => NOTES ? (st.notes || []).filter(x => HLC[x.col]).map((x, i) => ({k:"note:" + x.id, id:x.id, col:x.col, t:x.t, free:true, src:{name:MINE}, n:1e9 + i})) : [];
+function noteEditorHTML(withColours){
+  const e = nbEdit;
+  return `<div class="nb-edit"><textarea data-notetext="1" maxlength="800" placeholder="${e.kind === "hl" ? "Your note on this sentence…" : "Your note…"}" aria-label="${e.kind === "hl" ? "Your note on this sentence" : "Your note"}">${esc(e.t || "")}</textarea>
+    <div class="row">${withColours ? HL.map(([key, name, c]) => `<button type="button" class="sw" data-notecol="${key}" aria-pressed="${e.col === key}" aria-label="${esc(hlLabel(key) || name)}" title="${esc(hlLabel(key) || name)}"><i style="background:${c}"></i></button>`).join("") : ""}
+      <button type="button" class="linkish" data-notecancel="1">Cancel</button><button type="button" class="save" data-notesave="1">Save note</button></div></div>`;
+}
+function notebookHTML(inSubmit, box){
   const reg = hlRegistry();
-  const items = Object.entries(st.hl || {}).filter(([k, col]) => reg[k] && HLC[col]).map(([k, col]) => ({k, col, ...reg[k]})).sort((a, b) => a.n - b.n);
+  const items = Object.entries(st.hl || {}).filter(([k, col]) => reg[k] && HLC[col]).map(([k, col]) => ({k, col, ...reg[k]})).sort((a, b) => a.n - b.n)
+    .concat(noteItems());
+  const editing = (kind, id) => nbEdit && nbEdit.box === box && nbEdit.kind === kind && (kind === "new" || nbEdit.id === id);
+  const composer = editing("new") ? noteEditorHTML(true) : "";
   const byColour = st.hlGroup !== "source";
-  const tools = `<div class="tools"><span>Show by</span><button type="button" data-grp="colour" aria-pressed="${byColour}">colour</button><button type="button" data-grp="source" aria-pressed="${!byColour}">source</button>
-    ${items.length ? `<button type="button" class="linkish" data-clear="1" style="margin-left:auto">Clear all highlights</button><span data-clearask hidden>Remove all ${items.length}? <button type="button" class="linkish" data-clearyes="1">Yes, clear them</button> · <button type="button" class="linkish" data-clearno="1">Keep them</button></span>` : ""}</div>`;
+  const nHl = items.filter(x => !x.free).length, nHlNotes = NOTES ? items.filter(x => !x.free && (st.hlNotes || {})[x.k]).length : 0;
+  const tools = `<div class="tools">${NOTES && !editing("new") ? `<button type="button" class="addnote" data-addnote="1">+ Add a note</button>` : ""}<span>Show by</span><button type="button" data-grp="colour" aria-pressed="${byColour}">colour</button><button type="button" data-grp="source" aria-pressed="${!byColour}">source</button>
+    ${nHl ? `<button type="button" class="linkish" data-clear="1" style="margin-left:auto">Clear all highlights</button><span data-clearask hidden>Remove all ${nHl}${nHlNotes ? ` and the ${nHlNotes === 1 ? "note" : "notes"} on ${nHl === 1 ? "it" : "them"}` : ""}${NOTES && (st.notes || []).length ? ` (your notes in “${MINE}” stay)` : ""}? <button type="button" class="linkish" data-clearyes="1">Yes, clear them</button> · <button type="button" class="linkish" data-clearno="1">Keep them</button></span>` : ""}</div>`;
   let shown = items, filt = "";
   if (items.length) {   // one filter, in a single grouped list: part of the argument (new AE format), decision, source, colour
     const f = (st.nbf || {}).one || "", names = [...new Set(items.map(x => x.src.name))];
     const [kind, val] = f ? [f.slice(0, 1), f.slice(2)] : ["", ""];
     shown = items.filter(x => { const t = tagsOf(x.k);
-      return !kind || (kind === "p" && (val === "-" ? !t.p : t.p === val)) || (kind === "d" && (val === "-" ? !t.d.length : t.d.includes(val)))
+      return !kind || (kind === "p" && !x.free && (val === "-" ? !t.p : t.p === val)) || (kind === "d" && !x.free && (val === "-" ? !t.d.length : t.d.includes(val)))
           || (kind === "s" && x.src.name === val) || (kind === "c" && x.col === val); });
     const opt = (v, t) => `<option value="${esc(v)}" ${f === v ? "selected" : ""}>${esc(t)}</option>`;
     const grp = (label, opts) => `<optgroup label="${esc(label)}">${opts.join("")}</optgroup>`;
-    filt = `<div class="nbf"><label>Show <select data-f="one">${opt("", "all highlights")}
+    filt = `<div class="nbf"><label>Show <select data-f="one">${opt("", NOTES ? "everything" : "all highlights")}
       ${AE2 ? grp("Part of the argument", [...TAG_PARTS.map(x => opt("p:" + x, x)), opt("p:-", "no part tag yet")]) : ""}
       ${TAGS ? grp("Decision", [...S.decisions.map(d => opt("d:" + d.id, decLabel(d.id))), opt("d:-", "no decision tag yet")]) : ""}
       ${grp("Source", names.map(n => opt("s:" + n, n)))}
       ${grp("Colour", HL.map(([k, name]) => opt("c:" + k, hlLabel(k) || name)))}</select></label>
       ${shown.length < items.length ? `<span>${shown.length} of ${items.length}</span>` : ""}</div>`;
   }
-  if (!items.length) return tools + `<p class="nb-empty">Tap any sentence in ${EXAM ? (EX.article ? "the Situation, the Article or the Emails" : "the Situation or the Reading tab") : `the Context or ${AE2 ? "Research" : "Inbox"}`} to highlight it. Your highlights collect here${inSubmit ? "" : " and next to your writing"}.</p>`;
+  if (!items.length) return tools + composer + `<p class="nb-empty">Tap any sentence in ${EXAM ? (EX.article ? "the Situation, the Article or the Emails" : "the Situation or the Reading tab") : `the Context or ${AE2 ? "Research" : "Inbox"}`} to highlight it. Your highlights collect here${inSubmit ? "" : " and next to your writing"}.${NOTES ? " You can also add notes of your own." : ""}</p>`;
   const groups = [];
   if (byColour) HL.forEach(([key, name, c]) => { const g = shown.filter(x => x.col === key); if (g.length) groups.push({head:`<i style="background:${c}"></i>${esc(hlLabel(key) || name)}`, g}); });
   else { const seen = []; shown.forEach(x => { if (!seen.includes(x.src.name)) seen.push(x.src.name); }); seen.forEach(nm => groups.push({head:esc(nm), g:shown.filter(x => x.src.name === nm)})); }
+  const del = (ask, attr, val, label) => nbAsk === ask
+    ? `<span>Delete it? <button type="button" class="linkish" ${attr}="${esc(val)}" data-sure="1">Yes</button> · <button type="button" class="linkish" data-noask="1">No</button></span>`
+    : `<button type="button" class="linkish" ${attr}="${esc(val)}">${label}</button>`;
   const card = x => {
+    if (x.free) return editing("free", x.id) ? noteEditorHTML(true) : `<div class="nb-card mine" style="border-left-color:${HLC[x.col]}">
+      <p class="s">${esc(x.t)}</p>
+      <div class="src"><span>${esc(hlLabel(x.col) || hlName(x.col))} · My note</span><span class="acts"><button type="button" class="linkish" data-noteedit="${esc(x.id)}">Edit</button>${del("n:" + x.id, "data-notedel", x.id, "Delete")}</span></div></div>`;
+    const mine = NOTES ? ((st.hlNotes || {})[x.k] || "") : "";
+    const noteBit = !NOTES ? "" : editing("hl", x.k) ? noteEditorHTML(false)
+      : mine ? `<p class="hlnote">${esc(mine)}</p><div class="src"><span class="acts"><button type="button" class="linkish" data-hlnote="${esc(x.k)}">Edit note</button>${del("h:" + x.k, "data-hlnotedel", x.k, "Delete note")}</span></div>`
+      : `<div class="src"><button type="button" class="linkish" data-hlnote="${esc(x.k)}">Add a note</button></div>`;
     const cite = inSubmit && S.course === "AE" && x.src.citation ? citeOf(x.src.citation) : "";
     return `<div class="nb-card" style="border-left-color:${HLC[x.col]}">
       <p class="s" role="button" tabindex="0" data-jump="${esc(x.k)}" title="Show this sentence where it came from">${esc(x.t)}</p>
       <div class="src"><span>${esc(hlLabel(x.col) || hlName(x.col))}${TAGS ? tagChips(x.k) : ""} · ${esc(x.src.name)}${x.src.title ? ", " + esc(x.src.title) : ""}${x.src.option ? ` (“${esc(x.src.option)}”)` : ""}</span>
         ${cite ? `<button type="button" class="citebtn" data-cite="${esc(cite)}" aria-label="Insert ${esc(cite)} into your text">Cite ${esc(cite)}</button>` : ""}</div>
-      ${S.course === "AE" && x.src.citation ? `<div class="src">${esc(x.src.citation)}</div>` : ""}</div>`;
+      ${S.course === "AE" && x.src.citation ? `<div class="src">${esc(x.src.citation)}</div>` : ""}${noteBit}</div>`;
   };
-  return tools + filt + (shown.length ? "" : `<p class="nb-empty">No highlights match this filter.</p>`)
+  return tools + composer + filt + (shown.length ? "" : `<p class="nb-empty">Nothing matches this filter.</p>`)
     + groups.map(G => `<div class="nb-group">${G.head}</div>` + G.g.map(card).join("")).join("");
 }
+function nbFocus(box, ...sels){ const b = document.querySelector(`[data-nb="${box}"]`), el = b && sels.map(x => b.querySelector(x)).find(Boolean); if (el) { el.focus(); if (el.tagName === "TEXTAREA") el.setSelectionRange(el.value.length, el.value.length); } }
+function nbSay(msg){ const live = document.getElementById("nblive"); if (live) { live.textContent = ""; setTimeout(() => { live.textContent = msg; }, 50); } }
+// where focus goes when an editor closes: the note's own Edit / Add a note button, else "+ Add a note"
+const nbBack = e => [e.kind === "free" ? `[data-noteedit="${CSS.escape(e.id)}"]` : e.kind === "hl" ? `[data-hlnote="${CSS.escape(e.k)}"]` : ".addnote", ".addnote"];
+function noteSave(){
+  const e = nbEdit; if (!e) return;
+  const t = (e.t || "").trim(), had = e.kind === "free" || (e.kind === "hl" && !!(st.hlNotes || {})[e.k]);
+  if (e.kind === "new") { if (t) { st.notes = st.notes || []; st.notes.push({id:Date.now().toString(36) + Math.random().toString(36).slice(2, 5), t, col:e.col}); } }
+  else if (e.kind === "free") { st.notes = (st.notes || []).map(x => x.id === e.id ? {...x, t, col:e.col} : x).filter(x => x.t); }
+  else { st.hlNotes = st.hlNotes || {}; if (t) st.hlNotes[e.k] = t; else delete st.hlNotes[e.k]; }
+  nbEdit = null; save(); refreshNotebook(); nbFocus(e.box, ...nbBack(e)); if (t) nbSay("Note saved."); else if (had) nbSay("Note removed.");
+}
+// Clicks on the note controls in a notebook; true if handled.
+function noteClick(e, boxEl){
+  const box = boxEl.dataset.nb, b = e.target.closest("button"); if (!b) return false;
+  const d = b.dataset;
+  if (d.addnote) { nbEdit = {kind:"new", box, t:"", col:"yellow"}; nbAsk = null; refreshNotebook(); nbFocus(box, "[data-notetext]"); return true; }
+  if (d.noteedit) { const x = (st.notes || []).find(n => n.id === d.noteedit); if (!x) return true;
+                    nbEdit = {kind:"free", box, id:x.id, t:x.t, col:x.col}; nbAsk = null; refreshNotebook(); nbFocus(box, "[data-notetext]"); return true; }
+  if (d.hlnote) { nbEdit = {kind:"hl", box, id:d.hlnote, k:d.hlnote, t:(st.hlNotes || {})[d.hlnote] || ""}; nbAsk = null; refreshNotebook(); nbFocus(box, "[data-notetext]"); return true; }
+  if (d.notecol) { if (nbEdit) nbEdit.col = d.notecol; refreshNotebook(); nbFocus(box, `[data-notecol="${d.notecol}"]`); return true; }
+  if (d.notecancel) { const was = nbEdit; nbEdit = null; refreshNotebook(); if (was) nbFocus(box, ...nbBack(was)); return true; }
+  if (d.notesave) { noteSave(); return true; }
+  if (d.noask) { const a = nbAsk; nbAsk = null; refreshNotebook();
+                if (a) nbFocus(box, a.startsWith("n:") ? `[data-notedel="${CSS.escape(a.slice(2))}"]` : `[data-hlnotedel="${CSS.escape(a.slice(2))}"]`); return true; }
+  if (d.notedel || d.hlnotedel) {
+    const ask = d.notedel ? "n:" + d.notedel : "h:" + d.hlnotedel;
+    if (!d.sure) { nbAsk = ask; refreshNotebook(); nbFocus(box, "[data-sure]"); return true; }
+    if (d.notedel) st.notes = (st.notes || []).filter(x => x.id !== d.notedel); else if (st.hlNotes) delete st.hlNotes[d.hlnotedel];
+    nbAsk = null; save(); refreshNotebook(); nbFocus(box, d.hlnotedel ? `[data-hlnote="${CSS.escape(d.hlnotedel)}"]` : ".addnote", ".addnote"); nbSay("Note deleted."); return true;
+  }
+  return false;
+}
 function refreshNotebook(){
-  document.querySelectorAll("[data-nb]").forEach(el => { el.innerHTML = notebookHTML(el.dataset.nb === "submit"); });
-  const n = Object.keys(hlRegistry()).filter(k => (st.hl || {})[k]).length, c = document.getElementById("nbcount");
+  document.querySelectorAll("[data-nb]").forEach(el => { el.innerHTML = notebookHTML(el.dataset.nb === "submit", el.dataset.nb); });
+  const n = Object.keys(hlRegistry()).filter(k => (st.hl || {})[k]).length + noteItems().length, c = document.getElementById("nbcount");
   if (c) c.textContent = n ? ` (${n})` : "";
 }
 let memoPos = null;   // where Cite inserts: the last cursor position in the memo
@@ -906,11 +980,12 @@ document.addEventListener("click", e => {
   const j = e.target.closest("[data-jump]"); if (j) { jumpTo(j.dataset.jump); return; }
   const c = e.target.closest("[data-cite]"); if (c) { insertCite(c.dataset.cite); return; }
   const box = e.target.closest("[data-nb]");
+  if (NOTES && box && noteClick(e, box)) return;
   if (e.target.closest("[data-clear]")) { box.querySelector("[data-clearask]").hidden = false; e.target.hidden = true; box.querySelector("[data-clearno]").focus(); return; }
   const head = () => { const h = document.getElementById("nbhead"); if (h) h.focus(); };
   if (e.target.closest("[data-clearno]")) { refreshNotebook(); head(); return; }
   if (e.target.closest("[data-clearyes]")) {
-    st.hl = {}; save();
+    st.hl = {}; st.hlNotes = {}; if (nbEdit && nbEdit.kind === "hl") nbEdit = null; save();
     document.querySelectorAll(".hs.on").forEach(sp => { sp.classList.remove("on"); sp.style.background = ""; sp.removeAttribute("aria-describedby"); });
     refreshNotebook(); head();
     const live = document.getElementById("nblive"); if (live) { live.textContent = ""; setTimeout(() => { live.textContent = "All highlights cleared."; }, 50); }
@@ -918,6 +993,12 @@ document.addEventListener("click", e => {
   }
 });
 document.addEventListener("keydown", e => {
+  if (e.target.dataset && e.target.dataset.notetext) {
+    if (e.isComposing) return;
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); noteSave(); }
+    else if (e.key === "Escape") { const was = nbEdit; nbEdit = null; refreshNotebook(); if (was) nbFocus(was.box, ...nbBack(was)); }
+    return;
+  }
   if (e.key === "Escape") { const p = document.getElementById("hlpal"); if (p && !p.hidden) { closePalette(true); return; } }
   const t = e.target;
   if ((e.key === "Enter" || e.key === " ") && t.classList && (t.classList.contains("hs") || t.dataset.jump)) {
@@ -936,6 +1017,7 @@ document.addEventListener("change", e => {   // ae2 note filters
   const again = box && box.querySelector(`select[data-f="${f}"]`); if (again) again.focus();
 });
 document.addEventListener("input", e => {
+  if (e.target.dataset && e.target.dataset.notetext && nbEdit) { nbEdit.t = e.target.value; return; }
   const k = e.target.dataset && e.target.dataset.cc;
   if (k) { st.hlLabels = st.hlLabels || {}; st.hlLabels[k] = e.target.value; save(); refreshNotebook(); hlDescs(); }
 });
@@ -1167,7 +1249,7 @@ function tabReading(){
     <div class="examgrid"><div>
       <p>${esc(R.emails_intro || R.intro || "Read the documents and answer the questions.")} <b>Tap sentences</b> to highlight them.</p>
       ${role0().characters.map(examMailHTML).join("")}
-      <section class="nb"><h2 id="nbhead" tabindex="-1">Your highlights<span id="nbcount"></span></h2><p id="nblive" class="small muted" aria-live="polite"></p><div data-nb="inbox"></div></section>
+      <section class="nb"><h2 id="nbhead" tabindex="-1">${NB_TITLE}<span id="nbcount"></span></h2><p id="nblive" class="small muted" aria-live="polite"></p><div data-nb="inbox"></div></section>
     </div>
     <div class="qpanel"><h2>${EX.article ? "Questions on the emails" : "Reading questions"}</h2><p class="qcount" id="qcount" aria-live="polite" data-parts="${esc(JSON.stringify(parts.map(p => p.id)))}">${tabCount(parts, "reading")}</p>
       ${parts.map(qPartHTML).join("")}</div></div>`;
@@ -1272,7 +1354,7 @@ function tabSpeakEmails(){
     ${colourCodeHTML()}
     <p>Read your emails. Only you have this information. <b>Tap sentences</b> to highlight them.${r.characters.some(c => c.offers.length) ? ` Some of your contacts can tell you <b>one more thing</b>: you choose what, and you can't change your choice afterwards. Think about what your client needs for the deal sheet.` : ""}</p>
     ${r.characters.map(c => c.offers.length ? mailHTML(c) : examMailHTML(c)).join("")}
-    <section class="nb"><h2 id="nbhead" tabindex="-1">Your highlights<span id="nbcount"></span></h2><p id="nblive" class="small muted" aria-live="polite"></p><div data-nb="inbox"></div></section>`;
+    <section class="nb"><h2 id="nbhead" tabindex="-1">${NB_TITLE}<span id="nbcount"></span></h2><p id="nblive" class="small muted" aria-live="polite"></p><div data-nb="inbox"></div></section>`;
   r.characters.filter(c => c.offers.length).forEach(wireMail);   // the sims' "one more thing" (good, better, best)
   refreshNotebook();
 }
@@ -1398,7 +1480,7 @@ function tabInbox(){
       ${colourCodeHTML()}${decStripHTML()}
       <p>Read your ${num(r.characters.length)} papers. Each one has <b>three drawers</b>: the data behind it, a counter text and another text like it. Open and close them whenever you like. As you read, <b>tap sentences</b> to highlight them and tag the part of the argument and the decision they matter for. Then tell ${pair() ? "your partner" : "your group"} what you found: they can't see your papers.</p>
       ${r.characters.map(c => sourceHTML(c)).join("")}
-      <section class="nb"><h2 id="nbhead" tabindex="-1">Your highlights<span id="nbcount"></span></h2><p id="nblive" class="small muted" aria-live="polite"></p><div data-nb="inbox"></div></section>`;
+      <section class="nb"><h2 id="nbhead" tabindex="-1">${NB_TITLE}<span id="nbcount"></span></h2><p id="nblive" class="small muted" aria-live="polite"></p><div data-nb="inbox"></div></section>`;
     document.querySelectorAll("details.drawer").forEach(d => d.addEventListener("toggle", () => {
       const c = d.dataset.c, o = d.dataset.o;
       st.drawOpen = st.drawOpen || {}; st.drawOpen[c + "|" + o] = d.open;
@@ -1412,7 +1494,7 @@ function tabInbox(){
     ${colourCodeHTML()}${decStripHTML()}
     <p>Each contact will tell you <b>one more thing</b> — you choose what. All three are useful, but some matter much more than others — and what matters most often depends on what ${pair() ? "your partner's" : "your teammates'"} contacts know. <b>Talk to ${pair() ? "your partner" : "your group"} before you choose.</b> Your choice is final.</p>
     ${r.characters.map(c => mailHTML(c)).join("")}
-    <section class="nb"><h2 id="nbhead" tabindex="-1">Your highlights<span id="nbcount"></span></h2><p id="nblive" class="small muted" aria-live="polite"></p><div data-nb="inbox"></div></section>`;
+    <section class="nb"><h2 id="nbhead" tabindex="-1">${NB_TITLE}<span id="nbcount"></span></h2><p id="nblive" class="small muted" aria-live="polite"></p><div data-nb="inbox"></div></section>`;
   r.characters.forEach(c => wireMail(c));
   refreshNotebook();
 }
@@ -1526,7 +1608,7 @@ function tabBudget(){
 }
 
 // the student's highlights beside the decisions (or the budget), with the same filter as everywhere else
-const NB_PANEL = () => `<details class="nbpanel sticky" id="nbpanel" ${st.nbClosed ? "" : "open"}><summary id="nbhead">Your highlights<span id="nbcount"></span></summary><p id="nblive" class="small muted" aria-live="polite"></p><section class="nb" data-nb="decisions"></section></details>`;
+const NB_PANEL = () => `<details class="nbpanel sticky" id="nbpanel" ${st.nbClosed ? "" : "open"}><summary id="nbhead">${NB_TITLE}<span id="nbcount"></span></summary><p id="nblive" class="small muted" aria-live="polite"></p><section class="nb" data-nb="decisions"></section></details>`;
 function wirePanel(){ $("#nbpanel").ontoggle = e => { st.nbClosed = !e.target.open; save(); }; refreshNotebook(); }
 const OBJECTION = AE2 ? "The strongest argument against your choice, and your answer to it" : "The biggest risk or strongest objection, and your answer to it";
 function tabDecisions(){
@@ -1584,7 +1666,7 @@ function tabSubmit(){
     <div class="writegrid"><div>
       <textarea class="memo" id="memo" placeholder="Write here. Your text is kept in this tab until you close it.">${esc(st.memo)}</textarea>
       <div class="count" id="count"></div></div>
-      <details class="nbpanel" id="nbpanel" ${st.nbClosed ? "" : "open"}><summary id="nbhead">Your highlights<span id="nbcount"></span></summary><p id="nblive" class="small muted" aria-live="polite"></p><section class="nb" data-nb="submit"></section></details>
+      <details class="nbpanel" id="nbpanel" ${st.nbClosed ? "" : "open"}><summary id="nbhead">${NB_TITLE}<span id="nbcount"></span></summary><p id="nblive" class="small muted" aria-live="polite"></p><section class="nb" data-nb="submit"></section></details>
     </div>
 
     <div class="consent">
