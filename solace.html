@@ -1581,7 +1581,7 @@ function mailHTML(c){
       ${pick ? `<div class="confirm"><button type="button" class="btn" data-confirm="${c.id}">Ask about this</button><span class="muted small">You can't change this afterwards.</span></div>` : ""}
     </div>`;
   }
-  return `<details class="mail" id="m_${c.id}" ${open || st.tab==="inbox" ? "open" : ""}>
+  return `<details class="mail" id="m_${c.id}" ${open || st.tab==="inbox" || (SPEAK && st.tab==="reading") ? "open" : ""}>
     <summary><span><span class="from">${esc(c.name)}</span>, <span class="muted">${esc(c.title)}</span><br><span class="subj">${esc(c.subject)}</span></span>
       <span class="state ${chosen?"":"todo"}">${chosen ? "Answered" : "Choose one"}</span></summary>
     <div class="body"><div class="prose">${hlHTML(c.email, c.id, "email")}</div>${attachHTML(c)}${c.citation ? `<p class="cite"><b>Reference:</b> ${esc(c.citation)}</p>` : ""}${offers}</div></details>`;
