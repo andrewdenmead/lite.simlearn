@@ -1719,7 +1719,9 @@ function tabSubmit(){
   const W = S.writing;
   $("#main").innerHTML = `
     <h2 style="margin-top:0">Your ${esc(W.label)}${W.addressee ? ` to ${esc(W.addressee)}` : ""}${EXAM && EX.points ? ` <span class="ptsbadge">${pts(EX.points.writing)}</span>` : ""}</h2>
-    ${EXAM && EX.points ? `<p class="small muted">Marked on the five points under "What makes a strong ${esc(W.label)}", equally.</p>` : ""}
+    ${EXAM && EX.points ? (S.rubric ? `<p class="small muted">Marked on the five points under "What makes a strong ${esc(W.label)}", equally.</p>`
+      : `<p class="small muted">Marked on five points, equally: the task, how you use the sources, the argument, organisation and language.</p>`) : ""}
+    ${W.question ? `<p><b>${esc(W.question)}</b></p>` : ""}
     <p>About ${W.words} words. Your ${esc(W.label)} should:</p>
     <ul>${W.instructions.map(i => `<li>${esc(i)}</li>`).join("")}</ul>
     ${W.reader ? `<p><b>Your reader:</b> ${esc(W.reader)}</p>` : ""}
