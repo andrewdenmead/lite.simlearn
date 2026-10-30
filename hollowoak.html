@@ -1702,13 +1702,28 @@ function tabDecisions(){
   $("#main").oninput = e => { if (e.target.dataset.hw) { st.however[e.target.dataset.hw] = e.target.value; save(); } };
 }
 
+// The writing task's name: "recommendation memo to Jane Doe", or just "literature review" when there is no addressee
+// (the AE genre tasks, 30 Oct 2026, are written for an academic reader, not a named person).
+function taskName(W){ return W.addressee ? `${W.label} to ${W.addressee}` : W.label; }
+// Optional writing.genre {purpose, structure, strong}: what this kind of text is for and what a strong one does.
+function genreHTML(W){
+  const G = W.genre, list = x => Array.isArray(x) ? `<ul class="small">${x.map(i => `<li>${esc(i)}</li>`).join("")}</ul>` : `<p class="small">${esc(x)}</p>`;
+  const cap = W.label.charAt(0).toUpperCase() + W.label.slice(1);
+  return `<details class="rubric" id="genre" ${st.genreOpen === false ? "" : "open"}><summary>${esc(cap)}: how this kind of text works</summary>
+    ${G.purpose ? `<h3>What it is for</h3>${list(G.purpose)}` : ""}
+    ${G.structure ? `<h3>How it is usually built</h3>${list(G.structure)}` : ""}
+    ${G.strong ? `<h3>What a strong one does</h3>${list(G.strong)}` : ""}<p></p></details>`;
+}
+
 function tabSubmit(){
   const W = S.writing;
   $("#main").innerHTML = `
-    <h2 style="margin-top:0">Your ${esc(W.label)} to ${esc(W.addressee)}${EXAM && EX.points ? ` <span class="ptsbadge">${pts(EX.points.writing)}</span>` : ""}</h2>
+    <h2 style="margin-top:0">Your ${esc(W.label)}${W.addressee ? ` to ${esc(W.addressee)}` : ""}${EXAM && EX.points ? ` <span class="ptsbadge">${pts(EX.points.writing)}</span>` : ""}</h2>
     ${EXAM && EX.points ? `<p class="small muted">Marked on the five points under "What makes a strong ${esc(W.label)}", equally.</p>` : ""}
     <p>About ${W.words} words. Your ${esc(W.label)} should:</p>
     <ul>${W.instructions.map(i => `<li>${esc(i)}</li>`).join("")}</ul>
+    ${W.reader ? `<p><b>Your reader:</b> ${esc(W.reader)}</p>` : ""}
+    ${W.genre ? genreHTML(W) : ""}
     ${S.rubric ? `<details class="rubric" id="rubric" ${st.rubricOpen ? "open" : ""}><summary>What makes a strong ${esc(W.label)}</summary>
       ${S.rubric.map(c => `<h3>${esc(c.name)}</h3><p class="aim small">${esc(c.aim)}</p><ul class="small">${c.look_for.map(x => `<li>${esc(x)}</li>`).join("")}</ul>`).join("")}
       <p class="small muted">Your teacher uses these same points for feedback and for exams.</p></details>` : ""}
@@ -1734,6 +1749,7 @@ function tabSubmit(){
   memoPos = null; refreshNotebook();
   $("#nbpanel").ontoggle = e => { st.nbClosed = !e.target.open; save(); };
   const rb = $("#rubric"); if (rb) rb.ontoggle = () => { st.rubricOpen = rb.open; save(); };
+  const gb = $("#genre"); if (gb) gb.ontoggle = () => { st.genreOpen = gb.open; save(); };
   $("#consent").onchange = e => { st.consent = e.target.checked; save(); $("#out").innerHTML = ""; };
   $("#make").onclick = makeSubmission;
 }
@@ -1890,9 +1906,9 @@ function makeSubmission(){
   ];
   let block;
   if (ai === "yes") {
-    block = [...head, `--- ${W.label} to ${W.addressee} (${words(memoText)} words) ---`, memoText, "=== END ==="].join("\n");
+    block = [...head, `--- ${taskName(W)} (${words(memoText)} words) ---`, memoText, "=== END ==="].join("\n");
   } else {
-    block = [...head, "=== END ===", "", `My ${W.label} to ${W.addressee} (${words(memoText)} words):`, "", memoText].join("\n");
+    block = [...head, "=== END ===", "", `My ${taskName(W)} (${words(memoText)} words):`, "", memoText].join("\n");
   }
   $("#out").innerHTML = `
     <h2>Your submission</h2>
@@ -1905,10 +1921,10 @@ function makeSubmission(){
     <p class="muted small">If you change your text or your answers later, create your submission again before you hand it in.</p>`;
   $("#pdf").onclick = () => {
     const blockOnly = ai === "yes" ? block : [...head, "=== END ==="].join("\n");   // no text without AI consent
-    const cap = W.label.charAt(0).toUpperCase() + W.label.slice(1);
+    const cap = taskName(W).charAt(0).toUpperCase() + taskName(W).slice(1);
     const today = new Date().toLocaleDateString("en-GB", {day: "numeric", month: "long", year: "numeric"});
     const blob = makePdf({
-      title: `${cap} to ${W.addressee}`,
+      title: cap,
       subtitle: `${S.title} · ${EXAM ? "Written exam" : "Role " + r.id + (r.dept ? " (" + r.dept + ")" : "")} · ${words(memoText)} words · ${today}`,
       body: memoText,
       note: EXAM ? (ai === "yes"
