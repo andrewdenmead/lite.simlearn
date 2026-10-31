@@ -1036,6 +1036,16 @@ const SPEAK_TABS = SPEAK_LISTEN ? [["context","Your brief"], ["reading","Emails"
 const TABS = SPEAK ? SPEAK_TABS : EXAM ? EXAM_TABS
   : ALL_TABS.filter(([k]) => (k !== "listening" || (S.listening && S.listening.questions && S.listening.questions.length))
                          && (k !== "article" || (S.reading && S.reading.questions && S.reading.questions.length)));
+function keepTabInView(prev){   // after a re-render, keep the strip where it was and make sure the open tab is visible
+  const nav = document.querySelector(".tabs"), a = nav && nav.querySelector('[aria-selected="true"]');
+  if (!nav) return;
+  nav.scrollLeft = prev || 0;
+  if (!a) return;
+  const n = nav.getBoundingClientRect(), b = a.getBoundingClientRect();
+  if (b.left < n.left) nav.scrollLeft -= n.left - b.left + 8;
+  else if (b.right > n.right) nav.scrollLeft += b.right - n.right + 8;
+}
+
 function render(){
   closePalette(false);
   document.querySelectorAll("audio").forEach(x => x.pause());   // a recording stops (and remembers where) when the tab changes
@@ -1049,6 +1059,7 @@ function render(){
   document.title = HO ? `${hoName}'s work · ${S.title}` : S.title;
   numberQuestions();
   const pending = AE2 || EXAM || SPEAK ? 0 : r.characters.filter(c => !st.choices[c.id]).length;
+  const oldTabs = document.querySelector(".tabs"), tabScroll = oldTabs ? oldTabs.scrollLeft : 0;   // the tab strip scrolls on small screens
   $("#app").innerHTML = `
   <header class="bar">${topBar(SPEAK ? `Speaking exam · ${r.id}: ${roleName(r)}` : EXAM ? "Written exam" : (HO ? "Hand-over: " + hoName + " · " : "") + (r.dept ? r.label + " · " + r.dept : r.label))}
     <div class="wrap"><nav class="tabs" role="tablist">${tabs.map(([k,l]) => `<button type="button" class="tab" role="tab" data-tab="${k}" aria-selected="${st.tab===k}">${l}${k==="inbox"&&pending?`<span class="dot" title="${pending} choice(s) still open"></span>`:""}</button>`).join("")}</nav></div></header>
@@ -1067,6 +1078,7 @@ function render(){
       <button type="button" class="btn" id="hoGo">Download hand-over file</button>
       <p id="hoDone" class="small ok" aria-live="polite"></p></div>`}</footer>`;
   document.querySelectorAll(".tab").forEach(b => b.onclick = () => { st.tab = b.dataset.tab; save(); render(); window.scrollTo(0,0); });
+  keepTabInView(tabScroll);
   $("#reset").onclick = () => { $("#resetAsk").hidden = false; $("#reset").hidden = true; };
   const hoOut = $("#hoOut");
   if (hoOut) hoOut.onclick = () => { $("#hoPanel").hidden = !$("#hoPanel").hidden; if (!$("#hoPanel").hidden) $("#hoName").focus(); };
