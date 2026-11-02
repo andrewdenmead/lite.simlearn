@@ -409,6 +409,8 @@ footer{border-top:1px solid var(--line);padding:18px 0 40px;font-size:.85rem;col
 <script id="main" type="text/plain">
 "use strict";
 const S = JSON.parse(document.getElementById("scenario").textContent);
+// AE written papers (30 Oct 2026) give two briefing notes, not emails: name them as the paper and the students' guide do.
+const DOCS = S.course === "AE" ? "briefing notes" : "emails";
 const STORE = "simlearn:" + S.id + ":v" + S.version;
 const AE2 = S.format === "ae2";   // new AE format: drawers, tags, "which is the better argument?"
 const EXAM = S.format === "exam", EX = S.exam || null;   // written exam: one candidate, questions, no answers in the page
@@ -583,7 +585,7 @@ function renderExamStart(){
     <ul class="times">${EX.article ? `
       <li><b>Situation</b>: a short introduction. Read it first.</li>
       ${EX.listening ? `<li><b>Listening</b>${m.listening ? ` (about ${m.listening} minutes)` : ""}: your teacher plays the recording at the start; answer the questions as you listen.</li>` : ""}
-      <li><b>Reading</b>${m.reading ? ` (about ${m.reading} minutes)` : ""}: an article and ${num(role0().characters.length)} emails${readingParts("decisions").length ? ", and a few questions on the Decisions tab" : ""}.</li>
+      <li><b>Reading</b>${m.reading ? ` (about ${m.reading} minutes)` : ""}: an article and ${num(role0().characters.length)} ${DOCS}${readingParts("decisions").length ? ", and a few questions on the Decisions tab" : ""}.</li>
       <li><b>Writing</b>${m.writing ? ` (about ${m.writing} minutes)` : ""}: make the decisions and write your ${esc(S.writing.label)}.</li>` : `
       <li><b>Reading</b>${m.reading ? ` (about ${m.reading} minutes)` : ""}: read the situation and the ${num(role0().characters.length)} documents, and answer the questions beside them.</li>
       <li><b>Listening</b>${m.listening ? ` (about ${m.listening} minutes)` : ""}: your teacher plays the recording; answer the questions as you listen.</li>
@@ -1028,7 +1030,7 @@ document.addEventListener("input", e => {
 const ALL_TABS = [["context","Context"], ...(AE2 ? [["listening","Listening"],["firstlook","First look"]] : [["firstlook","First look"],["listening","Listening"],["article","Reading"]]),["inbox", AE2 ? "Research" : "Inbox"],["decisions", B ? "Budget" : "Decisions"],["submit","Write & submit"]];
 const partTab = p => p.tab || "emails";
 const EXAM_TABS = EXAM ? (EX.article
-  ? [["context","Situation"], ...(EX.listening ? [["listening","Listening"]] : []), ["article","Article"], ["reading","Emails"], ["decisions","Decisions"], ["submit","Write & submit"]]
+  ? [["context","Situation"], ...(EX.listening ? [["listening","Listening"]] : []), ["article","Article"], ["reading", DOCS === "emails" ? "Emails" : "Briefing notes"], ["decisions","Decisions"], ["submit","Write & submit"]]
   : [["context","Situation"], ["reading","Reading"], ...(EX.listening ? [["listening","Listening"]] : []), ["decisions","Decisions"], ["submit","Write & submit"]]) : [];
 const SPEAK_LISTEN = !!(SP && SP.listening && (SP.listening.parts || []).length);   // without recordings: nothing to hand in
 const SPEAK_TABS = SPEAK_LISTEN ? [["context","Your brief"], ["reading","Emails"], ["listening","Listening"], ["deal","Deal sheet"], ["submit","Hand in"]]
@@ -1113,7 +1115,7 @@ function tabContext(){
     ${c.scar ? `<div class="note scar"><b>${esc(c.scar.label)}</b><p class="prose">${hlHTML(c.scar.text, "ctx", "scar")}</p></div>` : ""}
     ${c.proof ? `<div class="note proof"><b>${esc(c.proof.label)}</b><p class="prose">${hlHTML(c.proof.text, "ctx", "proof")}</p></div>` : ""}
     ${c.constraint ? `<div class="note clock"><b>The clock</b><p class="prose">${hlHTML(c.constraint, "ctx", "clock")}</p></div>` : ""}
-    ${EXAM ? `<h2>Your documents</h2><p class="muted">${EX.article ? `The article "${esc(EX.article.title)}" and emails from: ` : "On the Reading tab, from: "}${role0().characters.map(ch => `${esc(ch.name)}, ${esc(ch.title)}`).join(" · ")}.</p>` : `
+    ${EXAM ? `<h2>Your documents</h2><p class="muted">${EX.article ? `The article "${esc(EX.article.title)}" and ${DOCS} from: ` : "On the Reading tab, from: "}${role0().characters.map(ch => `${esc(ch.name)}, ${esc(ch.title)}`).join(" · ")}.</p>` : `
     <h2>${AE2 ? "Who's who" : "Who knows what"}</h2>
     <p class="muted">You only see your own ${AE2 ? "papers" : "contacts"}. What the others know reaches you by talking to ${st.mode === "2" ? "your partner" : "your group"}.</p>
     <div class="contacts">${roles().map(r => `<div><b>${esc(roleName(r))}</b>${r.id===st.role?" (you)":""}<br><span class="muted">${r.characters.map(ch => `${esc(ch.name)}, ${esc(ch.title)}`).join(" · ")}</span></div>`).join("")}</div>`}`;
@@ -1312,7 +1314,7 @@ function tabReading(){
       ${role0().characters.map(examMailHTML).join("")}
       <section class="nb"><h2 id="nbhead" tabindex="-1">${NB_TITLE}<span id="nbcount"></span></h2><p id="nblive" class="small muted" aria-live="polite"></p><div data-nb="inbox"></div></section>
     </div>
-    <div class="qpanel"><h2>${EX.article ? "Questions on the emails" : "Reading questions"}</h2><p class="qcount" id="qcount" aria-live="polite" data-parts="${esc(JSON.stringify(parts.map(p => p.id)))}">${tabCount(parts, "reading")}</p>
+    <div class="qpanel"><h2>${EX.article ? `Questions on the ${DOCS}` : "Reading questions"}</h2><p class="qcount" id="qcount" aria-live="polite" data-parts="${esc(JSON.stringify(parts.map(p => p.id)))}">${tabCount(parts, "reading")}</p>
       ${parts.map(qPartHTML).join("")}</div></div>`;
   wireQuestions("reading");
   refreshNotebook();
