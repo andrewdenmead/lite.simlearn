@@ -304,6 +304,22 @@ footer{border-top:1px solid var(--line);padding:18px 0 40px;font-size:.85rem;col
   .writegrid .nbpanel.sticky{position:sticky;top:112px}
   .writegrid .nbpanel.sticky .nb{max-height:calc(100vh - 180px)}
 }
+
+/* model answer (practice sims, 4 Nov 2026): shown after the student creates a submission; tap a sentence to see what it does */
+.model{margin-top:1.6em;border-top:2px solid var(--line);padding-top:1em}
+.model .mtext{font-family:var(--serif);font-size:1.04rem;line-height:1.7;background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.model .mtext p{margin:0 0 .8em}
+.model .ms{cursor:pointer;border-radius:4px;padding:1px 2px;transition:background .15s;-webkit-tap-highlight-color:transparent}
+.model .ms:hover{background:var(--panel)}
+.model .ms:focus-visible{outline:2px solid var(--pine);outline-offset:1px}
+.model .ms.on{background:var(--amber-bg);box-shadow:inset 0 -2px 0 var(--amber)}
+.model.all .ms[data-c="0"]{background:#e3ecf8}.model.all .ms[data-c="1"]{background:#e3f3e6}.model.all .ms[data-c="2"]{background:#fbe7d3}
+.model.all .ms[data-c="3"]{background:#efe5f6}.model.all .ms[data-c="4"]{background:#f6f1d5}
+.model .mnote{font-family:var(--sans);font-size:.92rem;background:var(--panel);border-left:4px solid var(--amber);border-radius:6px;padding:8px 12px;margin:-.3em 0 .9em}
+.model .mnote b{display:block}
+.model .mcrit{display:inline-block;font-size:.75rem;font-weight:600;padding:1px 8px;border-radius:999px;background:#fff;border:1px solid var(--line);margin-top:4px}
+.model .mkey{display:flex;flex-wrap:wrap;gap:6px;margin:.5em 0}
+.model .mkey span{font-size:.78rem;padding:2px 9px;border-radius:999px}
 </style>
 </head>
 <body>
@@ -1755,6 +1771,7 @@ function tabSubmit(){
     <h2 style="margin-top:0">Your ${esc(W.label)}${W.addressee ? ` to ${esc(W.addressee)}` : ""}${EXAM && EX.points ? ` <span class="ptsbadge">${pts(EX.points.writing)}</span>` : ""}</h2>
     ${EXAM && EX.points ? (S.rubric ? `<p class="small muted">Marked on the five points under "What makes a strong ${esc(W.label)}", equally.</p>`
       : `<p class="small muted">Marked on five points, equally: the task, how you use the sources, the argument, organisation and language.</p>`) : ""}
+    ${W.exam_practice ? `<p class="small muted">Exam practice: this is the written exam's task. Your teacher marks it on the exam's five criteria (the task, how you use the sources, the argument, organisation and language) and gives you a provisional grade.</p>` : ""}
     ${W.question ? `<p><b>${esc(W.question)}</b></p>` : ""}
     <p>About ${W.words} words. Your ${esc(W.label)} should:</p>
     <ul>${W.instructions.map(i => `<li>${esc(i)}</li>`).join("")}</ul>
@@ -1777,7 +1794,8 @@ function tabSubmit(){
 
     <div id="issues" class="issues"></div>
     <button type="button" class="btn" id="make">Create my submission</button>
-    <div id="out"></div>`;
+    <div id="out"></div>
+    ${S.model ? `<section class="model" id="model">${st.modelSeen ? "" : `<p class="small muted">When you have written your text and created your submission, a model answer appears here to compare with.</p>`}</section>` : ""}`;
   const memo = $("#memo"), count = () => { const n = words(memo.value); $("#count").textContent = `${n} word${n===1?"":"s"}`; };
   memo.oninput = () => { st.memo = memo.value; save(); count(); }; count();
   const keep = () => { memoPos = memo.selectionStart; };
@@ -1788,6 +1806,7 @@ function tabSubmit(){
   const gb = $("#genre"); if (gb) gb.ontoggle = () => { st.genreOpen = gb.open; save(); };
   $("#consent").onchange = e => { st.consent = e.target.checked; save(); $("#out").innerHTML = ""; };
   $("#make").onclick = makeSubmission;
+  if (S.model && st.modelSeen) showModel();
 }
 
 /* ---------- PDF of the submission (made here in the browser; nothing is sent anywhere) ----------
@@ -1989,6 +2008,43 @@ function makeSubmission(){
     $("#copied").textContent = "Your browser blocked copying. The text is selected — press Ctrl+C (or ⌘C) to copy it.";
   };
   $("#block").scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center"});
+  if (S.model) { st.modelSeen = true; save(); showModel(); }
+}
+
+/* ---------- Model answer (practice sims): S.model = {intro, argues, paragraphs: [[{t, what, crit}]], after}.
+   Only after the student has written and created a submission, so they compare rather than copy. ---------- */
+const CRIT_COL = ["#e3ecf8", "#e3f3e6", "#fbe7d3", "#efe5f6", "#f6f1d5"];
+function showModel(){
+  const M = S.model, box = $("#model");
+  if (!M || !box) return;
+  const crits = [...new Set(M.paragraphs.flat().map(x => x.crit))];
+  let n = 0;
+  box.innerHTML = `
+    <h2>Compare with a model answer</h2>
+    ${M.intro ? `<p>${esc(M.intro)}</p>` : ""}
+    ${M.argues ? `<p class="small"><b>It argues:</b> ${esc(M.argues)}</p>` : ""}
+    <p class="small muted">Tap any sentence to see what it is doing. Then look at your own text: where does it do the same?</p>
+    <p><label class="small"><input type="checkbox" id="mall"> Colour every sentence by exam criterion</label></p>
+    <div class="mkey" id="mkey" hidden>${crits.map((c, i) => `<span style="background:${CRIT_COL[i % 5]}">${esc(c)}</span>`).join("")}</div>
+    <div class="mtext">${M.paragraphs.map((p, pi) => `<p data-p="${pi}">${p.map(x => `<span class="ms" tabindex="0" role="button" data-i="${n++}" data-c="${crits.indexOf(x.crit) % 5}">${esc(x.t)}</span>`).join(" ")}</p>`).join("")}</div>
+    ${M.after ? `<p class="small">${esc(M.after)}</p>` : ""}`;
+  const flat = M.paragraphs.flatMap((p, pi) => p.map(x => [pi, x]));
+  const open = el => {
+    box.querySelectorAll(".mnote").forEach(x => x.remove());
+    const was = el.classList.contains("on");
+    box.querySelectorAll(".ms.on").forEach(x => x.classList.remove("on"));
+    if (was) return;
+    el.classList.add("on");
+    const [, x] = flat[+el.dataset.i];
+    const note = document.createElement("div"); note.className = "mnote"; note.setAttribute("aria-live", "polite");
+    note.innerHTML = `<b>${esc(x.what)}</b><span class="mcrit">${esc(x.crit)}</span>`;
+    el.closest("p").after(note);
+  };
+  box.querySelectorAll(".ms").forEach(el => {
+    el.onclick = () => open(el);
+    el.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(el); } };
+  });
+  $("#mall").onchange = e => { box.classList.toggle("all", e.target.checked); $("#mkey").hidden = !e.target.checked; };
 }
 
 render();
