@@ -305,8 +305,8 @@ footer{border-top:1px solid var(--line);padding:18px 0 40px;font-size:.85rem;col
   .writegrid .nbpanel.sticky .nb{max-height:calc(100vh - 180px)}
 }
 
-/* model answer (practice sims, 4 Nov 2026): shown after the student creates a submission; tap a sentence to see what it does */
-.model{margin-top:1.6em;border-top:2px solid var(--line);padding-top:1em}
+/* model answer (practice sims, 4 Nov 2026): its own tab, open at any time; tap a sentence to see what it does */
+.model{margin-top:.4em}
 .model .mtext{font-family:var(--serif);font-size:1.04rem;line-height:1.7;background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 16px}
 .model .mtext p{margin:0 0 .8em}
 .model .ms{cursor:pointer;border-radius:4px;padding:1px 2px;transition:background .15s;-webkit-tap-highlight-color:transparent}
@@ -1061,7 +1061,7 @@ document.addEventListener("input", e => {
 });
 
 /* ---------- main shell ---------- */
-const ALL_TABS = [["context","Context"], ...(AE2 ? [["listening","Listening"],["firstlook","First look"]] : [["firstlook","First look"],["listening","Listening"],["article","Reading"]]),["inbox", AE2 ? "Research" : "Inbox"],["decisions", B ? "Budget" : "Decisions"],["submit","Write & submit"]];
+const ALL_TABS = [["context","Context"], ...(AE2 ? [["listening","Listening"],["firstlook","First look"]] : [["firstlook","First look"],["listening","Listening"],["article","Reading"]]),["inbox", AE2 ? "Research" : "Inbox"],["decisions", B ? "Budget" : "Decisions"],["submit","Write & submit"], ...(S.model ? [["model","Model answer"]] : [])];
 const partTab = p => p.tab || "emails";
 const EXAM_TABS = EXAM ? (EX.article
   ? [["context","Situation"], ...(EX.listening ? [["listening","Listening"]] : []), ["article","Article"], ["reading", DOCS === "emails" ? "Emails" : "Briefing notes"], ["decisions","Decisions"], ["submit","Write & submit"]]
@@ -1138,7 +1138,7 @@ function render(){
     pendingPick = {}; render(); window.scrollTo(0,0);
   };
   (SPEAK ? {context:tabSpeakBrief, reading:tabSpeakEmails, listening:tabSpeakListening, deal:tabDeal, submit:tabSpeakSubmit}
-   : {context:tabContext, firstlook:tabFirstLook, listening:EXAM ? tabExamListening : tabListening, inbox:tabInbox, reading:tabReading, article:EXAM ? tabArticle : tabSimReading, decisions:tabDecisions, submit:tabSubmit})[st.tab]();
+   : {context:tabContext, firstlook:tabFirstLook, listening:EXAM ? tabExamListening : tabListening, inbox:tabInbox, reading:tabReading, article:EXAM ? tabArticle : tabSimReading, decisions:tabDecisions, submit:tabSubmit, model:tabModel})[st.tab]();
 }
 
 /* ---------- tabs ---------- */
@@ -1795,7 +1795,7 @@ function tabSubmit(){
     <div id="issues" class="issues"></div>
     <button type="button" class="btn" id="make">Create my submission</button>
     <div id="out"></div>
-    ${S.model ? `<section class="model" id="model">${st.modelSeen ? "" : `<p class="small muted">When you have written your text and created your submission, a model answer appears here to compare with.</p>`}</section>` : ""}`;
+    ${S.model ? `<p class="small muted">A model answer is on the <b>Model answer</b> tab, whenever you want it: before you write, to see what a good text does, or afterwards, to compare.</p>` : ""}`;
   const memo = $("#memo"), count = () => { const n = words(memo.value); $("#count").textContent = `${n} word${n===1?"":"s"}`; };
   memo.oninput = () => { st.memo = memo.value; save(); count(); }; count();
   const keep = () => { memoPos = memo.selectionStart; };
@@ -1806,7 +1806,6 @@ function tabSubmit(){
   const gb = $("#genre"); if (gb) gb.ontoggle = () => { st.genreOpen = gb.open; save(); };
   $("#consent").onchange = e => { st.consent = e.target.checked; save(); $("#out").innerHTML = ""; };
   $("#make").onclick = makeSubmission;
-  if (S.model && st.modelSeen) showModel();
 }
 
 /* ---------- PDF of the submission (made here in the browser; nothing is sent anywhere) ----------
@@ -2008,11 +2007,12 @@ function makeSubmission(){
     $("#copied").textContent = "Your browser blocked copying. The text is selected — press Ctrl+C (or ⌘C) to copy it.";
   };
   $("#block").scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center"});
-  if (S.model) { st.modelSeen = true; save(); showModel(); }
+  if (S.model) $("#out").insertAdjacentHTML("beforeend", `<p class="small">Now compare your text with the <b>Model answer</b> tab.</p>`);
 }
 
 /* ---------- Model answer (practice sims): S.model = {intro, argues, paragraphs: [[{t, what, crit}]], after}.
-   Only after the student has written and created a submission, so they compare rather than copy. ---------- */
+   Its own tab, open at any time (Andrew, 4 Nov 2026: students may look before doing the sim). ---------- */
+function tabModel(){ $("#main").innerHTML = `<section class="model" id="model"></section>`; showModel(); }
 const CRIT_COL = ["#e3ecf8", "#e3f3e6", "#fbe7d3", "#efe5f6", "#f6f1d5"];
 function showModel(){
   const M = S.model, box = $("#model");
@@ -2020,7 +2020,7 @@ function showModel(){
   const crits = [...new Set(M.paragraphs.flat().map(x => x.crit))];
   let n = 0;
   box.innerHTML = `
-    <h2>Compare with a model answer</h2>
+    <h2>A model answer</h2>
     ${M.intro ? `<p>${esc(M.intro)}</p>` : ""}
     ${M.argues ? `<p class="small"><b>It argues:</b> ${esc(M.argues)}</p>` : ""}
     <p class="small muted">Tap any sentence to see what it is doing. Then look at your own text: where does it do the same?</p>
