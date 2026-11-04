@@ -309,6 +309,7 @@ footer{border-top:1px solid var(--line);padding:18px 0 40px;font-size:.85rem;col
 .model{margin-top:.4em}
 .model .mtext{font-family:var(--serif);font-size:1.04rem;line-height:1.7;background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 16px}
 .model .mtext p{margin:0 0 .8em}
+.model .mpart{font-family:var(--sans, system-ui, sans-serif);font-size:.72rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted, #667);margin:0 0 .2em}
 .model .ms{cursor:pointer;border-radius:4px;padding:1px 2px;transition:background .15s;-webkit-tap-highlight-color:transparent}
 .model .ms:hover{background:var(--panel)}
 .model .ms:focus-visible{outline:2px solid var(--pine);outline-offset:1px}
@@ -2026,7 +2027,7 @@ function showModel(){
     <p class="small muted">Tap any sentence to see what it is doing. Then look at your own text: where does it do the same?</p>
     <p><label class="small"><input type="checkbox" id="mall"> Colour every sentence by exam criterion</label></p>
     <div class="mkey" id="mkey" hidden>${crits.map((c, i) => `<span style="background:${CRIT_COL[i % 5]}">${esc(c)}</span>`).join("")}</div>
-    <div class="mtext">${M.paragraphs.map((p, pi) => `<p data-p="${pi}">${p.map(x => `<span class="ms" tabindex="0" role="button" data-i="${n++}" data-c="${crits.indexOf(x.crit) % 5}">${esc(x.t)}</span>`).join(" ")}</p>`).join("")}</div>
+    <div class="mtext">${M.paragraphs.map((p, pi) => `${(M.parts || [])[pi] ? `<div class="mpart">${pi + 1} · ${esc(M.parts[pi])}</div>` : ""}<p data-p="${pi}">${p.map(x => `<span class="ms" tabindex="0" role="button" data-i="${n++}" data-c="${crits.indexOf(x.crit) % 5}">${esc(x.t)}</span>`).join(" ")}</p>`).join("")}</div>
     ${M.after ? `<p class="small">${esc(M.after)}</p>` : ""}`;
   const flat = M.paragraphs.flatMap((p, pi) => p.map(x => [pi, x]));
   const open = el => {
