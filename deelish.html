@@ -1401,9 +1401,9 @@ function renderSpeakStart(){
       <li><b>Your brief</b>: who you represent and what they want.${SPEAK_SOLO ? "" : " Each person in your group has a different role."}</li>
       ${SPEAK_LISTEN ? `<li><b>Emails</b> and <b>recordings</b> with information only you have. Answer the listening questions: they count for your mark.</li>` : `<li><b>Emails and messages</b> with information only you have.</li>`}
       <li><b>Deal sheet</b>: the points ${SPEAK_SOLO ? "you discuss in the exam room" : "your group has to agree on"}.</li>
-      ${SPEAK_LISTEN ? `<li><b>Hand in</b> your listening answers before the speaking part.</li>` : `<li>Nothing to hand in: the examiner marks how you speak in the exam room.</li>`}
+      ${SPEAK_LISTEN ? `<li><b>Hand in</b> your listening answers before the speaking part.</li>` : `<li>Nothing to hand in: the ${SPEAK_SOLO ? "examiners mark" : "examiner marks"} how you speak in the exam room.</li>`}
     </ul>
-    ${!P.listening && P.speaking ? `<p><b>Points:</b> speaking ${pts(P.speaking)}, marked in the exam room on the five points under "What the examiner listens for".</p>` : ""}
+    ${!P.listening && P.speaking ? `<p><b>Points:</b> speaking ${pts(P.speaking)}, marked in the exam room on the five points under "What the ${SPEAK_SOLO ? "examiners listen" : "examiner listens"} for".</p>` : ""}
     ${P.listening ? `<p><b>Points:</b> listening ${pts(P.listening)} (one per question, here) · speaking ${pts(P.speaking)} (in the exam room) · <b>${pts(P.listening + P.speaking)} in all</b>.</p>` : ""}
     ${S.ack_disclaimer ? `<div class="ack"><b>Before you start</b><p>${esc(S.disclaimer)}</p>
       <label><input type="checkbox" id="ack" ${st.ack ? "checked" : ""}> I understand</label></div>` : `<p class="muted small">${esc(S.disclaimer)}</p>`}
@@ -1446,7 +1446,7 @@ function tabSpeakBrief(){
         <li><b>Questions from the examiner</b> about the deal you made.</li>
       </ol>`}
       <p class="small muted">Use your own words: pass on what you read, don't read it out. You can bring short notes (key words and numbers), not full sentences.</p></div></details>
-    ${S.speaking_rubric ? `<details class="mail spmore"><summary><span class="subj">What the examiner listens for</span></summary><div class="body"><ul>${S.speaking_rubric.map(c => `<li><b>${esc(c.name)}</b>: ${esc(c.aim)}</li>`).join("")}</ul></div></details>` : ""}`;
+    ${S.speaking_rubric ? `<details class="mail spmore"><summary><span class="subj">What the ${SPEAK_SOLO ? "examiners listen" : "examiner listens"} for</span></summary><div class="body"><ul>${S.speaking_rubric.map(c => `<li><b>${esc(c.name)}</b>: ${esc(c.aim)}</li>`).join("")}</ul></div></details>` : ""}`;
 }
 function tabSpeakEmails(){
   const r = role();
