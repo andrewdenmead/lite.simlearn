@@ -602,11 +602,11 @@ function renderExamStart(){
     <p class="lede">This is an exam. You work <b>on your own</b>: everything you need is on this page.</p>
     <ul class="times">${EX.article ? `
       <li><b>Situation</b>: a short introduction. Read it first.</li>
-      ${EX.listening ? `<li><b>Listening</b>${m.listening ? ` (about ${m.listening} minutes)` : ""}: your teacher plays the recording at the start; answer the questions as you listen.</li>` : ""}
+      ${EX.listening ? `<li><b>Listening</b>${m.listening ? ` (about ${m.listening} minutes)` : ""}: ${LISTEN_HOW}</li>` : ""}
       <li><b>Reading</b>${m.reading ? ` (about ${m.reading} minutes)` : ""}: an article and ${num(role0().characters.length)} ${DOCS}${readingParts("decisions").length ? ", and a few questions on the Decisions tab" : ""}.</li>
       <li><b>Writing</b>${m.writing ? ` (about ${m.writing} minutes)` : ""}: make the decisions and write your ${esc(S.writing.label)}.</li>` : `
       <li><b>Reading</b>${m.reading ? ` (about ${m.reading} minutes)` : ""}: read the situation and the ${num(role0().characters.length)} documents, and answer the questions beside them.</li>
-      <li><b>Listening</b>${m.listening ? ` (about ${m.listening} minutes)` : ""}: your teacher plays the recording; answer the questions as you listen.</li>
+      <li><b>Listening</b>${m.listening ? ` (about ${m.listening} minutes)` : ""}: ${LISTEN_HOW}</li>
       <li><b>Writing</b>${m.writing ? ` (about ${m.writing} minutes)` : ""}: make the decisions and write your ${esc(S.writing.label)}.</li>`}
     </ul>
     ${EX.points ? `<p><b>Points:</b> listening ${pts(EX.points.listening)} · reading ${pts(EX.points.reading)} · writing ${pts(EX.points.writing)} · <b>${pts(EX.points.listening + EX.points.reading + EX.points.writing)} in all</b>. Every listening and reading question is worth one point.</p>` : ""}
@@ -1372,13 +1372,19 @@ function tabArticle(){
       ${parts.map(qPartHTML).join("")}</div></div>`;
   wireQuestions("reading");
 }
+// a mock paper is practice at home (Andrew, 6 Nov 2026): the recordings are on the page, one player per part
+const MOCK_AUDIO = !!(S.mock && EX && EX.listening && (EX.listening.parts || []).some(p => p.src));
+const LISTEN_HOW = MOCK_AUDIO ? "play each recording on the Listening tab, twice, as in the exam; answer the questions as you listen."
+  : "your teacher plays the recording; answer the questions as you listen.";
+const mockClip = p => !MOCK_AUDIO ? "" : p.src ? `<div class="clip"><audio controls preload="none" src="${esc(p.src)}" style="width:100%"></audio></div>`
+  : `<p class="clip muted small">This recording isn't on the page yet.</p>`;
 function tabExamListening(){
   const L = EX.listening;
   $("#main").innerHTML = `
     <h2 style="margin-top:0">${esc(L.name || "Listening")}</h2>
-    <p>${esc(L.intro || "Your teacher will play the recording. You will hear each part twice.")} Read the questions before ${L.parts.length > 1 ? "each part begins" : "the recording starts"}.</p>
+    <p>${MOCK_AUDIO ? "This is a practice paper, so the recordings are here. In the real exam your teacher plays them. Read the questions first, then play each part twice, and don't pause it: that's how it works in the exam." : esc(L.intro || "Your teacher will play the recording. You will hear each part twice.") + " Read the questions before " + (L.parts.length > 1 ? "each part begins" : "the recording starts") + "."}</p>
     <p class="qcount" id="qcount" aria-live="polite">${qCount("listening")} · listening: ${pts(qItems("listening").length)}</p>
-    ${L.parts.map(qPartHTML).join("")}`;
+    ${L.parts.map(p => qPartHTML(p).replace("</h3>", "</h3>" + mockClip(p))).join("")}`;
   wireQuestions("listening");
 }
 
