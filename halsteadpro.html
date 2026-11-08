@@ -1,0 +1,1111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<title>Halstead Componentry: The Resilience Fund (Pro) — SimLearn</title>
+<link rel="icon" href="/favicon.ico" sizes="any"><link rel="icon" type="image/png" href="/favicon-32.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: Lite-style single column. Plain header, five tabs, a task line on every tab, content as cards and emails. */
+:root{
+  /* Lite's palette and fonts (studio/template.html), with Pro marked by Lite's amber on tabs and badge. Light only, like Lite. */
+  --bg:#FBFBF8; --surface:#ffffff; --sunk:#ECEFF3; --ink:#1D2733; --muted:#4A5562; --line:#D4D9E1;
+  --blue:#2C5282; --blue-soft:#EEF3F9; --amber:#C98A1B; --amber-soft:#FBF1DC;
+  --good:#2F6B47; --good-soft:#E3F0E7; --bad:#9B2C2C; --bad-soft:#F7E4E4; --warn:#7A5A0E; --warn-soft:#FBF1DC; --proto:#FBF1DC;
+  --ui:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --serif:Charter,"Bitstream Charter","Sitka Text",Cambria,Georgia,serif;
+  --mono:ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+body{background:var(--bg);color:var(--ink);font-family:var(--ui);font-size:16px;line-height:1.55}
+.wrap{max-width:860px;margin:0 auto;padding-left:max(16px, env(safe-area-inset-left,0px));padding-right:max(16px, env(safe-area-inset-right,0px))}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+h1,h2,h3{text-wrap:balance;margin:0;line-height:1.2}
+p{margin:0}
+
+.proto{background:var(--proto);border-bottom:1px dashed var(--line);font-size:13px}
+.proto .wrap{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;padding-block:7px}
+.proto b{color:var(--amber);letter-spacing:.08em;text-transform:uppercase;font-size:11px}
+.ghost{background:transparent;border:1px solid var(--line);border-radius:6px;padding:3px 10px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{background:transparent;border:0;padding:3px 10px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+
+header{background:var(--surface);border-bottom:1px solid var(--line);border-top:4px solid var(--blue)}
+header .wrap{padding-block:18px 0}
+.brand{font-weight:800;color:var(--blue);font-size:14px;letter-spacing:.02em}
+.brand span{background:var(--amber);color:#fff;border-radius:4px;padding:0 6px;margin-left:4px;font-size:12px}
+h1{font-size:clamp(26px,4.5vw,34px);font-weight:800;margin-top:4px}
+.whoami{color:var(--muted);font-size:14.5px;margin-top:2px}
+.tabs{display:flex;gap:2px;overflow-x:auto;margin-top:14px}
+.tabs button{background:transparent;border:0;border-bottom:3px solid transparent;padding:8px 12px;font-weight:700;color:var(--muted);white-space:nowrap}
+.tabs button[aria-current="true"]{color:var(--ink);border-bottom-color:var(--amber)}
+.tabs button:disabled{opacity:.4;cursor:default}
+.tdot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--amber);margin-left:6px;vertical-align:middle}
+
+main .wrap{padding-block:22px 64px;display:flex;flex-direction:column;gap:18px}
+.task{background:var(--blue-soft);border-radius:8px;padding:12px 16px;display:flex;gap:10px;align-items:baseline}
+.task b{color:var(--blue);white-space:nowrap}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card h2{font-size:21px;font-weight:800}
+.card h3{font-size:17px;font-weight:700}
+.step{font-family:var(--mono);font-size:12px;color:var(--blue)}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+.pic{aspect-ratio:16/7;max-width:100%;border-radius:6px;background:repeating-linear-gradient(135deg,var(--sunk) 0 12px,transparent 12px 24px);border:1px dashed var(--line);display:grid;place-items:center;color:var(--muted);font-size:14px;text-align:center;padding:12px}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.fact{background:var(--bg);border-radius:6px;padding:8px 12px}
+.fact .l{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+.fact .v{font-weight:700}
+.roles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}
+.role{text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.role[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft)}
+.role b{font-size:16.5px}
+.role span{font-size:14px;color:var(--muted)}
+.people{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}
+.person{border-left:3px solid var(--line);padding:2px 12px}
+.person b{display:block}
+.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:10px}
+.choice{text-align:left;background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.choice:hover:not(:disabled){border-color:var(--ink)}
+.choice[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft)}
+.choice:disabled{cursor:default}
+.choice:disabled:not([aria-pressed="true"]){opacity:.5}
+.choice .k{font-family:var(--mono);font-size:12px;color:var(--blue)}
+.choice small{color:var(--muted);font-size:14px}
+.btn{background:var(--blue);color:#fff;border:0;border-radius:8px;padding:9px 18px;font-weight:700;align-self:flex-start}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.done{background:var(--good-soft);color:var(--good);border-radius:6px;padding:8px 12px;font-weight:600}
+
+/* emails */
+.mail{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.mail summary{list-style:none;cursor:pointer;padding:12px 16px;display:grid;grid-template-columns:1fr auto;gap:2px 12px}
+.mail summary::-webkit-details-marker{display:none}
+.mail .from{font-weight:400}
+.mail .lbl{color:var(--muted);font-weight:400;margin-right:2px}
+.mail.unread .from,.mail.unread .subj{font-weight:700;color:var(--ink)}
+.udot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--blue);margin-right:8px;vertical-align:1px}
+.mail .subj{grid-column:1/2;color:var(--muted);font-size:14.5px}
+.mail .tag{grid-row:1/3;grid-column:2;align-self:center}
+.mail[open] summary{border-bottom:1px solid var(--line);background:var(--bg)}
+.mail .body p,.card>p,.attach>p{font-family:var(--serif);font-size:1.02rem;line-height:1.62}
+.mail .body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:10px}
+.sig{color:var(--muted)}
+.attach{border:1px solid var(--line);border-radius:6px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.attach .an{font-size:12.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.fine{font-size:13px;color:var(--muted);border-top:1px dotted var(--line);padding-top:6px}
+.rel{font-size:11.5px;font-weight:700;padding:1px 8px;border-radius:99px;white-space:nowrap}
+.rel-high{background:var(--good-soft);color:var(--good)}
+.rel-medium{background:var(--warn-soft);color:var(--warn)}
+.rel-low{background:var(--bad-soft);color:var(--bad)}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+td.num,th.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.mono{font-family:var(--mono);font-size:.9em}
+svg text{fill:var(--muted);font-family:var(--ui);font-size:12px}
+svg .lab{fill:var(--ink);font-size:13px}
+svg .val{fill:var(--ink);font-family:var(--mono);font-size:12px}
+svg .axis{stroke:var(--line)} svg .zero{stroke:var(--muted)}
+svg .neg{fill:var(--bad)} svg .pos{fill:var(--good)}
+svg .ring-bg{stroke:var(--sunk);fill:none} svg .ring{stroke:var(--amber);fill:none}
+.donuts{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:6px}
+.donuts figure{margin:0;text-align:center;font-size:13.5px}
+
+/* audio placeholder */
+.audio{background:var(--blue-soft);border-radius:8px;padding:10px 14px;display:grid;grid-template-columns:auto 1fr;gap:2px 12px;align-items:center}
+.audio .play{width:36px;height:36px;border-radius:50%;border:1.5px dashed var(--blue);background:transparent;color:var(--blue);cursor:not-allowed}
+.audio .t{font-weight:700}
+.audio .s{font-size:13px;color:var(--muted)}
+.audio details{grid-column:1/-1;font-size:14px}
+.audio summary{cursor:pointer;color:var(--blue);font-weight:600}
+.script{display:flex;flex-direction:column;gap:8px;padding-top:6px}
+.sd{font-style:italic;color:var(--muted);font-size:13.5px}
+
+/* investigate */
+.qs{display:flex;flex-direction:column;gap:8px}
+.q{text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:6px;padding:9px 12px}
+.q[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft)}
+.q:disabled:not([aria-pressed="true"]){opacity:.45;cursor:default}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:14px}
+.two>*{min-width:0}
+
+/* timeline */
+.tl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.tc{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;user-select:none}
+.tc[draggable="true"]{cursor:grab}
+.tc.dragging{opacity:.4}
+.tc.over{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-soft)}
+.tc .n{font-family:var(--mono);color:var(--muted);text-align:center}
+.tc .d{display:block;font-family:var(--mono);font-size:12.5px;color:var(--good)}
+.tc .arr{display:flex;gap:4px}
+.tc .arr button{width:34px;height:34px;border-radius:6px;border:1px solid var(--line);background:var(--bg)}
+.tc .arr button:disabled{opacity:.3;cursor:default}
+.tl.ok .tc{border-color:var(--good)}
+.note-strong{background:var(--amber-soft);border-radius:8px;padding:8px 12px}
+.hint{background:var(--warn-soft);border-radius:6px;padding:9px 12px}
+.opt{text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:6px;padding:8px 12px}
+.opt.right{border-color:var(--good);background:var(--good-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.opt:disabled{cursor:default}
+.fb{font-size:14.5px}
+
+textarea{width:100%;min-height:200px;resize:vertical;font:inherit;line-height:1.6;padding:10px 12px;border:1.5px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);box-sizing:border-box}
+.wc{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.board{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:10px}
+.tile{background:var(--bg);border-radius:6px;padding:10px 12px}
+.tile .l{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+.tile .v{font-weight:700}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+.sn{cursor:pointer;border-radius:3px;transition:background .15s}
+.sn:hover{box-shadow:inset 0 -2px 0 var(--amber)}
+#hlpal{position:absolute;z-index:30;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px;display:flex;gap:6px;box-shadow:0 4px 14px rgba(0,0,0,.15)}
+#hlpal[hidden]{display:none}
+#hlpal button{width:28px;height:28px;border-radius:50%;border:1px solid rgba(0,0,0,.15);cursor:pointer}
+#hlpal .none{background:var(--surface);color:var(--muted)}
+#fab{position:fixed;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:20;background:var(--blue);color:#fff;border:0;border-radius:999px;padding:10px 18px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+#fab[hidden],#nb[hidden]{display:none}
+#nb{position:fixed;top:0;right:0;bottom:0;width:min(380px,100vw);z-index:25;background:var(--bg);border-left:1px solid var(--line);overflow-y:auto;padding:calc(14px + env(safe-area-inset-top,0px)) 16px 24px;box-shadow:-6px 0 20px rgba(0,0,0,.12);display:flex;flex-direction:column;gap:10px;box-sizing:border-box}
+.nbhead{display:flex;justify-content:space-between;align-items:center}
+.nbhead h2{font-size:18px}
+.lnk{background:none;border:0;color:var(--blue);text-decoration:underline;padding:0;font-size:14px;cursor:pointer}
+.cc summary{cursor:pointer;display:flex;gap:4px;align-items:center;font-weight:600;font-size:14px}
+.cc i,.nbgroup i,.pin i{display:inline-block;width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.15);flex:none}
+.ccgrid{display:grid;gap:6px;margin-top:8px}
+.ccgrid label{display:flex;gap:8px;align-items:center}
+.ccgrid input{flex:1;font:inherit;font-size:14px;padding:4px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
+.nbadd{display:flex;flex-direction:column;gap:6px}
+.nbadd textarea{min-height:60px;font-size:14px}
+.btn.small{padding:6px 12px;font-size:14px}
+.nbgroup{display:flex;gap:6px;align-items:center;font-weight:700;font-size:14px;margin-top:6px}
+.nbcard{background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--line);border-radius:8px;padding:8px 10px}
+.nbcard p{font-family:var(--serif);font-size:15px;line-height:1.5}
+.nbcard .src{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-between;gap:8px;margin-top:4px}
+.pins{display:flex;flex-direction:column;gap:6px}
+.pin{display:flex;gap:8px;align-items:flex-start;text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:8px;padding:8px 10px}
+.pin[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft)}
+.pin span{font-family:var(--serif);font-size:15px}
+.pin small{display:block;font-family:var(--ui);font-size:12.5px;color:var(--muted)}
+.gate{border:2px dashed var(--amber)}
+.coderow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.coderow input,.numin{font-family:var(--mono);font-size:18px;padding:6px 10px;border:1.5px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);width:12ch}
+.bigcode{font-family:var(--mono);font-size:34px;letter-spacing:.2em;color:var(--good);border:2px solid var(--good);border-radius:8px;padding:6px 18px;align-self:flex-start}
+.pzq{display:flex;flex-direction:column;gap:6px;border-top:1px dotted var(--line);padding-top:10px}
+.opts2{display:flex;flex-wrap:wrap;gap:6px}
+.opts2 .opt[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft)}
+.msg{color:var(--bad);font-size:14px}
+.sortq{display:flex;flex-direction:column;gap:8px}
+.sortrow{display:grid;grid-template-columns:1fr minmax(170px,auto);gap:10px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--bg)}
+.sortrow p{font-family:var(--serif);font-size:15px}
+.sortrow select{font:inherit;font-size:14px;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
+@media (max-width:560px){.sortrow{grid-template-columns:1fr}}
+.opts2 .opt{text-align:left}
+svg .sa{fill:var(--blue)} svg .sb{fill:var(--amber)}
+.legend{display:flex;gap:14px;font-size:13px;color:var(--muted);flex-wrap:wrap}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.sums{width:100%;font-size:14px}
+.sums td.num{white-space:nowrap}
+.sums tr.tot td{font-weight:800;border-top:2px solid var(--ink)}
+
+/* budget table (Lite's Budget tab: a number per line, a live total) */
+.bud{display:flex;flex-direction:column}
+.brow{display:grid;grid-template-columns:1fr 9ch 11ch;gap:10px;align-items:center;border-bottom:1px solid var(--line);padding:9px 0}
+.brow label{display:flex;flex-direction:column;gap:2px}
+.brow .numin{width:100%;box-sizing:border-box;font-size:16px}
+.brow .bsub{text-align:right;font-family:var(--mono);font-size:14px}
+.brow .bx{font-size:13px;color:var(--warn)}
+.btotal{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;font-weight:700;background:var(--bg);border-radius:8px;padding:10px 12px}
+.btotal .on{color:var(--good)} .btotal .off{color:var(--bad)}
+@media (max-width:560px){.brow{grid-template-columns:1fr 9ch}.brow .bsub{grid-column:1/-1}}
+.lines{display:flex;flex-direction:column;gap:8px}
+.lines p{font-family:var(--serif);font-size:1rem;line-height:1.58}
+
+/* Lite's hand-in (studio/template.html), added for the Pro hand-in */
+.consent{border:1px solid var(--line);background:#fff;border-radius:12px;padding:14px 16px;margin:6px 0}
+.consent label{display:flex;gap:10px;align-items:flex-start;font-weight:600;margin-top:8px}
+.consent input{margin-top:5px;width:18px;height:18px}
+.issues{color:var(--warn);font-size:.92rem}
+.block{width:100%;min-height:260px;font:13px/1.45 ui-monospace,Menlo,Consolas,monospace;border:2px solid var(--blue);border-radius:10px;padding:10px 12px;background:#fff;white-space:pre-wrap;box-sizing:border-box}
+.ok{color:var(--good);font-weight:600}
+#out{display:flex;flex-direction:column;gap:10px}
+</style>
+</head>
+<body>
+
+
+<header><div class="wrap">
+  <div class="brand">SimLearn<span>PRO</span></div>
+  <h1>Halstead Componentry: The Resilience Fund</h1>
+  <p class="whoami" id="who"></p>
+  <nav class="tabs" id="tabs" aria-label="Sections"></nav>
+</div></header>
+<main><div class="wrap" id="main"></div></main>
+<div id="hlpal" hidden role="dialog" aria-label="Highlight colour"><button data-hlc="yellow" style="background:#FFF176" aria-label="Yellow"></button><button data-hlc="green" style="background:#B9F6CA" aria-label="Green"></button><button data-hlc="pink" style="background:#F8BBD0" aria-label="Pink"></button><button data-hlc="blue" style="background:#B3E5FC" aria-label="Blue"></button><button data-hlc="orange" style="background:#FFE0B2" aria-label="Orange"></button><button data-hlc="purple" style="background:#E1BEE7" aria-label="Purple"></button><button data-hlc="none" class="none" aria-label="Remove highlight">✕</button></div>
+<button id="fab" data-act="nbopen" hidden>Notes (0)</button>
+<aside id="nb" hidden aria-label="Your highlights and notes"></aside>
+
+<script>
+const ROLES={
+ A:{name:"Asia-Pacific Sourcing Planner",line:"Suppliers, freight and the backup supplier",detail:"You work in Halstead's sourcing office in Penang, Malaysia. Your inbox holds messages from the sourcing manager, the freight forwarder and the supplier auditor."},
+ B:{name:"European Hub Planner",line:"Warehouses, customs and client deliveries",detail:"You work at Halstead's European Distribution Hub near Antwerp. Your inbox holds messages from the warehouse, customs and the client delivery team."},
+ C:{name:"Finance & Risk Analyst",line:"The fund, client contracts and insurance",detail:"You work at head office in Sheffield. Your inbox holds messages from the Head of Finance, the contracts manager and the risk analyst."}
+};
+const REL={high:"Reliable",medium:"Personal view",low:"Weak evidence"};
+const fmt=n=>(n<0?"−":"")+"£"+Math.abs(n).toLocaleString("en-GB");
+
+/* simple horizontal bars with a value label */
+function bars(rows,label){
+  const W=500,left=200,right=70,rowH=28,top=4,H=top+rows.length*rowH+4,w=W-left-right,max=Math.max(...rows.map(r=>r.v));
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${label}">`;
+  rows.forEach((r,i)=>{const y=top+i*rowH,bw=Math.max(2,w*r.v/max);
+    s+=`<text class="lab" x="${left-10}" y="${y+17}" text-anchor="end">${r.l}</text><rect class="${r.hi?"sb":"sa"}" x="${left}" y="${y+5}" width="${bw}" height="${rowH-11}" rx="2"/><text class="val" x="${left+bw+6}" y="${y+17}">${r.t}</text>`;});
+  return s+"</svg>";
+}
+const PRO_COVER="";   // the cover picture (build.py fills this in)
+const PRO_AUDIO=[];   // the recordings published next to the page (build.py fills this in)
+function audio(t,voice,script,file){if(file&&PRO_AUDIO.includes(file))return `<div class="audio rec"><div style="flex:1;min-width:0"><div class="t">${t}</div><audio controls preload="none" data-f="${file}" src="audio/${file}.mp3" style="width:100%;margin-top:6px"></audio></div><details ${(S.heard||{})[file]?"":"hidden"}><summary>Show the text</summary><div class="script">${script}</div></details></div>`;
+ return `<div class="audio"><button class="play" disabled aria-label="Play (recording to come)">▶</button><div><div class="t">${t}</div><div class="s">Recording to come: read the text</div></div><details open><summary>The text</summary><div class="script">${script}</div></details></div>`;}
+function mail(m){const k=m.from+"|"+m.subj, o=!!S.mailOpen[k], r=!!S.mailRead[k];
+ return `<details class="mail ${r?"read":"unread"}" data-mail="${encodeURIComponent(k)}"${o?" open":""}><summary><span class="from">${r?"":`<span class="udot" aria-label="Unread"></span>`}<span class="lbl">From:</span> ${m.from}</span><span class="subj">${m.subj}</span><span class="tag"><span class="rel rel-${m.rel}">${REL[m.rel]}</span></span></summary><div class="body" data-src="${m.from.split(",")[0]}" data-q="${m.rel}">${m.body}</div></details>`;}
+function att(name,html){return `<div class="attach"><div class="an">📎 ${name}</div>${html}</div>`;}
+
+/* ---------- inboxes (every key clue appears in at least two places) ---------- */
+const RESTART=`<div class="tw"><table><thead><tr><th>When</th><th>What restarts</th><th>Output</th></tr></thead><tbody>
+  <tr><td>Week 6</td><td>Line 1</td><td>About a third of normal</td></tr>
+  <tr><td>Week 8</td><td>Line 2</td><td>About two-thirds of normal</td></tr>
+  <tr><td>Weeks 10–12</td><td>Line 3</td><td>Full capacity</td></tr></tbody></table></div>`;
+const VIRAL={from:"Alasdair Reid, Managing Director",subj:"Fwd: “Back through Suez within a fortnight”",rel:"low",body:`
+ <p>Seen this? If it's right, we won't need half of what's on the wish lists.</p>
+ <p class="muted"><em>“Insiders tell us the big carriers will be back through Suez within a fortnight.”</em> (Freight Whispers, a weekly email newsletter, 3 November)</p>
+ <p class="fine">The newsletter names no source. In March, its “insiders” said the same thing.</p>`};
+
+const INBOX={
+ A:[
+  {from:"Lakshmi Chandrasekaran, Regional Sourcing Manager",subj:"The real timeline, since nobody else will say it",rel:"high",body:`
+   <p>I'll say what the last three status calls haven't: the six-week figure going round head office isn't what Kaveri is telling me. Six weeks is when their first line restarts. Their own engineers say full capacity takes ten to twelve weeks, and I'd rather you hear that now than in week seven. Their draft plan is attached. Note that nobody has signed it.</p>
+   ${att("Kaveri Precision: restart plan (draft, unsigned)",RESTART+`<p class="fine">Restored output will be allocated according to customers' framework agreements.</p>`)}
+   <p>That last line matters. When capacity comes back, Kaveri will ration it, and the biggest buyers usually come first. One audit and renegotiation visit (£5,300, travel included) would get us a signed, dated schedule for each line and written priority on the first restored output, from about week ten. A second visit adds nothing.</p>
+   <p>On the backup: Straits Valve Works in Penang will take 15% off its qualification fee if we sign this month. Its first lots could reach our hub about six weeks after signing, right in the middle of the gap.</p>
+   <p class="sig">Lakshmi</p>`},
+  {from:"Renzo Aguilar, Freight Forwarding Agent",subj:"Reroute numbers, and a clock that's ticking",rel:"high",body:`
+   <p>Here are the real numbers, not the rounded ones going round head office. The Cape route adds about twelve days and costs about 40% more per container than the old rate. Air freight costs four to five times the sea rate, but it's the only way to deliver inside three weeks.</p>
+   <p>Over the next three months I count sixteen urgent shipments on the critical lines. Today's air price is £4,500 a shipment, and carriers are signalling another increase within about three weeks, so whatever we book, sooner is cheaper. The chart shows whose shipments they are: most of the urgency is Dornbach's.</p>
+   ${att("Urgent shipments, next three months, by client",bars([{l:"Dornbach Automotive",v:10,t:"10",hi:1},{l:"Kessler Pumps",v:3,t:"3"},{l:"Bergman Foods",v:2,t:"2"},{l:"Falkirk Precision",v:1,t:"1"}],"Urgent shipments by client: Dornbach 10, Kessler 3, Bergman 2, Falkirk 1"))}
+   <p>Two practical points. Air cargo is cleared at the airport under its own declaration, so it's a separate clearance point from the port. And each air shipment travels on an air waybill in the airline's system: it only appears in a client's tracking portal once someone links the waybill to the order. You can tell them apart: a waybill number is the airline's three-digit code and eight digits (176-12345678), a container number is four letters and seven digits.</p>
+   <p class="sig">Renzo</p>`},
+  {from:"Mei Lin Tan, Quality & Compliance Auditor",subj:"Audit's done: here's the honest read",rel:"high",body:`
+   <p>I've finished the audit at Straits Valve Works. Good news: they pass on quality and documentation, and their machining is as good as anything we buy. Less good news: they run a single shift and can't add a second before next year. That gives them about 40% of our total volume, whatever their sales deck implies. It's a hard ceiling.</p>
+   <p>So aim it. If one client has a hard requirement, qualify one product line for that client and sign before the discount ends. Spread across all three lines, the same 40% protects nobody properly. With the discount, qualification costs £9,000 per product line; after this month it's the standard £10,600.</p>
+   ${att("Our volume by product line",`<div class="tw"><table><thead><tr><th>Product line</th><th class="num">Share of our volume</th></tr></thead><tbody>
+    <tr><td>VB valve bodies</td><td class="num">34%</td></tr><tr><td>PH pump housings</td><td class="num">38%</td></tr><tr><td>CV check valves</td><td class="num">28%</td></tr></tbody></table></div><p class="fine">Each line is under 40%, so Straits could make any one of them in full, or part of several.</p>`)}
+   <p>Which client takes which line is in the hub's order book, not in my files.</p>
+   <p class="sig">Mei Lin</p>`}
+ ],
+ B:[
+  {from:"Kasia Nowicka, Warehouse Operations Lead",subj:"The rate holds, but only if we move now",rel:"high",body:`
+   <p>Our logistics provider has quoted a good rate for extra buffer-stock space at the hub: £210 per pallet-month if we book before quarter-end. After that it goes up to £250. One pallet-month is one pallet stored for a month, handling included.</p>
+   <p>How much? About 140 pallet-months holds roughly ten weeks of our critical lines, and 170 about twelve. Lakshmi tells me Kaveri needs ten to twelve weeks to get back to full capacity, so I wouldn't go much below 140. If this fund is all there is, book the space now and fill it. Booking less and topping up later only works if there's later money.</p>
+   ${att("How long the buffer lasts",bars([{l:"110 pallet-months",v:8,t:"about 8 weeks"},{l:"140 pallet-months",v:10,t:"about 10 weeks",hi:1},{l:"170 pallet-months",v:12,t:"about 12 weeks"},{l:"200 pallet-months",v:14,t:"about 14 weeks"}],"Weeks of cover by buffer size"))}
+   <p>Don't count on our own space. Sheffield is at about 90% of capacity and the hub isn't much better. Re-racking would squeeze in about twenty more pallets, which runs out within a fortnight.</p>
+   <p class="sig">Kasia</p>`},
+  {from:"Declan O'Farrell, Customs & Compliance Officer",subj:"A detail that hasn't made the official briefing yet",rel:"medium",body:`
+   <p>Something to know before anyone finalises a rerouting plan. Customs at Antwerp have started re-checking every container that arrives by the long route, because the route no longer matches the original declaration. Each one needs a fresh declaration, and duty is charged on the higher freight and insurance cost too. It isn't in any official notice yet, but I've seen it twice this month: a few hundred pounds more duty each time, and two extra days while the paperwork was redone.</p>
+   <p>The real danger is volume. If we ship both by the long sea route and by air, we clear at two points, the port and the airport, and my team can't staff both. Twelve temporary staff on two shifts would keep clearance under 48 hours. With six, the queue grows by about a day every week. The agency quotes £4,300 per person for the twelve weeks.</p>
+   <p>Experienced staff catch paperwork problems before the ship docks. New staff catch them after, when the container is already sitting on the quay.</p>
+   <p class="sig">Declan</p>`},
+  {from:"Chiara Ricci, Client Delivery Coordinator",subj:"Dornbach is getting nervous, and I don't blame them",rel:"medium",body:`
+   <p>Dornbach's account manager called me this week, off the record: one more delay on top of this one and they'll review the whole supplier relationship, not just this shipment. Julian says their contract requires real-time visibility of every order, and their planners log into our tracking portal every morning. I've watched them do it.</p>
+   <p>That's why the licences matter. Ours run out at the end of the month, and the renewal comes out of this fund at £640 a licence. Thirty-five licences track every open order even at our peak; in a normal week about thirty orders are moving. Below thirty, orders drop off the screen. We have 28 now.</p>
+   <p>I'm also phoning Dornbach in the evenings because the day is full. Overtime for the account managers on our six most time-sensitive accounts, at £1,400 per account, would let us warn clients days before a shipment is late, not on the day.</p>
+   ${att("Order book: who buys what",`<div class="tw"><table><thead><tr><th>Client</th><th>Product line</th><th class="num">Share of our volume</th></tr></thead><tbody>
+    <tr><td>Dornbach Automotive</td><td>VB valve bodies</td><td class="num">30%</td></tr>
+    <tr><td>Bergman Foods</td><td>PH pump housings</td><td class="num">22%</td></tr>
+    <tr><td>Kessler Pumps</td><td>PH pump housings</td><td class="num">12%</td></tr>
+    <tr><td>Falkirk Precision</td><td>CV check valves</td><td class="num">10%</td></tr>
+    <tr><td>Five smaller accounts</td><td>All three lines</td><td class="num">26%</td></tr></tbody></table></div>`)}
+   <p class="sig">Chiara</p>`}
+ ],
+ C:[
+  {from:"Naomi Price, Head of Finance",subj:"£220,000. That's it. That's the whole number.",rel:"high",body:`
+   <p>To be completely clear: the Resilience Fund is £220,000, released outside the normal budget for this disruption only. It doesn't roll over, and there is no second allocation this year. If it isn't committed within two weeks, it goes back to general reserves.</p>
+   <p>If every department got its wish list in full, we'd need £298,200, so more than £78,000 has to go. My rule is simple: fund first what we've signed up to, then what keeps parts arriving in the coming months, and only then what makes us feel safer.</p>
+   ${att("The three wish lists, with each quote's source",`<div class="tw"><table><thead><tr><th>Line</th><th class="num">Asked for</th><th class="num">Unit cost</th><th class="num">Total</th></tr></thead><tbody>
+    <tr><td colspan="4"><b>Asia-Pacific Sourcing: £109,600</b></td></tr>
+    <tr><td>Air freight (Renzo's count of urgent shipments)</td><td class="num">16</td><td class="num">£4,500</td><td class="num">£72,000</td></tr>
+    <tr><td>Backup supplier, per product line (Straits, discounted)</td><td class="num">3</td><td class="num">£9,000</td><td class="num">£27,000</td></tr>
+    <tr><td>Main-supplier audit visits (Lakshmi)</td><td class="num">2</td><td class="num">£5,300</td><td class="num">£10,600</td></tr>
+    <tr><td colspan="4"><b>European Hub: £128,600</b></td></tr>
+    <tr><td>Buffer stock, pallet-months (Kasia)</td><td class="num">200</td><td class="num">£210</td><td class="num">£42,000</td></tr>
+    <tr><td>Temporary staff for twelve weeks (Declan)</td><td class="num">12</td><td class="num">£4,300</td><td class="num">£51,600</td></tr>
+    <tr><td>Tracking licences (Chiara)</td><td class="num">35</td><td class="num">£640</td><td class="num">£22,400</td></tr>
+    <tr><td>Account overtime, per account (Chiara)</td><td class="num">9</td><td class="num">£1,400</td><td class="num">£12,600</td></tr>
+    <tr><td colspan="4"><b>Finance &amp; Risk: £60,000</b></td></tr>
+    <tr><td>Penalty insurance, per contract (Tobias)</td><td class="num">9</td><td class="num">£3,200</td><td class="num">£28,800</td></tr>
+    <tr><td>Freight-rate hedge, months (Tobias)</td><td class="num">6</td><td class="num">£2,100</td><td class="num">£12,600</td></tr>
+    <tr><td>Nearshoring site studies (Finance)</td><td class="num">3</td><td class="num">£6,200</td><td class="num">£18,600</td></tr></tbody></table></div>`)}
+   <p>One easy saving: the site studies wouldn't move a single part before next year. I'll put one into next year's capital plan myself, so cutting them here loses nothing.</p>
+   <p>What I don't trust yet are the freight figures. What's reached my desk has clearly been rounded to look better, and the real ones sit with our forwarder.</p>
+   <p class="sig">Naomi</p>`},
+  {from:"Julian Ashworth, Commercial Contracts Manager",subj:"Not every contract is equally exposed",rel:"high",body:`
+   <p>Everyone seems to assume every contract is a five-alarm fire if we're late. It isn't. Falkirk Precision and Bergman Foods both rewrote their force-majeure clauses after the pandemic to name supply-chain disruption, so this disruption almost certainly qualifies, and our penalty exposure there is minimal. Two smaller accounts run on rolling terms with no penalty clause at all. That leaves five contracts where lateness costs real money, Dornbach first.</p>
+   <p>Dornbach is a different story entirely. Its contract, signed after its own recall scandal, says we must be able to show every order's location and status on request, in real time, from dispatch to delivery. Each failure carries a fixed penalty, and three failures in a quarter give Dornbach the right to terminate. It's the strictest clause we have.</p>
+   <p>Mei Lin tells me the backup supplier can cover only about 40% of our volume, so some shipments will be late. If we insure, we should insure those five contracts, and only those five.</p>
+   <p class="sig">Julian</p>`},
+  {from:"Tobias Hallgren, Risk & Insurance Analyst",subj:"What hedging and insurance actually cover",rel:"high",body:`
+   <p>Two quotes, and what they really buy.</p>
+   <p>The freight-rate hedge locks today's rate for up to six months at £2,100 a month. It protects us against further increases but refunds nothing if rates fall. Match it to the recovery, not to the maximum on offer: if the supplier needs about twelve weeks, three months is right, four at most, since rates come down slowly. Hedge prices rise as soon as carriers announce an increase, so this price won't last.</p>
+   <p>Contract-penalty insurance costs £3,200 per contract covered. It pays only once a delay passes a documented threshold, usually ten working days beyond the contract window, and only up to the penalty actually invoiced. It doesn't cover goodwill or a client walking away. Where a contract can't produce a penalty, the premium buys nothing.</p>
+   <p>What I don't have is a recovery timeline I trust. Six weeks is the number going round head office, and I'm not sure anyone has checked it.</p>
+   <p class="sig">Tobias</p>`}
+ ]
+};
+const BRANCH={
+ tell:{from:"Henrike Vogt, Supplier Quality Lead, Dornbach Automotive",subj:"Thank you for calling us first",rel:"high",body:`
+  <p>Chiara called us this morning, before we saw anything on your portal. After our own recall, that matters to us.</p>
+  <p>To help your planning: we hold about four weeks of our own stock for two of the ten urgent shipments you have for us. Those two can come by sea. The other eight cannot wait.</p>
+  <p>You should also know two things. Our team will run spot checks on your tracking portal: every open order, live, without notice. And as a precaution, our purchasing department has asked a second supplier to stand by for one valve line. That is our standard procedure since the recall. If your plan works, it will stay on standby.</p>
+  <p class="sig">Henrike Vogt</p>`},
+ wait:{from:"Henrike Vogt, Supplier Quality Lead, Dornbach Automotive",subj:"Two orders marked “delayed at origin”",rel:"high",body:`
+  <p>On Monday our planners noticed that two of our orders on your portal are marked “delayed at origin”. Nobody from Halstead has told us why.</p>
+  <p>I am sure there is an explanation, and I would like it, with your recovery plan, by Friday. You know our contract: we must be able to see every order, live. Our team checks your portal every morning, and from today it will also run spot checks without notice.</p>
+  <p>We have not looked at other suppliers. We would prefer not to.</p>
+  <p class="sig">Henrike Vogt</p>`}
+};
+
+/* ---------- experts: one per role, from a shortlist ---------- */
+const EXPERTS={
+ freight:{name:"Freight-market analyst",who:"Dr Ewan Fraser, Clydeside Shipping Research",what:"Tracks container rates on the Asia–Europe routes. Can tell you where freight prices are heading.",
+  rep:`<p>Rates spike fast and fall slowly. In the last mass rerouting, Asia–Europe spot rates more than tripled within about eight weeks and took months to come down.</p>
+   <p>A hedge is worth having for as long as you'll actually need the capacity. Lock in for the recovery period, not for the longest term on offer: there's no refund when rates fall. Hedge prices rise the moment carriers announce an increase.</p>`},
+ recovery:{name:"Supplier-recovery consultant",who:"Priya Natarajan, Restart Advisory",what:"Helps manufacturers get factories running again after floods and fires. Knows what suppliers' restart dates really mean.",
+  rep:`<p>After a flood, plants restart line by line. The first date a supplier gives you is almost always the first line restarting, not full capacity.</p>
+   <p>When output comes back, suppliers ration it, and customers with a signed priority agreement go first. A site visit that ends with a signed, dated schedule is the cheapest protection you can buy.</p>`},
+ inventory:{name:"Inventory planner",who:"Tom Hesketh, Hesketh Inventory Partners",what:"Sizes safety stock for engineering firms. Can tell you how much buffer a gap really needs.",
+  rep:`<p>Safety stock should cover the gap between your last reliable delivery and your next one, plus a margin in case the date slips.</p>
+   <p>If a backup supplier starts delivering in the middle of the gap, your buffer doesn't have to carry it alone. Stock also costs money while it sits on a shelf, so plan to run it down, not to keep it.</p>`},
+ customs:{name:"Customs broker",who:"Annelies Peeters, Scheldt Customs Services",what:"Clears goods at Antwerp port and airport every day. Knows where the queues come from.",
+  rep:`<p>When the route changes, the original declaration no longer matches, so every container needs a new one, and duty is charged on the full cost of getting the goods here, freight and insurance included.</p>
+   <p>Air cargo clears separately at the airport. Experienced staff on two shifts can keep both under 48 hours. One tired team can't.</p>`},
+ oem:{name:"Former car-industry quality manager",who:"Ruth Okafor, supplier-quality consultant",what:"Spent fifteen years checking suppliers for European car makers. Knows how they read a supplier contract.",
+  rep:`<p>Car makers that have been through a recall trust data, not promises. If a contract says every order must be visible in real time, they check it, often without warning.</p>
+   <p>An order they can't see counts against you, even if the parts arrive on time. Suppliers who warn early with a plan are treated better than suppliers who are found out.</p>`},
+ insurance:{name:"Insurance broker",who:"Joanna Whitfield, Whitfield Trade Cover",what:"Arranges penalty and trade-disruption cover for manufacturers. Knows what a policy will really pay.",
+  rep:`<p>Penalty cover pays only once a delay passes a documented threshold, usually ten working days, and only up to the penalty actually invoiced.</p>
+   <p>It's good value where penalties are real and large. On a contract with force-majeure protection, or with no penalty clause, there's nothing to claim, so the premium buys nothing.</p>`}
+};
+const SHORTLIST={A:["freight","recovery","inventory"],B:["customs","inventory","oem"],C:["insurance","recovery","oem"]};
+
+const WIT={
+ arjun:{name:"Arjun Mehta",role:"Key Account Director, Kaveri Precision",voice:"male, Indian English, smooth and reassuring",
+  account:`<p class="sd">[Phone line. A quiet office, a ceiling fan.]</p><p>First, let me say that Halstead has been a valued partner of Kaveri for fifteen years, and we take this very seriously. The flooding was severe, but our people have worked day and night.</p><p>We will be shipping again in six weeks. I have told your head office the same thing. All our customers will be treated fairly, and I see no reason for Halstead to spend large sums on emergency measures.</p>`,
+  qs:[["Will Halstead get priority when you restart?","Our largest customers have framework agreements, and restored output follows those agreements. Without one, a customer waits its turn. A visit to agree a schedule would of course be welcome."],
+      ["What exactly happens in six weeks?","[pause] In six weeks, Line 1 restarts. Lines 2 and 3 follow. Full volume, realistically, is weeks ten to twelve."],
+      ["Why does head office think you'll be back to normal in six weeks?","Six weeks is the date I gave for restarting. Perhaps it was summarised. I can't control how your colleagues report it."]]},
+ farah:{name:"Farah Ismail",role:"Managing Director, Straits Valve Works",voice:"female, Malaysian English, direct and practical",
+  account:`<p class="sd">[A busy machine shop. A forklift beeps in the background.]</p><p>We passed Mei Lin's audit, and I'm proud of that. Our machining is as good as anyone's. But I won't promise what we can't do. We run one shift, we can't add a second before next year, and that means about 40% of Halstead's volume.</p><p>Our discount stands until the end of the month. After that, it's our standard rate. I'd like your business, but I'd rather do one job properly than three badly.</p>`,
+  qs:[["How soon could your first parts reach Europe?","About six weeks after you sign. Set-up first, then the voyage, which is longer now."],
+      ["How did Straits Valve Works start?","My father opened the shop in 1988, making pump parts for the rubber estates around Penang. We moved into precision valves about fifteen years ago."],
+      ["Could you replace Kaveri completely?","No. One shift, about 40% of your volume. Anyone who tells you otherwise is selling."]]}
+};
+
+const CHECKS=[
+ {q:"How long will Kaveri really need to get back to full capacity?",right:1,opts:["About six weeks, as head office says","About ten to twelve weeks","About six months, until next spring"],
+  why:"Lakshmi says six weeks is only when Kaveri's first line restarts; full capacity takes ten to twelve weeks. Arjun admits the same if you ask him."},
+ {q:"What does Dornbach's contract say about tracking?",right:1,opts:["Halstead sends a tracking report once a month, and a late one costs a small fee","Every order must be visible in real time; three failures a quarter allow termination","Nothing: tracking is Halstead's own business and isn't in the contract"],
+  why:"Julian says three failures in a quarter give Dornbach the right to terminate. Chiara says that below thirty licences, orders drop off the screen."},
+ {q:"How much of Halstead's volume can Straits take?",right:2,opts:["All of it, once it adds a second shift next month","About 15%, the same as its discount","About 40%, on its one shift"],
+  why:"Mei Lin says Straits can make about 40% of Halstead's volume on one shift. Aimed at one line, Dornbach's, it protects a client properly; spread over three, it protects nobody. Farah says the same."}
+];
+
+/* ---------- the budget: Lite's ten lines, target and tolerance ---------- */
+const ITEMS=[
+ {id:"air",label:"Emergency air freight for urgent shipments",unit:"shipment",max:16,src:"Renzo Aguilar's quote"},
+ {id:"dual",label:"Qualify the backup supplier: audit and onboarding",unit:"product line",max:3,src:"Mei Lin Tan: Straits Valve Works' fee"},
+ {id:"buffer",label:"Buffer stock warehousing",unit:"pallet-month",max:200,src:"Kasia Nowicka: the logistics provider's rate"},
+ {id:"vis",label:"Supply-chain visibility and tracking software",unit:"licence",max:35,src:"Chiara Ricci: the licence renewal"},
+ {id:"ins",label:"Contract-penalty insurance",unit:"contract",max:9,src:"Tobias Hallgren: the insurer's quote"},
+ {id:"temp",label:"Temporary logistics and customs staff",unit:"person",max:12,src:"Declan O'Farrell: the agency's quote for twelve weeks"},
+ {id:"hedge",label:"Freight-rate hedging contract",unit:"month",max:6,src:"Tobias Hallgren's quote"},
+ {id:"near",label:"Nearshoring feasibility study",unit:"site",max:3,src:"Naomi Price"},
+ {id:"audit",label:"Main-supplier audit and renegotiation visit",unit:"visit",max:2,src:"Lakshmi Chandrasekaran"},
+ {id:"ot",label:"Client account-management overtime",unit:"account",max:9,src:"Chiara Ricci"}];
+const TOL=250;
+function cost(id){switch(id){
+ case "air":return failed(3)?5000:4500; case "dual":return failed(1)?10600:9000; case "buffer":return 210;
+ case "vis":return failed(2)?700:640; case "ins":return 3200; case "temp":return 4300; case "hedge":return failed(3)?2400:2100;
+ case "near":return 6200; case "audit":return 5300; case "ot":return 1400;}}
+function costNote(id){
+ if((id==="air"||id==="hedge")&&failed(3))return " (after the carriers' increase)";
+ if(id==="dual")return failed(1)?" (standard rate: the discount lapsed)":" (with the 15% discount)";
+ if(id==="vis"&&failed(2))return " (the package that links air waybills)";
+ if(id==="buffer")return " (booked before quarter-end)";
+ return "";}
+function itemNote(id){
+ if(id==="near"&&r5())return "Alasdair has already paid for one study, in Poland, from the fund.";
+ if(id==="dual"&&ok(1))return "Straits is ready to start on Dornbach's valve bodies.";
+ return "";}
+const TELL=()=>S.fork==="tell";
+const URG=()=>16-(TELL()?2:0), DORN=()=>10-(TELL()?2:0);
+const r5=()=>S.ranked&&S.rank[0]==="r5";
+const MISSTEP={r3:["A weekly freight-rate forecast",4000],r4:["The insurer's survey of all nine contracts",3000],r5:["A nearshoring site study in Poland",6200]};
+const missAmt=()=>S.ranked&&MISSTEP[S.rank[0]]?MISSTEP[S.rank[0]][1]:0;
+const FUND=()=>220000-missAmt();
+const bval=id=>+S.budget[id]||0;
+const val=id=>id==="near"?bval("near")+(r5()?1:0):bval(id);
+const total=()=>ITEMS.reduce((a,it)=>a+bval(it.id)*cost(it.id),0);
+const onTarget=()=>Math.abs(total()-FUND())<=TOL;
+/* the evidence range for each line (used only after hand-in) */
+const RANGE={air:()=>[DORN(),URG()],dual:()=>[1,2],buffer:()=>[110,170],vis:()=>[30,35],ins:()=>[3,5],temp:()=>[8,12],hedge:()=>[3,4],near:()=>[0,1],audit:()=>[1,1],ot:()=>[4,7]};
+function band(id){const [lo,hi]=RANGE[id](),v=val(id);return v<lo?"low":v>hi?"high":"ok";}
+
+/* ---------- the interim briefing ---------- */
+const RANK=[["r1","Kaveri will take far longer to recover than head office thinks"],["r2","Dornbach could end its contract over shipment tracking"],["r3","Freight rates will keep climbing for months"],["r4","Falkirk Precision and Bergman Foods will claim big penalties"],["r5","A rival will win our clients with parts made in Europe"]];
+const RANK_START=["r3","r4","r1","r5","r2"];
+const REPLIES={
+ r1:()=>`<p>You've put Kaveri's recovery first, and the more I hear, the more I think you're right. I phoned Kaveri's chairman this morning and asked for their schedule in writing. Arjun has sent it, and it's in your inbox. I've told the board to plan on twelve weeks, not six.</p>`,
+ r2:()=>`<p>Dornbach's contract first. Fair enough: it's our biggest account and our strictest. I've asked Julian to send everyone the clause, word for word. It's in your inbox.</p>`,
+ r3:()=>`<p>Right. If rates are going to keep climbing, I want to see it coming. I've signed up a freight consultancy for a weekly rate forecast: £4,000 from the fund.</p>`,
+ r4:()=>`<p>Good point. I've asked our insurer to survey all nine contracts so we can cover the lot: the survey fee is £3,000 from the fund.</p>`,
+ r5:()=>`<p>You're right that we can't sit still. I've commissioned a nearshoring site study in northern Poland: £6,200 from the fund. If a rival can make our parts in Europe, so can we.</p>`
+};
+function reply(){
+ const first=S.rank[0], p=S.rank.indexOf("r1");
+ let extra="";
+ if(first!=="r1"&&p===1) extra="<p>You've put Kaveri's recovery second, so I've asked Lakshmi to keep pressing them for a firm date as well.</p>";
+ return {from:"Alasdair Reid, Managing Director",subj:"Re: Interim briefing",rel:"medium",body:REPLIES[first]()+extra+(S.ev?EV_REPLY[S.ev]:"")+`<p class="sig">Alasdair</p>`};
+}
+const CONSEQ={
+ r1:{from:"Arjun Mehta, Key Account Director, Kaveri Precision",subj:"Our restart schedule, in writing",rel:"high",body:`<p>Your managing director asked for our schedule in writing, so here it is. I should have been clearer on the phone: six weeks is when Line 1 restarts. We expect full capacity between weeks ten and twelve.</p>
+   ${att("Kaveri Precision: restart schedule (signed)",RESTART)}<p>As before, restored output will be allocated first to customers with a signed priority agreement.</p><p class="sig">Arjun Mehta</p>`},
+ r2:{from:"Julian Ashworth, Commercial Contracts Manager",subj:"The clause, word for word",rel:"high",body:`<p>Alasdair asked me to send everyone the wording:</p>
+   <p class="muted"><em>“For every order, the Supplier shall be able to show its location and status on request, in real time, from dispatch to delivery. Each failure to do so incurs a fixed penalty. Three failures in any quarter entitle Dornbach to terminate.”</em></p>
+   <p>Note what it doesn't say. A late delivery we can show live is not a failure under this clause. An on-time delivery we can't show is.</p><p class="sig">Julian</p>`},
+ r3:{from:"Tobias Hallgren, Risk & Insurance Analyst",subj:"The rate forecast",rel:"high",body:`<p>The first weekly forecast is in. It says rates will rise for about three weeks and then fall back slowly, over months. That's what Renzo told us for nothing. The £4,000 for the forecast came out of the fund.</p><p class="sig">Tobias</p>`},
+ r4:{from:"Julian Ashworth, Commercial Contracts Manager",subj:"The insurer's survey",rel:"high",body:`<p>The insurer's survey has found what our contract register already says: Falkirk and Bergman have force-majeure clauses that cover this, two smaller accounts have no penalty clause, and five contracts carry real penalties. It cost £3,000 from the fund to tell us that.</p><p class="sig">Julian</p>`},
+ r5:{from:"Naomi Price, Head of Finance",subj:"The Poland study",rel:"high",body:`<p>Alasdair's site study in Poland has started. It will be useful next year, but it won't move a single part in the next twelve weeks, and the £6,200 has come out of the fund.</p><p class="sig">Naomi</p>`}
+};
+const STANDING={r1:()=>"Alasdair has told the board to plan on twelve weeks. Kaveri has confirmed its restart schedule in writing: full capacity in weeks 10–12.",
+ r2:()=>"Julian has sent everyone the exact wording of Dornbach's visibility clause.",
+ r3:()=>"Alasdair has spent £4,000 of the fund on a weekly freight-rate forecast.",
+ r4:()=>"Alasdair has spent £3,000 of the fund on an insurer's survey of all nine contracts.",
+ r5:()=>"Alasdair has spent £6,200 of the fund on a nearshoring site study in Poland."};
+function pinsHTML(){const N=S.notes[R()], items=Object.entries(N.hl);
+ return `<h3>Your evidence</h3><p>Pin up to three of your highlights as evidence for the risk you've put first. Alasdair will show them to the board.</p>`+
+ (items.length?`<div class="pins">${items.map(([k,h])=>`<button class="pin" data-act="pin" data-v="${k}" aria-pressed="${N.pins.includes(k)}"><i style="background:${HLC[h.c]}"></i><span>${esc(h.t)}<small>${esc(h.src)}</small></span></button>`).join("")}</div>`
+   :`<p class="muted small">You haven't highlighted anything yet. Tap sentences in your emails or reports to highlight them, then come back.</p>`);}
+function inboxList(){const list=[...INBOX[R()]]; if(S.fork) list.unshift(BRANCH[S.fork]); list.push(VIRAL); if(S.ranked) list.unshift(CONSEQ[S.rank[0]]); return list;}
+
+/* ---------- team puzzles ---------- */
+const PZ={
+ 1:{owner:"A",title:"Which line for the backup?",
+   intro:"Farah Ismail at Straits Valve Works needs to know this week which of Halstead's product lines to set up first, or the month will end and the 15% discount with it. Mei Lin's audit says Straits can make any one line in full. Using what your whole team knows, work out which line comes first, and why.",
+   screen:`<div class="attach"><div class="an">Mei Lin's note · what Straits can take on</div>
+     <p><b>Ceiling:</b> about 40% of Halstead's total volume, on one shift.</p>
+     <p><b>VB valve bodies:</b> 34% of our volume. <b>PH pump housings:</b> 38%. <b>CV check valves:</b> 28%.</p></div>`,
+   qs:[{q:"Which product line should Straits set up first?",type:"choice",opts:["PH pump housings","VB valve bodies","CV check valves","A third of each line"],ans:"VB valve bodies"},
+       {q:"Bergman Foods buys more pump housings than anyone. Why is it reasonable not to start with that line?",type:"choice",opts:["It holds about three months of pump housings in its own stores","It's moving its pump housings to another supplier next year","Its force-majeure clause already covers a disruption like this one"],ans:"Its force-majeure clause already covers a disruption like this one"}],
+   hint:"Which client buys which product line is in the European Hub's order book. Which contracts can't produce penalties is in Finance & Risk's emails.",
+   out:{ok:"Mei Lin has told Farah to set up the valve-body line, Dornbach's, at the discounted £9,000 per product line. If the team funds it, Straits' first lots are pencilled in for week six.",
+        fail:"While the team argued, the month ended. The 15% discount lapsed and Straits' set-up slot moved back two weeks: qualifying a product line now costs the standard £10,600, and first lots would arrive around week eight."}},
+ 2:{owner:"B",title:"The missing orders",
+   intro:"Before Dornbach starts its spot checks, Chiara has tested the tracking portal herself. Last week she couldn't find five of Dornbach's orders on it. Work out why each one was missing, then answer one question. Whatever isn't fixed will still be missing when Dornbach checks.",
+   screen:`<p class="muted small">Last week: 30 orders open on the portal, 28 licences. Each record shows the shipment's reference number and the carrier's status.</p>`,
+   qs:[{q:"Why was each order missing?",type:"sort",cats:["Too few licences","Waybill not linked","Held at the port","Not a tracking problem"],
+        items:[["<b>D-4471</b> · ref. 176-40212385 · carrier: at destination, awaiting collection. Portal: last update at dispatch.","Waybill not linked"],
+               ["<b>D-4480</b> · ref. HLXU 4481207 · carrier: unloaded at Antwerp; declaration does not match route. Portal: “in transit”.","Held at the port"],
+               ["<b>D-4485</b> · ref. HLXU 4483761 · carrier: in transit. Portal: no entry.","Too few licences"],
+               ["<b>D-4490</b> · ref. 176-40388016 · carrier: in transit. Portal: no entry.","Waybill not linked"],
+               ["<b>D-4492</b> · ref. HLXU 4479102 · carrier: in transit. Portal: shown all week; Chiara had typed D-4429.","Not a tracking problem"]]},
+       {q:"If Dornbach's first spot check finds gaps like these, how serious is it?",type:"choice",opts:["Not serious: penalties under the clause only apply to late deliveries","Serious: each unseen order is a failure; three a quarter allow termination","Serious, but only after Dornbach has warned Halstead about the clause in writing"],ans:"Serious: each unseen order is a failure; three a quarter allow termination"}],
+   hint:"Asia-Pacific Sourcing knows how to tell a waybill number from a container number, and how air shipments appear in a client's portal. Finance & Risk knows exactly what Dornbach's contract says about tracking.",
+   out:{ok:"Chiara fixed the causes before Dornbach's first spot check, and the check found every order. The software supplier, shown exactly what was missing, will include air-waybill linking in the standard licence at £640.",
+        fail:"Chiara couldn't pin down the causes in time. Dornbach's first spot check found two orders missing and logged two failures under the visibility clause: a third this quarter lets it end the contract. The software supplier now charges £700 a licence for the package that links air waybills."}},
+ 3:{owner:"C",title:"Head office's planning sheet",
+   intro:"Head office has drafted a one-page planning sheet that Alasdair will take to the board on Thursday. Naomi suspects some figures were rounded to look better. Using what your whole team knows, decide whether each claim is true, misleading or false. Naomi will only send corrections she can back up.",
+   screen:`<div class="attach"><div class="an">Head office · Disruption planning sheet · draft for the board</div>
+     <p><b>Claim 1:</b> Kaveri will be back to normal within six weeks.</p>
+     <p><b>Claim 2:</b> The long route adds about a week, at about 15% more per container.</p>
+     <p><b>Claim 3:</b> Our own warehouses can absorb the extra stock we need.</p></div>`,
+   qs:[{q:"Claim 1",type:"choice",opts:["True: Kaveri has confirmed six weeks in writing to head office and the board","Misleading: six weeks is when Line 1 restarts, at a third of normal output","False: Kaveri says full output won't return before spring"],ans:"Misleading: six weeks is when Line 1 restarts, at a third of normal output"},
+       {q:"Claim 2",type:"choice",opts:["True: those are the forwarder's latest figures for the long route","Misleading: right for air, not for sea","False: it adds about twelve days, at about 40% more"],ans:"False: it adds about twelve days, at about 40% more"},
+       {q:"Claim 3",type:"choice",opts:["True: the two sites have room for about 140 more pallets","Misleading: there's room, but only at the European hub near Antwerp","False: they're about 90% full, and re-racking only adds about twenty pallets"],ans:"False: they're about 90% full, and re-racking only adds about twenty pallets"}],
+   hint:"Claims 1 and 2: Asia-Pacific Sourcing has Kaveri's restart plan and the forwarder's real numbers. Claim 3: the European Hub knows how full the warehouses are.",
+   out:{ok:"Naomi sent the corrected figures before Thursday, and the board approved fast-track bookings. Renzo can book before the carriers' increase: air freight stays at £4,500 a shipment and the hedge at £2,100 a month.",
+        fail:"The draft went to the board with the rounded figures. When the real ones arrived, the board froze all bookings for a week to recheck, and the carriers' increase landed first: air freight now costs £5,000 a shipment and the hedge £2,400 a month."}}
+};
+const CODES={1:{first:"2649",help:"2386",fail:"2917"},2:{first:"5472",help:"5814",fail:"5230"},3:{first:"9105",help:"9638",fail:"9351"}};
+const rightAns=q=>q.type==="sort"?q.items.map(([t,c])=>`${(t.match(/D-\d+/)||[""])[0]}: ${c}`).join("; "):q.ans;
+const TIER_LABEL={first:"Solved first time",help:"Solved with help",fail:"Not solved"};
+const pzDone=(r,n)=>!!S.pz[n].tier&&!!S.gate[r][n];
+const allPz=r=>[1,2,3].every(n=>pzDone(r,n));
+const ok=n=>!!S.pz[n].tier&&S.pz[n].tier!=="fail";
+const failed=n=>S.pz[n].tier==="fail";
+
+/* evidence pinned to the briefing: reliable AND about the risk ranked first */
+const REL_KW={r1:/week|recover|capacity|restart|schedule|Kaveri|six|twelve/i,r2:/Dornbach|visib|real time|real-time|clause|licen|portal|terminat|every order/i,r3:/rate|freight|hedge|increase|carrier/i,r4:/Falkirk|Bergman|penalt|insur|force/i,r5:/nearshor|Europe|rival|competitor|site stud/i};
+function evScore(){const N=S.notes[R()], pins=N.pins.map(k=>N.hl[k]).filter(Boolean), kw=REL_KW[S.rank[0]];
+ if(!pins.length)return "trust";
+ if(pins.some(h=>h.q==="low"))return "pushback";
+ return pins.filter(h=>h.q==="high"&&kw.test(h.t)).length>=2?"backed":"unsure";}
+const EV_REPLY={trust:"<p>You didn't pin any evidence, so the board will take your view on trust this time.</p>",backed:"<p>The evidence you pinned was solid: data and documents that speak directly to the risk you put first. I showed it to the board, and they accepted it.</p>",
+ unsure:"<p>Your evidence was thin, or it didn't speak directly to the risk you put first. The board took your view on trust, but they'll want more next time.</p>",
+ pushback:"<p>You pinned a weak source, and the board noticed. They want an outside consultant to check the plan before the fund is committed: £5,000 from the operations budget, not from the fund.</p>"};
+const EV_STANDING={trust:"The board took your briefing on trust.",backed:"The board accepted the evidence behind your briefing.",unsure:"The board took your briefing on trust.",pushback:"The board has paid £5,000 from the operations budget for an outside consultant to check the plan."};
+
+/* ---------- notes: highlights, colour code, free notes ---------- */
+const HL=[["yellow","#FFF176"],["green","#B9F6CA"],["pink","#F8BBD0"],["blue","#B3E5FC"],["orange","#FFE0B2"],["purple","#E1BEE7"]];
+const HLC=Object.fromEntries(HL);
+const HL_HINT=["Key fact","Evidence","Doubt","Number","Ask the team","Use in writing"];
+function hsh(t){let h=5381;for(const c of t)h=((h<<5)+h+c.charCodeAt(0))>>>0;return h.toString(36);}
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function wrapSentences(root){
+ root.querySelectorAll("[data-src]").forEach(box=>{
+  const src=box.dataset.src, q=box.dataset.q||"medium";
+  box.querySelectorAll("p").forEach(p=>{
+   if(p.dataset.w||p.closest(".audio")||p.classList.contains("sig")||p.querySelector("button,input,svg"))return;
+   const t=p.textContent.replace(/\s+/g," ").trim(); if(!t)return;
+   const parts=t.match(/[^.!?]+[.!?]+["”’)]*|[^.!?]+$/g)||[t];
+   const N=S.notes[R()];
+   p.innerHTML=parts.map(x=>{x=x.trim(); const k=hsh(src+"|"+x), h=N.hl[k];
+     return `<span class="sn" data-k="${k}" data-src="${esc(src)}" data-q="${q}"${h?` style="background:${HLC[h.c]}"`:""}>${esc(x)}</span>`;}).join(" ");
+   p.dataset.w="1";});
+ });
+}
+let palFor=null;
+function openPal(el){palFor=el;const pal=document.getElementById("hlpal");const r=el.getBoundingClientRect();
+ pal.hidden=false; pal.style.top=(window.scrollY+r.bottom+6)+"px"; pal.style.left=Math.max(8,Math.min(window.scrollX+r.left,window.scrollX+document.documentElement.clientWidth-pal.offsetWidth-8))+"px";}
+function closePal(){document.getElementById("hlpal").hidden=true;palFor=null;}
+function notesHTML(){
+ const N=S.notes[R()], items=Object.entries(N.hl);
+ const cc=`<details class="cc"><summary>${HL.map(([,c])=>`<i style="background:${c}"></i>`).join("")}<span>My colour code</span></summary><div class="ccgrid">${HL.map(([k,c],i)=>`<label><i style="background:${c}"></i><input data-cc="${k}" maxlength="24" value="${esc(N.cc[k]||"")}" placeholder="${HL_HINT[i]}" aria-label="${k} means"></label>`).join("")}</div></details>`;
+ const add=`<div class="nbadd"><textarea id="nbnew" maxlength="400" placeholder="A note of your own…" aria-label="A note of your own"></textarea><button class="btn small" data-act="noteadd">Add note</button></div>`;
+ const free=N.free.map((t,i)=>`<div class="nbcard mine"><p>${esc(t)}</p><div class="src">Your note <button class="lnk" data-act="noterm" data-v="${i}">Delete</button></div></div>`).join("");
+ const groups=HL.map(([k,c])=>{const g=items.filter(([,h])=>h.c===k); if(!g.length)return "";
+   return `<div class="nbgroup"><i style="background:${c}"></i>${esc(N.cc[k]||k[0].toUpperCase()+k.slice(1))}</div>`+g.map(([key,h])=>`<div class="nbcard" style="border-left-color:${c}"><p>${esc(h.t)}</p><div class="src">${esc(h.src)} <button class="lnk" data-act="hlrm" data-v="${key}">Remove</button></div></div>`).join("");}).join("");
+ return `<div class="nbhead"><h2>Your highlights and notes</h2><button class="lnk" data-act="nbclose" aria-label="Close notes">Close ✕</button></div>${cc}${add}${free}${items.length?groups:`<p class="muted small">Tap any sentence in the Context, your emails or a report to highlight it. Your highlights collect here.</p>`}`;
+}
+
+/* ---------- state ---------- */
+const fresh=()=>({role:null,tab:"context",unlock:false,fork:null,expert:null,picks:{arjun:null,farah:null},checks:{},budget:{},decided:false,text:"",handed:false,rank:[...RANK_START],ranked:false,mailOpen:{},mailRead:{},notes:{A:{hl:{},cc:{},free:[],pins:[]},B:{hl:{},cc:{},free:[],pins:[]},C:{hl:{},cc:{},free:[],pins:[]}},nbOpen:false,pz:{1:{failAt:null,tier:null,tries:[0,0,0],ok:[0,0,0],hint:false,sel:{}},2:{tier:null,tries:[0,0,0],ok:[0,0,0],hint:false,sel:{}},3:{tier:null,tries:[0,0,0],ok:[0,0,0],hint:false,sel:{}}},gate:{A:{},B:{},C:{}},gateMsg:"",ev:null});
+let S=fresh();
+const STORE_KEY="simlearn-pro-halsteadpro";
+try{const x=JSON.parse(sessionStorage.getItem(STORE_KEY)||"null"); if(x&&typeof x==="object"&&!Array.isArray(x)) S=Object.assign(fresh(),x);}catch(e){}
+function save(){try{sessionStorage.setItem(STORE_KEY,JSON.stringify(S));}catch(e){}}
+const TABS=[["context","Context"],["inbox","Inbox"],["puzzles","Team puzzles"],["investigate","Investigate"],["decide","Decide"]];
+const ready=()=>S.unlock||(S.role&&S.fork);
+const tabOpen=t=>t==="context"||(ready()&&(["inbox","puzzles"].includes(t)||S.unlock||allPz(R())));
+const PATH={tell:"called Dornbach on day one",wait:"waited to call Dornbach with a plan"};
+
+function render(){
+  save();
+  document.getElementById("who").textContent=S.role?`You are the ${ROLES[S.role].name}${S.fork?` · Path: ${PATH[S.fork]}`:""}`:"Read the context, then choose your role.";
+  document.getElementById("tabs").innerHTML=TABS.map(([k,l])=>`<button data-act="tab" data-v="${k}" aria-current="${S.tab===k}" ${tabOpen(k)?"":"disabled"}>${l}${k==="inbox"&&tabOpen(k)&&inboxList().some(m=>!S.mailRead[m.from+"|"+m.subj])?`<span class="tdot" aria-label="unread emails"></span>`:""}</button>`).join("");
+  document.getElementById("main").innerHTML=V[S.tab]();
+  wrapSentences(document.getElementById("main"));
+  const nb=document.getElementById("nb"); nb.hidden=!S.nbOpen; if(S.nbOpen) nb.innerHTML=notesHTML();
+  const fab=document.getElementById("fab"); fab.hidden=!S.role; fab.textContent=`Notes (${Object.keys(S.notes[R()].hl).length+S.notes[R()].free.length})`;
+  if(S.tab==="investigate"&&!S.ranked) bindDrag("rank");
+  if(S.tab==="decide"){const ta=document.getElementById("cf"); if(ta){ta.value=S.text; wc();}}
+}
+const task=t=>`<div class="task"><b>Your task</b><span>${t}</span></div>`;
+const R=()=>S.role||"A";
+
+const V={
+ context(){
+  const r=S.role;
+  return task("Read from top to bottom. Choose your role, then make your first decision: agree as a team, then everyone enters the same choice.")
+  +`<section class="card" data-src="Context" data-q="medium"><span class="step">1 · Where you work</span><h2>Halstead Componentry, Sheffield</h2>
+    ${PRO_COVER?`<img src="${PRO_COVER}" alt="" style="display:block;width:100%;height:auto;border-radius:10px">`:""}
+    <p>Halstead Componentry has made precision valves and pump parts in Sheffield for thirty years. Its customers are car plants, food factories and engineering firms across Europe, and most of them run their production lines just in time: parts arrive shortly before they're needed, so nobody pays to keep stock on shelves. That only works if lead times, the weeks between an order and its delivery, stay steady. As Naomi Price in Finance likes to say, “Just in time is a promise about time.”</p>
+    <p>Halstead buys its machined parts from a cluster of three specialist suppliers near Chennai in South India, led by Kaveri Precision. Single sourcing from one region kept costs low and quality high for fifteen years. The weakness is that all three share the same ports and the same shipping lane to Europe. The usual protection is safety stock, extra parts held against delays: just in case, rather than just in time. Some firms also buy the same part from two suppliers, or move production closer to their customers, which the industry calls nearshoring.</p>
+    <p>Halstead has learned this twice. In the Rotherham Stockout two years ago, safety stock had been run down to save warehouse costs just before a supplier strike. A car plant's line stopped for four days, and within a quarter the client had moved half its volume to a competitor. In the Antwerp Reroute eighteen months ago, the operations team paid for emergency air freight without waiting for head office. A food client's shipment arrived on time, the client never knew how close it had been, and it renewed its contract early.</p>
+    <div class="facts"><div class="fact"><div class="l">Founded</div><div class="v">1996, Sheffield</div></div><div class="fact"><div class="l">Main supplier</div><div class="v">Kaveri Precision, near Chennai</div></div><div class="fact"><div class="l">Contracts with delivery windows</div><div class="v">Nine</div></div><div class="fact"><div class="l">Biggest account</div><div class="v">Dornbach Automotive</div></div></div></section>`
+  +`<section class="card" data-src="Context" data-q="medium"><span class="step">2 · Who you are</span><h2>The resilience team</h2>
+    <p>You are three planners from different parts of Halstead. Each of you sees different information. Choose your role.</p>
+    <div class="roles">${Object.entries(ROLES).map(([k,v])=>`<button class="role" data-act="role" data-v="${k}" aria-pressed="${r===k}" ${S.fork&&S.role?"disabled":""}><b>${v.name}</b><span>${v.line}</span></button>`).join("")}</div>${S.fork&&S.role?`<p class="muted small">Your role is fixed now that your team has made its first decision.</p>`:""}
+    ${r?`<p><strong>You are the ${ROLES[r].name}.</strong> ${ROLES[r].detail}</p>`:""}
+    <h3 style="margin-top:6px">Other people you'll hear from</h3>
+    <div class="people"><div class="person"><b>Alasdair Reid</b><span class="muted small">Managing Director, your boss. Grew up in Paisley and joined Halstead as an apprentice.</span></div><div class="person"><b>Henrike Vogt</b><span class="muted small">Supplier Quality Lead at Dornbach Automotive, Halstead's biggest and strictest client.</span></div><div class="person"><b>Arjun Mehta</b><span class="muted small">Key Account Director at Kaveri Precision, Halstead's main supplier.</span></div><div class="person"><b>Farah Ismail</b><span class="muted small">Managing Director of Straits Valve Works in Penang, a possible backup supplier.</span></div></div></section>`
+  +`<section class="card" data-src="Context" data-q="medium"><span class="step">3 · The situation</span><h2>One fund, ten lines</h2>
+    <p>Three weeks ago, attacks on ships in the Red Sea pushed container lines away from the Suez Canal, so ships from India now sail round the Cape of Good Hope, and freight and insurance prices have jumped. Then a cyclone flooded Kaveri's plant and stopped most of its production. Head office has been planning on the first figure that reached Sheffield: back to normal in six weeks.</p>
+    <p>The board has released a one-off Supply Chain Resilience Fund of £220,000 to get Halstead through the disruption without losing a client. It won't be topped up, and if it isn't committed within two weeks, it goes back to general reserves. The departments' wish lists come to far more. Your team must agree how to split the fund across ten budget lines.</p></section>`
+  +`<section class="card" data-src="Context" data-q="medium"><span class="step">4 · It starts</span><h2>A voicemail from Alasdair</h2>
+    ${audio("Voicemail from Alasdair Reid","male, Paisley accent, warm and blunt",`<p class="sd">[A factory floor. A forklift reverses in the background.]</p><p>Hiya, it's Alasdair. I've just come out of the board. We've got the money: two hundred and twenty thousand, once, and that's it. The wish lists come to nearly three hundred, so somebody's not getting what they asked for.</p><p>Head office keeps saying six weeks. I've heard that number from everybody, and I've no idea who checked it. So check everything.</p><p>One thing can't wait. Chiara wants to phone Dornbach today and tell them straight what's happening. Julian says you don't phone a client like Dornbach with a problem and no plan. They've both got a point. Talk to each other and let me know by lunchtime.</p>`,"halsteadpro_voicemail")}</section>`
+  +`<section class="card" data-src="Context" data-q="medium"><span class="step">5 · Your first decision</span><h2>Call Dornbach today, or wait until there's a plan?</h2>
+    <p>Chiara Ricci, who looks after the Dornbach account, wants to call today: in her experience, clients forgive delays they hear about early. Julian Ashworth, the contracts manager, wants to wait about a week and call with the agreed plan: since its own recall scandal, Dornbach gets very nervous about a supplier with a problem and no plan. You haven't seen the evidence yet. Agree as a team, then everyone enters the same choice.</p>
+    <div class="choices">${[["tell","A","Call Dornbach today","No cost. Dornbach hears about the disruption from Halstead first, but before there's a plan to tell them about."],["wait","B","Wait, and call with the plan","No cost. Chiara calls in about a week with the agreed plan, but Dornbach may notice the delays on its own first."]].map(([v,k,t,c])=>`<button class="choice" data-act="fork" data-v="${v}" aria-pressed="${S.fork===v}" ${S.fork?"disabled":""}><span class="k">OPTION ${k}</span><b>${t}</b><small>${c}</small></button>`).join("")}</div>
+    ${S.fork?(S.role?`<p class="done">Decision made. Some of the evidence you see depends on this choice. Go to your inbox.</p><button class="btn" data-act="tab" data-v="inbox">Open your inbox</button>`:`<p class="done">Decision made. Now choose your role above.</p>`):""}</section>`;
+ },
+ inbox(){
+  const list=inboxList();
+  return task("Read your emails and tell your team what you've found, in your own words. Your teammates have different emails. Not every source is equally reliable.")
+  +`<div style="display:flex;flex-direction:column;gap:10px">${list.map(m=>mail(m)).join("")}</div>`;
+ },
+ puzzles(){
+  const r=R(); let h=task("Each of you has one puzzle, and nobody can solve theirs alone. When a puzzle appears on someone's screen, everyone gathers round that screen until it's solved. Each result changes what happens next.");
+  const done=[1,2,3].filter(n=>pzDone(r,n));
+  if(done.length) h+=`<section class="card"><h2>Results so far</h2>${done.map(n=>`<p><b>${PZ[n].title}</b> (${ROLES[PZ[n].owner].name}): ${TIER_LABEL[S.pz[n].tier]}. ${ok(n)?PZ[n].out.ok:PZ[n].out.fail}</p>`).join("")}</section>`;
+  const n=[1,2,3].find(x=>!pzDone(r,x));
+  if(!n) return h+`<p class="done">All three puzzles are done.</p><button class="btn" data-act="tab" data-v="investigate">Go to Investigate</button>`;
+  const P=PZ[n];
+  if(P.owner!==r) return h+`<section class="card gate"><span class="step">Puzzle ${n} of 3</span><h2>The ${ROLES[P.owner].name} needs your help</h2>
+     <p>Go and look at their screen. They have a puzzle called <b>${P.title}</b>, and they need facts from your emails to solve it. When it's done, their screen shows a four-digit code. Type it here to carry on.</p>
+     <div class="coderow"><input id="gatecode" inputmode="numeric" maxlength="4" placeholder="0000" aria-label="Code from the ${ROLES[P.owner].name}"><button class="btn" data-act="gate" data-v="${n}">Carry on</button></div>${S.gateMsg?`<p class="msg">${S.gateMsg}</p>`:""}</section>`;
+  const Z=S.pz[n];
+  if(Z.tier) return h+`<section class="card"><span class="step">Puzzle ${n} of 3 · ${P.title}</span><h2>${TIER_LABEL[Z.tier]}</h2>${Z.tier==="fail"&&Z.failAt!=null?`<p class="hint">The right answer to question ${Z.failAt+1}: ${rightAns(P.qs[Z.failAt])}</p>`:""}<p>${ok(n)?P.out.ok:P.out.fail}</p>
+     <p>Show this code to your teammates. They need it to carry on.</p><div class="bigcode">${CODES[n][Z.tier]}</div>
+     <button class="btn" data-act="pznext" data-v="${n}">I've shared the code</button></section>`;
+  return h+`<section class="card"><span class="step">Puzzle ${n} of 3 · your puzzle</span><h2>${P.title}</h2><p>${P.intro}</p>
+    <p class="note-strong"><strong>Call your teammates over.</strong> You can't solve this from your own emails alone.</p>${P.screen}
+    ${P.qs.map((q,i)=>{const done=Z.ok[i];
+      return `<div class="pzq"><h3>${i+1}. ${q.q}</h3>${done?`<p class="done">${q.type==="sort"?"All orders sorted":q.ans} ✓</p>`:
+       (q.type==="sort"?`<div class="sortq">${q.items.map(([t],j)=>`<div class="sortrow"><p>${t}</p><select data-sort="${n}_${i}_${j}" aria-label="Order ${j+1}"><option value="">Choose…</option>${q.cats.map(c=>`<option${(Z.sort&&Z.sort[i]&&Z.sort[i][j])===c?" selected":""}>${c}</option>`).join("")}</select></div>`).join("")}</div>${Z.sortMsg&&Z.sortMsg[i]?`<p class="msg">${Z.sortMsg[i]}</p>`:""}`:
+        `<div class="opts2">${q.opts.map(o=>`<button class="opt" data-act="pzsel" data-n="${n}" data-i="${i}" data-v="${esc(o)}" aria-pressed="${Z.sel[i]===o}">${o}</button>`).join("")}</div>`)+
+       `<div class="coderow"><button class="btn" data-act="pzcheck" data-n="${n}" data-i="${i}">Check</button>${Z.tries[i]?`<span class="msg">Not yet. One more try: a second wrong answer means the puzzle isn't solved.</span>`:""}</div>`}</div>`;}).join("")}
+    ${Z.hint?`<p class="hint">${P.hint}</p>`:`<button class="lnk" data-act="pzhint" data-v="${n}">Show a hint (counts as help)</button>`}</section>`;
+ },
+ investigate(){
+  const sl=SHORTLIST[R()], e=S.expert;
+  return task("Question the two witnesses, then agree your interim briefing as a team: everyone sends Alasdair the same order. Agree which highlights to pin, and all pin the same (none is fine: the board takes it on trust). If you have time, hire one outside expert first.")
+  +`<section class="card"><h2>Hire an expert (if you have time)</h2><p>This step is optional. Alasdair has set aside money for outside help, enough for each of you to bring in one expert. Experts are expensive and only answer the question you hire them for, so think about what your team most needs to know. Each role has a different shortlist, and some experts appear on more than one list.</p>
+    <div class="choices">${sl.map(k=>`<button class="choice" data-act="expert" data-v="${k}" aria-pressed="${e===k}" ${e?"disabled":""}><b>${EXPERTS[k].name}</b><small><em>${EXPERTS[k].who}</em><br>${EXPERTS[k].what}</small></button>`).join("")}</div>
+    ${e?`<div class="attach" data-src="${EXPERTS[e].who.split(",")[0]}" data-q="high"><div class="an">📎 Report from ${EXPERTS[e].who}</div>${EXPERTS[e].rep}</div>`:""}</section>`
+  +`<section class="card"><h2>The witnesses</h2><p>Arjun and Farah both want Halstead's business. <strong>One of them is leaving things out.</strong> Listen for what's missing, then choose your one question for each.</p>
+    <div class="two">${Object.entries(WIT).map(([k,w])=>{const p=S.picks[k];
+      return `<div style="display:flex;flex-direction:column;gap:10px"><h3>${w.name} <span class="muted small">· ${w.role}</span></h3>
+       ${audio(`${w.name}'s account`,w.voice,w.account,"halsteadpro_"+k)}
+       <div class="qs">${w.qs.map((q,i)=>`<button class="q" data-act="ask" data-w="${k}" data-v="${i}" aria-pressed="${p===i}" ${p!==null?"disabled":""}>${q[0]}</button>`).join("")}</div>
+       ${p!==null?audio(`${w.name} answers`,w.voice,`<p>${w.qs[p][1]}</p>`,"halsteadpro_"+k+"_"+(p+1)):""}</div>`;}).join("")}</div></section>`
+  +`<section class="card"><h2>Interim briefing for Alasdair</h2>
+    <p>Alasdair meets the board on Thursday and needs your view now, before you split the fund. Below are the risks people at Halstead have been talking about, in head office's order. Put them in order, from the biggest risk to Halstead's clients over the next three months to the smallest.</p>
+    <p class="note-strong"><strong>Alasdair will act on whatever you put first, straight away.</strong></p>
+    <ol class="tl" id="rk">${S.rank.map((id,i)=>{const t=RANK.find(x=>x[0]===id);
+      return `<li class="tc" data-id="${id}" draggable="${!S.ranked}"><span class="n">${i+1}</span><span>${t[1]}</span><span class="arr">${S.ranked?"":`<button data-act="mv" data-l="rank" data-v="${i}" data-d="-1" aria-label="Move up" ${i?"":"disabled"}>↑</button><button data-act="mv" data-l="rank" data-v="${i}" data-d="1" aria-label="Move down" ${i<RANK.length-1?"":"disabled"}>↓</button>`}</span></li>`;}).join("")}</ol>
+    ${S.ranked?`<p class="done">Sent to Alasdair. His reply is below, and there's a new email in your inbox.</p>${mail(reply())}`:pinsHTML()+`<button class="btn" data-act="sendrank">Send to Alasdair</button>`}</section>`;
+ },
+ decide(){
+  const dis=S.decided?"disabled":"";
+  let h=task("Check what you've worked out, then agree the split as a team: everyone enters the same numbers. Then write a short budget memo. After you hand in, you'll hear what happened next.");
+  const forkLine=S.fork==="tell"?"Chiara called Dornbach on day one. Henrike Vogt thanked her: two of Dornbach's ten urgent shipments can come by sea, and Dornbach has put a second supplier on standby for one valve line.":S.fork==="wait"?"Halstead hasn't called Dornbach yet. Henrike Vogt has asked why two orders show “delayed at origin”, and wants the recovery plan by Friday.":"";
+  h+=`<section class="card"><h2>Where things stand</h2><p>${forkLine} ${S.ranked?STANDING[S.rank[0]]():"Alasdair is still waiting for your interim briefing."} ${S.ev?EV_STANDING[S.ev]:""}</p>${[1,2,3].filter(n=>S.pz[n].tier).map(n=>`<p><b>${PZ[n].title}:</b> ${ok(n)?PZ[n].out.ok:PZ[n].out.fail}</p>`).join("")}
+   <div class="facts"><div class="fact"><div class="l">Fund to split</div><div class="v">${fmt(FUND())}</div></div><div class="fact"><div class="l">Time to commit it</div><div class="v">Two weeks</div></div></div></section>`;
+  h+=`<section class="card"><h2>What have you worked out?</h2>${CHECKS.map((c,qi)=>{const a=S.checks[qi];
+     return `<div style="display:flex;flex-direction:column;gap:6px"><h3>${qi+1}. ${c.q}</h3>${c.opts.map((o,oi)=>`<button class="opt ${a===undefined?"":oi===c.right?"right":oi===a?"wrong":""}" data-act="chk" data-q="${qi}" data-v="${oi}" ${a!==undefined?"disabled":""}>${o}</button>`).join("")}${a!==undefined?`<p class="fb">${a===c.right?"<strong>Yes.</strong> ":"<strong>Not quite.</strong> "}${c.why}</p>`:""}</div>`;}).join("")}</section>`;
+  h+=`<section class="card"><h2>Split the fund</h2><p>Agree how to split the <b>${fmt(FUND())}</b> as a team, then everyone enters the same numbers here. The total has to land within ${fmt(TOL)} of the fund.${FUND()<220000?" (The fund started at £220,000: see Where things stand.)":""}</p>
+   <div class="bud">${ITEMS.map(it=>{const v=bval(it.id), note=itemNote(it.id);
+     return `<div class="brow"><label for="b_${it.id}"><b>${it.label}</b><span class="small muted">${fmt(cost(it.id))} per ${it.unit}${costNote(it.id)} · ${it.src} · up to ${it.max}</span>${note?`<span class="bx">${note}</span>`:""}</label><input class="numin" id="b_${it.id}" data-b="${it.id}" type="number" inputmode="numeric" min="0" max="${it.max}" step="1" value="${v||""}" placeholder="0" ${dis} aria-label="${it.label}: number of ${it.unit}s"><span class="bsub" id="bs_${it.id}">${v?fmt(v*cost(it.id)):""}</span></div>`;}).join("")}</div>
+   <div class="btotal" id="btotal" aria-live="polite">${totalHTML()}</div>
+   ${S.ranked?"":`<p class="msg">Send your interim briefing to Alasdair first (Investigate). What he does next may change the fund.</p>`}
+   ${S.decided?`<p class="done">Budget confirmed.</p>`:`<button class="btn" id="lockb" data-act="lock" ${canLock()?"":"disabled"}>Confirm our budget</button>`}</section>`;
+  if(!S.decided) return h;
+  if(!S.handed)h+=`<p><button class="btn small" data-act="undec">Change our budget</button> <span class="muted small">Until you hand in, your team can still change its budget.</span></p>`;
+  h+=`<section class="card"><h2>Budget memo</h2><p>Write 120–180 words for the board: your split and the reasons for your largest lines (name the person or document, and use the numbers), what you cut and why that risk is acceptable, and the biggest risk that remains, with how Halstead should manage it.</p>
+   <p class="muted small">Useful language: <em>We have allocated £… to … because…</em> · <em>Our first priority is…</em> · <em>If the recovery takes twelve weeks rather than six, …</em> · <em>We accept the risk that…, because…</em></p>
+   <textarea id="cf" aria-label="Budget memo"></textarea>
+   <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><span class="wc" id="wc">0 words</span></div>${handinHTML()}</section>`;
+  if(!S.handed) return h;
+  const L=ledger(), beyond=L.filter(x=>x[1]==="beyond").reduce((a,x)=>a+x[2],0), inside=L.filter(x=>x[1]==="inside").reduce((a,x)=>a+x[2],0), inR=ITEMS.filter(it=>band(it.id)==="ok").length;
+  h+=`<section class="card"><h2>Twelve weeks later</h2>${audio("Trade news: Supply Lines","newsreader, light music bed under",epilogue(beyond,inside))}
+   <div class="board"><div class="tile"><div class="l">Dornbach</div><div class="v">${DORN_LABEL[dornStatus()]}</div></div><div class="tile"><div class="l">Lines within the evidence range</div><div class="v">${inR} of ${ITEMS.length}</div></div><div class="tile"><div class="l">Cost beyond the fund</div><div class="v">${fmt(beyond)}</div></div><div class="tile"><div class="l">Fund spent beyond the evidence</div><div class="v">${fmt(inside)}</div></div></div>
+   <details><summary class="small" style="cursor:pointer;color:var(--blue);font-weight:600">Line by line</summary><div class="lines">${ITEMS.map(it=>`<p><b>${it.label} (${bval(it.id)}):</b> ${EPI[it.id][band(it.id)]()}</p>`).join("")}</div></details>
+   <details><summary class="small" style="cursor:pointer;color:var(--blue);font-weight:600">How that adds up</summary><div class="tw"><table class="sums"><thead><tr><th>What happened</th><th>Where</th><th class="num">Amount</th></tr></thead><tbody>${L.length?L.map(([l,w,v])=>`<tr><td>${l}</td><td class="muted">${w==="beyond"?"Beyond the fund":"Inside the fund"}</td><td class="num">${fmt(v)}</td></tr>`).join(""):`<tr><td colspan="3">Nothing: every line was within the evidence range, and nothing went wrong beyond the fund.</td></tr>`}<tr class="tot"><td>Cost beyond the fund</td><td></td><td class="num">${fmt(beyond)}</td></tr><tr class="tot"><td>Fund spent beyond the evidence</td><td></td><td class="num">${fmt(inside)}</td></tr></tbody></table></div></details>
+   <p>Now find a group that made the other choice at the start, and ask them what happened to them.</p></section>`;
+  return h;
+ }
+};
+const canLock=()=>!!S.ranked&&onTarget();
+function totalHTML(){const t=total(),d=t-FUND(),k=Math.abs(d)<=TOL;
+ return `<span>Total: ${fmt(t)}</span><span class="${k?"on":"off"}">${k?"✓ on target":(d>0?fmt(d)+" over":fmt(-d)+" under")} (fund ${fmt(FUND())})</span>`;}
+function patchTotal(){const b=document.getElementById("btotal"); if(b)b.innerHTML=totalHTML(); const l=document.getElementById("lockb"); if(l)l.disabled=!canLock();}
+
+/* ---------- the epilogue ---------- */
+const dornTrouble=()=>band("vis")==="low"||band("air")==="low";
+const terminated=()=>band("vis")==="low"&&failed(2);
+function dornStatus(){ if(terminated()||(TELL()&&dornTrouble()))return "lost"; if(dornTrouble())return "review"; return "kept";}
+const DORN_LABEL={kept:"Kept, all lines",review:"Kept, but cut its next order",lost:"Lost one valve line"};
+function ledger(){const L=[],add=(l,w,v)=>L.push([l,w,v]);
+ if(band("air")==="low")add("Dornbach shipments sent by sea arrived late: penalties and a rush order","beyond",40000);
+ if(band("dual")==="low")add("No second source: extra air freight when Kaveri's second line slipped","beyond",15000);
+ if(band("buffer")==="low")add("Rationing at the hub from week eight: two client lines stopped","beyond",45000);
+ if(band("vis")==="low")add("Dornbach's penalties under the visibility clause","beyond",30000);
+ if(terminated())add("Dornbach ended the contract for one valve line: lost business","beyond",90000);
+ else if(TELL()&&dornTrouble())add("Dornbach moved one valve line to its standby supplier: lost business","beyond",60000);
+ else if(dornTrouble())add("Dornbach's review went badly, and it cut its next order","beyond",30000);
+ if(band("ins")==="low")add("An uninsured penalty on a delayed contract","beyond",12000);
+ if(band("temp")==="low")add("Containers waiting on the quay: storage charges and late deliveries","beyond",25000);
+ if(band("hedge")==="low")add("Sailings booked at spot rates after the increase","beyond",18000);
+ if(band("audit")==="low")add("Behind bigger buyers in Kaveri's queue: full shipments three weeks later","beyond",20000);
+ if(band("ot")==="low")add("Clients surprised by late shipments: a smaller account moved an order","beyond",8000);
+ const over=(id,lim,c)=>{const n=val(id)-lim; if(n>0)return n*c; return 0;};
+ const ex=[["air",URG(),cost("air"),"Air freight beyond the urgent shipments"],["dual",2,cost("dual"),"A third backup product line"],["buffer",170,210,"Buffer stock beyond twelve weeks"],["ins",5,3200,"Insurance on contracts that couldn't claim"],["hedge",4,cost("hedge"),"Hedge months after the recovery"],["near",1,6200,"Extra nearshoring site studies"],["audit",1,5300,"A second audit visit"],["ot",7,1400,"Overtime on accounts with little exposure"]];
+ ex.forEach(([id,lim,c,l])=>{const v=over(id,lim,c); if(v)add(l,"inside",v);});
+ if(S.ranked&&(S.rank[0]==="r3"||S.rank[0]==="r4"))add(MISSTEP[S.rank[0]][0],"inside",MISSTEP[S.rank[0]][1]);
+ if(S.ev==="pushback")add("The board's outside consultant (operations budget)","beyond",5000);
+ return L;}
+const EPI={
+ air:{low:()=>"Halstead booked fewer air slots than Dornbach's urgent shipments needed. Several of Dornbach's shipments went by sea instead and arrived late, and each delay was logged by its supplier-quality team.",
+  ok:()=>`The air slots were booked as soon as the fund was committed, and Dornbach's orders went first.${TELL()?" Two of Dornbach's shipments came by sea, as Henrike had agreed, while Dornbach used its own stock.":""}${failed(3)?" Each flight cost £5,000, after the carriers' increase.":""}`,
+  high:()=>`Halstead booked more air slots than it had urgent shipments${TELL()?", including shipments Dornbach had said could come by sea":""}. The extra flights were the most expensive way the fund could have been spent.`},
+ dual:{low:()=>`The backup supplier was never qualified${failed(1)?"":", and the discount lapsed at the end of the month"}. For twelve weeks Halstead had no second source, and every planning meeting began with the same question: what if Kaveri slips again?`,
+  ok:()=>`Straits Valve Works was qualified${failed(1)?" late, at the standard rate, so its first lots arrived around week eight rather than week six":` before the discount ended, and its first lots arrived around week six${ok(1)?", on Dornbach's valve bodies, the line the team had picked":""}`}. It never supplied more than about 40% of Halstead's volume, but where it was aimed it shortened the worst stretch of the gap.`,
+  high:()=>"Halstead qualified all three product lines. Straits' 40% was spread across all of them, so no line got enough to matter, and the sourcing team spent weeks dividing small allocations between clients who each needed more."},
+ buffer:{low:()=>"Halstead booked less buffer space than the gap required. By around week eight the critical lines were running down and the hub was rationing parts between clients. Topping up after quarter-end would have meant the higher rate, from money the fund no longer had, and the board heard the word “Rotherham” more than once.",
+  ok:()=>"The extra space was booked before quarter-end at £210 a pallet-month and filled while parts were still arriving. It carried the critical lines through the worst weeks, and the hub could give clients dates rather than estimates.",
+  high:()=>"Halstead booked more buffer space than the gap required. Much of it was still full when Kaveri came back, and Finance pointed out that the stock had tied up more cash than the storage itself had cost."},
+ vis:{low:()=>`The tracking licences were cut back to save money. Within a month, Dornbach's spot check found orders missing from the portal, and its supplier-quality team invoked the visibility clause: a fixed penalty for every order Halstead couldn't show in real time.${failed(2)?" With two failures already logged from its first spot check, Dornbach passed three in a quarter and ended the contract for one valve line.":""}`,
+  ok:()=>`Dornbach's orders stayed visible on the portal throughout. When its team ran a spot check in week seven, Halstead showed every open Dornbach order live, in minutes${ok(2)?", air waybills included":""}.${failed(2)?" With two failures already logged, there was no room for a third, and there wasn't one.":""}`,
+  high:()=>"Halstead bought more tracking licences than it had orders to track. Dornbach's orders were all visible, and the spare licences sat unused."},
+ ins:{low:()=>"Most of the contracts with real penalty clauses were left uninsured, so a delay past the threshold on one of them came straight out of Halstead's margin, in a quarter that was already tight.",
+  ok:()=>"The insurance sat only on contracts where lateness carried real penalties, so a delay past the documented threshold on an insured account would be paid for. Nobody paid premiums for Falkirk Precision or Bergman Foods, and neither raised a penalty.",
+  high:()=>"Halstead insured six or more contracts, including accounts that faced no real penalty: those protected by force majeure, or with no penalty clause at all. No claim was ever possible on them, and the premiums defended accounts that were never at risk."},
+ temp:{low:()=>"With too few temporary staff, clearance at the port and the airport ran as one long queue. Rerouted containers waited up to a week for new declarations, and parts that had been paid for to arrive quickly sat on the quay instead.",
+  ok:()=>"The temporary customs team ran two shifts and kept clearance at the port and the airport close to two days, even as the re-checks spread to more containers. Parts that had been paid for to move quickly kept moving.",
+  high:()=>"Halstead hired more temporary customs staff than the two clearance points could use, and some of the team spent the last weeks on filing."},
+ hedge:{low:()=>"Halstead's freight hedge was too short, or missing altogether. Rates kept rising while Kaveri still had weeks to go, and the remaining sailings were booked at spot rates well above the old ones.",
+  ok:()=>`The hedge${failed(3)?", signed at £2,400 a month after the carriers' increase,":" was signed as soon as the fund was committed and"} covered the sailings through Kaveri's recovery. Rates came down only slowly afterwards, but by then the worst was over.`,
+  high:()=>"Halstead locked in freight rates for five or six months. Kaveri recovered in about twelve weeks, and for the months after that Halstead kept paying a fixed price for capacity it no longer needed, with no refund as rates eased."},
+ near:{low:()=>"No nearshoring study was funded.",
+  ok:()=>`${r5()?"Alasdair's study in Poland was the only nearshoring work this quarter. ":""}The nearshoring question stayed where it belonged, as a longer-term decision: no part would come from a European site for at least a year, and the board added it to next year's capital plan.`,
+  high:()=>`Halstead paid for two or more nearshoring site studies${r5()?", including Alasdair's study in Poland":""}. They were thorough and interesting, and none of them changed anything in the twelve weeks that mattered.`},
+ audit:{low:()=>"Nobody visited Kaveri. When its capacity came back, it rationed output between its customers, and Halstead found itself behind bigger buyers in the queue, still working from a recovery date nobody had put in writing.",
+  ok:()=>"The audit visit produced a signed, line-by-line recovery schedule and written priority on the first restored output. Halstead's first full shipments from Kaveri left in week ten.",
+  high:()=>"Halstead paid for two audit visits. The first produced a signed schedule and priority on restored output; the second confirmed the first and cost £5,300 that other lines could have used."},
+ ot:{low:()=>"Most account managers worked normal hours, so clients often heard about late shipments on the day they were due. Several asked why nobody had warned them, and Chiara spent her evenings repairing relationships one call at a time.",
+  ok:()=>"Extra hours let the account managers call the most time-sensitive clients every week. When a shipment was going to be late, the client heard days in advance, not on the day.",
+  high:()=>"Overtime was paid on almost every account, including those with no penalty exposure and little need for weekly calls. The calls were appreciated, but the time-critical lines could have used the money."}
+};
+function epilogue(beyond,inside){
+ const p=[`<p class="sd">[News jingle, then a light music bed under]</p>`];
+ p.push(`Twelve weeks after Halstead Componentry committed its £220,000 Resilience Fund, its main supplier near Chennai is back close to full capacity, and the board has asked what the money bought.`);
+ const vl=band("vis")==="low", st=dornStatus();
+ if(TELL()) p.push(st==="kept"?"Dornbach had heard about the disruption from Halstead on day one. Its spot checks found every order on the portal and its urgent parts arrived on time, so in week nine it stood its standby supplier down."
+   :terminated()?"Dornbach had heard about the disruption from Halstead on day one, and had put a second supplier on standby. When orders went missing from the portal, Dornbach passed three failures in a quarter, ended the contract for one valve line and gave it to that supplier."
+   :`Dornbach had heard about the disruption from Halstead on day one, and had put a second supplier on standby as a precaution. When ${vl?"orders went missing from the portal":"its urgent shipments arrived late"}, it moved one valve line to that supplier.`);
+ else p.push(st==="kept"?"Chiara called Dornbach a week in, with the full plan. Its planners had already spotted two delayed orders and didn't like hearing about them second-hand, but every order stayed visible and its urgent parts arrived on time. Dornbach never looked for another supplier."
+   :terminated()?"Dornbach's planners found the problems on the portal before anyone at Halstead had called. Orders kept going missing, Dornbach passed three failures in a quarter, and it ended the contract for one valve line."
+   :`Dornbach's planners found the delays on the portal before anyone at Halstead had called, and when ${vl?"orders went missing":"its urgent shipments arrived late"}, its review of the relationship went badly. Dornbach kept Halstead, but cut its next order.`);
+ const extra=[];
+ extra.push(ok(3)?"Because the board approved fast-track bookings, Halstead booked its air freight and hedge before the carriers' increase.":"The board's week-long freeze on bookings meant Halstead paid the carriers' higher prices for air freight and its hedge.");
+ if(failed(1)&&bval("dual")>0) extra.push("The lapsed discount at Straits cost £1,600 for every product line qualified.");
+ if(S.ranked&&MISSTEP[S.rank[0]]) extra.push(`${MISSTEP[S.rank[0]][0]}, Alasdair's first move, cost ${fmt(MISSTEP[S.rank[0]][1])} from the fund.`);
+ if(S.ev==="pushback") extra.push("The board's outside consultant cost £5,000 from the operations budget.");
+ if(S.ev==="backed") extra.push("The board later praised the team's evidence.");
+ p.push(extra.join(" "));
+ if(band("vis")==="low"||band("ins")==="high") p.push("The board's review asked one question of every line: what has Halstead actually signed? The answer showed that some lines had been judged by how they sounded, optional or prudent, rather than by what the contracts said.");
+ p.push(beyond?`Beyond the fund, the disruption cost Halstead about ${fmt(beyond)} in penalties, extra costs and lost business.`:"Halstead came through the twelve weeks without a single cost beyond the fund.");
+ if(inside) p.push(`${fmt(inside)} of the fund went on more than the evidence supported.`);
+ return p.map((x,i)=>i?`<p>${x}</p>`:x).join("");
+}
+
+/* ---------- actions ---------- */
+function wc(){const ta=document.getElementById("cf");document.getElementById("wc").textContent=`${(ta.value.trim().match(/\S+/g)||[]).length} words`;}
+document.addEventListener("toggle",e=>{const d=e.target;if(!d.dataset||!d.dataset.mail)return;const k=decodeURIComponent(d.dataset.mail);
+ S.mailOpen[k]=d.open; if(d.open&&!S.mailRead[k]){S.mailRead[k]=true;d.classList.replace("unread","read");const u=d.querySelector(".udot");if(u)u.remove();}},true);
+document.addEventListener("input",e=>{
+ if(e.target.id==="cf"){S.text=e.target.value;wc();return;}
+ const id=e.target.dataset&&e.target.dataset.b; if(!id||S.decided)return;
+ const it=ITEMS.find(x=>x.id===id); let v=parseInt(e.target.value,10); if(isNaN(v)||v<0)v=0; if(v>it.max){v=it.max;e.target.value=v;}
+ S.budget[id]=v; const sub=document.getElementById("bs_"+id); if(sub)sub.textContent=v?fmt(v*cost(id)):""; patchTotal();});
+document.addEventListener("click",e=>{
+ const sw=e.target.closest("[data-hlc]"); if(sw&&palFor){const N=S.notes[R()],k=palFor.dataset.k;
+   if(sw.dataset.hlc==="none"){delete N.hl[k];N.pins=N.pins.filter(x=>x!==k);} else N.hl[k]={c:sw.dataset.hlc,t:palFor.textContent,src:palFor.dataset.src,q:palFor.dataset.q};
+   closePal(); render(); return;}
+ const sn=e.target.closest(".sn"); if(sn){openPal(sn);return;}
+ if(!e.target.closest("#hlpal"))closePal();
+ const b=e.target.closest("[data-act]");if(!b||b.disabled)return;act(b.dataset.act,b.dataset);});
+document.addEventListener("change",e=>{const v=e.target.dataset&&e.target.dataset.sort; if(!v)return; const [n,i,j]=v.split("_"); const Z=S.pz[n]; Z.sort=Z.sort||{}; Z.sort[i]=Z.sort[i]||{}; if(e.target.value)Z.sort[i][j]=e.target.value; else delete Z.sort[i][j];});
+document.addEventListener("input",e=>{if(e.target.dataset&&e.target.dataset.cc){S.notes[R()].cc[e.target.dataset.cc]=e.target.value;}});
+function act(a,d){
+ switch(a){
+  case "role":if(!(S.fork&&S.role))S.role=d.v;break;
+  case "undec":if(!S.handed){S.decided=false;S.sub=null;S.issues=[];}break;
+  case "tab":if(tabOpen(d.v)){S.tab=d.v;window.scrollTo({top:0});}break;
+  case "fork":if(!S.fork)S.fork=d.v;break;
+  case "expert":if(!S.expert)S.expert=d.v;break;
+  case "ask":if(S.picks[d.w]===null)S.picks[d.w]=+d.v;break;
+  case "mv":{const L=S[d.l],i=+d.v,j=i+(+d.d);if(j<0||j>=L.length)return;flip(d.l,()=>{[L[i],L[j]]=[L[j],L[i]];});return;}
+  case "sendrank":if(!S.ranked){S.ev=evScore();S.ranked=true;}break;
+  case "pin":{const N=S.notes[R()],i=N.pins.indexOf(d.v); if(i>=0)N.pins.splice(i,1); else if(N.pins.length<3)N.pins.push(d.v); break;}
+  case "nbopen":S.nbOpen=true;break;
+  case "nbclose":S.nbOpen=false;break;
+  case "hlrm":{const N=S.notes[R()];delete N.hl[d.v];N.pins=N.pins.filter(x=>x!==d.v);break;}
+  case "noteadd":{const t=(document.getElementById("nbnew")||{}).value||""; if(t.trim())S.notes[R()].free.push(t.trim()); break;}
+  case "noterm":S.notes[R()].free.splice(+d.v,1);break;
+  case "pzsel":S.pz[d.n].sel[d.i]=d.v;break;
+  case "pzhint":S.pz[d.v].hint=true;break;
+  case "pzcheck":{const n=+d.n,i=+d.i,Z=S.pz[n],q=PZ[n].qs[i];
+    if(Z.tier||Z.ok[i])break;
+    let right;
+    if(q.type==="sort"){const got=(Z.sort&&Z.sort[i])||{}; if(Object.keys(got).length<q.items.length){Z.sortMsg={...(Z.sortMsg||{}),[i]:"Sort every order first."};break;}
+      const n2=q.items.filter(([,c],j)=>got[j]===c).length; right=n2===q.items.length; Z.sortMsg={...(Z.sortMsg||{}),[i]:right?"":`${n2} of ${q.items.length} are right.`};}
+    else{const a=Z.sel[i]; if(!a)return; right=a===q.ans;}
+    if(right)Z.ok[i]=1; else {Z.tries[i]++; if(Z.tries[i]>=2){Z.tier="fail";Z.failAt=i;break;}}
+    if(Z.ok.slice(0,PZ[n].qs.length).every(Boolean)) Z.tier=(Z.hint||Z.tries.some(t=>t>0))?"help":"first";
+    break;}
+  case "pznext":S.gate[R()][d.v]=S.pz[d.v].tier;S.gateMsg="";break;
+  case "gate":{const n=+d.v,c=((document.getElementById("gatecode")||{}).value||"").trim(),t=Object.keys(CODES[n]).find(k=>CODES[n][k]===c);
+    if(t&&(!S.pz[n].tier||S.pz[n].tier===t)){S.pz[n].tier=t;S.gate[R()][n]=t;S.gateMsg="";} else S.gateMsg="That code doesn't work. Check it with your teammate."; break;}
+  case "chk":if(S.checks[d.q]===undefined)S.checks[d.q]=+d.v;break;
+  case "lock":if(canLock())S.decided=true;break;
+  case "hand":makeSub();render();{const bl=document.getElementById("block")||document.getElementById("issues");if(bl&&bl.scrollIntoView)bl.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"center"});}return;
+  case "pdf":downloadPdf();return;
+  case "copy":copyBlock();return;
+ }
+ render();
+}
+const LIST_ID={rank:"rk"};
+function flip(key,mutate){
+ const sel=`#${LIST_ID[key]} .tc`, before={};
+ document.querySelectorAll(sel).forEach(c=>before[c.dataset.id]=c.getBoundingClientRect().top);
+ mutate();render();
+ if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+ document.querySelectorAll(sel).forEach(c=>{const dy=before[c.dataset.id]-c.getBoundingClientRect().top;
+  if(dy){c.style.transition="none";c.style.transform=`translateY(${dy}px)`;requestAnimationFrame(()=>{c.style.transition="transform .22s ease";c.style.transform="";});}});
+}
+let drag=null;
+function bindDrag(key){
+ const L=S[key];
+ document.querySelectorAll(`#${LIST_ID[key]} .tc[draggable="true"]`).forEach(c=>{
+  c.addEventListener("dragstart",e=>{drag=c.dataset.id;c.classList.add("dragging");try{e.dataTransfer.setData("text/plain",drag);}catch(_){}});
+  c.addEventListener("dragend",()=>{c.classList.remove("dragging");drag=null;});
+  c.addEventListener("dragover",e=>{e.preventDefault();if(c.dataset.id!==drag)c.classList.add("over");});
+  c.addEventListener("dragleave",()=>c.classList.remove("over"));
+  c.addEventListener("drop",e=>{e.preventDefault();const to=c.dataset.id;if(!drag||to===drag||!L.includes(drag))return;
+   flip(key,()=>{const from=L.indexOf(drag);L.splice(from,1);const ti=L.indexOf(to);L.splice(from<=ti?ti+1:ti,0,drag);});});
+ });
+}
+
+/* ---------- hand-in: Lite's submission block and PDF (GUIDE 2n). Everything below up to "Pro hand-in" is copied
+   verbatim from studio/template.html by cartridges/authoring/_pro_common.py, so the check code matches blocks.py.
+   Nothing is sent anywhere: the block and the PDF are made here in the browser. ---------- */
+const LITE={"id": "halsteadpro", "version": 1, "title": "Halstead Componentry: The Resilience Fund (Pro)", "writing": {"label": "budget memo", "addressee": "the Halstead board"}, "roles": {"A": {"dept": "Asia-Pacific Sourcing Planner", "chars": {"expert": "expert_a", "arjun": "arjun_a", "farah": "farah_a"}}, "B": {"dept": "European Hub Planner", "chars": {"expert": "expert_b", "arjun": "arjun_b", "farah": "farah_b"}}, "C": {"dept": "Finance & Risk Analyst", "chars": {"expert": "expert_c", "arjun": "arjun_c", "farah": "farah_c"}}}, "decisions": {}, "budget": ["air", "dual", "buffer", "vis", "ins", "temp", "hedge", "near", "audit", "ot"]};
+function fnv(str){ let h = 0x811c9dc5; for (const ch of new TextEncoder().encode(str)) { h ^= ch; h = Math.imul(h, 0x01000193) >>> 0; } return h >>> 0; }
+function checkCode(parts){
+  const A = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
+  const s = parts.join("|");
+  const four = h => { let n = h % 923521, o = ""; for (let i = 0; i < 4; i++) { o += A[n % 31]; n = Math.floor(n / 31); } return o; };
+  return four(fnv(s)) + "-" + four(fnv(s + "#"));
+}
+const norm = t => t.replace(/\s+/g, " ").trim();
+function words(t){ return (t.trim().match(/\S+/g) || []).length; }
+function taskName(W){ return W.addressee ? `${W.label} to ${W.addressee}` : W.label; }
+const PDFW = {"R":[278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584,761,556,0,222,556,333,1000,556,556,333,1000,667,333,1000,0,611,0,0,222,222,333,333,350,556,1000,333,1000,500,333,944,0,500,667,278,333,556,556,556,556,260,556,333,737,370,556,584,333,737,333,400,584,333,333,333,556,537,278,333,333,365,556,834,834,834,611,667,667,667,667,667,667,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,500,556,556,556,556,278,278,278,278,556,556,556,556,556,556,556,584,611,556,556,556,556,500,556,500],"B":[278,333,474,556,556,889,722,238,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,333,333,584,584,584,611,975,722,722,722,722,667,611,778,722,278,556,722,611,833,722,778,667,778,722,667,611,722,667,944,667,667,611,333,278,333,584,556,333,556,611,556,611,556,333,611,611,278,278,556,278,889,611,611,611,611,389,556,333,611,556,778,556,556,500,389,280,389,584,761,556,0,278,556,500,1000,556,556,333,1000,667,333,1000,0,611,0,0,278,278,500,500,350,556,1000,333,1000,556,333,944,0,500,667,278,333,556,556,556,556,280,556,333,737,370,556,584,333,737,333,400,584,333,333,333,611,556,278,333,333,365,556,834,834,834,611,722,722,722,722,722,722,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,556,556,556,556,556,278,278,278,278,611,611,611,611,611,611,611,584,611,611,611,611,611,556,611,556]};
+const PDF_WIN = {"8364":128,"8218":130,"402":131,"8222":132,"8230":133,"8224":134,"8225":135,"710":136,"8240":137,"352":138,"8249":139,"338":140,"381":142,"8216":145,"8217":146,"8220":147,"8221":148,"8226":149,"8211":150,"8212":151,"732":152,"8482":153,"353":154,"8250":155,"339":156,"382":158,"376":159};   // Unicode -> WinAnsi byte, for 0x80-0x9F
+const PDF_ALT = {"Ł":"L","ł":"l","Đ":"D","đ":"d","ı":"i","ħ":"h","‐":"-","‑":"-","−":"-","′":"'","″":"\"","\u2009":" ","\u202f":" ","→":"->","←":"<-","≈":"~","≤":"<=","≥":">="};
+function pdfByte(ch){
+  const u = ch.codePointAt(0);
+  if (u >= 32 && u <= 126) return u;
+  if (u >= 160 && u <= 255) return u;
+  if (PDF_WIN[u] !== undefined) return PDF_WIN[u];
+  if (u === 9) return 32;
+  const base = ch.normalize("NFKD").replace(/[̀-ͯ]/g, "");   // ł, ő, ş… fall back to the plain letter
+  if (base && base !== ch && base.length === 1) return pdfByte(base);
+  return 63;   // ?
+}
+// Letters the PDF font can't show: a few by hand, then compatibility forms (ﬁ -> fi, ² -> 2), else "?".
+const pdfClean = s => [...String(s).replace(/[ŁłĐđıħ‐‑−′″\u2009\u202f→←≈≤≥]/g, c => PDF_ALT[c])].map(c => {
+  if (c === "\n" || pdfByte(c) !== 63 || c === "?") return c;
+  const k = c.normalize("NFKD").replace(/[\u0300-\u036f]/g, "");
+  return k && [...k].every(x => pdfByte(x) !== 63) ? k : c;
+}).join("");
+function pdfWidth(text, font, size){
+  let w = 0; for (const ch of text) { const b = pdfByte(ch); w += PDFW[font][b - 32] || 556; } return w * size / 1000;
+}
+function pdfStr(text){   // a PDF literal string in WinAnsi, with octal escapes
+  let out = "(";
+  for (const ch of text) {
+    const b = pdfByte(ch);
+    if (b === 40 || b === 41 || b === 92) out += "\\" + String.fromCharCode(b);
+    else if (b > 126) out += "\\" + b.toString(8).padStart(3, "0");
+    else out += String.fromCharCode(b);
+  }
+  return out + ")";
+}
+function pdfWrap(text, font, size, width){
+  const lines = [];
+  text.split("\n").forEach(par => {
+    if (!par.trim()) { lines.push(""); return; }
+    let line = "";
+    par.split(/\s+/).filter(Boolean).forEach(word => {
+      const tryLine = line ? line + " " + word : word;
+      if (pdfWidth(tryLine, font, size) <= width) { line = tryLine; return; }
+      if (line) lines.push(line);
+      while (pdfWidth(word, font, size) > width) {          // a very long word: break it (one pass per line)
+        const chars = [...word]; let n = 0, w = 0;
+        while (n < chars.length) { const cw = pdfWidth(chars[n], font, size); if (n > 0 && w + cw > width) break; w += cw; n++; }
+        lines.push(chars.slice(0, n).join("")); word = chars.slice(n).join("");
+      }
+      line = word;
+    });
+    lines.push(line);
+  });
+  return lines;
+}
+function utf16Hex(text){
+  let h = "FEFF";
+  for (let i = 0; i < text.length; i++) h += text.charCodeAt(i).toString(16).padStart(4, "0").toUpperCase();
+  return "<" + h + ">";
+}
+function makePdf({title, subtitle, body, note, footer, block, fileName}){
+  [title, subtitle, body, note, footer] = [title, subtitle, body, note, footer].map(pdfClean);
+  const W = 595.28, H = 841.89, M = 64, TW = W - 2 * M;
+  const pages = []; let ops = [], y = H - M;
+  const newPage = () => { if (ops.length) pages.push(ops); ops = []; y = H - M; };
+  const text = (s, font, size, x, yy, grey) => ops.push(`BT /${font} ${size} Tf ${grey ? "0.4 0.45 0.5 rg" : "0.11 0.15 0.2 rg"} ${x.toFixed(2)} ${yy.toFixed(2)} Td ${pdfStr(s)} Tj ET`);
+  const para = (s, font, size, lead, grey) => pdfWrap(s, font, size, TW).forEach(l => {
+    if (y - lead < M + 20) newPage();
+    y -= lead; if (l) text(l, font, size, M, y, grey);
+  });
+  para(title, "B", 16, 21);
+  para(subtitle, "R", 9.5, 13, true);
+  y -= 14;
+  para(body, "R", 11, 15.5);
+  y -= 18;
+  para(note, "R", 8, 11, true);
+  newPage();
+  // objects: 1 catalog, 2 pages, 3 font R, 4 font B, 5 embedded file, 6 filespec, 7 info, then page/content pairs
+  const objs = [];
+  const enc = new TextEncoder(), blockBytes = enc.encode(block);
+  const kids = pages.map((_, i) => `${8 + i * 2} 0 R`).join(" ");
+  objs[1] = `<< /Type /Catalog /Pages 2 0 R /Names << /EmbeddedFiles << /Names [${pdfStr(fileName)} 6 0 R] >> >> /PageMode /UseNone >>`;
+  objs[2] = `<< /Type /Pages /Kids [${kids}] /Count ${pages.length} >>`;
+  objs[3] = `<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>`;
+  objs[4] = `<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>`;
+  objs[5] = {dict: `<< /Type /EmbeddedFile /Subtype /text#2Fplain /Length ${blockBytes.length} >>`, data: blockBytes};
+  objs[6] = `<< /Type /Filespec /F ${pdfStr(fileName)} /UF ${utf16Hex(fileName)} /EF << /F 5 0 R >> /Desc ${pdfStr("SimLearn answers for the teacher tool")} >>`;
+  objs[7] = `<< /Title ${utf16Hex(title)} /Creator (SimLearn) /Producer (SimLearn) /SimLearnSubmission ${utf16Hex(block)} >>`;
+  pages.forEach((p, i) => {
+    const foot = `BT /R 7.5 Tf 0.4 0.45 0.5 rg ${M} 36 Td ${pdfStr(footer + (pages.length > 1 ? ` · page ${i + 1} of ${pages.length}` : ""))} Tj ET`;
+    const content = enc.encode([...p, foot].join("\n").split("").map(c => c.charCodeAt(0) < 256 ? c : "?").join(""));
+    objs[8 + i * 2] = `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${W} ${H}] /Resources << /Font << /R 3 0 R /B 4 0 R >> >> /Contents ${9 + i * 2} 0 R >>`;
+    objs[9 + i * 2] = {dict: `<< /Length ${content.length} >>`, data: content};
+  });
+  // assemble with byte offsets (all strings here are ASCII)
+  const parts = [], offs = []; let len = 0;
+  const add = b => { parts.push(b); len += b.length; };
+  add(enc.encode("%PDF-1.7\n")); add(new Uint8Array([0x25, 0xE2, 0xE3, 0xCF, 0xD3, 0x0A]));   // marks the file as binary
+  for (let n = 1; n < objs.length; n++) {
+    offs[n] = len;
+    const o = objs[n];
+    if (typeof o === "string") add(enc.encode(`${n} 0 obj\n${o}\nendobj\n`));
+    else { add(enc.encode(`${n} 0 obj\n${o.dict}\nstream\n`)); add(o.data); add(enc.encode(`\nendstream\nendobj\n`)); }
+  }
+  const xref = len;
+  let x = `xref\n0 ${objs.length}\n0000000000 65535 f \n`;
+  for (let n = 1; n < objs.length; n++) x += String(offs[n]).padStart(10, "0") + " 00000 n \n";
+  add(enc.encode(x + `trailer\n<< /Size ${objs.length} /Root 1 0 R /Info 7 0 R >>\nstartxref\n${xref}\n%%EOF\n`));
+  return new Blob(parts, {type: "application/pdf"});
+}
+
+/* ---------- Pro hand-in ---------- */
+function proChoices(r){
+ const c=LITE.roles[r].chars, sl=SHORTLIST[r]||[], out=[];
+ out.push(`${c.expert}=${S.expert&&sl.includes(S.expert)?"o"+(sl.indexOf(S.expert)+1):"-"}`);
+ Object.keys(WIT).forEach(w=>{const p=S.picks[w]; out.push(`${c[w]}=${p===null||p===undefined?"-":"o"+(p+1)}`);});
+ return out.join(", ");
+}
+// The Pro line: the team's fork, interim briefing (Morven/Moira acts on the first), evidence verdict and puzzle tiers.
+// Not part of the check code (blocks.py reads it into sub["pro"]).
+function proLine(){
+ return `Pro: fork=${S.fork||"none"}, briefing=${S.ranked?S.rank.join(">"):"none"}, evidence=${S.ranked&&S.ev?S.ev:"none"}, puzzles=${[1,2,3].map(n=>`${n}:${S.pz[n].tier||"none"}`).join(",")}`;
+}
+function makeSub(){
+ const r=S.role, W=LITE.writing, missing=[];
+ S.sub=null;
+ if(!r||!LITE.roles[r]){S.issues=["Choose your role first (Context)."];return;}
+ const memoText=(S.text||"").trim();
+ const open=Object.entries(WIT).filter(([k])=>S.picks[k]===null||S.picks[k]===undefined).map(([,w])=>w.name);
+ if(open.length) missing.push(`You haven't chosen what to ask ${open.join(", ")} yet (Investigate).`);
+ const openDec=LITE.budget?(S.decided?[]:["budget"]):Object.keys(LITE.decisions).filter(k=>!S[k]);
+ if(openDec.length) missing.push(LITE.budget?"Your group's budget isn't confirmed yet (Decide).":`Your group's answer is missing for ${openDec.map(k=>LITE.decisions[k]).join(", ")} (Decide).`);
+ if(words(memoText)<50) missing.push("Your text is very short — write your "+W.label+" first.");
+ S.issues=missing;
+ if(openDec.length||words(memoText)<50) return;
+ const ai=S.consent?"yes":"no";
+ const choices=proChoices(r);
+ const decisions=LITE.budget?LITE.budget.map(id=>`${id}=${+((S.budget||{})[id])||0}`).join(", ")   // Lite's budget format
+                           :Object.entries(LITE.decisions).map(([k,id])=>`${id}=${S[k]}`).join(", ");
+ const parts=[LITE.id, LITE.version, r, choices, decisions, ai, ai==="yes"?norm(memoText):""];
+ const code=checkCode(parts);
+ const head=[
+  "=== SIMLEARN SUBMISSION ===",
+  ai==="yes"?"AI check: ALLOWED":"AI check: NOT ALLOWED - grade by hand",
+  `Scenario: ${LITE.id} v${LITE.version} (${LITE.title})`,
+  `Role: ${r} (${LITE.roles[r].dept})`,
+  `Info choices: ${choices}`,
+  `Group decisions: ${decisions}`,
+  proLine(),
+  `Check: ${code}`,
+ ];
+ const block=ai==="yes"?[...head,`--- ${taskName(W)} (${words(memoText)} words) ---`,memoText,"=== END ==="].join("\n")
+                       :[...head,"=== END ===","",`My ${taskName(W)} (${words(memoText)} words):`,"",memoText].join("\n");
+ S.sub={block, blockOnly: ai==="yes"?block:[...head,"=== END ==="].join("\n"), code, ai, r, n:words(memoText), memo:memoText};
+ S.handed=true;
+}
+function subHTML(){const x=S.sub; if(!x) return "";
+ return `
+    <h2>Your submission</h2>
+    <p>Hand it in the way your <b>Moodle assignment</b> asks for:</p>
+    <p><b>A file upload?</b> Download your PDF and upload it to the assignment.</p>
+    <p><button type="button" class="btn" id="pdf" data-act="pdf">Download my submission (PDF)</button> <span id="pdfmsg" class="ok" aria-live="polite"></span></p>
+    <p><b>A text box?</b> Copy everything in the box below and paste it in. ${x.ai==="yes" ? "" : "Your text sits below the SimLearn part, so your teacher can mark it by hand."}</p>
+    <textarea class="block" id="block" readonly>${esc(x.block)}</textarea>
+    <p><button type="button" class="btn" id="copy" data-act="copy">Copy to clipboard</button> <span id="copied" class="ok" aria-live="polite"></span></p>
+    <p class="muted small">If you change your text or your answers later, create your submission again before you hand it in.</p>`;}
+function handinHTML(){
+ return `<div class="consent">
+      <b>Can your teacher check your text with AI?</b>
+      <p class="small">Your teacher may use the SimLearn teacher tool, which can ask an AI system (Claude, by Anthropic) to suggest feedback on your writing. Only your text and your group's choices would be sent — not your name. Your teacher always makes the final decision about your grade. If you say no, your teacher marks your text by hand. Saying no has no effect on your grade.</p>
+      <label><input type="checkbox" id="consent" ${S.consent?"checked":""}> Yes, my teacher may check my text with AI.</label>
+    </div>
+    <div id="issues" class="issues">${(S.issues||[]).map(m=>`<p>${esc(m)}</p>`).join("")}</div>
+    <button type="button" class="btn" data-act="hand">Create my submission</button>
+    <div id="out">${subHTML()}</div>`;
+}
+function downloadPdf(){
+ const x=S.sub; if(!x) return;
+ const W=LITE.writing, rr=LITE.roles[x.r];
+ const cap=taskName(W).charAt(0).toUpperCase()+taskName(W).slice(1);
+ const today=new Date().toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"});
+ const blob=makePdf({
+  title: cap,
+  subtitle: `${LITE.title} · Role ${x.r}${rr.dept?" ("+rr.dept+")":""} · ${x.n} words · ${today}`,
+  body: x.memo,
+  note: (x.ai==="yes"
+   ? "This file also carries your SimLearn answers for your teacher's SimLearn tool: your information choices, your group's decisions and a copy of your text. You agreed that your teacher may check your text with AI."
+   : "This file also carries your SimLearn answers for your teacher's SimLearn tool: your information choices and your group's decisions, but not your text. You did not agree to an AI check, so your teacher will mark your text by hand.")
+   + ` Check code: ${x.code}.`,
+  footer: `SimLearn · ${LITE.title}`,
+  block: x.blockOnly, fileName: "simlearn-submission.txt"});
+ const a=document.createElement("a");
+ a.href=URL.createObjectURL(blob); a.download=`simlearn-${LITE.id}-role-${x.r}.pdf`;
+ document.body.appendChild(a); a.click(); a.remove();
+ setTimeout(()=>URL.revokeObjectURL(a.href),120000);
+ const m=document.getElementById("pdfmsg"); if(m) m.textContent="Look in your Downloads, then upload the file to Moodle. If nothing downloaded, open this page in Safari, Chrome or Firefox (not inside an app), or use the text box below.";
+}
+async function copyBlock(){
+ const ta=document.getElementById("block"), msg=document.getElementById("copied"); if(!ta) return;
+ const done=()=>{msg.textContent="Copied — now paste it into Moodle.";};
+ try{await navigator.clipboard.writeText(ta.value); return done();}catch(e){}
+ // older method: still works in many embedded frames where the modern one is blocked
+ ta.focus(); ta.select(); ta.setSelectionRange(0,ta.value.length);
+ let ok=false; try{ok=document.execCommand("copy");}catch(e){}
+ if(ok) return done();
+ msg.textContent="Your browser blocked copying. The text is selected — press Ctrl+C (or ⌘C) to copy it.";
+}
+
+// a recorded clip's text appears once the student has listened to the end (GUIDE 2h); media events don't bubble
+document.addEventListener("ended",e=>{const a=e.target; if(!a||a.tagName!=="AUDIO"||!a.dataset.f)return;
+ S.heard=Object.assign({},S.heard,{[a.dataset.f]:1}); const box=a.closest(".audio"), dt=box&&box.querySelector("details"); if(dt)dt.hidden=false; save();},true);
+
+document.addEventListener("change",e=>{if(e.target.id==="consent"){S.consent=e.target.checked;S.sub=null;S.issues=[];render();}});
+document.addEventListener("input",e=>{if(e.target.id!=="cf")return; if(S.sub){S.sub=null;const o=document.getElementById("out");if(o)o.innerHTML="";} save();});
+
+render();
+</script>
+</body>
+</html>
