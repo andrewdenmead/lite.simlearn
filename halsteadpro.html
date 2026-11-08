@@ -600,6 +600,8 @@ const ready=()=>S.unlock||(S.role&&S.fork);
 const tabOpen=t=>t==="context"||(ready()&&(["inbox","puzzles"].includes(t)||S.unlock||allPz(R())));
 const PATH={tell:"called Dornbach on day one",wait:"waited to call Dornbach with a plan"};
 
+const ENDING_HASH=912509104;
+function endLockHTML(){return `<section class="card"><h2>What happened next</h2><p>When <b>everyone in your team</b> has created their submission, ask your teacher for the code to find out what happened.</p><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input id="endcode" inputmode="numeric" autocomplete="off" maxlength="4" aria-label="Code from your teacher" style="width:7em;font:inherit;padding:6px 10px;border:1px solid var(--line);border-radius:8px"><button class="btn" data-act="endcode">Open</button> <span class="msg" aria-live="polite">${S.endMsg||""}</span></div></section>`;}
 function render(){
   save();
   document.getElementById("who").textContent=S.role?`You are the ${ROLES[S.role].name}${S.fork?` · Path: ${PATH[S.fork]}`:""}`:"Read the context, then choose your role.";
@@ -708,6 +710,7 @@ const V={
    <textarea id="cf" aria-label="Budget memo"></textarea>
    <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><span class="wc" id="wc">0 words</span></div>${handinHTML()}</section>`;
   if(!S.handed) return h;
+  if(!S.endOpen){h+=endLockHTML();return h;}
   const L=ledger(), beyond=L.filter(x=>x[1]==="beyond").reduce((a,x)=>a+x[2],0), inside=L.filter(x=>x[1]==="inside").reduce((a,x)=>a+x[2],0), inR=ITEMS.filter(it=>band(it.id)==="ok").length;
   h+=`<section class="card"><h2>Twelve weeks later</h2>${audio("Trade news: Supply Lines","newsreader, light music bed under",epilogue(beyond,inside))}
    <div class="board"><div class="tile"><div class="l">Dornbach</div><div class="v">${DORN_LABEL[dornStatus()]}</div></div><div class="tile"><div class="l">Lines within the evidence range</div><div class="v">${inR} of ${ITEMS.length}</div></div><div class="tile"><div class="l">Cost beyond the fund</div><div class="v">${fmt(beyond)}</div></div><div class="tile"><div class="l">Fund spent beyond the evidence</div><div class="v">${fmt(inside)}</div></div></div>
@@ -831,6 +834,7 @@ function act(a,d){
   case "sendrank":if(!S.ranked){S.ev=evScore();S.ranked=true;}break;
   case "pin":{const N=S.notes[R()],i=N.pins.indexOf(d.v); if(i>=0)N.pins.splice(i,1); else if(N.pins.length<3)N.pins.push(d.v); break;}
   case "nbopen":S.nbOpen=true;break;
+  case "endcode":{const c=((document.getElementById("endcode")||{}).value||"").trim();if(fnv(c)===ENDING_HASH){S.endOpen=true;S.endMsg="";}else S.endMsg=c?"That isn't the code. Check it with your teacher.":"";break;}
   case "nbclose":S.nbOpen=false;break;
   case "hlrm":{const N=S.notes[R()];delete N.hl[d.v];N.pins=N.pins.filter(x=>x!==d.v);break;}
   case "noteadd":{const t=(document.getElementById("nbnew")||{}).value||""; if(t.trim())S.notes[R()].free.push(t.trim()); break;}
