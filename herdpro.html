@@ -1,0 +1,1025 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<title>Herd: The Range Reset (Pro) — SimLearn</title>
+<link rel="icon" href="/favicon.ico" sizes="any"><link rel="icon" type="image/png" href="/favicon-32.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: Lite-style single column. Plain header, five tabs, a task line on every tab, content as cards and emails. */
+:root{
+  /* Lite's palette and fonts (studio/template.html), with Pro marked by Lite's amber on tabs and badge. Light only, like Lite. */
+  --bg:#FBFBF8; --surface:#ffffff; --sunk:#ECEFF3; --ink:#1D2733; --muted:#4A5562; --line:#D4D9E1;
+  --blue:#2C5282; --blue-soft:#EEF3F9; --amber:#C98A1B; --amber-soft:#FBF1DC;
+  --good:#2F6B47; --good-soft:#E3F0E7; --bad:#9B2C2C; --bad-soft:#F7E4E4; --warn:#7A5A0E; --warn-soft:#FBF1DC; --proto:#FBF1DC;
+  --ui:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --serif:Charter,"Bitstream Charter","Sitka Text",Cambria,Georgia,serif;
+  --mono:ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+body{background:var(--bg);color:var(--ink);font-family:var(--ui);font-size:16px;line-height:1.55}
+.wrap{max-width:860px;margin:0 auto;padding-left:max(16px, env(safe-area-inset-left,0px));padding-right:max(16px, env(safe-area-inset-right,0px))}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+h1,h2,h3{text-wrap:balance;margin:0;line-height:1.2}
+p{margin:0}
+
+.proto{background:var(--proto);border-bottom:1px dashed var(--line);font-size:13px}
+.proto .wrap{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;padding-block:7px}
+.proto b{color:var(--amber);letter-spacing:.08em;text-transform:uppercase;font-size:11px}
+.ghost{background:transparent;border:1px solid var(--line);border-radius:6px;padding:3px 10px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{background:transparent;border:0;padding:3px 10px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+
+header{background:var(--surface);border-bottom:1px solid var(--line);border-top:4px solid var(--blue)}
+header .wrap{padding-block:18px 0}
+.brand{font-weight:800;color:var(--blue);font-size:14px;letter-spacing:.02em}
+.brand span{background:var(--amber);color:#fff;border-radius:4px;padding:0 6px;margin-left:4px;font-size:12px}
+h1{font-size:clamp(26px,4.5vw,34px);font-weight:800;margin-top:4px}
+.whoami{color:var(--muted);font-size:14.5px;margin-top:2px}
+.tabs{display:flex;gap:2px;overflow-x:auto;margin-top:14px}
+.tabs button{background:transparent;border:0;border-bottom:3px solid transparent;padding:8px 12px;font-weight:700;color:var(--muted);white-space:nowrap}
+.tabs button[aria-current="true"]{color:var(--ink);border-bottom-color:var(--amber)}
+.tabs button:disabled{opacity:.4;cursor:default}
+.tdot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--amber);margin-left:6px;vertical-align:middle}
+
+main .wrap{padding-block:22px 64px;display:flex;flex-direction:column;gap:18px}
+.task{background:var(--blue-soft);border-radius:8px;padding:12px 16px;display:flex;gap:10px;align-items:baseline}
+.task b{color:var(--blue);white-space:nowrap}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card h2{font-size:21px;font-weight:800}
+.card h3{font-size:17px;font-weight:700}
+.step{font-family:var(--mono);font-size:12px;color:var(--blue)}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+.pic{aspect-ratio:16/7;max-width:100%;border-radius:6px;background:repeating-linear-gradient(135deg,var(--sunk) 0 12px,transparent 12px 24px);border:1px dashed var(--line);display:grid;place-items:center;color:var(--muted);font-size:14px;text-align:center;padding:12px}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.fact{background:var(--bg);border-radius:6px;padding:8px 12px}
+.fact .l{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+.fact .v{font-weight:700}
+.roles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}
+.role{text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.role[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft)}
+.role b{font-size:16.5px}
+.role span{font-size:14px;color:var(--muted)}
+.people{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}
+.person{border-left:3px solid var(--line);padding:2px 12px}
+.person b{display:block}
+.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:10px}
+.choice{text-align:left;background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.choice:hover:not(:disabled){border-color:var(--ink)}
+.choice[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft)}
+.choice:disabled{cursor:default}
+.choice:disabled:not([aria-pressed="true"]){opacity:.5}
+.choice .k{font-family:var(--mono);font-size:12px;color:var(--blue)}
+.choice small{color:var(--muted);font-size:14px}
+.btn{background:var(--blue);color:#fff;border:0;border-radius:8px;padding:9px 18px;font-weight:700;align-self:flex-start}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.done{background:var(--good-soft);color:var(--good);border-radius:6px;padding:8px 12px;font-weight:600}
+
+/* emails */
+.mail{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.mail summary{list-style:none;cursor:pointer;padding:12px 16px;display:grid;grid-template-columns:1fr auto;gap:2px 12px}
+.mail summary::-webkit-details-marker{display:none}
+.mail .from{font-weight:400}
+.mail .lbl{color:var(--muted);font-weight:400;margin-right:2px}
+.mail.unread .from,.mail.unread .subj{font-weight:700;color:var(--ink)}
+.udot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--blue);margin-right:8px;vertical-align:1px}
+.mail .subj{grid-column:1/2;color:var(--muted);font-size:14.5px}
+.mail .tag{grid-row:1/3;grid-column:2;align-self:center}
+.mail[open] summary{border-bottom:1px solid var(--line);background:var(--bg)}
+.mail .body p,.card>p,.attach>p{font-family:var(--serif);font-size:1.02rem;line-height:1.62}
+.mail .body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:10px}
+.sig{color:var(--muted)}
+.attach{border:1px solid var(--line);border-radius:6px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.attach .an{font-size:12.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.fine{font-size:13px;color:var(--muted);border-top:1px dotted var(--line);padding-top:6px}
+.rel{font-size:11.5px;font-weight:700;padding:1px 8px;border-radius:99px;white-space:nowrap}
+.rel-high{background:var(--good-soft);color:var(--good)}
+.rel-medium{background:var(--warn-soft);color:var(--warn)}
+.rel-low{background:var(--bad-soft);color:var(--bad)}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+td.num,th.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.mono{font-family:var(--mono);font-size:.9em}
+svg text{fill:var(--muted);font-family:var(--ui);font-size:12px}
+svg .lab{fill:var(--ink);font-size:13px}
+svg .val{fill:var(--ink);font-family:var(--mono);font-size:12px}
+svg .axis{stroke:var(--line)} svg .zero{stroke:var(--muted)}
+svg .neg{fill:var(--bad)} svg .pos{fill:var(--good)}
+svg .ring-bg{stroke:var(--sunk);fill:none} svg .ring{stroke:var(--amber);fill:none}
+.donuts{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:6px}
+.donuts figure{margin:0;text-align:center;font-size:13.5px}
+
+/* audio placeholder */
+.audio{background:var(--blue-soft);border-radius:8px;padding:10px 14px;display:grid;grid-template-columns:auto 1fr;gap:2px 12px;align-items:center}
+.audio .play{width:36px;height:36px;border-radius:50%;border:1.5px dashed var(--blue);background:transparent;color:var(--blue);cursor:not-allowed}
+.audio .t{font-weight:700}
+.audio .s{font-size:13px;color:var(--muted)}
+.audio details{grid-column:1/-1;font-size:14px}
+.audio summary{cursor:pointer;color:var(--blue);font-weight:600}
+.script{display:flex;flex-direction:column;gap:8px;padding-top:6px}
+.sd{font-style:italic;color:var(--muted);font-size:13.5px}
+
+/* investigate */
+.qs{display:flex;flex-direction:column;gap:8px}
+.q{text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:6px;padding:9px 12px}
+.q[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft)}
+.q:disabled:not([aria-pressed="true"]){opacity:.45;cursor:default}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:14px}
+.two>*{min-width:0}
+
+/* timeline */
+.tl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.tc{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;user-select:none}
+.tc[draggable="true"]{cursor:grab}
+.tc.dragging{opacity:.4}
+.tc.over{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-soft)}
+.tc .n{font-family:var(--mono);color:var(--muted);text-align:center}
+.tc .d{display:block;font-family:var(--mono);font-size:12.5px;color:var(--good)}
+.tc .arr{display:flex;gap:4px}
+.tc .arr button{width:34px;height:34px;border-radius:6px;border:1px solid var(--line);background:var(--bg)}
+.tc .arr button:disabled{opacity:.3;cursor:default}
+.tl.ok .tc{border-color:var(--good)}
+.note-strong{background:var(--amber-soft);border-radius:8px;padding:8px 12px}
+.hint{background:var(--warn-soft);border-radius:6px;padding:9px 12px}
+.opt{text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:6px;padding:8px 12px}
+.opt.right{border-color:var(--good);background:var(--good-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.opt:disabled{cursor:default}
+.fb{font-size:14.5px}
+
+textarea{width:100%;min-height:200px;resize:vertical;font:inherit;line-height:1.6;padding:10px 12px;border:1.5px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);box-sizing:border-box}
+.wc{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.board{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:10px}
+.tile{background:var(--bg);border-radius:6px;padding:10px 12px}
+.tile .l{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+.tile .v{font-weight:700}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+.sn{cursor:pointer;border-radius:3px;transition:background .15s}
+.sn:hover{box-shadow:inset 0 -2px 0 var(--amber)}
+#hlpal{position:absolute;z-index:30;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px;display:flex;gap:6px;box-shadow:0 4px 14px rgba(0,0,0,.15)}
+#hlpal[hidden]{display:none}
+#hlpal button{width:28px;height:28px;border-radius:50%;border:1px solid rgba(0,0,0,.15);cursor:pointer}
+#hlpal .none{background:var(--surface);color:var(--muted)}
+#fab{position:fixed;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:20;background:var(--blue);color:#fff;border:0;border-radius:999px;padding:10px 18px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+#fab[hidden],#nb[hidden]{display:none}
+#nb{position:fixed;top:0;right:0;bottom:0;width:min(380px,100vw);z-index:25;background:var(--bg);border-left:1px solid var(--line);overflow-y:auto;padding:calc(14px + env(safe-area-inset-top,0px)) 16px 24px;box-shadow:-6px 0 20px rgba(0,0,0,.12);display:flex;flex-direction:column;gap:10px;box-sizing:border-box}
+.nbhead{display:flex;justify-content:space-between;align-items:center}
+.nbhead h2{font-size:18px}
+.lnk{background:none;border:0;color:var(--blue);text-decoration:underline;padding:0;font-size:14px;cursor:pointer}
+.cc summary{cursor:pointer;display:flex;gap:4px;align-items:center;font-weight:600;font-size:14px}
+.cc i,.nbgroup i,.pin i{display:inline-block;width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.15);flex:none}
+.ccgrid{display:grid;gap:6px;margin-top:8px}
+.ccgrid label{display:flex;gap:8px;align-items:center}
+.ccgrid input{flex:1;font:inherit;font-size:14px;padding:4px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
+.nbadd{display:flex;flex-direction:column;gap:6px}
+.nbadd textarea{min-height:60px;font-size:14px}
+.btn.small{padding:6px 12px;font-size:14px}
+.nbgroup{display:flex;gap:6px;align-items:center;font-weight:700;font-size:14px;margin-top:6px}
+.nbcard{background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--line);border-radius:8px;padding:8px 10px}
+.nbcard p{font-family:var(--serif);font-size:15px;line-height:1.5}
+.nbcard .src{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-between;gap:8px;margin-top:4px}
+.pins{display:flex;flex-direction:column;gap:6px}
+.pin{display:flex;gap:8px;align-items:flex-start;text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:8px;padding:8px 10px}
+.pin[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft)}
+.pin span{font-family:var(--serif);font-size:15px}
+.pin small{display:block;font-family:var(--ui);font-size:12.5px;color:var(--muted)}
+.gate{border:2px dashed var(--amber)}
+.coderow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.coderow input,.numin{font-family:var(--mono);font-size:18px;padding:6px 10px;border:1.5px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);width:12ch}
+.bigcode{font-family:var(--mono);font-size:34px;letter-spacing:.2em;color:var(--good);border:2px solid var(--good);border-radius:8px;padding:6px 18px;align-self:flex-start}
+.pzq{display:flex;flex-direction:column;gap:6px;border-top:1px dotted var(--line);padding-top:10px}
+.opts2{display:flex;flex-wrap:wrap;gap:6px}
+.opts2 .opt[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft)}
+.msg{color:var(--bad);font-size:14px}
+.sortq{display:flex;flex-direction:column;gap:8px}
+.sortrow{display:grid;grid-template-columns:1fr minmax(170px,auto);gap:10px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--bg)}
+.sortrow p{font-family:var(--serif);font-size:15px}
+.sortrow select{font:inherit;font-size:14px;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
+@media (max-width:560px){.sortrow{grid-template-columns:1fr}}
+.opts2 .opt{text-align:left}
+svg .sa{fill:var(--blue)} svg .sb{fill:var(--amber)}
+.legend{display:flex;gap:14px;font-size:13px;color:var(--muted);flex-wrap:wrap}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.sums{width:100%;font-size:14px}
+.sums td.num{white-space:nowrap}
+.sums tr.tot td{font-weight:800;border-top:2px solid var(--ink)}
+
+/* Lite's hand-in (studio/template.html), added for the Pro hand-in */
+.consent{border:1px solid var(--line);background:#fff;border-radius:12px;padding:14px 16px;margin:6px 0}
+.consent label{display:flex;gap:10px;align-items:flex-start;font-weight:600;margin-top:8px}
+.consent input{margin-top:5px;width:18px;height:18px}
+.issues{color:var(--warn);font-size:.92rem}
+.block{width:100%;min-height:260px;font:13px/1.45 ui-monospace,Menlo,Consolas,monospace;border:2px solid var(--blue);border-radius:10px;padding:10px 12px;background:#fff;white-space:pre-wrap;box-sizing:border-box}
+.ok{color:var(--good);font-weight:600}
+#out{display:flex;flex-direction:column;gap:10px}
+</style>
+</head>
+<body>
+
+
+<header><div class="wrap">
+  <div class="brand">SimLearn<span>PRO</span></div>
+  <h1>Herd: The Range Reset</h1>
+  <p class="whoami" id="who"></p>
+  <nav class="tabs" id="tabs" aria-label="Sections"></nav>
+</div></header>
+<main><div class="wrap" id="main"></div></main>
+<div id="hlpal" hidden role="dialog" aria-label="Highlight colour"><button data-hlc="yellow" style="background:#FFF176" aria-label="Yellow"></button><button data-hlc="green" style="background:#B9F6CA" aria-label="Green"></button><button data-hlc="pink" style="background:#F8BBD0" aria-label="Pink"></button><button data-hlc="blue" style="background:#B3E5FC" aria-label="Blue"></button><button data-hlc="orange" style="background:#FFE0B2" aria-label="Orange"></button><button data-hlc="purple" style="background:#E1BEE7" aria-label="Purple"></button><button data-hlc="none" class="none" aria-label="Remove highlight">✕</button></div>
+<button id="fab" data-act="nbopen" hidden>Notes (0)</button>
+<aside id="nb" hidden aria-label="Your highlights and notes"></aside>
+
+<script>
+const ROLES={
+ A:{name:"Structural Packaging Designer",line:"Carton shape, materials and the filling line",detail:"You design the carton itself: its shape, what it's made of and how it runs on the filling line and travels to the shops. Your inbox holds messages from the factory floor and from logistics."},
+ B:{name:"Brand & Packaging Designer",line:"How the four packs look, alone and together",detail:"You decide how the range looks: each pack on its own, and all four side by side on the shelf. Your inbox holds messages from Herd's design agency and from shopper research."},
+ C:{name:"Sustainable Packaging Designer",line:"Materials, green claims and what they cost",detail:"You make sure Herd's packs are as sustainable as they can be, and that every claim on them is true. Your inbox holds messages from compliance, the lab's work and finance."}
+};
+const REL={high:"Reliable",medium:"Personal view",low:"Weak evidence"};
+const fmt=n=>(n<0?"−":"")+"£"+Math.abs(n).toLocaleString("en-GB");
+
+/* two-series 100% bars (concept test) and a simple share chart */
+function splitBars(rows,la,lb){
+  const W=500,left=170,right=10,rowH=34,top=6,H=top+rows.length*rowH+4,w=W-left-right;
+  let s=`<div class="legend"><span><i style="background:var(--blue)"></i>${la}</span><span><i style="background:var(--amber)"></i>${lb}</span></div><svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${la} versus ${lb} by shopper group">`;
+  rows.forEach((r,i)=>{const y=top+i*rowH, aw=w*r.a/100;
+    s+=`<text class="lab" x="${left-10}" y="${y+19}" text-anchor="end">${r.l}</text><rect class="sa" x="${left}" y="${y+5}" width="${aw}" height="${rowH-12}" rx="2"/><rect class="sb" x="${left+aw}" y="${y+5}" width="${w-aw}" height="${rowH-12}" rx="2"/>`;
+    s+=`<text class="val" x="${left+6}" y="${y+19}" style="fill:#fff">${r.a}%</text><text class="val" x="${left+w-6}" y="${y+19}" text-anchor="end">${100-r.a}%</text>`;});
+  return s+"</svg>";
+}
+function shareBars(rows){
+  const W=500,left=170,right=50,rowH=28,top=4,H=top+rows.length*rowH+4,w=W-left-right;
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="What shoppers mentioned without being asked">`;
+  rows.forEach((r,i)=>{const y=top+i*rowH;
+    s+=`<text class="lab" x="${left-10}" y="${y+17}" text-anchor="end">${r.l}</text><rect class="sa" x="${left}" y="${y+5}" width="${Math.max(2,w*r.v/100)}" height="${rowH-11}" rx="2"/><text class="val" x="${left+Math.max(2,w*r.v/100)+6}" y="${y+17}">${r.v}%</text>`;});
+  return s+"</svg>";
+}
+const PRO_AUDIO=[];   // the recordings published next to the page (build.py fills this in)
+function audio(t,voice,script,file){if(file&&PRO_AUDIO.includes(file))return `<div class="audio rec"><div style="flex:1;min-width:0"><div class="t">${t}</div><audio controls preload="none" data-f="${file}" src="audio/${file}.mp3" style="width:100%;margin-top:6px"></audio></div><details ${(S.heard||{})[file]?"":"hidden"}><summary>Show the text</summary><div class="script">${script}</div></details></div>`;
+ return `<div class="audio"><button class="play" disabled aria-label="Play (recording to come)">▶</button><div><div class="t">${t}</div><div class="s">Recording to come: read the text</div></div><details open><summary>The text</summary><div class="script">${script}</div></details></div>`;}
+function mail(m){const k=m.from+"|"+m.subj, o=!!S.mailOpen[k], r=!!S.mailRead[k];
+ return `<details class="mail ${r?"read":"unread"}" data-mail="${encodeURIComponent(k)}"${o?" open":""}><summary><span class="from">${r?"":`<span class="udot" aria-label="Unread"></span>`}<span class="lbl">From:</span> ${m.from}</span><span class="subj">${m.subj}</span><span class="tag"><span class="rel rel-${m.rel}">${REL[m.rel]}</span></span></summary><div class="body" data-src="${m.from.split(",")[0]}" data-q="${m.rel}">${m.body}</div></details>`;}
+function att(name,html){return `<div class="attach"><div class="an">📎 ${name}</div>${html}</div>`;}
+
+/* ---------- inboxes (every key clue appears in at least two roles) ---------- */
+const VIRAL={from:"Morven Laidlaw, Founder & CEO",subj:"Fwd: “Nobody buys plastic any more”",rel:"low",body:`
+ <p>This post is everywhere this week. Food for thought?</p>
+ <p class="muted"><em>“Gen Z won't touch a pack that isn't 100% plastic-free. Brands: switch or die.”</em> (lifestyle influencer, 210,000 followers, 4 November)</p>
+ <p class="fine">The post gives no survey, no figures and no source.</p>`};
+
+const INBOX={
+ A:[
+  {from:"Gavin Treloar, Operations & Filling Line Manager",subj:"One changeover, and before Declan calls you",rel:"high",body:`
+   <p>Quick heads-up before anything is locked. Our filling line can take one changeover before the Bellamy's deadline. Each one stops the line for two full days: new parts, a food-safety clean and a test run. A new material and a new format at the same time would be two changeovers in a slot planned for one.</p>
+   <p>Declan at Halden will tell you the new carton is ready. As far as I know, it has only run on their pilot line, slowly, with their best people watching every pack. The first full-speed trial on a line like ours is six weeks away, three weeks before the print deadline. Nerys tells me the recyclability certificate won't be through before the deadline either.</p>
+   <p>One more thing: a screw cap would need its own applicator, which we don't have. Renting one takes about three weeks to arrive.</p>
+   ${att("Halden's pilot samples, cut open on the bench",`<p><b>Standard carton</b> (code HP-210 printed on the inside seam): paperboard with a thin foil lining.</p><p><b>New carton</b> (code HP-M1 on the inside seam): paper all the way through, with a clear coating and no foil.</p>`)}
+   <p class="sig">Gavin</p>`},
+  {from:"Sanjay Thackray, Retail Logistics Planner",subj:"What Bellamy's DC will and won't take",rel:"high",body:`
+   <p>I've been through the specifications of Bellamy's distribution centre with their inbound team. Three things.</p>
+   <p>First, their pallets are built around the standard one-litre brick. A slim, tall carton needs a new pallet pattern that nobody has costed, and tall cartons tip over in a lorry. Expect two or three per cent damage in the first months, and one damaged carton gets the whole case rejected.</p>
+   <p>Second, the DC won't accept ambient drinks with less than six months of shelf life left. I hear the new carton is only proven for four months so far.</p>
+   <p>Third, Bellamy's rule for a reset is that the whole range arrives at the DC in the same week, the week before the reset. They don't take a range in instalments. That's four new codes for their system to learn at once, just like the Bloom Line. I've dug out Bellamy's problem log from the Bloom Line's first month for the team.</p>
+   ${att("Product sheet for the DC: four new codes",`<div class="tw"><table><thead><tr><th>Code</th><th>Product</th><th>What's in the carton</th></tr></thead><tbody>
+    <tr><td class="mono">HRD-01</td><td>Herd Oat</td><td>Creamy and mild</td></tr>
+    <tr><td class="mono">HRD-02</td><td>Barista Blend</td><td>Thicker oat drink that foams in a coffee machine</td></tr>
+    <tr><td class="mono">HRD-03</td><td>Almond</td><td>Unsweetened, light and nutty</td></tr>
+    <tr><td class="mono">HRD-04</td><td>Cultured</td><td>Sharp and lightly sparkling, with live cultures</td></tr></tbody></table></div>`)}
+   <p class="sig">Sanjay</p>`}
+ ],
+ B:[
+  {from:"Clio Marten, Creative Director, Marrow Studio",subj:"The Bloom Line, and this range",rel:"medium",body:`
+   <p>You should hear this from me: I was creative director on the Bloom Line. People at Herd say the custom packs killed it. I don't think that's the whole story. They won a design award, and shoppers loved them.</p>
+   <p>What went wrong happened behind the shelf. Bellamy's system matches every new code to a picture of the pack on the planogram. Four packs that looked nothing alike, or like Herd, were matched to the wrong codes, and stock looked stolen when it was on the shelf. Bellamy's can load new codes and pack pictures before a reset, a “scan rehearsal”, but only if a supplier asks in good time. Nobody asked for the Bloom Line.</p>
+   <p>This time all four products land on the same day again. Kacper says custom illustration needs extra inks and plates: about £24,000 out of the £55,000 contingency.</p>
+   <p>Halden's new carton prints beautifully, by the way: it's the sample with HP-M1 on the inside seam. Our range brief is attached.</p>
+   ${att("Range brief: how each product should feel",`<p><b>Herd Oat:</b> creamy and mild, the one people already know. <b>Barista Blend:</b> thicker, foams when heated in a coffee machine, for café people. <b>Almond:</b> unsweetened, light and nutty. <b>Cultured:</b> sharp and lightly sparkling, with live cultures for gut health.</p>`)}
+   <p class="sig">Clio</p>`},
+  {from:"Mika Nakamura, Brand Insights Manager",subj:"Concept test: the results are split",rel:"high",body:`
+   <p>Here are the concept-test results. They don't point one way. The custom system, with each product in its own colour and illustration, scored about twenty points higher with younger coffee-shop shoppers on the Barista Blend. The unified system, one layout and colour framework with a small accent colour each, won with our loyal Herd Oat buyers. As one of them put it: “obviously from the people who make the oat drink I already trust”. Those loyal buyers bring in about three-quarters of our sales.</p>
+   <p>One more thing: almost nobody mentioned the carton's shape or material. What shoppers reacted to was the front of the pack: the colours, the name and the illustration.</p>
+   ${att("Which system shoppers preferred",splitBars([{l:"Loyal Herd Oat buyers",a:33},{l:"New coffee-shop shoppers",a:61}],"Custom","Unified"))}
+   ${att("What shoppers mentioned without being asked",shareBars([{l:"Front of the pack",v:81},{l:"Price",v:11},{l:"Shape",v:5},{l:"Material",v:3}]))}
+   <p>Remember that this was a screen test, not a real shelf, so treat it as a guide, not a rule.</p>
+   <p class="sig">Mika</p>`}
+ ],
+ C:[
+  {from:"Dr Nerys Fisk, Packaging Sustainability & Compliance Officer",subj:"No certificate before the deadline",rel:"high",body:`
+   <p>Before anyone commits to a “recyclable” claim: the new carton's certification is on track, but the earliest it can clear is ten weeks from now, after the Bellamy's print deadline. I can't sign off an uncertified claim. Safer phrases such as “designed to be recycled” are allowed, but most shoppers barely notice them, and Mika tells me almost nobody in the concept test mentioned the material anyway.</p>
+   <p>Second, from Dr Aoife Lynch's lab: the new carton's barrier has only been validated for four months of shelf life, against the nine months we guarantee on the standard carton. The Cultured drink worries me most. Live cultures are the most sensitive to oxygen, and they die off when too much gets in. Aoife is running a storage test now. Sanjay reminds me that Bellamy's DC turns away drinks with less than six months of life left.</p>
+   <p>And Halden's first full-speed trial is still six weeks away.</p>
+   <p class="sig">Nerys</p>`},
+  {from:"Kacper Baran, Finance & Costing Analyst",subj:"The budget, and the contingency",rel:"high",body:`
+   <p>I've run the numbers. At Halden's latest quote, the new carton costs 18% more per unit than the standard one. Across all four products, that's about £42,000 extra over the first six months. Any change above five per cent needs a written business case for the finance director, and that takes about two weeks off the deadline.</p>
+   <p>The spring budget assumes the standard carton on all four products and nothing extra. On top of it there's a £55,000 contingency, and that's all. Two things would come out of it: the slim format with a screw cap, and custom illustration. Anything beyond the contingency needs a business case too: the extra would come from the marketing budget, and we'd lose the same two weeks.</p>
+   <p>Keep in mind where the money comes from. Herd Oat is about three-quarters of our revenue, so the budget protects it first.</p>
+   ${att("Extra costs on top of the spring budget",`<div class="tw"><table><thead><tr><th>Item</th><th class="num">Extra cost</th><th>Paid from</th></tr></thead><tbody>
+    <tr><td>New carton on all four products (18%)</td><td class="num">£42,000 / 6 months</td><td>Packaging budget, by business case</td></tr>
+    <tr><td>Slim format: screw-cap applicator rental and a new pallet pattern</td><td class="num">£27,000</td><td>Contingency</td></tr>
+    <tr><td>Custom illustration: extra inks and printing plates</td><td class="num">£24,000</td><td>Contingency</td></tr>
+    <tr><td><b>Contingency available</b></td><td class="num"><b>£55,000</b></td><td></td></tr></tbody></table></div>`)}
+   <p class="sig">Kacper</p>`}
+ ]
+};
+const BRANCH={
+ tease:{from:"Jess Okoro, Social Media Lead",subj:"The poll results are in",rel:"medium",body:`
+  <p>The poll went live two days ago and it's flying: 9,400 votes in 48 hours, and 71% chose the custom look. People love the Barista Blend illustration, and two coffee chains have already asked about stocking it.</p>
+  <p>To be honest about who voted: our follower survey says most of our followers are under 30, and only about a third of them buy Herd Oat regularly. So the poll shows what our followers like. It doesn't necessarily show what fills most baskets. The buzz is great for launch, though.</p><p class="sig">Jess</p>`},
+ quiet:{from:"Joanna Pryce, Plant-Based Buyer, Bellamy's",subj:"An exclusive, and some data",rel:"high",body:`
+  <p>Thank you for keeping the range exclusive to us. I can offer Herd an end-of-aisle display for the first four weeks after the reset.</p>
+  <p>Our loyalty-card data might help your designers. Seven in ten Herd Oat buyers pick it up in under three seconds, without reading anything. They know the carton from across the aisle. Shoppers who buy barista-style drinks browse for longer and like trying new brands.</p>
+  <p>One reminder from our DC: every delivery still needs at least six months of shelf life left.</p><p class="sig">Joanna Pryce</p>`}
+};
+
+/* ---------- experts: one per role, from a shortlist ---------- */
+const EXPERTS={
+ engineer:{name:"Carton engineer",who:"Dr Hannah Webb, independent packaging engineer",what:"Has helped bring new carton materials to market for twenty years. Can tell you how ready the new carton really is.",
+  rep:`<p>Pilot lines are where new cartons look their best. They usually run at about a quarter of full speed, with engineers adjusting every seal. On the first full-speed runs, sealing faults of 2–5% are common until the settings are right, and fixing them often takes several weeks.</p>
+   <p>Paper-only barriers are getting much better, but they still let in more oxygen than foil, especially at the seams. Drinks with live cultures or delicate flavours show it first.</p>
+   <p>I would never put a new barrier on a product launch without a full shelf-life test behind it. Switching a range a year later, with the data in hand, is normal, and shoppers rarely notice.</p>`},
+ cost:{name:"Supply-chain cost consultant",who:"Tom Ashby, Ashby Supply Chain",what:"Works out what packaging really costs, from the filling line to the shelf.",
+  rep:`<p>Unit prices hide most of the cost. A slim carton on a pallet built for bricks wastes about 15% of the space in every lorry, so you pay to move air.</p>
+   <p>Expect two or three per cent damaged cases in the first months on a new pallet pattern. At a DC that rejects whole cases, that's more lost stock than it sounds.</p>
+   <p>A screw cap needs an applicator: rental, fitting and a test run. For a range like Herd's, I'd expect the slim format's real first-year cost to be about twice what the unit price suggests.</p>`},
+ retail:{name:"Former Bellamy's category manager",who:"Rhona McAllister, retail consultant",what:"Ran Bellamy's ambient drinks aisles for nine years. Knows how the buyers and the systems think.",
+  rep:`<p>Bellamy's recognises products by matching each new code to a picture of the pack on the planogram. When four new packs arrive at once and look nothing alike, the matching goes wrong, and so do the stock counts. Missing stock looks like theft, and buyers hate that.</p>
+   <p>Buyers sometimes agree to a scan rehearsal, loading the codes and pictures before the reset. They only do it for suppliers they trust, and only if the final pictures arrive in good time.</p>
+   <p>The DC's six-months-of-shelf-life rule is never waived. I've seen a whole range turned away at the door.</p>`},
+ shelf:{name:"Eye-tracking study",who:"Glance Lab, a shopper-research agency",what:"Tracks where shoppers' eyes go in a full-size mock-up of a supermarket aisle.",
+  rep:`<p>Shoppers spent an average of 3.2 seconds on the plant-based shelf before picking something up.</p>
+   <p>The unified mock-up formed one block that shoppers found from four metres away, about twice as fast as the custom version. The custom Barista Blend pack got the most first looks from shoppers under 30.</p>
+   <p>Nobody in the study looked closely at the carton's material, and only 4% commented on its shape.</p>`},
+ shopper:{name:"Loyalty-card analysis",who:"Basket Insight, a retail data agency",what:"Analyses millions of real Bellamy's shopping baskets. Can tell you who buys Herd, and how.",
+  rep:`<p>Herd Oat's buyers are loyal: about three-quarters of Herd's sales come from shoppers who buy Herd Oat at least twice a month, mostly aged 30 to 55. Most pick it up without stopping, because they know the carton.</p>
+   <p>Barista-style drinks are bought by younger shoppers who browse longer and try new brands, but they usually buy one product, not a range.</p>
+   <p>When a loyal shopper's usual pack changes beyond recognition, about one in ten switches brand in the first month.</p>`},
+ recycling:{name:"Recycling-infrastructure consultant",who:"Grace Holloway, Circular Packaging Advisory",what:"Advises brands on what can really be recycled, and what they can claim.",
+  rep:`<p>Only about a third of local collection and sorting systems in most European countries handle mono-material cartons separately. A “recyclable” claim depends on that infrastructure, not just on the pack.</p>
+   <p>Regulators have fined brands for vague green claims, and a claim needs its evidence before it is printed, not after. “Designed to be recycled” is safe without certification, but few shoppers notice it.</p>
+   <p>The brands that do this well usually switch material quietly, then announce it with the certificate in hand.</p>`}
+};
+const SHORTLIST={A:["engineer","cost","retail"],B:["shelf","shopper","retail"],C:["recycling","engineer","shopper"]};
+
+const WIT={
+ declan:{name:"Declan Shaw",role:"Account Manager, Halden Pack",voice:"male, Fife accent, upbeat and quick",
+  account:`<p class="sd">[Phone line. Bright and fast, a salesman's energy.]</p><p>Honestly, this is the most exciting carton we've ever made. Paper all the way through, no foil, and it prints like a dream. Clio's team love it.</p><p>Shelf life's designed for nine months, same as you've got now, and the certification is basically a formality. The first brand in the aisle with this carton wins the story. I'd hate to see one of your competitors get there before Herd.</p>`,
+  qs:[["Why does it cost more?","It's a new material, made in small volumes. Eighteen per cent is a launch price. It'll come down as more brands switch."],
+      ["When will the recyclability certificate arrive?","We expect it in about ten weeks. It's a formality, really."],
+      ["Where has the carton run at full speed?","[pause] So far, on our pilot line in Glenrothes. The first full-speed trial on a customer's line is booked for six weeks from now. The pilot results have been very encouraging."]]},
+ clio:{name:"Clio Marten",role:"Creative Director, Marrow Studio",voice:"female, London accent, warm but guarded",
+  account:`<p class="sd">[Design studio. Music faintly in the background.]</p><p>Everyone at Herd thinks I killed the Bloom Line with bold packs. I've had more than a year of that. The packs were good. They won an award, and people photographed them in the aisle. What went wrong happened in Bellamy's systems, not in shoppers' heads.</p><p>Would I love to do a custom range for Herd? Of course. The Barista Blend illustration we've drawn is the best thing we've made. But I've learned to ask what happens behind the shelf.</p>`,
+  qs:[["Did shoppers like the Bloom Line packs?","They loved them. It won a design award, and sales in the first few weeks were strong."],
+      ["What exactly went wrong in the shops?","Bellamy's system matches every new code to a picture of the pack. Four packs that looked nothing alike, all new on the same day, were matched to the wrong codes. The stock was on the shelf, but the system said it was missing."],
+      ["Would you design a custom range for this launch?","Honestly? Part of me would love to. But with all four landing on the same day, my gut says be careful. That's a feeling, not data. You've seen more of the numbers than I have."]]}
+};
+
+const CHECKS=[
+ {q:"What did shoppers in Mika's concept test react to most?",right:1,opts:["The carton's shape","The front of the pack: colours, name and illustration","The price"],
+  why:"In Mika's test, 81% mentioned the front of the pack without being asked. Only 5% mentioned the shape and 3% the material."},
+ {q:"Why can't the new carton say “recyclable” at this reset?",right:0,opts:["Its certificate can't arrive before the print deadline","It isn't made mainly of paper","Bellamy's doesn't allow green claims"],
+  why:"Nerys says the earliest the certificate can clear is ten weeks from now, after the print deadline. Gavin has heard the same."},
+ {q:"Who left important facts out of their story?",right:2,opts:["Clio","Mika","Declan"],
+  why:"Declan's pitch left out that the carton has only run on a pilot line, that it's only proven for four months, and that the certificate comes after the deadline."}
+];
+
+const DEC={
+ d1:["Which carton material?",
+   ["Switch all four products to the new mono-material carton","Paper all the way through and easier to recycle. Costs 18% more per carton: about £42,000 over the first six months. Needs a business case for the finance director: two weeks off the deadline."],
+   ["Keep the standard aseptic carton","Paperboard, plastic and foil, proven at full speed with nine months' shelf life. No extra cost, but no strong recyclability claim this year."]],
+ d2:["Which carton format?",
+   ["A one-litre brick with a tear-and-pour spout","Cheaper and familiar to shoppers. Looks less premium, and is easier to spill."],
+   ["A slim, tall carton with a resealable screw cap","Easier to pour and reseal, and looks more premium. Applicator rental and a new pallet pattern: about £27,000 from the contingency."]],
+ d3:["Which visual system?",
+   ["Custom: every product gets its own colours and illustration","A curated range with its own personality per product. Extra inks and printing plates: about £24,000 from the contingency."],
+   ["Monolithic: one shared layout, typeface and colour framework","The four products differ only by name and a small accent colour. No extra print cost."]]
+};
+
+const RANK=[["r1","The new carton may not be ready in time"],["r2","Next to bolder brands, the range won't stand out in four seconds"],["r3","Without a strong green message, younger shoppers won't try the range"],["r4","The filling line won't cope with four new products"],["r5","At full price, shoppers won't risk trying three new products"]];
+const RANK_START=["r2","r3","r5","r1","r4"];
+const REPLIES={
+ r1:()=>`<p>You've put the carton first, and the more I hear, the more I think you're right. I've asked Declan for Halden's pilot data in writing, and I've told Joanna we'll only commit to a carton we can prove. She liked that. Whenever we switch, she'd want it certified, and she'd give the new carton a sustainability feature in the aisle at that reset.${failed(1)?" I wish I'd waited before paying Halden's deposit.":""}</p><p>Declan's data is in your inbox.</p>`,
+ r2:()=>`<p>Right. If the range needs more personality, let's give it some. I've asked Marrow for two more rounds of custom concepts. It's £18,000, and Kacper says it has to come out of the packaging contingency.</p>`,
+ r3:()=>`<p>Good point. I told Joanna on the phone this morning that the new range will be fully recyclable. Younger shoppers need to hear it, and so does Bellamy's.</p>`,
+ r4:()=>`<p>I've booked weekend shifts on the filling line for the next six weeks. It's £9,000 from the operating budget, but the line won't be the thing that stops us.</p>`,
+ r5:()=>`<p>I've offered Joanna a launch discount on all four products, paid for by us: about £25,000 from the marketing budget. Price shouldn't stop anyone trying the range.</p>`
+};
+function reply(){
+ const first=S.rank[0], p=S.rank.indexOf("r1");
+ let extra="";
+ if(first!=="r1"&&p===1) extra="<p>You've put the carton second, so I've asked Nerys to keep a close eye on Halden as well.</p>";
+ return {from:"Morven Laidlaw, Founder & CEO",subj:"Re: Interim briefing",rel:"medium",body:REPLIES[first]()+extra+(S.ev?EV_REPLY[S.ev]:"")+`<p class="sig">Morven</p>`};
+}
+const CONSEQ={
+ r1:{from:"Declan Shaw, Account Manager, Halden Pack",subj:"Pilot data, as requested",rel:"high",body:`<p>Morven asked for our data in writing, so here it is. I should have been clearer on the sales sheet. The pilot results are good, but I understand why you want to see a full-speed run first.</p>
+   ${att("New carton: where things stand",`<div class="tw"><table><tbody>
+    <tr><td>Where it has run</td><td>Halden pilot line, Glenrothes, at about 6,000 packs an hour (Herd's line runs at 24,000)</td></tr>
+    <tr><td>First full-speed trial</td><td>Six weeks from now</td></tr>
+    <tr><td>Shelf life validated</td><td>4 months (the nine-month test finishes in five months)</td></tr>
+    <tr><td>Recyclability certificate</td><td>Expected in about ten weeks</td></tr></tbody></table></div>`)}<p class="sig">Declan</p>`},
+ get r2(){return {from:"Kacper Baran, Finance & Costing Analyst",subj:"The contingency after Morven's concepts",rel:"high",body:`<p>Morven's two extra rounds of custom concepts have come out of the contingency, which now stands at £37,000. ${failed(2)?"That still covers the slim format (£27,000). Custom illustration, with Bellamy's £15,000 new line check on top, would now need a business case.":"That still covers the slim format (£27,000) or custom illustration (£24,000). Both together would need a business case."}</p><p class="sig">Kacper</p>`};},
+ r3:{from:"Dr Nerys Fisk, Packaging Sustainability & Compliance Officer",subj:"I've had to correct Morven's promise",rel:"high",body:`<p>Morven told Joanna the range would be “fully recyclable”. It can't be, not at this reset: there's no certificate. I've written to Bellamy's to correct it. Their legal team now wants to check every green claim on our packs before print. That's £4,000 from the marketing budget, and a few more days on sign-off.</p><p class="sig">Nerys</p>`},
+ r4:{from:"Gavin Treloar, Operations & Filling Line Manager",subj:"About the weekend shifts",rel:"high",body:`<p>Thanks for the weekend shifts, but they don't solve our problem. A changeover still stops the line for two full days, and we still have room for only one before the deadline. Extra hours make more cartons, not more changeovers.</p><p class="sig">Gavin</p>`},
+ r5:{from:"Kacper Baran, Finance & Costing Analyst",subj:"The launch discount",rel:"high",body:`<p>Joanna accepted the discount happily, of course. But our price was never the problem: Herd Oat already sells at full price, and in Mika's test shoppers talked far more about the front of the pack than about price.</p><p class="sig">Kacper</p>`}
+};
+const STANDING={r1:()=>"Morven has told Joanna that Herd will only commit to a carton it can prove. Halden has sent its pilot data in writing, and Bellamy's would give a certified new carton a sustainability feature at a later reset.",
+ r2:()=>"Morven has spent £18,000 of the packaging contingency on extra custom concepts.",
+ r3:()=>"Morven promised Bellamy's a fully recyclable range, and Nerys had to correct it. Bellamy's legal team will now check every green claim (£4,000 from the marketing budget).",
+ r4:()=>"Morven has booked £9,000 of weekend shifts (operating budget), but the line still has room for only one changeover.",
+ r5:()=>"Morven has offered Bellamy's a £25,000 launch discount from the marketing budget, although price was never the problem."};
+const MISSTEP={r2:["Extra custom concepts from Marrow","Packaging contingency",-18000],r3:["Bellamy's legal check on green claims","Marketing budget",-4000],r4:["Weekend shifts on the filling line","Operating budget",-9000],r5:["Launch discount for Bellamy's","Marketing budget",-25000]};
+const EPI_RANK={r2:"Marrow's extra custom concepts are still in a drawer.",r3:"Bellamy's legal team still checks every green claim Herd makes.",r4:"The weekend shifts made plenty of cartons, but they never added a changeover slot.",r5:"The £25,000 launch discount brought few extra sales: Herd Oat had always sold at full price."};
+function pinsHTML(){const N=S.notes[R()], items=Object.entries(N.hl);
+ return `<h3>Your evidence</h3><p>Pin up to three of your highlights as evidence for the risk you've put first. Morven will show them to Herd's investors.</p>`+
+ (items.length?`<div class="pins">${items.map(([k,h])=>`<button class="pin" data-act="pin" data-v="${k}" aria-pressed="${N.pins.includes(k)}"><i style="background:${HLC[h.c]}"></i><span>${esc(h.t)}<small>${esc(h.src)}</small></span></button>`).join("")}</div>`
+   :`<p class="muted small">You haven't highlighted anything yet. Tap sentences in your emails or reports to highlight them, then come back.</p>`);}
+function inboxList(){const list=[...INBOX[R()]]; if(R()==="B"&&S.fork) list.splice(1,0,BRANCH[S.fork]); list.push(VIRAL); if(S.ranked) list.unshift(CONSEQ[S.rank[0]]); return list;}
+
+/* ---------- team puzzles ---------- */
+const PZ={
+ 1:{owner:"C",title:"The storage test",
+   intro:"Dr Aoife Lynch's lab has kept four cartons at a warm temperature that ages a drink quickly. These samples are now the equivalent of five months old. Aoife has taken the labels off so that nobody's expectations get in the way, and noted only the code printed on each carton's inside seam and how the drink tastes. Before Morven signs anything with Halden, the team has to say which sample is which, and what the test shows.",
+   screen:`<div class="attach"><div class="an">Aoife's notes · four unlabelled cartons, five months' equivalent</div>
+     <p><b>Sample 1:</b> Seam code HP-210. Creamy and mild, with a clean finish. Oxygen inside the pack: low.</p>
+     <p><b>Sample 2:</b> Seam code HP-M1. Thick, and foams well when heated. Clean taste. Oxygen: medium.</p>
+     <p><b>Sample 3:</b> Seam code HP-210. Sharp and lightly sparkling, as fresh. Oxygen: low.</p>
+     <p><b>Sample 4:</b> Seam code HP-M1. A sharp smell, but flat, with no sparkle left and a sour aftertaste. Oxygen: high.</p></div>`,
+   qs:[{q:"Which sample is the Cultured drink in the new carton?",type:"choice",opts:["Sample 1","Sample 2","Sample 3","Sample 4"],ans:"Sample 4"},
+       {q:"Which sample is the Barista Blend, and in which carton?",type:"choice",opts:["Sample 1, standard carton","Sample 2, new carton","Sample 2, standard carton","Sample 3, new carton"],ans:"Sample 2, new carton"},
+       {q:"So what does the test show?",type:"choice",opts:["The new carton protects every drink as well as the standard one","At five months, the new carton isn't protecting the most sensitive drink","Both cartons fail after five months"],ans:"At five months, the new carton isn't protecting the most sensitive drink"}],
+   hint:"Which seam code belongs to which carton? Structural and Brand both have it. What each drink should taste like is in Brand's range brief and on Structural's product sheet.",
+   out:{ok:"Nerys now has proof in writing that the new carton isn't ready for the Cultured drink. Morven hasn't signed Halden's early-capacity deal, so no deposit is at risk.",
+        fail:"Nobody could say which sample was which, so Morven signed Halden's early-capacity deal and paid a £20,000 deposit from next year's packaging budget. Halden only refunds it against orders for the new carton."}},
+ 2:{owner:"A",title:"The Bloom Line log",
+   intro:"Sanjay has found Bellamy's problem log from the Bloom Line's first month. Before Herd asks Bellamy's for anything this time, the team has to work out what really went wrong. Joanna at Bellamy's will only help if Herd can show it understands what happened. Sort the entries, then answer two questions.",
+   screen:`<p class="muted small">The Bloom Line had four flavours: Peach, Mango, Elderflower, and Cucumber & Mint. Each pack had its own colour and illustration. Some of your teammates know how Bellamy's system works.</p>`,
+   qs:[{q:"Sort the log: what is each entry about?",type:"sort",cats:["A scanning mix-up","Damage in transit","What shoppers thought","Nothing to do with Herd"],
+        items:[["“Store 112: system shows zero Mango, but 40 packs are on the shelf.”","A scanning mix-up"],
+               ["“Six cases of Peach rejected at the DC: one crushed carton in each.”","Damage in transit"],
+               ["“Elderflower flagged as ‘possible theft’ in 31 stores: stock missing from the count.”","A scanning mix-up"],
+               ["“Customer comment: ‘Mango is far too sweet for me.’”","What shoppers thought"],
+               ["“Bellamy's tills down nationally for an hour on 3 May.”","Nothing to do with Herd"],
+               ["“Cucumber & Mint recorded as Peach on the planogram check.”","A scanning mix-up"],
+               ["“Store manager: ‘Lovely packs. Customers keep photographing them.’”","What shoppers thought"],
+               ["“Shelf-gap report: Peach shown as empty, but the shelf is full.”","A scanning mix-up"]]},
+       {q:"What sank the Bloom Line?",type:"choice",opts:["Shoppers didn't like the custom packs","Four packs that looked nothing alike, all new on the same day, confused Bellamy's stock system","Too many cartons were damaged on the way to the DC"],ans:"Four packs that looked nothing alike, all new on the same day, confused Bellamy's stock system"},
+       {q:"What could make a custom range safer this time?",type:"choice",opts:["Asking Bellamy's to load all four codes and pack pictures before the reset","Delivering the four products to the DC in different weeks","Making each illustration brighter"],ans:"Asking Bellamy's to load all four codes and pack pictures before the reset"}],
+   hint:"Brand knows how Bellamy's system matches new codes to packs, and what could have been done about it. Look for entries where the stock is there but the system can't see it. And check Sanjay's email: can Herd deliver the products in different weeks?",
+   out:{ok:"Joanna was impressed by the team's account of the Bloom Line. Bellamy's will run a scan rehearsal: if Herd sends final pack pictures three weeks before the deadline, the DC will load all four codes in advance.",
+        fail:"The team couldn't explain the Bloom Line. Joanna remembers it well, and she has added a £15,000 “new line check” for any range whose four packs don't share one design."}},
+ 3:{owner:"B",title:"Halden's sales sheet",
+   intro:"Declan Shaw at Halden has sent Morven a one-page sales sheet for the new carton. Morven wants to forward it to Joanna at Bellamy's today, and use it on the side of the pack. Each line makes one claim. Using what your whole team knows, decide whether each claim is true, misleading or false, and why.",
+   screen:`<div class="attach"><div class="an">Halden Pack · “Why switch now?”</div>
+     <p><b>Claim 1:</b> Proven at full production speed.</p>
+     <p><b>Claim 2:</b> Print “recyclable” on your packs from day one.</p>
+     <p><b>Claim 3:</b> The same nine-month shelf life as your current carton.</p></div>`,
+   qs:[{q:"Claim 1",type:"choice",opts:["True: it ran at full speed in Halden's own trial last month","False: it has only run on Halden's pilot line, and the full-speed trial is six weeks away","Misleading: it has run at full speed, but only on a filling line in Sweden"],ans:"False: it has only run on Halden's pilot line, and the full-speed trial is six weeks away"},
+       {q:"Claim 2",type:"choice",opts:["True: Nerys signed off the recyclability claim last week","Misleading: it's certified in Germany, but not yet in the UK","False: the certificate can't arrive until after the print deadline"],ans:"False: the certificate can't arrive until after the print deadline"},
+       {q:"Claim 3",type:"choice",opts:["True: Aoife's lab has validated nine months","Misleading: it's designed for nine months, but so far it's only proven for four","False: the lab found the drinks go off after two months"],ans:"Misleading: it's designed for nine months, but so far it's only proven for four"}],
+   hint:"Claim 1: ask Structural where the carton has run. Claims 2 and 3: Sustainable has the certificate date and the lab's shelf-life results.",
+   out:{ok:"Morven sent the corrections to Halden instead of quoting the sheet to Bellamy's. Declan's manager apologised and has cut the new carton's extra cost from 18% to 12%.",
+        fail:"Morven forwarded the sheet to Joanna. When the truth came out, Bellamy's moved Herd's block to the bottom shelf for the first two months: about £20,000 in lost sales."}}
+};
+const CODES={1:{first:"3518",help:"3546",fail:"3592"},2:{first:"5703",help:"5731",fail:"5779"},3:{first:"7425",help:"7468",fail:"7490"}};
+const TIER_LABEL={first:"Solved first time",help:"Solved with help",fail:"Not solved"};
+const pzDone=(r,n)=>!!S.pz[n].tier&&!!S.gate[r][n];
+const allPz=r=>[1,2,3].every(n=>pzDone(r,n));
+const ok=n=>S.pz[n].tier&&S.pz[n].tier!=="fail";
+const failed=n=>S.pz[n].tier==="fail";
+
+/* ---------- money: the contingency, option costs and the six-month result ---------- */
+const CONT=()=>55000-(S.ranked&&S.rank[0]==="r2"?18000:0);
+const SLIM=27000;
+const costCustom=()=>24000+(failed(2)?15000:0);
+const contSpend=(d2=S.d2,d3=S.d3)=>(d2==="B"?SLIM:0)+(d3==="A"?costCustom():0);
+const overBy=(d2=S.d2,d3=S.d3)=>Math.max(0,contSpend(d2,d3)-CONT());
+const needsBC=()=>S.d1==="A"||overBy()>0;
+const TWO_CO=" With both a new material and a new format, that's two changeovers in a slot planned for one (Gavin): four days without production.";
+function optInfo(k,v){
+ let desc=DEC[k][v==="A"?1:2][1];
+ if(k==="d1"){
+  if(v==="A"&&ok(3)) desc=desc.replace("18% more per carton: about £42,000","12% more per carton, after Halden's new offer: about £28,000");
+  if(v==="A"&&S.d2==="B") desc+=TWO_CO;
+  if(failed(1)) desc+=v==="A"?" Morven's £20,000 deposit with Halden would be used.":" Morven's £20,000 deposit with Halden (from next year's packaging budget) would be lost.";
+ }
+ if(k==="d2"&&v==="B"){ if(S.d1==="A") desc+=TWO_CO;
+  const o=overBy("B",S.d3); if(o) desc+=` Over the contingency${S.d3==="A"?" together with custom illustration":""}: needs a business case, ${fmt(o)} from the marketing budget and two weeks off the deadline.`;}
+ if(k==="d3"&&v==="A"){
+  if(failed(2)) desc=desc.replace("about £24,000","about £24,000, plus Bellamy's £15,000 new line check,");
+  if(ok(2)) desc+=" Bellamy's will load all four codes in advance (scan rehearsal).";
+  const o=overBy(S.d2,"A"); if(o) desc+=` Over the contingency${S.d2==="B"?" together with the slim format":""}: needs a business case, ${fmt(o)} from the marketing budget and two weeks off the deadline.`;}
+ return {desc};
+}
+function ledger(){const L=[],add=(l,s,v)=>L.push([l,s,v]);
+ if(S.fork==="tease"){add("Teaser film and poll","Marketing budget",-6000);add("Launch buzz from the teaser","Extra sales",30000); if(S.d3==="A")add("Followers got the look they voted for","Extra sales",10000);}
+ if(S.fork==="quiet")add("Bellamy's end-of-aisle display","Extra sales",25000);
+ if(S.ranked&&MISSTEP[S.rank[0]])add(...MISSTEP[S.rank[0]]);
+ if(S.ev==="pushback")add("Investors' outside review","Marketing budget",-8000);
+ if(failed(3))add("Two months on the bottom shelf","Lost sales",-20000);
+ if(S.d1==="A"){add(`Extra cost of the new cartons (${ok(3)?"12":"18"}%)`,"Packaging budget, by business case",ok(3)?-28000:-42000);add("Last-minute switch back to the standard carton: second changeover, rush order, reprinted artwork","Operating budget",-60000);}
+ if(S.d1==="B"&&failed(1))add("Halden deposit lost","Next year's packaging budget",-20000);
+ if(S.d2==="B"){add("Screw-cap applicator and new pallet pattern","Packaging contingency",-SLIM);add("Damaged cases in the first month","Lost sales",-18000);add("Shoppers who liked the screw cap","Extra sales",10000); if(S.d1==="A")add("Two changeovers: four days without production","Lost sales",-30000);}
+ if(S.d3==="A"){add("Extra inks and printing plates","Packaging contingency",-24000); if(failed(2))add("Bellamy's new line check","Packaging contingency",-15000);
+  add("Barista Blend sales to coffee-shop shoppers","Extra sales",20000);add("Loyal buyers who didn't recognise the packs","Lost sales",-10000);
+  if(!ok(2))add("Stock-count errors at Bellamy's","Lost sales",-35000);}
+ if(needsBC())add("Business case: two weeks lost, artwork finished in a rush","Operating budget",-10000);
+ return L;}
+const net=()=>ledger().reduce((a,r)=>a+r[2],0);
+const netWords=()=>{const n=net(); return n>0?`${fmt(n)} ahead of plan`:n<0?`${fmt(-n)} behind plan`:"exactly on plan";};
+
+/* evidence pinned to the briefing: reliable AND about the risk ranked first */
+const REL_KW={r1:/carton|pilot|shelf life|certif|trial|months|seam|Halden|validat|barrier|oxygen|full speed|full-speed/i,r2:/custom|illustrat|stand out|bold|Barista|look|colour|front of the pack|block/i,r3:/recycl|green|planet|plastic|claim/i,r4:/changeover|filling|production|shift/i,r5:/price|discount|cheap/i};
+function evScore(){const N=S.notes[R()], pins=N.pins.map(k=>N.hl[k]).filter(Boolean), kw=REL_KW[S.rank[0]];
+ if(pins.some(h=>h.q==="low"))return "pushback";
+ return pins.filter(h=>h.q==="high"&&kw.test(h.t)).length>=2?"backed":"unsure";}
+const EV_REPLY={backed:"<p>The evidence you pinned was solid: data and documents that speak directly to the risk you put first. I showed it to our investors, and they accepted it.</p>",
+ unsure:"<p>Your evidence was thin, or it didn't speak directly to the risk you put first. The investors took your view on trust, but they'll want more next time.</p>",
+ pushback:"<p>You pinned a weak source, and our investors noticed. They want an outside packaging consultant to review any recommendation before we commit: about £8,000 from the marketing budget, and a week of our nine.</p>"};
+const EV_STANDING={backed:"Herd's investors accepted the evidence behind your briefing.",unsure:"Herd's investors took your briefing on trust.",pushback:"Herd's investors want an outside review before they accept any recommendation (about £8,000 from the marketing budget, and a week)."};
+
+/* ---------- notes: highlights, colour code, free notes ---------- */
+const HL=[["yellow","#FFF176"],["green","#B9F6CA"],["pink","#F8BBD0"],["blue","#B3E5FC"],["orange","#FFE0B2"],["purple","#E1BEE7"]];
+const HLC=Object.fromEntries(HL);
+const HL_HINT=["Key fact","Evidence","Doubt","Number","Ask the team","Use in writing"];
+function hsh(t){let h=5381;for(const c of t)h=((h<<5)+h+c.charCodeAt(0))>>>0;return h.toString(36);}
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function wrapSentences(root){
+ root.querySelectorAll("[data-src]").forEach(box=>{
+  const src=box.dataset.src, q=box.dataset.q||"medium";
+  box.querySelectorAll("p").forEach(p=>{
+   if(p.dataset.w||p.closest(".audio")||p.classList.contains("sig")||p.querySelector("button,input,svg"))return;
+   const t=p.textContent.replace(/\s+/g," ").trim(); if(!t)return;
+   const parts=t.match(/[^.!?]+[.!?]+["”’)]*|[^.!?]+$/g)||[t];
+   const N=S.notes[R()];
+   p.innerHTML=parts.map(x=>{x=x.trim(); const k=hsh(src+"|"+x), h=N.hl[k];
+     return `<span class="sn" data-k="${k}" data-src="${esc(src)}" data-q="${q}"${h?` style="background:${HLC[h.c]}"`:""}>${esc(x)}</span>`;}).join(" ");
+   p.dataset.w="1";});
+ });
+}
+let palFor=null;
+function openPal(el){palFor=el;const pal=document.getElementById("hlpal");const r=el.getBoundingClientRect();
+ pal.hidden=false; pal.style.top=(window.scrollY+r.bottom+6)+"px"; pal.style.left=Math.max(8,Math.min(window.scrollX+r.left,window.scrollX+document.documentElement.clientWidth-pal.offsetWidth-8))+"px";}
+function closePal(){document.getElementById("hlpal").hidden=true;palFor=null;}
+function notesHTML(){
+ const N=S.notes[R()], items=Object.entries(N.hl);
+ const cc=`<details class="cc"><summary>${HL.map(([,c])=>`<i style="background:${c}"></i>`).join("")}<span>My colour code</span></summary><div class="ccgrid">${HL.map(([k,c],i)=>`<label><i style="background:${c}"></i><input data-cc="${k}" maxlength="24" value="${esc(N.cc[k]||"")}" placeholder="${HL_HINT[i]}" aria-label="${k} means"></label>`).join("")}</div></details>`;
+ const add=`<div class="nbadd"><textarea id="nbnew" maxlength="400" placeholder="A note of your own…" aria-label="A note of your own"></textarea><button class="btn small" data-act="noteadd">Add note</button></div>`;
+ const free=N.free.map((t,i)=>`<div class="nbcard mine"><p>${esc(t)}</p><div class="src">Your note <button class="lnk" data-act="noterm" data-v="${i}">Delete</button></div></div>`).join("");
+ const groups=HL.map(([k,c])=>{const g=items.filter(([,h])=>h.c===k); if(!g.length)return "";
+   return `<div class="nbgroup"><i style="background:${c}"></i>${esc(N.cc[k]||k[0].toUpperCase()+k.slice(1))}</div>`+g.map(([key,h])=>`<div class="nbcard" style="border-left-color:${c}"><p>${esc(h.t)}</p><div class="src">${esc(h.src)} <button class="lnk" data-act="hlrm" data-v="${key}">Remove</button></div></div>`).join("");}).join("");
+ return `<div class="nbhead"><h2>Your highlights and notes</h2><button class="lnk" data-act="nbclose" aria-label="Close notes">Close ✕</button></div>${cc}${add}${free}${items.length?groups:`<p class="muted small">Tap any sentence in the Context, your emails or a report to highlight it. Your highlights collect here.</p>`}`;
+}
+
+/* ---------- state ---------- */
+const fresh=()=>({role:null,tab:"context",unlock:false,fork:null,expert:null,picks:{declan:null,clio:null},checks:{},d1:null,d2:null,d3:null,decided:false,text:"",handed:false,rank:[...RANK_START],ranked:false,mailOpen:{},mailRead:{},notes:{A:{hl:{},cc:{},free:[],pins:[]},B:{hl:{},cc:{},free:[],pins:[]},C:{hl:{},cc:{},free:[],pins:[]}},nbOpen:false,pz:{1:{tier:null,tries:[0,0,0],ok:[0,0,0],hint:false,sel:{}},2:{tier:null,tries:[0,0,0],ok:[0,0,0],hint:false,sel:{}},3:{tier:null,tries:[0,0,0],ok:[0,0,0],hint:false,sel:{}}},gate:{A:{},B:{},C:{}},gateMsg:"",ev:null});
+let S=fresh();
+const STORE_KEY="simlearn-pro-herdpro";
+try{const x=JSON.parse(sessionStorage.getItem(STORE_KEY)||"null"); if(x&&typeof x==="object"&&!Array.isArray(x)) S=Object.assign(fresh(),x);}catch(e){}
+function save(){try{sessionStorage.setItem(STORE_KEY,JSON.stringify(S));}catch(e){}}
+const TABS=[["context","Context"],["inbox","Inbox"],["puzzles","Team puzzles"],["investigate","Investigate"],["decide","Decide"]];
+const ready=()=>S.unlock||(S.role&&S.fork);
+const tabOpen=t=>t==="context"||(ready()&&(["inbox","puzzles"].includes(t)||S.unlock||allPz(R())));
+const PATH={tease:"teased the range",quiet:"kept it under wraps"};
+
+function render(){
+  save();
+  document.getElementById("who").textContent=S.role?`You are the ${ROLES[S.role].name}${S.fork?` · Path: ${PATH[S.fork]}`:""}`:"Read the context, then choose your role.";
+  document.getElementById("tabs").innerHTML=TABS.map(([k,l])=>`<button data-act="tab" data-v="${k}" aria-current="${S.tab===k}" ${tabOpen(k)?"":"disabled"}>${l}${k==="inbox"&&tabOpen(k)&&inboxList().some(m=>!S.mailRead[m.from+"|"+m.subj])?`<span class="tdot" aria-label="unread emails"></span>`:""}</button>`).join("");
+  document.getElementById("main").innerHTML=V[S.tab]();
+  wrapSentences(document.getElementById("main"));
+  const nb=document.getElementById("nb"); nb.hidden=!S.nbOpen; if(S.nbOpen) nb.innerHTML=notesHTML();
+  const fab=document.getElementById("fab"); fab.hidden=!S.role; fab.textContent=`Notes (${Object.keys(S.notes[R()].hl).length+S.notes[R()].free.length})`;
+  if(S.tab==="investigate"&&!S.ranked) bindDrag("rank");
+  if(S.tab==="decide"){const ta=document.getElementById("cf"); if(ta){ta.value=S.text; wc();}}
+}
+const task=t=>`<div class="task"><b>Your task</b><span>${t}</span></div>`;
+const R=()=>S.role||"A";
+
+const V={
+ context(){
+  const r=S.role;
+  return task("Read from top to bottom. Choose your role, then make your first decision: agree as a team, then everyone enters the same choice.")
+  +`<section class="card" data-src="Context" data-q="medium"><span class="step">1 · Where you work</span><h2>Herd, plant-based drinks</h2>
+    <div class="pic">Scenario picture to come: Herd's oat-drink carton on a supermarket shelf, with three blank cartons beside it</div>
+    <p>Herd started in 2019 in a shared kitchen on Glasgow's Southside, where two friends made oat drink for the cafés on their street. Today Herd Oat sits on the ambient shelf of every Bellamy's in the country, unchilled, because it comes in an aseptic carton: the drink is sterilised, then filled into a sterile pack, so it keeps for months without a fridge. The carton looks like paper, but it is a composite. Paperboard gives it strength, thin layers of plastic keep out moisture, and a layer of aluminium foil thinner than a hair keeps out oxygen and light. That foil is what makes cartons hard to recycle, and it's why carton makers are racing to build a mono-material pack, made of paper alone.</p>
+    <p>In packaging, a range lives or dies on the shelf. Retailers plan every aisle with a planogram, a map of where each product, or SKU, goes and how many facings it gets, and a shopper gives a pack under four seconds before picking it up or walking on. Clio Marten, Herd's creative director at Marrow Studio, likes to remind clients that every carton has two jobs: the brand zone says who made it, and the product zone helps you choose. Some brands give a whole range one monolithic design, so the products form a single block you can spot across the aisle. Others go custom, with a different look for every product. Many end up somewhere in between, with a hybrid.</p>
+    <p>Herd knows both sides. When Herd Oat launched, its one simple carton was so easy to shelve and recognise that Bellamy's listed it nationally within three months. Two years ago, Herd's fruit-water spin-off, the Bloom Line, launched four flavours at once, each in its own colour and illustration. Within nine months, Bellamy's had delisted it. Ask around the office why, and everyone gives you a different answer.</p>
+    <div class="facts"><div class="fact"><div class="l">Founded</div><div class="v">2019, Glasgow</div></div><div class="fact"><div class="l">Staff</div><div class="v">38</div></div><div class="fact"><div class="l">Products today</div><div class="v">Herd Oat in shops · 6-litre packs for cafés</div></div><div class="fact"><div class="l">Revenue</div><div class="v">About three-quarters from Herd Oat in shops</div></div></div></section>`
+  +`<section class="card" data-src="Context" data-q="medium"><span class="step">2 · Who you are</span><h2>The packaging team</h2>
+    <p>You are three of Herd's packaging designers. Each of you sees different information. Choose your role.</p>
+    <div class="roles">${Object.entries(ROLES).map(([k,v])=>`<button class="role" data-act="role" data-v="${k}" aria-pressed="${r===k}" ${S.fork&&S.role?"disabled":""}><b>${v.name}</b><span>${v.line}</span></button>`).join("")}</div>${S.fork&&S.role?`<p class="muted small">Your role is fixed now that your team has made its first decision.</p>`:""}
+    ${r?`<p><strong>You are the ${ROLES[r].name}.</strong> ${ROLES[r].detail}</p>`:""}
+    <h3 style="margin-top:6px">Other people you'll hear from</h3>
+    <div class="people"><div class="person"><b>Morven Laidlaw</b><span class="muted small">Founder & CEO. Your boss. Started Herd in that Southside kitchen.</span></div><div class="person"><b>Joanna Pryce</b><span class="muted small">Plant-Based Buyer at Bellamy's. Decides what goes on the shelf.</span></div><div class="person"><b>Declan Shaw</b><span class="muted small">Account Manager at Halden Pack, Herd's carton supplier.</span></div><div class="person"><b>Clio Marten</b><span class="muted small">Creative Director at Marrow Studio, Herd's design agency. Designed the Bloom Line.</span></div></div></section>`
+  +`<section class="card" data-src="Context" data-q="medium"><span class="step">3 · The situation</span><h2>Four products, nine weeks</h2>
+    <p>Herd wants a proper range: a Barista Blend for coffee, an unsweetened Almond drink and a new oat-based Cultured drink for the gut-health market, alongside Herd Oat. Bellamy's is resetting its plant-based aisle in nine weeks and has offered Herd a four-carton shelf block, but only for the complete range. All four products, with final artwork and production specifications, must be ready before the deadline, and the whole range must arrive at Bellamy's in the same week. Anything missing waits twelve months for the next reset.</p>
+    <p>Three things are still open: what the carton is made of, its format, and how the four products look side by side.</p></section>`
+  +`<section class="card" data-src="Context" data-q="medium"><span class="step">4 · It starts</span><h2>A voicemail from Morven</h2>
+    ${audio("Voicemail from Morven Laidlaw","female, Glasgow accent, energetic",`<p class="sd">[A busy café. A coffee machine hisses in the background.]</p><p>Hiya, it's Morven. I've just had Declan from Halden on the phone. He says we could be the first range in the aisle in a carton that's paper all the way through. And Clio's team have sent concepts for all four products that are honestly gorgeous.</p><p>Joanna at Bellamy's needs everything in nine weeks: final artwork, specs, the lot. My gut says go big. New carton, new shape, every product with its own look. My head keeps saying “remember the Bloom Line”. The carton's the one thing our customers touch every single day, so let's get it right.</p><p>Oh, and one decision can't wait. Jess wants to show our followers the concepts today. Talk to each other and tell me by lunchtime.</p>`,"herdpro_voicemail")}</section>`
+  +`<section class="card" data-src="Context" data-q="medium"><span class="step">5 · Your first decision</span><h2>Tease the range, or keep it under wraps?</h2>
+    <p>Jess, Herd's social media lead, wants to post Marrow's two looks for the range, one custom and one shared, as a poll for Herd's 140,000 followers today. A teaser builds excitement and makes the community feel the range is theirs. Joanna at Bellamy's would rather have the range as an exclusive, a surprise on her shelf. You haven't seen the evidence yet. Agree as a team, then everyone enters the same choice.</p>
+    <div class="choices">${[["tease","A","Tease the range: post the poll today","Costs £6,000 from the marketing budget for a short film and the poll. Builds buzz, but everyone will have seen your concepts and voted."],["quiet","B","Keep it under wraps until the reset","No cost. Bellamy's gets an exclusive, but nobody outside Herd knows the range is coming."]].map(([v,k,t,c])=>`<button class="choice" data-act="fork" data-v="${v}" aria-pressed="${S.fork===v}" ${S.fork?"disabled":""}><span class="k">OPTION ${k}</span><b>${t}</b><small>${c}</small></button>`).join("")}</div>
+    ${S.fork?(S.role?`<p class="done">Decision made. Some of the evidence you see depends on this choice. Go to your inbox.</p><button class="btn" data-act="tab" data-v="inbox">Open your inbox</button>`:`<p class="done">Decision made. Now choose your role above.</p>`):""}</section>`;
+ },
+ inbox(){
+  const list=inboxList();
+  return task("Read your emails and tell your team what you've found, in your own words. Your teammates have different emails. Not every source is equally reliable.")
+  +`<div style="display:flex;flex-direction:column;gap:10px">${list.map(m=>mail(m)).join("")}</div>`;
+ },
+ puzzles(){
+  const r=R(); let h=task("Each of you has one puzzle, and nobody can solve theirs alone. When a puzzle appears on someone's screen, everyone gathers round that screen until it's solved. Each result changes what happens next.");
+  const done=[1,2,3].filter(n=>pzDone(r,n));
+  if(done.length) h+=`<section class="card"><h2>Results so far</h2>${done.map(n=>`<p><b>${PZ[n].title}</b> (${ROLES[PZ[n].owner].name}): ${TIER_LABEL[S.pz[n].tier]}. ${ok(n)?PZ[n].out.ok:PZ[n].out.fail}</p>`).join("")}</section>`;
+  const n=[1,2,3].find(x=>!pzDone(r,x));
+  if(!n) return h+`<p class="done">All three puzzles are done.</p><button class="btn" data-act="tab" data-v="investigate">Go to Investigate</button>`;
+  const P=PZ[n];
+  if(P.owner!==r) return h+`<section class="card gate"><span class="step">Puzzle ${n} of 3</span><h2>The ${ROLES[P.owner].name} needs your help</h2>
+     <p>Go and look at their screen. They have a puzzle called <b>${P.title}</b>, and they need facts from your emails to solve it. When it's done, their screen shows a four-digit code. Type it here to carry on.</p>
+     <div class="coderow"><input id="gatecode" inputmode="numeric" maxlength="4" placeholder="0000" aria-label="Code from the ${ROLES[P.owner].name}"><button class="btn" data-act="gate" data-v="${n}">Carry on</button></div>${S.gateMsg?`<p class="msg">${S.gateMsg}</p>`:""}</section>`;
+  const Z=S.pz[n];
+  if(Z.tier) return h+`<section class="card"><span class="step">Puzzle ${n} of 3 · ${P.title}</span><h2>${TIER_LABEL[Z.tier]}</h2><p>${ok(n)?P.out.ok:P.out.fail}</p>
+     <p>Show this code to your teammates. They need it to carry on.</p><div class="bigcode">${CODES[n][Z.tier]}</div>
+     <button class="btn" data-act="pznext" data-v="${n}">I've shared the code</button></section>`;
+  return h+`<section class="card"><span class="step">Puzzle ${n} of 3 · your puzzle</span><h2>${P.title}</h2><p>${P.intro}</p>
+    <p class="note-strong"><strong>Call your teammates over.</strong> You can't solve this from your own emails alone.</p>${P.screen}
+    ${P.qs.map((q,i)=>{const done=Z.ok[i], left=2-Z.tries[i];
+      return `<div class="pzq"><h3>${i+1}. ${q.q}</h3>${done?(Z.qfail&&Z.qfail[i]?`<p class="msg">Not solved. The answer: ${q.type==="sort"?q.items.map(([x,c])=>esc(x)+" → "+c).join(" · "):q.ans}</p>`:`<p class="done">${q.type==="sort"?"All entries sorted":q.ans} ✓</p>`):
+       (q.type==="sort"?`<div class="sortq">${q.items.map(([t],j)=>`<div class="sortrow"><p>${t}</p><select data-sort="${n}_${i}_${j}" aria-label="Entry ${j+1}"><option value="">Choose…</option>${q.cats.map(c=>`<option${(Z.sort&&Z.sort[i]&&Z.sort[i][j])===c?" selected":""}>${c}</option>`).join("")}</select></div>`).join("")}</div>${Z.sortMsg&&Z.sortMsg[i]?`<p class="msg">${Z.sortMsg[i]}</p>`:""}`:
+        `<div class="opts2">${q.opts.map(o=>`<button class="opt" data-act="pzsel" data-n="${n}" data-i="${i}" data-v="${esc(o)}" aria-pressed="${Z.sel[i]===o}">${o}</button>`).join("")}</div>`)+
+       `<div class="coderow"><button class="btn" data-act="pzcheck" data-n="${n}" data-i="${i}">Check</button>${Z.tries[i]?`<span class="msg">Not yet. ${left} ${left===1?"try":"tries"} left.</span>`:""}</div>`}</div>`;}).join("")}
+    ${Z.hint?`<p class="hint">${P.hint}</p>`:`<button class="lnk" data-act="pzhint" data-v="${n}">Show a hint (counts as help)</button>`}</section>`;
+ },
+ investigate(){
+  const sl=SHORTLIST[R()], e=S.expert;
+  return task("Question the two witnesses, then agree your interim briefing as a team: everyone sends Morven the same order. If you have time, hire one outside expert first.")
+  +`<section class="card"><h2>Hire an expert (if you have time)</h2><p>This step is optional. Morven has set aside money for outside help, enough for each of you to bring in one expert. Experts are expensive and only answer the question you hire them for, so think about what your team most needs to know. Each role has a different shortlist, and some experts appear on more than one list.</p>
+    <div class="choices">${sl.map(k=>`<button class="choice" data-act="expert" data-v="${k}" aria-pressed="${e===k}" ${e?"disabled":""}><b>${EXPERTS[k].name}</b><small><em>${EXPERTS[k].who}</em><br>${EXPERTS[k].what}</small></button>`).join("")}</div>
+    ${e?`<div class="attach" data-src="${EXPERTS[e].who.split(",")[0]}" data-q="high"><div class="an">📎 Report from ${EXPERTS[e].who}</div>${EXPERTS[e].rep}</div>`:""}</section>`
+  +`<section class="card"><h2>The witnesses</h2><p>Declan and Clio both want something from this launch. <strong>One of them is leaving things out.</strong> Listen for what's missing, then choose your one question for each.</p>
+    <div class="two">${Object.entries(WIT).map(([k,w])=>{const p=S.picks[k];
+      return `<div style="display:flex;flex-direction:column;gap:10px"><h3>${w.name} <span class="muted small">· ${w.role}</span></h3>
+       ${audio(`${w.name}'s account`,w.voice,w.account,"herdpro_"+k)}
+       <div class="qs">${w.qs.map((q,i)=>`<button class="q" data-act="ask" data-w="${k}" data-v="${i}" aria-pressed="${p===i}" ${p!==null?"disabled":""}>${q[0]}</button>`).join("")}</div>
+       ${p!==null?audio(`${w.name} answers`,w.voice,`<p>${w.qs[p][1]}</p>`,"herdpro_"+k+"_"+(p+1)):""}</div>`;}).join("")}</div></section>`
+  +`<section class="card"><h2>Interim briefing for Morven</h2>
+    <p>Morven meets Joanna at Bellamy's on Friday and needs your view now, before your final decisions. Below is her list of worries, in the order the office has been talking about them. Put them in order, from the biggest risk to getting the range onto Bellamy's shelf to the smallest.</p>
+    <p class="note-strong"><strong>Morven will act on whatever you put first, straight away.</strong></p>
+    <ol class="tl" id="rk">${S.rank.map((id,i)=>{const t=RANK.find(x=>x[0]===id);
+      return `<li class="tc" data-id="${id}" draggable="${!S.ranked}"><span class="n">${i+1}</span><span>${t[1]}</span><span class="arr">${S.ranked?"":`<button data-act="mv" data-l="rank" data-v="${i}" data-d="-1" aria-label="Move up" ${i?"":"disabled"}>↑</button><button data-act="mv" data-l="rank" data-v="${i}" data-d="1" aria-label="Move down" ${i<RANK.length-1?"":"disabled"}>↓</button>`}</span></li>`;}).join("")}</ol>
+    ${S.ranked?`<p class="done">Sent to Morven. Her reply is below, and there's a new email in your inbox.</p>${mail(reply())}`:pinsHTML()+`<button class="btn" data-act="sendrank">Send to Morven</button>`}</section>`;
+ },
+ decide(){
+  const dis=S.decided?"disabled":"";
+  let h=task("Check what you've worked out, then agree three decisions as a team: everyone enters the same choices. Then write a short design rationale. After you hand in, you'll hear what happened next.");
+  const forkLine=S.fork==="tease"?"Jess posted the poll: 9,400 votes, 71% for the custom look. The teaser cost £6,000.":S.fork==="quiet"?"The range is still under wraps, and Bellamy's has offered an exclusive end-of-aisle display for the first four weeks.":"";
+  h+=`<section class="card"><h2>Where things stand</h2><p>${forkLine} ${S.ranked?STANDING[S.rank[0]]():"Morven is still waiting for your interim briefing."} ${S.ev?EV_STANDING[S.ev]:""}</p>${[1,2,3].filter(n=>S.pz[n].tier).map(n=>`<p><b>${PZ[n].title}:</b> ${ok(n)?PZ[n].out.ok:PZ[n].out.fail}</p>`).join("")}
+   <div class="facts"><div class="fact"><div class="l">Contingency left</div><div class="v">${fmt(CONT())}</div></div><div class="fact"><div class="l">Time to the deadline</div><div class="v">${S.ev==="pushback"?"Eight weeks":"Nine weeks"}</div></div></div></section>`;
+  h+=`<section class="card"><h2>What have you worked out?</h2>${CHECKS.map((c,qi)=>{const a=S.checks[qi];
+     return `<div style="display:flex;flex-direction:column;gap:6px"><h3>${qi+1}. ${c.q}</h3>${c.opts.map((o,oi)=>`<button class="opt ${a===undefined?"":oi===c.right?"right":oi===a?"wrong":""}" data-act="chk" data-q="${qi}" data-v="${oi}" ${a!==undefined?"disabled":""}>${o}</button>`).join("")}${a!==undefined?`<p class="fb">${a===c.right?"<strong>Yes.</strong> ":"<strong>Not quite.</strong> "}${c.why}</p>`:""}</div>`;}).join("")}</section>`;
+  h+=["d1","d2","d3"].map(k=>{const D=DEC[k];return `<section class="card"><h2>${D[0]}</h2><div class="choices">${[1,2].map(i=>{const v=i===1?"A":"B", o=optInfo(k,v);
+    return `<button class="choice" data-act="dec" data-q="${k}" data-v="${v}" aria-pressed="${S[k]===v}" ${dis}><span class="k">OPTION ${v}</span><b>${D[i][0]}</b><small>${o.desc}</small></button>`;}).join("")}</div></section>`;}).join("");
+  if(!S.decided) return h+`<button class="btn" data-act="lock" ${canLock()?"":"disabled"}>Confirm our decisions</button>`;
+  if(!S.handed)h+=`<p><button class="btn small" data-act="undec">Change our decisions</button> <span class="muted small">Until you hand in, your team can still change its decisions.</span></p>`;
+  h+=`<section class="card"><h2>Design rationale</h2><p>Write 120–180 words for Morven: your recommendation for each decision and how they fit together, the evidence that convinced you (name the person or document), and the strongest objection to your plan, with your answer to it.</p>
+   <p class="muted small">Useful language: <em>We recommend…</em> · <em>According to…</em> · <em>Although the custom look…, …</em> · <em>If we…, we would…</em></p>
+   <textarea id="cf" aria-label="Design rationale"></textarea>
+   <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><span class="wc" id="wc">0 words</span></div>${handinHTML()}</section>`;
+  if(!S.handed) return h;
+  h+=`<section class="card"><h2>Six months later</h2>${audio("Trade news: Pack & Shelf","newsreader, light music bed under",epilogue())}
+   <p><strong>Six months after the reset, Herd's range is ${netWords()}.</strong></p>
+   <details><summary class="small" style="cursor:pointer;color:var(--blue);font-weight:600">How that adds up</summary><div class="tw"><table class="sums"><tbody><thead><tr><th>What happened</th><th>Paid from / effect</th><th class="num">Amount</th></tr></thead>${ledger().map(([l,src,v])=>`<tr><td>${l}</td><td class="muted">${src}</td><td class="num">${v>0?"+":""}${fmt(v)}</td></tr>`).join("")}<tr class="tot"><td>Against plan</td><td></td><td class="num">${net()>0?"+":""}${fmt(net())}</td></tr></tbody></table></div>${overBy()?`<p class="small muted">Of the contingency items, ${fmt(overBy())} went beyond the contingency and came from the marketing budget, by business case.</p>`:""}</details>
+   <p>Now find a group that made the other choice at the start, and ask them what happened to them.</p></section>`;
+  return h;
+ }
+};
+const canLock=()=>!!(S.d1&&S.d2&&S.d3);
+
+function epilogue(){
+ const p=[`<p class="sd">[News jingle, then a light music bed under]</p>`];
+ if(S.fork==="tease") p.push(S.d3==="A"?"Herd's teaser poll paid off. Its followers got the custom look they had voted for, and in launch week the range sold out in several stores.":"Herd's teaser poll created real buzz before launch, although some followers grumbled that the custom look they had voted for never appeared. Jess won most of them back by letting them choose the Barista Blend's accent colour.");
+ else p.push("Bellamy's gave Herd's new range an exclusive end-of-aisle display for its first four weeks, and shoppers met all four cartons before they reached the shelf.");
+ if(S.d1==="A") p.push(`Halden's new carton went into production after its trial. Then Aoife's storage test finished: by month five, the Cultured drink in the new carton had lost more than half its live cultures${failed(1)?", just as the samples the team couldn't read had shown":""}. Bellamy's rejected Herd's production specification, because every delivery needs six months of shelf life left and the new carton was proven for only four. Herd switched all four products back to the standard carton at the last minute: a second changeover, a rush order and reprinted artwork. The range made the reset with two days to spare, with no “recyclable” claim on the packs.`);
+ else p.push(`The range launched in the standard carton. There was no recyclability story on the pack this year, but the line ran without a hitch.${S.ranked&&S.rank[0]==="r1"?" At the next reset, Herd switches to the new carton, certified, with a sustainability feature in Bellamy's aisle.":" The switch to the new carton is planned for the next reset, with the certificate in hand."}${failed(1)?" The £20,000 deposit Morven paid Halden was lost.":""}`);
+ if(S.d2==="A") p.push("The brick cartons stacked on Bellamy's standard pallets with no damage in transit.");
+ else p.push(`The slim screw-cap cartons looked premium, and shoppers liked the caps, but the new pallet pattern meant damaged cases in the first month.${S.d1==="A"?" Fitting a new material and a new format meant two changeovers in a slot planned for one, and the line lost four days.":""}`);
+ if(S.d3==="B") p.push("The four products shared one layout, with a small accent colour each. Loyal Herd Oat buyers recognised them at once, and the block was easy to spot from across the aisle.");
+ else p.push(`Each product had its own colours and illustration. The Barista Blend won over coffee-shop shoppers, but some loyal Herd Oat buyers didn't realise the new cartons were Herd's.${ok(2)?" Thanks to the scan rehearsal, Bellamy's stock counts were right from day one.":" And, as with the Bloom Line, Bellamy's first stock counts came out wrong."}${failed(2)?" Bellamy's charged its £15,000 new line check.":""}`);
+ const extra=[];
+ if(needsBC()) extra.push(`The business case ${S.d1==="A"&&overBy()?"for the new carton and the spending beyond the contingency":S.d1==="A"?"for the new carton":"for spending beyond the contingency"} took two weeks, and the artwork was finished in a rush.${overBy()?` ${fmt(overBy())} came out of the marketing budget.`:""}`);
+ if(S.ranked&&EPI_RANK[S.rank[0]]) extra.push(EPI_RANK[S.rank[0]]);
+ if(failed(3)) extra.push("Two months on the bottom shelf, after the Halden sales sheet, cost about £20,000 in sales.");
+ if(S.ev==="pushback") extra.push("The investors' outside review cost £8,000 and a week.");
+ if(S.ev==="backed") extra.push("Herd's investors later praised the packaging team's evidence.");
+ if(extra.length) p.push(extra.join(" "));
+ p.push(`Six months after the reset, Herd's range is ${netWords()}.`);
+ return p.map((x,i)=>i?`<p>${x}</p>`:x).join("");
+}
+
+/* ---------- actions ---------- */
+function wc(){const ta=document.getElementById("cf");document.getElementById("wc").textContent=`${(ta.value.trim().match(/\S+/g)||[]).length} words`;}
+document.addEventListener("toggle",e=>{const d=e.target;if(!d.dataset||!d.dataset.mail)return;const k=decodeURIComponent(d.dataset.mail);
+ S.mailOpen[k]=d.open; if(d.open&&!S.mailRead[k]){S.mailRead[k]=true;d.classList.replace("unread","read");const u=d.querySelector(".udot");if(u)u.remove();}},true);
+document.addEventListener("input",e=>{if(e.target.id==="cf"){S.text=e.target.value;wc();}});
+document.addEventListener("click",e=>{
+ const sw=e.target.closest("[data-hlc]"); if(sw&&palFor){const N=S.notes[R()],k=palFor.dataset.k;
+   if(sw.dataset.hlc==="none"){delete N.hl[k];N.pins=N.pins.filter(x=>x!==k);} else N.hl[k]={c:sw.dataset.hlc,t:palFor.textContent,src:palFor.dataset.src,q:palFor.dataset.q};
+   closePal(); render(); return;}
+ const sn=e.target.closest(".sn"); if(sn){openPal(sn);return;}
+ if(!e.target.closest("#hlpal"))closePal();
+ const b=e.target.closest("[data-act]");if(!b||b.disabled)return;act(b.dataset.act,b.dataset);});
+document.addEventListener("change",e=>{const v=e.target.dataset&&e.target.dataset.sort; if(!v)return; const [n,i,j]=v.split("_"); const Z=S.pz[n]; Z.sort=Z.sort||{}; Z.sort[i]=Z.sort[i]||{}; if(e.target.value)Z.sort[i][j]=e.target.value; else delete Z.sort[i][j];});
+document.addEventListener("input",e=>{if(e.target.dataset&&e.target.dataset.cc){S.notes[R()].cc[e.target.dataset.cc]=e.target.value;}});
+function act(a,d){
+ switch(a){
+  case "role":if(!(S.fork&&S.role))S.role=d.v;break;
+  case "undec":if(!S.handed){S.decided=false;S.sub=null;S.issues=[];}break;
+  case "tab":if(tabOpen(d.v)){S.tab=d.v;window.scrollTo({top:0});}break;
+  case "fork":if(!S.fork)S.fork=d.v;break;
+  case "expert":if(!S.expert)S.expert=d.v;break;
+  case "ask":if(S.picks[d.w]===null)S.picks[d.w]=+d.v;break;
+  case "mv":{const L=S[d.l],i=+d.v,j=i+(+d.d);if(j<0||j>=L.length)return;flip(d.l,()=>{[L[i],L[j]]=[L[j],L[i]];});return;}
+  case "sendrank":S.ev=evScore();S.ranked=true;break;
+  case "pin":{const N=S.notes[R()],i=N.pins.indexOf(d.v); if(i>=0)N.pins.splice(i,1); else if(N.pins.length<3)N.pins.push(d.v); break;}
+  case "nbopen":S.nbOpen=true;break;
+  case "nbclose":S.nbOpen=false;break;
+  case "hlrm":{const N=S.notes[R()];delete N.hl[d.v];N.pins=N.pins.filter(x=>x!==d.v);break;}
+  case "noteadd":{const t=(document.getElementById("nbnew")||{}).value||""; if(t.trim())S.notes[R()].free.push(t.trim()); break;}
+  case "noterm":S.notes[R()].free.splice(+d.v,1);break;
+  case "pzsel":S.pz[d.n].sel[d.i]=d.v;break;
+  case "pzhint":S.pz[d.v].hint=true;break;
+  case "pzcheck":{const n=+d.n,i=+d.i,Z=S.pz[n],q=PZ[n].qs[i];
+    let right;
+    if(q.type==="sort"){const got=(Z.sort&&Z.sort[i])||{}; if(Object.keys(got).length<q.items.length){Z.sortMsg={...(Z.sortMsg||{}),[i]:"Sort every entry first."};break;}
+      const n2=q.items.filter(([,c],j)=>got[j]===c).length; right=n2===q.items.length; Z.sortMsg={...(Z.sortMsg||{}),[i]:right?"":`${n2} of ${q.items.length} are right.`};}
+    else{const a=Z.sel[i]; if(!a)return; right=a===q.ans;}
+    if(right)Z.ok[i]=1; else {Z.tries[i]++; if(Z.tries[i]>=2){Z.ok[i]=1;Z.failq=true;Z.qfail=Object.assign({},Z.qfail,{[i]:1});}}
+    if(Z.ok.slice(0,PZ[n].qs.length).every(Boolean)) Z.tier=Z.failq?"fail":(Z.hint||Z.tries.some(t=>t>0))?"help":"first";
+    break;}
+  case "pznext":S.gate[R()][d.v]=S.pz[d.v].tier;S.gateMsg="";break;
+  case "gate":{const n=+d.v,c=((document.getElementById("gatecode")||{}).value||"").trim(),t=Object.keys(CODES[n]).find(k=>CODES[n][k]===c);
+    if(t&&(!S.pz[n].tier||S.pz[n].tier===t)){S.pz[n].tier=t;S.gate[R()][n]=t;S.gateMsg="";} else S.gateMsg="That code doesn't work. Check it with your teammate."; break;}
+  case "chk":if(S.checks[d.q]===undefined)S.checks[d.q]=+d.v;break;
+  case "dec":if(!S.decided)S[d.q]=d.v;break;
+  case "lock":if(canLock())S.decided=true;break;
+  case "hand":makeSub();render();{const bl=document.getElementById("block")||document.getElementById("issues");if(bl&&bl.scrollIntoView)bl.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"center"});}return;
+  case "pdf":downloadPdf();return;
+  case "copy":copyBlock();return;
+ }
+ render();
+}
+const LIST_ID={rank:"rk"};
+function flip(key,mutate){
+ const sel=`#${LIST_ID[key]} .tc`, before={};
+ document.querySelectorAll(sel).forEach(c=>before[c.dataset.id]=c.getBoundingClientRect().top);
+ mutate();render();
+ if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+ document.querySelectorAll(sel).forEach(c=>{const dy=before[c.dataset.id]-c.getBoundingClientRect().top;
+  if(dy){c.style.transition="none";c.style.transform=`translateY(${dy}px)`;requestAnimationFrame(()=>{c.style.transition="transform .22s ease";c.style.transform="";});}});
+}
+let drag=null;
+function bindDrag(key){
+ const L=S[key];
+ document.querySelectorAll(`#${LIST_ID[key]} .tc[draggable="true"]`).forEach(c=>{
+  c.addEventListener("dragstart",e=>{drag=c.dataset.id;c.classList.add("dragging");try{e.dataTransfer.setData("text/plain",drag);}catch(_){}});
+  c.addEventListener("dragend",()=>{c.classList.remove("dragging");drag=null;});
+  c.addEventListener("dragover",e=>{e.preventDefault();if(c.dataset.id!==drag)c.classList.add("over");});
+  c.addEventListener("dragleave",()=>c.classList.remove("over"));
+  c.addEventListener("drop",e=>{e.preventDefault();const to=c.dataset.id;if(!drag||to===drag||!L.includes(drag))return;
+   flip(key,()=>{const from=L.indexOf(drag);L.splice(from,1);const ti=L.indexOf(to);L.splice(from<=ti?ti+1:ti,0,drag);});});
+ });
+}
+
+/* ---------- hand-in: Lite's submission block and PDF (GUIDE 2n). Everything below up to "Pro hand-in" is copied
+   verbatim from studio/template.html by cartridges/authoring/_pro_common.py, so the check code matches blocks.py.
+   Nothing is sent anywhere: the block and the PDF are made here in the browser. ---------- */
+const LITE={"id": "herdpro", "version": 1, "title": "Herd: The Range Reset (Pro)", "writing": {"label": "design rationale", "addressee": "Morven Laidlaw"}, "roles": {"A": {"dept": "Structural Packaging Designer", "chars": {"expert": "expert_a", "declan": "declan_a", "clio": "clio_a"}}, "B": {"dept": "Brand & Packaging Designer", "chars": {"expert": "expert_b", "declan": "declan_b", "clio": "clio_b"}}, "C": {"dept": "Sustainable Packaging Designer", "chars": {"expert": "expert_c", "declan": "declan_c", "clio": "clio_c"}}}, "decisions": {"d1": "D1", "d2": "D2", "d3": "D3"}};
+function fnv(str){ let h = 0x811c9dc5; for (const ch of new TextEncoder().encode(str)) { h ^= ch; h = Math.imul(h, 0x01000193) >>> 0; } return h >>> 0; }
+function checkCode(parts){
+  const A = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
+  const s = parts.join("|");
+  const four = h => { let n = h % 923521, o = ""; for (let i = 0; i < 4; i++) { o += A[n % 31]; n = Math.floor(n / 31); } return o; };
+  return four(fnv(s)) + "-" + four(fnv(s + "#"));
+}
+const norm = t => t.replace(/\s+/g, " ").trim();
+function words(t){ return (t.trim().match(/\S+/g) || []).length; }
+function taskName(W){ return W.addressee ? `${W.label} to ${W.addressee}` : W.label; }
+const PDFW = {"R":[278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584,761,556,0,222,556,333,1000,556,556,333,1000,667,333,1000,0,611,0,0,222,222,333,333,350,556,1000,333,1000,500,333,944,0,500,667,278,333,556,556,556,556,260,556,333,737,370,556,584,333,737,333,400,584,333,333,333,556,537,278,333,333,365,556,834,834,834,611,667,667,667,667,667,667,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,500,556,556,556,556,278,278,278,278,556,556,556,556,556,556,556,584,611,556,556,556,556,500,556,500],"B":[278,333,474,556,556,889,722,238,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,333,333,584,584,584,611,975,722,722,722,722,667,611,778,722,278,556,722,611,833,722,778,667,778,722,667,611,722,667,944,667,667,611,333,278,333,584,556,333,556,611,556,611,556,333,611,611,278,278,556,278,889,611,611,611,611,389,556,333,611,556,778,556,556,500,389,280,389,584,761,556,0,278,556,500,1000,556,556,333,1000,667,333,1000,0,611,0,0,278,278,500,500,350,556,1000,333,1000,556,333,944,0,500,667,278,333,556,556,556,556,280,556,333,737,370,556,584,333,737,333,400,584,333,333,333,611,556,278,333,333,365,556,834,834,834,611,722,722,722,722,722,722,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,556,556,556,556,556,278,278,278,278,611,611,611,611,611,611,611,584,611,611,611,611,611,556,611,556]};
+const PDF_WIN = {"8364":128,"8218":130,"402":131,"8222":132,"8230":133,"8224":134,"8225":135,"710":136,"8240":137,"352":138,"8249":139,"338":140,"381":142,"8216":145,"8217":146,"8220":147,"8221":148,"8226":149,"8211":150,"8212":151,"732":152,"8482":153,"353":154,"8250":155,"339":156,"382":158,"376":159};   // Unicode -> WinAnsi byte, for 0x80-0x9F
+const PDF_ALT = {"Ł":"L","ł":"l","Đ":"D","đ":"d","ı":"i","ħ":"h","‐":"-","‑":"-","−":"-","′":"'","″":"\"","\u2009":" ","\u202f":" ","→":"->","←":"<-","≈":"~","≤":"<=","≥":">="};
+function pdfByte(ch){
+  const u = ch.codePointAt(0);
+  if (u >= 32 && u <= 126) return u;
+  if (u >= 160 && u <= 255) return u;
+  if (PDF_WIN[u] !== undefined) return PDF_WIN[u];
+  if (u === 9) return 32;
+  const base = ch.normalize("NFKD").replace(/[̀-ͯ]/g, "");   // ł, ő, ş… fall back to the plain letter
+  if (base && base !== ch && base.length === 1) return pdfByte(base);
+  return 63;   // ?
+}
+// Letters the PDF font can't show: a few by hand, then compatibility forms (ﬁ -> fi, ² -> 2), else "?".
+const pdfClean = s => [...String(s).replace(/[ŁłĐđıħ‐‑−′″\u2009\u202f→←≈≤≥]/g, c => PDF_ALT[c])].map(c => {
+  if (c === "\n" || pdfByte(c) !== 63 || c === "?") return c;
+  const k = c.normalize("NFKD").replace(/[\u0300-\u036f]/g, "");
+  return k && [...k].every(x => pdfByte(x) !== 63) ? k : c;
+}).join("");
+function pdfWidth(text, font, size){
+  let w = 0; for (const ch of text) { const b = pdfByte(ch); w += PDFW[font][b - 32] || 556; } return w * size / 1000;
+}
+function pdfStr(text){   // a PDF literal string in WinAnsi, with octal escapes
+  let out = "(";
+  for (const ch of text) {
+    const b = pdfByte(ch);
+    if (b === 40 || b === 41 || b === 92) out += "\\" + String.fromCharCode(b);
+    else if (b > 126) out += "\\" + b.toString(8).padStart(3, "0");
+    else out += String.fromCharCode(b);
+  }
+  return out + ")";
+}
+function pdfWrap(text, font, size, width){
+  const lines = [];
+  text.split("\n").forEach(par => {
+    if (!par.trim()) { lines.push(""); return; }
+    let line = "";
+    par.split(/\s+/).filter(Boolean).forEach(word => {
+      const tryLine = line ? line + " " + word : word;
+      if (pdfWidth(tryLine, font, size) <= width) { line = tryLine; return; }
+      if (line) lines.push(line);
+      while (pdfWidth(word, font, size) > width) {          // a very long word: break it (one pass per line)
+        const chars = [...word]; let n = 0, w = 0;
+        while (n < chars.length) { const cw = pdfWidth(chars[n], font, size); if (n > 0 && w + cw > width) break; w += cw; n++; }
+        lines.push(chars.slice(0, n).join("")); word = chars.slice(n).join("");
+      }
+      line = word;
+    });
+    lines.push(line);
+  });
+  return lines;
+}
+function utf16Hex(text){
+  let h = "FEFF";
+  for (let i = 0; i < text.length; i++) h += text.charCodeAt(i).toString(16).padStart(4, "0").toUpperCase();
+  return "<" + h + ">";
+}
+function makePdf({title, subtitle, body, note, footer, block, fileName}){
+  [title, subtitle, body, note, footer] = [title, subtitle, body, note, footer].map(pdfClean);
+  const W = 595.28, H = 841.89, M = 64, TW = W - 2 * M;
+  const pages = []; let ops = [], y = H - M;
+  const newPage = () => { if (ops.length) pages.push(ops); ops = []; y = H - M; };
+  const text = (s, font, size, x, yy, grey) => ops.push(`BT /${font} ${size} Tf ${grey ? "0.4 0.45 0.5 rg" : "0.11 0.15 0.2 rg"} ${x.toFixed(2)} ${yy.toFixed(2)} Td ${pdfStr(s)} Tj ET`);
+  const para = (s, font, size, lead, grey) => pdfWrap(s, font, size, TW).forEach(l => {
+    if (y - lead < M + 20) newPage();
+    y -= lead; if (l) text(l, font, size, M, y, grey);
+  });
+  para(title, "B", 16, 21);
+  para(subtitle, "R", 9.5, 13, true);
+  y -= 14;
+  para(body, "R", 11, 15.5);
+  y -= 18;
+  para(note, "R", 8, 11, true);
+  newPage();
+  // objects: 1 catalog, 2 pages, 3 font R, 4 font B, 5 embedded file, 6 filespec, 7 info, then page/content pairs
+  const objs = [];
+  const enc = new TextEncoder(), blockBytes = enc.encode(block);
+  const kids = pages.map((_, i) => `${8 + i * 2} 0 R`).join(" ");
+  objs[1] = `<< /Type /Catalog /Pages 2 0 R /Names << /EmbeddedFiles << /Names [${pdfStr(fileName)} 6 0 R] >> >> /PageMode /UseNone >>`;
+  objs[2] = `<< /Type /Pages /Kids [${kids}] /Count ${pages.length} >>`;
+  objs[3] = `<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>`;
+  objs[4] = `<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>`;
+  objs[5] = {dict: `<< /Type /EmbeddedFile /Subtype /text#2Fplain /Length ${blockBytes.length} >>`, data: blockBytes};
+  objs[6] = `<< /Type /Filespec /F ${pdfStr(fileName)} /UF ${utf16Hex(fileName)} /EF << /F 5 0 R >> /Desc ${pdfStr("SimLearn answers for the teacher tool")} >>`;
+  objs[7] = `<< /Title ${utf16Hex(title)} /Creator (SimLearn) /Producer (SimLearn) /SimLearnSubmission ${utf16Hex(block)} >>`;
+  pages.forEach((p, i) => {
+    const foot = `BT /R 7.5 Tf 0.4 0.45 0.5 rg ${M} 36 Td ${pdfStr(footer + (pages.length > 1 ? ` · page ${i + 1} of ${pages.length}` : ""))} Tj ET`;
+    const content = enc.encode([...p, foot].join("\n").split("").map(c => c.charCodeAt(0) < 256 ? c : "?").join(""));
+    objs[8 + i * 2] = `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${W} ${H}] /Resources << /Font << /R 3 0 R /B 4 0 R >> >> /Contents ${9 + i * 2} 0 R >>`;
+    objs[9 + i * 2] = {dict: `<< /Length ${content.length} >>`, data: content};
+  });
+  // assemble with byte offsets (all strings here are ASCII)
+  const parts = [], offs = []; let len = 0;
+  const add = b => { parts.push(b); len += b.length; };
+  add(enc.encode("%PDF-1.7\n")); add(new Uint8Array([0x25, 0xE2, 0xE3, 0xCF, 0xD3, 0x0A]));   // marks the file as binary
+  for (let n = 1; n < objs.length; n++) {
+    offs[n] = len;
+    const o = objs[n];
+    if (typeof o === "string") add(enc.encode(`${n} 0 obj\n${o}\nendobj\n`));
+    else { add(enc.encode(`${n} 0 obj\n${o.dict}\nstream\n`)); add(o.data); add(enc.encode(`\nendstream\nendobj\n`)); }
+  }
+  const xref = len;
+  let x = `xref\n0 ${objs.length}\n0000000000 65535 f \n`;
+  for (let n = 1; n < objs.length; n++) x += String(offs[n]).padStart(10, "0") + " 00000 n \n";
+  add(enc.encode(x + `trailer\n<< /Size ${objs.length} /Root 1 0 R /Info 7 0 R >>\nstartxref\n${xref}\n%%EOF\n`));
+  return new Blob(parts, {type: "application/pdf"});
+}
+
+/* ---------- Pro hand-in ---------- */
+function proChoices(r){
+ const c=LITE.roles[r].chars, sl=SHORTLIST[r]||[], out=[];
+ out.push(`${c.expert}=${S.expert&&sl.includes(S.expert)?"o"+(sl.indexOf(S.expert)+1):"-"}`);
+ Object.keys(WIT).forEach(w=>{const p=S.picks[w]; out.push(`${c[w]}=${p===null||p===undefined?"-":"o"+(p+1)}`);});
+ return out.join(", ");
+}
+// The Pro line: the team's fork, interim briefing (Morven/Moira acts on the first), evidence verdict and puzzle tiers.
+// Not part of the check code (blocks.py reads it into sub["pro"]).
+function proLine(){
+ return `Pro: fork=${S.fork||"none"}, briefing=${S.ranked?S.rank.join(">"):"none"}, evidence=${S.ranked&&S.ev?S.ev:"none"}, puzzles=${[1,2,3].map(n=>`${n}:${S.pz[n].tier||"none"}`).join(",")}`;
+}
+function makeSub(){
+ const r=S.role, W=LITE.writing, missing=[];
+ S.sub=null;
+ if(!r||!LITE.roles[r]){S.issues=["Choose your role first (Context)."];return;}
+ const memoText=(S.text||"").trim();
+ const open=Object.entries(WIT).filter(([k])=>S.picks[k]===null||S.picks[k]===undefined).map(([,w])=>w.name);
+ if(open.length) missing.push(`You haven't chosen what to ask ${open.join(", ")} yet (Investigate).`);
+ const openDec=Object.keys(LITE.decisions).filter(k=>!S[k]);
+ if(openDec.length) missing.push(`Your group's answer is missing for ${openDec.map(k=>LITE.decisions[k]).join(", ")} (Decide).`);
+ if(words(memoText)<50) missing.push("Your text is very short — write your "+W.label+" first.");
+ S.issues=missing;
+ if(openDec.length||words(memoText)<50) return;
+ const ai=S.consent?"yes":"no";
+ const choices=proChoices(r);
+ const decisions=Object.entries(LITE.decisions).map(([k,id])=>`${id}=${S[k]}`).join(", ");
+ const parts=[LITE.id, LITE.version, r, choices, decisions, ai, ai==="yes"?norm(memoText):""];
+ const code=checkCode(parts);
+ const head=[
+  "=== SIMLEARN SUBMISSION ===",
+  ai==="yes"?"AI check: ALLOWED":"AI check: NOT ALLOWED - grade by hand",
+  `Scenario: ${LITE.id} v${LITE.version} (${LITE.title})`,
+  `Role: ${r} (${LITE.roles[r].dept})`,
+  `Info choices: ${choices}`,
+  `Group decisions: ${decisions}`,
+  proLine(),
+  `Check: ${code}`,
+ ];
+ const block=ai==="yes"?[...head,`--- ${taskName(W)} (${words(memoText)} words) ---`,memoText,"=== END ==="].join("\n")
+                       :[...head,"=== END ===","",`My ${taskName(W)} (${words(memoText)} words):`,"",memoText].join("\n");
+ S.sub={block, blockOnly: ai==="yes"?block:[...head,"=== END ==="].join("\n"), code, ai, r, n:words(memoText), memo:memoText};
+ S.handed=true;
+}
+function subHTML(){const x=S.sub; if(!x) return "";
+ return `
+    <h2>Your submission</h2>
+    <p>Hand it in the way your <b>Moodle assignment</b> asks for:</p>
+    <p><b>A file upload?</b> Download your PDF and upload it to the assignment.</p>
+    <p><button type="button" class="btn" id="pdf" data-act="pdf">Download my submission (PDF)</button> <span id="pdfmsg" class="ok" aria-live="polite"></span></p>
+    <p><b>A text box?</b> Copy everything in the box below and paste it in. ${x.ai==="yes" ? "" : "Your text sits below the SimLearn part, so your teacher can mark it by hand."}</p>
+    <textarea class="block" id="block" readonly>${esc(x.block)}</textarea>
+    <p><button type="button" class="btn" id="copy" data-act="copy">Copy to clipboard</button> <span id="copied" class="ok" aria-live="polite"></span></p>
+    <p class="muted small">If you change your text or your answers later, create your submission again before you hand it in.</p>`;}
+function handinHTML(){
+ return `<div class="consent">
+      <b>Can your teacher check your text with AI?</b>
+      <p class="small">Your teacher may use the SimLearn teacher tool, which can ask an AI system (Claude, by Anthropic) to suggest feedback on your writing. Only your text and your group's choices would be sent — not your name. Your teacher always makes the final decision about your grade. If you say no, your teacher marks your text by hand. Saying no has no effect on your grade.</p>
+      <label><input type="checkbox" id="consent" ${S.consent?"checked":""}> Yes, my teacher may check my text with AI.</label>
+    </div>
+    <div id="issues" class="issues">${(S.issues||[]).map(m=>`<p>${esc(m)}</p>`).join("")}</div>
+    <button type="button" class="btn" data-act="hand">Create my submission</button>
+    <div id="out">${subHTML()}</div>`;
+}
+function downloadPdf(){
+ const x=S.sub; if(!x) return;
+ const W=LITE.writing, rr=LITE.roles[x.r];
+ const cap=taskName(W).charAt(0).toUpperCase()+taskName(W).slice(1);
+ const today=new Date().toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"});
+ const blob=makePdf({
+  title: cap,
+  subtitle: `${LITE.title} · Role ${x.r}${rr.dept?" ("+rr.dept+")":""} · ${x.n} words · ${today}`,
+  body: x.memo,
+  note: (x.ai==="yes"
+   ? "This file also carries your SimLearn answers for your teacher's SimLearn tool: your information choices, your group's decisions and a copy of your text. You agreed that your teacher may check your text with AI."
+   : "This file also carries your SimLearn answers for your teacher's SimLearn tool: your information choices and your group's decisions, but not your text. You did not agree to an AI check, so your teacher will mark your text by hand.")
+   + ` Check code: ${x.code}.`,
+  footer: `SimLearn · ${LITE.title}`,
+  block: x.blockOnly, fileName: "simlearn-submission.txt"});
+ const a=document.createElement("a");
+ a.href=URL.createObjectURL(blob); a.download=`simlearn-${LITE.id}-role-${x.r}.pdf`;
+ document.body.appendChild(a); a.click(); a.remove();
+ setTimeout(()=>URL.revokeObjectURL(a.href),120000);
+ const m=document.getElementById("pdfmsg"); if(m) m.textContent="Look in your Downloads, then upload the file to Moodle. If nothing downloaded, open this page in Safari, Chrome or Firefox (not inside an app), or use the text box below.";
+}
+async function copyBlock(){
+ const ta=document.getElementById("block"), msg=document.getElementById("copied"); if(!ta) return;
+ const done=()=>{msg.textContent="Copied — now paste it into Moodle.";};
+ try{await navigator.clipboard.writeText(ta.value); return done();}catch(e){}
+ // older method: still works in many embedded frames where the modern one is blocked
+ ta.focus(); ta.select(); ta.setSelectionRange(0,ta.value.length);
+ let ok=false; try{ok=document.execCommand("copy");}catch(e){}
+ if(ok) return done();
+ msg.textContent="Your browser blocked copying. The text is selected — press Ctrl+C (or ⌘C) to copy it.";
+}
+
+// a recorded clip's text appears once the student has listened to the end (GUIDE 2h); media events don't bubble
+document.addEventListener("ended",e=>{const a=e.target; if(!a||a.tagName!=="AUDIO"||!a.dataset.f)return;
+ S.heard=Object.assign({},S.heard,{[a.dataset.f]:1}); const box=a.closest(".audio"), dt=box&&box.querySelector("details"); if(dt)dt.hidden=false; save();},true);
+
+document.addEventListener("change",e=>{if(e.target.id==="consent"){S.consent=e.target.checked;S.sub=null;S.issues=[];render();}});
+document.addEventListener("input",e=>{if(e.target.id!=="cf")return; if(S.sub){S.sub=null;const o=document.getElementById("out");if(o)o.innerHTML="";} save();});
+
+render();
+</script>
+</body>
+</html>

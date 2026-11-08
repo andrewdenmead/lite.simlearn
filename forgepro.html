@@ -1,0 +1,972 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<title>Harrow &amp; Vane: The Forge Inquiry (Pro) — SimLearn</title>
+<link rel="icon" href="/favicon.ico" sizes="any"><link rel="icon" type="image/png" href="/favicon-32.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: Lite-style single column. Plain header, five tabs, a task line on every tab, content as cards and emails. */
+:root{
+  /* Lite's palette and fonts (studio/template.html), with Pro marked by Lite's amber on tabs and badge. Light only, like Lite. */
+  --bg:#FBFBF8; --surface:#ffffff; --sunk:#ECEFF3; --ink:#1D2733; --muted:#4A5562; --line:#D4D9E1;
+  --blue:#2C5282; --blue-soft:#EEF3F9; --amber:#C98A1B; --amber-soft:#FBF1DC;
+  --good:#2F6B47; --good-soft:#E3F0E7; --bad:#9B2C2C; --bad-soft:#F7E4E4; --warn:#7A5A0E; --warn-soft:#FBF1DC; --proto:#FBF1DC;
+  --ui:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --serif:Charter,"Bitstream Charter","Sitka Text",Cambria,Georgia,serif;
+  --mono:ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+body{background:var(--bg);color:var(--ink);font-family:var(--ui);font-size:16px;line-height:1.55}
+.wrap{max-width:860px;margin:0 auto;padding-left:max(16px, env(safe-area-inset-left,0px));padding-right:max(16px, env(safe-area-inset-right,0px))}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+h1,h2,h3{text-wrap:balance;margin:0;line-height:1.2}
+p{margin:0}
+
+.proto{background:var(--proto);border-bottom:1px dashed var(--line);font-size:13px}
+.proto .wrap{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;padding-block:7px}
+.proto b{color:var(--amber);letter-spacing:.08em;text-transform:uppercase;font-size:11px}
+.ghost{background:transparent;border:1px solid var(--line);border-radius:6px;padding:3px 10px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{background:transparent;border:0;padding:3px 10px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+
+header{background:var(--surface);border-bottom:1px solid var(--line);border-top:4px solid var(--blue)}
+header .wrap{padding-block:18px 0}
+.brand{font-weight:800;color:var(--blue);font-size:14px;letter-spacing:.02em}
+.brand span{background:var(--amber);color:#fff;border-radius:4px;padding:0 6px;margin-left:4px;font-size:12px}
+h1{font-size:clamp(26px,4.5vw,34px);font-weight:800;margin-top:4px}
+.whoami{color:var(--muted);font-size:14.5px;margin-top:2px}
+.tabs{display:flex;gap:2px;overflow-x:auto;margin-top:14px}
+.tabs button{background:transparent;border:0;border-bottom:3px solid transparent;padding:8px 12px;font-weight:700;color:var(--muted);white-space:nowrap}
+.tabs button[aria-current="true"]{color:var(--ink);border-bottom-color:var(--amber)}
+.tabs button:disabled{opacity:.4;cursor:default}
+.tdot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--amber);margin-left:6px;vertical-align:middle}
+
+main .wrap{padding-block:22px 64px;display:flex;flex-direction:column;gap:18px}
+.task{background:var(--blue-soft);border-radius:8px;padding:12px 16px;display:flex;gap:10px;align-items:baseline}
+.task b{color:var(--blue);white-space:nowrap}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card h2{font-size:21px;font-weight:800}
+.card h3{font-size:17px;font-weight:700}
+.step{font-family:var(--mono);font-size:12px;color:var(--blue)}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+.pic{aspect-ratio:16/7;max-width:100%;border-radius:6px;background:repeating-linear-gradient(135deg,var(--sunk) 0 12px,transparent 12px 24px);border:1px dashed var(--line);display:grid;place-items:center;color:var(--muted);font-size:14px;text-align:center;padding:12px}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.fact{background:var(--bg);border-radius:6px;padding:8px 12px}
+.fact .l{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+.fact .v{font-weight:700}
+.roles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}
+.role{text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.role[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft)}
+.role b{font-size:16.5px}
+.role span{font-size:14px;color:var(--muted)}
+.people{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}
+.person{border-left:3px solid var(--line);padding:2px 12px}
+.person b{display:block}
+.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:10px}
+.choice{text-align:left;background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.choice:hover:not(:disabled){border-color:var(--ink)}
+.choice[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft)}
+.choice:disabled{cursor:default}
+.choice:disabled:not([aria-pressed="true"]){opacity:.5}
+.choice .k{font-family:var(--mono);font-size:12px;color:var(--blue)}
+.choice small{color:var(--muted);font-size:14px}
+.btn{background:var(--blue);color:#fff;border:0;border-radius:8px;padding:9px 18px;font-weight:700;align-self:flex-start}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.done{background:var(--good-soft);color:var(--good);border-radius:6px;padding:8px 12px;font-weight:600}
+
+/* emails */
+.mail{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.mail summary{list-style:none;cursor:pointer;padding:12px 16px;display:grid;grid-template-columns:1fr auto;gap:2px 12px}
+.mail summary::-webkit-details-marker{display:none}
+.mail .from{font-weight:400}
+.mail .lbl{color:var(--muted);font-weight:400;margin-right:2px}
+.mail.unread .from,.mail.unread .subj{font-weight:700;color:var(--ink)}
+.udot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--blue);margin-right:8px;vertical-align:1px}
+.mail .subj{grid-column:1/2;color:var(--muted);font-size:14.5px}
+.mail .tag{grid-row:1/3;grid-column:2;align-self:center}
+.mail[open] summary{border-bottom:1px solid var(--line);background:var(--bg)}
+.mail .body p,.card>p,.attach>p{font-family:var(--serif);font-size:1.02rem;line-height:1.62}
+.mail .body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:10px}
+.sig{color:var(--muted)}
+.attach{border:1px solid var(--line);border-radius:6px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.attach .an{font-size:12.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.fine{font-size:13px;color:var(--muted);border-top:1px dotted var(--line);padding-top:6px}
+.rel{font-size:11.5px;font-weight:700;padding:1px 8px;border-radius:99px;white-space:nowrap}
+.rel-high{background:var(--good-soft);color:var(--good)}
+.rel-medium{background:var(--warn-soft);color:var(--warn)}
+.rel-low{background:var(--bad-soft);color:var(--bad)}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+td.num,th.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.mono{font-family:var(--mono);font-size:.9em}
+svg text{fill:var(--muted);font-family:var(--ui);font-size:12px}
+svg .lab{fill:var(--ink);font-size:13px}
+svg .val{fill:var(--ink);font-family:var(--mono);font-size:12px}
+svg .axis{stroke:var(--line)} svg .zero{stroke:var(--muted)}
+svg .neg{fill:var(--bad)} svg .pos{fill:var(--good)}
+svg .ring-bg{stroke:var(--sunk);fill:none} svg .ring{stroke:var(--amber);fill:none}
+.donuts{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:6px}
+.donuts figure{margin:0;text-align:center;font-size:13.5px}
+
+/* audio placeholder */
+.audio{background:var(--blue-soft);border-radius:8px;padding:10px 14px;display:grid;grid-template-columns:auto 1fr;gap:2px 12px;align-items:center}
+.audio .play{width:36px;height:36px;border-radius:50%;border:1.5px dashed var(--blue);background:transparent;color:var(--blue);cursor:not-allowed}
+.audio .t{font-weight:700}
+.audio .s{font-size:13px;color:var(--muted)}
+.audio details{grid-column:1/-1;font-size:14px}
+.audio summary{cursor:pointer;color:var(--blue);font-weight:600}
+.script{display:flex;flex-direction:column;gap:8px;padding-top:6px}
+.sd{font-style:italic;color:var(--muted);font-size:13.5px}
+
+/* investigate */
+.qs{display:flex;flex-direction:column;gap:8px}
+.q{text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:6px;padding:9px 12px}
+.q[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft)}
+.q:disabled:not([aria-pressed="true"]){opacity:.45;cursor:default}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:14px}
+.two>*{min-width:0}
+
+/* timeline */
+.tl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.tc{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;user-select:none}
+.tc[draggable="true"]{cursor:grab}
+.tc.dragging{opacity:.4}
+.tc.over{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-soft)}
+.tc .n{font-family:var(--mono);color:var(--muted);text-align:center}
+.tc .d{display:block;font-family:var(--mono);font-size:12.5px;color:var(--good)}
+.tc .arr{display:flex;gap:4px}
+.tc .arr button{width:34px;height:34px;border-radius:6px;border:1px solid var(--line);background:var(--bg)}
+.tc .arr button:disabled{opacity:.3;cursor:default}
+.tl.ok .tc{border-color:var(--good)}
+.note-strong{background:var(--amber-soft);border-radius:8px;padding:8px 12px}
+.hint{background:var(--warn-soft);border-radius:6px;padding:9px 12px}
+.opt{text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:6px;padding:8px 12px}
+.opt.right{border-color:var(--good);background:var(--good-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.opt:disabled{cursor:default}
+.fb{font-size:14.5px}
+
+textarea{width:100%;min-height:200px;resize:vertical;font:inherit;line-height:1.6;padding:10px 12px;border:1.5px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);box-sizing:border-box}
+.wc{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.board{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:10px}
+.tile{background:var(--bg);border-radius:6px;padding:10px 12px}
+.tile .l{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+.tile .v{font-weight:700}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+.sn{cursor:pointer;border-radius:3px;transition:background .15s}
+.sn:hover{box-shadow:inset 0 -2px 0 var(--amber)}
+#hlpal{position:absolute;z-index:30;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px;display:flex;gap:6px;box-shadow:0 4px 14px rgba(0,0,0,.15)}
+#hlpal[hidden]{display:none}
+#hlpal button{width:28px;height:28px;border-radius:50%;border:1px solid rgba(0,0,0,.15);cursor:pointer}
+#hlpal .none{background:var(--surface);color:var(--muted)}
+#fab{position:fixed;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:20;background:var(--blue);color:#fff;border:0;border-radius:999px;padding:10px 18px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+#fab[hidden],#nb[hidden]{display:none}
+#nb{position:fixed;top:0;right:0;bottom:0;width:min(380px,100vw);z-index:25;background:var(--bg);border-left:1px solid var(--line);overflow-y:auto;padding:calc(14px + env(safe-area-inset-top,0px)) 16px 24px;box-shadow:-6px 0 20px rgba(0,0,0,.12);display:flex;flex-direction:column;gap:10px;box-sizing:border-box}
+.nbhead{display:flex;justify-content:space-between;align-items:center}
+.nbhead h2{font-size:18px}
+.lnk{background:none;border:0;color:var(--blue);text-decoration:underline;padding:0;font-size:14px;cursor:pointer}
+.cc summary{cursor:pointer;display:flex;gap:4px;align-items:center;font-weight:600;font-size:14px}
+.cc i,.nbgroup i,.pin i{display:inline-block;width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.15);flex:none}
+.ccgrid{display:grid;gap:6px;margin-top:8px}
+.ccgrid label{display:flex;gap:8px;align-items:center}
+.ccgrid input{flex:1;font:inherit;font-size:14px;padding:4px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
+.nbadd{display:flex;flex-direction:column;gap:6px}
+.nbadd textarea{min-height:60px;font-size:14px}
+.btn.small{padding:6px 12px;font-size:14px}
+.nbgroup{display:flex;gap:6px;align-items:center;font-weight:700;font-size:14px;margin-top:6px}
+.nbcard{background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--line);border-radius:8px;padding:8px 10px}
+.nbcard p{font-family:var(--serif);font-size:15px;line-height:1.5}
+.nbcard .src{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-between;gap:8px;margin-top:4px}
+.pins{display:flex;flex-direction:column;gap:6px}
+.pin{display:flex;gap:8px;align-items:flex-start;text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:8px;padding:8px 10px}
+.pin[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft)}
+.pin span{font-family:var(--serif);font-size:15px}
+.pin small{display:block;font-family:var(--ui);font-size:12.5px;color:var(--muted)}
+.gate{border:2px dashed var(--amber)}
+.coderow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.coderow input,.numin{font-family:var(--mono);font-size:18px;padding:6px 10px;border:1.5px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);width:12ch}
+.bigcode{font-family:var(--mono);font-size:34px;letter-spacing:.2em;color:var(--good);border:2px solid var(--good);border-radius:8px;padding:6px 18px;align-self:flex-start}
+.pzq{display:flex;flex-direction:column;gap:6px;border-top:1px dotted var(--line);padding-top:10px}
+.opts2{display:flex;flex-wrap:wrap;gap:6px}
+.opts2 .opt[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft)}
+.msg{color:var(--bad);font-size:14px}
+.sortq{display:flex;flex-direction:column;gap:8px}
+.sortrow{display:grid;grid-template-columns:1fr minmax(170px,auto);gap:10px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--bg)}
+.sortrow p{font-family:var(--serif);font-size:15px}
+.sortrow select{font:inherit;font-size:14px;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
+@media (max-width:560px){.sortrow{grid-template-columns:1fr}}
+.opts2 .opt{text-align:left}
+
+/* Lite's hand-in (studio/template.html), added for the Pro hand-in */
+.consent{border:1px solid var(--line);background:#fff;border-radius:12px;padding:14px 16px;margin:6px 0}
+.consent label{display:flex;gap:10px;align-items:flex-start;font-weight:600;margin-top:8px}
+.consent input{margin-top:5px;width:18px;height:18px}
+.issues{color:var(--warn);font-size:.92rem}
+.block{width:100%;min-height:260px;font:13px/1.45 ui-monospace,Menlo,Consolas,monospace;border:2px solid var(--blue);border-radius:10px;padding:10px 12px;background:#fff;white-space:pre-wrap;box-sizing:border-box}
+.ok{color:var(--good);font-weight:600}
+#out{display:flex;flex-direction:column;gap:10px}
+</style>
+</head>
+<body>
+
+
+<header><div class="wrap">
+  <div class="brand">SimLearn<span>PRO</span></div>
+  <h1>The Forge Inquiry</h1>
+  <p class="whoami" id="who"></p>
+  <nav class="tabs" id="tabs" aria-label="Sections"></nav>
+</div></header>
+<main><div class="wrap" id="main"></div></main>
+<div id="hlpal" hidden role="dialog" aria-label="Highlight colour"><button data-hlc="yellow" style="background:#FFF176" aria-label="Yellow"></button><button data-hlc="green" style="background:#B9F6CA" aria-label="Green"></button><button data-hlc="pink" style="background:#F8BBD0" aria-label="Pink"></button><button data-hlc="blue" style="background:#B3E5FC" aria-label="Blue"></button><button data-hlc="orange" style="background:#FFE0B2" aria-label="Orange"></button><button data-hlc="purple" style="background:#E1BEE7" aria-label="Purple"></button><button data-hlc="none" class="none" aria-label="Remove highlight">✕</button></div>
+<button id="fab" data-act="nbopen" hidden>Notes (0)</button>
+<aside id="nb" hidden aria-label="Your highlights and notes"></aside>
+
+<script>
+const ROLES={
+ A:{name:"Insights Manager",line:"Research & Insights",detail:"You work in the Research & Insights team, but you weren't part of the Forge study. Your inbox holds the research results and messages from the people who ran it."},
+ B:{name:"Retail Account Manager",line:"Retail & Field",detail:"You look after Harrow & Vane's supermarket customers. Your inbox holds sales figures from the shops and messages from people who see shoppers every day."},
+ C:{name:"Strategy & Finance Manager",line:"Leadership & Strategy",detail:"You work for the leadership team on plans and budgets. Your inbox holds board papers, budgets and messages from the directors who made the launch decision."}
+};
+const REL={high:"Reliable",medium:"Personal view",low:"Weak evidence"};
+const fmt=n=>"£"+n.toLocaleString("en-GB");
+
+function hbar(rows,o){
+  const W=500,left=110,right=48,rowH=32,top=8,H=top+rows.length*rowH+24,min=o.min,max=o.max;
+  const x=v=>left+(v-min)/(max-min)*(W-left-right);
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${o.label}">`;
+  o.ticks.forEach(t=>s+=`<line class="${t?'axis':'zero'}" x1="${x(t)}" x2="${x(t)}" y1="${top-4}" y2="${H-20}"/><text x="${x(t)}" y="${H-5}" text-anchor="middle">${t}${o.unit}</text>`);
+  rows.forEach((r,i)=>{const y=top+i*rowH,a=x(0),b=x(r.v);
+    s+=`<text class="lab" x="${left-10}" y="${y+18}" text-anchor="end">${r.l}</text><rect class="${r.hi?'neg':'pos'}" x="${a}" y="${y+6}" width="${Math.max(2,b-a)}" height="${rowH-13}" rx="2"/><text class="val" x="${b+6}" y="${y+18}">${r.v}${o.unit}</text>`;});
+  return s+"</svg>";
+}
+function donut(l,p){const c=2*Math.PI*38;return `<figure><svg viewBox="0 0 100 100" width="84" height="84" role="img" aria-label="${l} ${p}%"><circle class="ring-bg" cx="50" cy="50" r="38" stroke-width="12"/><circle class="ring" cx="50" cy="50" r="38" stroke-width="12" stroke-dasharray="${(c*p/100).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 50 50)"/><text class="val" x="50" y="55" text-anchor="middle" style="font-size:15px">${p}%</text></svg><figcaption class="muted">${l}</figcaption></figure>`;}
+const PRO_AUDIO=[];   // the recordings published next to the page (build.py fills this in)
+function audio(t,voice,script,file){if(file&&PRO_AUDIO.includes(file))return `<div class="audio rec"><div style="flex:1;min-width:0"><div class="t">${t}</div><audio controls preload="none" data-f="${file}" src="audio/${file}.mp3" style="width:100%;margin-top:6px"></audio></div><details ${(S.heard||{})[file]?"":"hidden"}><summary>Show the text</summary><div class="script">${script}</div></details></div>`;
+ return `<div class="audio"><button class="play" disabled aria-label="Play (recording to come)">▶</button><div><div class="t">${t}</div><div class="s">Recording to come: read the text</div></div><details open><summary>The text</summary><div class="script">${script}</div></details></div>`;}
+function mail(m){const k=m.from+"|"+m.subj, o=!!S.mailOpen[k], r=!!S.mailRead[k];
+ return `<details class="mail ${r?"read":"unread"}" data-mail="${encodeURIComponent(k)}"${o?" open":""}><summary><span class="from">${r?"":`<span class="udot" aria-label="Unread"></span>`}<span class="lbl">From:</span> ${m.from}</span><span class="subj">${m.subj}</span><span class="tag"><span class="rel rel-${m.rel}">${REL[m.rel]}</span></span></summary><div class="body" data-src="${m.from.split(",")[0]}" data-q="${m.rel}">${m.body}</div></details>`;}
+function att(name,html){return `<div class="attach"><div class="an">📎 ${name}</div>${html}</div>`;}
+
+/* ---------- inboxes (every key clue appears in at least two roles) ---------- */
+const FWD={from:"Moira Kinnaird, Chief Executive",subj:"Fwd: “Protein bars are over”",rel:"low",body:`
+ <p>A board member sent me this. I doubt there's much in it, but have a look.</p>
+ <p class="muted"><em>“Protein bars are SO last year. Gen Z has moved on. Forge launched into a dying fad, and no amount of marketing will save it.”</em> (post by a snack-trends influencer, 19 August)</p>
+ <p class="fine">The post gives no figures and names no source.</p>`};
+
+const INBOX={
+ A:[
+  {from:"Lydia Carden, Senior Research Analyst",subj:"Forge research: the numbers, and a caveat",rel:"high",body:`
+   <p>Hi, you asked for the pre-launch numbers, so here they are. 78% of the people we surveyed said they'd be “very likely” or “likely” to buy a high-protein bar from us. That's the top-two-box score the steering group saw. The focus groups loved the name and the black wrapper.</p>
+   <p>I'll be honest about the sample, because someone should be. We had three weeks, not the usual two or three months, so we asked the people we could reach fastest: our own app users, plus some newsletter readers and colleagues at head office, who use the app too. In other words, people who already like us. Nobody in the survey had tasted Forge, either. It was a concept test, run before the recipe was final.</p>
+   ${att("Who answered the survey (1,214 replies)",`<div class="donuts">${donut("App users",86)}${donut("Newsletter readers",9)}${donut("Head office staff",5)}</div>`)}
+   <p>Normally we add an outside panel of shoppers who don't know us, then run a second round once the product is finished. It costs about twice as much, but it shows you how a stranger reacts. For Forge there was time for neither.</p>
+   <p class="sig">Lydia</p>`},
+  {from:"Mateusz Gorski, Research Assistant",subj:"Blind taste test: the part nobody asked about",rel:"high",body:`
+   <p>Hi, here are the blind taste test results. Sixty testers tried four unbranded bars on numbered plates, Forge and three rivals, and scored each one out of ten. They didn't know which bar was which, so the wrapper couldn't help.</p>
+   <p>Forge came top for “looks healthy”, but third of four for taste and texture. The words testers kept writing were “chalky” and “dry”. I sent the summary to the Launch Steering Group on 23 February, before the launch was approved. The answer was that the branding would carry it.</p>
+   ${att("Blind taste test, February (60 testers, bars fresh from the pilot line)",`<div class="tw"><table><thead><tr><th>Bar</th><th class="num">Taste and texture</th><th class="num">Looks healthy</th></tr></thead><tbody>
+    <tr><td>Brawn</td><td class="num">7.4</td><td class="num">6.1</td></tr>
+    <tr><td>Peakform</td><td class="num">7.1</td><td class="num">6.8</td></tr>
+    <tr><td>Forge</td><td class="num">5.6</td><td class="num">8.3</td></tr>
+    <tr><td>Fuel Up</td><td class="num">5.2</td><td class="num">5.9</td></tr></tbody></table></div>`)}
+   <p>For what it's worth, the two bars that beat us on taste, Brawn and Peakform, are also the two most expensive bars on the shelf. People seem happy to pay for a bar they enjoy.</p>
+   <p>I hear the Leeds pilot struggled and that first-time buyers weren't coming back. I don't know whether that's connected to our results, but I'd like someone to ask.</p>
+   <p class="sig">Mateusz</p>`}
+ ],
+ B:[
+  {from:"Deja Boakye, Regional Account Manager (Leeds)",subj:"Leeds pilot: what I sent in May",rel:"high",body:`
+   <p>Hi, you asked for my pilot numbers. Forge went into 140 stores around Leeds on 13 April. After two weeks we were at about 55% of forecast. In week three it didn't pick up, which a normal slow start usually does when the first buyers come back.</p>
+   ${att("Leeds pilot: sales as a share of forecast",hbar([{l:"Week 1 (13 Apr)",v:58},{l:"Week 2",v:52},{l:"Week 3",v:53}],{min:0,max:100,ticks:[0,50,100],unit:"%",label:"Leeds pilot sales as a share of forecast, weeks 1 to 3"}))}
+   <p>The repeat figures worried me more. Loyalty card data showed that 7 in 10 Leeds buyers had never bought anything from us before, which is exactly who Forge was for. But only 15% of first-time buyers came back for a second bar. For a healthy new bar it's nearer 35%. When my team talked to shoppers, the word we heard most was “dry”.</p>
+   <p>I sent all of this to the Launch Steering Group on 4 May. Two weeks later, Forge was in every store. I've since heard the survey mostly asked our own app users. That would explain a lot.</p>
+   <p class="sig">Deja</p>`},
+  {from:"Grant Sillitoe, Category Buyer, Northfield Retail Group",subj:"Forge on our shelves, and a decision for you",rel:"high",body:`
+   <p>Hi, thanks for getting in touch. Forge has had a good spot with us since launch: eye level, and near the checkouts in our bigger stores. The display has stayed full. Placement isn't your problem.</p>
+   <p>You should know about Vital Bar. It arrived in all our stores, Leeds included, on 20 May, two days after Forge went national. It sits on the same shelf at £1.59, 40p less than Forge at £1.99. It's taking some of your sales, but it's also growing the protein shelf as a whole, which helps everyone on it.</p>
+   <p>In our data, price wins the first purchase. After that, shoppers who like a bar tend to stay with it.</p>
+   <p>New lines keep eye level until their first range review, and Forge's is on 14 September. Slow sellers get delisted to make room for the next new product. I need to know by Friday how you'll support Forge before then.</p>
+   <p class="sig">Grant</p>`}
+ ],
+ C:[
+  {from:"Rupert Bell, Director of Marketing Strategy",subj:"Why we launched when we did",rel:"medium",body:`
+   <p>Hi, happy to explain. The research came back strong: nearly 80% positive interest, and the focus groups loved the branding. High-protein was the fastest-growing category we track, and the board wanted us in it before a competitor got there first. Given what we knew at the time, launching when we did was the right call. I stand by it.</p>
+   <p>Since then, Vital Bar has come in 40p cheaper on the same shelf. In my experience, shoppers in this category follow price, whatever a survey says.</p>
+   ${att("Forge launch brief (extract)",`<p><b>Target shopper:</b> 18–34s who already buy protein bars but have never bought Harrow & Vane.</p><p><b>Goal:</b> bring a new, younger customer to the brand, not just sell another bar.</p><p><b>Shelf price:</b> £1.99.</p>`)}
+   <p>I've drafted a short paper for the board on Thursday and sent it to Celia.</p>
+   <p class="sig">Rupert</p>`},
+  {from:"Celia Whitcombe, Finance Director",subj:"The timeline, the money and the shelf",rel:"high",body:`
+   <p>Hi, some context. In January the board set a hard deadline: Forge on national shelves before the financial year ends on 30 June, to meet the snacking division's growth target. That's why research and testing were squeezed into three weeks instead of the usual two to three months. Forge's launch budget was £1.8 million, the division's biggest this year, and most of it was spent before the first sales data came in.</p>
+   ${att("Forge timeline",`<div class="tw"><table><thead><tr><th>Date</th><th>Event</th></tr></thead><tbody>
+    <tr><td class="mono">January</td><td>Board fixes the launch deadline</td></tr>
+    <tr><td class="mono">2–20 Feb</td><td>Survey, focus groups and blind taste test</td></tr>
+    <tr><td class="mono">24 Feb</td><td>Launch Steering Group (chair: Rupert Bell) approves Forge; national rollout booked for 18 May</td></tr>
+    <tr><td class="mono">13 Apr</td><td>Leeds pilot starts</td></tr>
+    <tr><td class="mono">5 May</td><td>Steering group meets again</td></tr>
+    <tr><td class="mono">18 May</td><td>National rollout: 2,400 stores</td></tr>
+    <tr><td class="mono">20 May</td><td>Vital Bar arrives in Northfield stores</td></tr>
+    <tr><td class="mono">16 Aug</td><td>First full quarter ends: Forge at about 40% of forecast</td></tr></tbody></table></div>`)}
+   <p>Rupert keeps saying it's all about price, so here's the protein shelf as it stands.</p>
+   ${att("Protein bar prices at Northfield, August",`<div class="tw"><table><thead><tr><th>Bar</th><th class="num">Price</th></tr></thead><tbody>
+    <tr><td>Vital Bar</td><td class="num">£1.59</td></tr><tr><td>Forge</td><td class="num">£1.99</td></tr><tr><td>Peakform</td><td class="num">£2.10</td></tr><tr><td>Brawn</td><td class="num">£2.30</td></tr></tbody></table></div>`)}
+   <p class="sig">Celia</p>`}
+ ]
+};
+const BRANCH={
+ price:{from:"Grant Sillitoe, Category Buyer, Northfield Retail Group",subj:"Your price promotion: the first week",rel:"high",body:`
+  <p>Quick update. At £1.59, Forge sold 60% more last week than the week before. Our loyalty data shows who bought it, though: almost all of them were trying Forge for the first time.</p>
+  <p>Of the shoppers who had tried Forge before the promotion, only about 1 in 8 bought it again, even at the lower price. The promotion is buying you first tries, not loyal customers.</p>
+  <p>One warning from experience: once shoppers have seen £1.59, £1.99 looks expensive.</p><p class="sig">Grant</p>`},
+ sample:{from:"Deja Boakye, Regional Account Manager (Leeds)",subj:"Tasting stands: the first week",rel:"high",body:`
+  <p>We've handed out about 9,400 samples so far. People love the look of the wrapper and the protein figure on the front. But the words my team hear most are “dry” and “chalky”.</p>
+  <p>About 1 in 12 people who tried a sample bought a bar that day. Grant says Vital Bar's tastings last month turned about 1 in 5 into buyers.</p>
+  <p>A woman in Harrogate summed it up: “Lovely packet. Shame about the inside.”</p><p class="sig">Deja</p>`}
+};
+
+/* ---------- experts: one per role, from a shortlist ---------- */
+const EXPERTS={
+ auditor:{name:"Research auditor",who:"Dr Helen Achterberg, independent market research auditor",what:"Checks how a study was designed and run. Can tell you how far the 78% can be trusted.",
+  rep:`<p>The Forge survey was a concept test, not a product test: nobody had tasted the bar or seen its real price. That is normal at an early stage, but it means the 78% measured interest in an idea and a brand.</p>
+   <p>86% of the 1,214 replies came from app users. That is a convenience sample: quick and cheap, and much friendlier than the public. The key question also opened by praising the company, which pushes answers upwards.</p>
+   <p>In my experience, loyal customers asked about an idea say yes two or three times as often as new shoppers buy. Among people who don't know the brand, I would expect the real figure to be well under half. The blind test was the only research that tested the bar itself, and it was the part that was set aside.</p>`},
+ sensory:{name:"Food scientist",who:"Tayside Food Science, a laboratory in Dundee",what:"Tests the texture and shelf life of foods. Can tell you whether the bar in the shops is the bar that was tested.",
+  rep:`<p>We tested Forge bars fresh from the factory and bars taken from shop shelves after six weeks.</p>
+   <p>Forge contains more protein per gram than its rivals, and its protein blend draws moisture out of the bar over time. Bars from the shelf were 35% harder than fresh ones. Our tasters described them as “chalky” and “dry”, the same words used in your February blind test.</p>
+   <p>Your testers tasted fresh bars, so shoppers are eating a drier bar than they did. A different protein blend and a little more moisture should fix it. We'd estimate about eight weeks of recipe work.</p>`},
+ shopper:{name:"Shopper panel analyst",who:"Basket Insight, a panel of 30,000 UK households",what:"Tracks what real households buy, week by week. Can tell you who tried Forge and who came back.",
+  rep:`<p>In its first quarter, 11% of protein bar buyers tried Forge. That's above average for a new bar: the advertising and the shelf position worked.</p>
+   <p>But only 17% of them bought it again, against 35% for protein bars in general and 33% for Vital Bar. When trial is strong and repeat is weak, the problem is usually the product, not awareness or placement.</p>
+   <p>About 60% of Vital Bar's buyers are new to protein bars. Around a quarter of its buyers had bought Forge before, so it is taking some of your customers, but most of its growth is new.</p>`},
+ pricing:{name:"Pricing consultant",who:"Tom Okafor, Shelfwise Pricing",what:"Advises supermarkets and brands on prices. Can tell you how much a 40p gap on the shelf really matters.",
+  rep:`<p>A 40p gap on the same shelf matters most for the first purchase. Shoppers comparing two unknown bars often pick the cheaper one.</p>
+   <p>Repeat buying is different. In our data, shoppers who like a bar rarely switch to save 40p: a 20% price gap usually moves repeat buying by only 3–5%. And the best-selling bars in this category are not the cheapest ones.</p>
+   <p>My estimate is that Vital Bar explains part of Forge's shortfall, perhaps a fifth, but not most of it. Matching Vital Bar's price for good would cost you about £110,000 a quarter in margin.</p>`},
+ social:{name:"Social media listening",who:"Brightwire, a listening agency in Manchester",what:"Reads what shoppers post online. Can tell you what people say about Forge, and since when.",
+  rep:`<p>Forge got plenty of attention at launch. Positive posts praise the black wrapper and the 20 grams of protein.</p>
+   <p>Negative posts started in late May and have grown every week since. 58% of them mention taste or texture: “chalky”, “dry” and “a workout for your jaw” are the most common phrases. Price comes up in 14%.</p>
+   <p>The most shared post is a photo of a half-eaten Forge with the caption “Great packet, though.”</p>`},
+ category:{name:"Category analyst",who:"Imogen Shah, Shelf Life Data",what:"Follows sales across the whole snack bar aisle. Can tell you whether the market is growing or shrinking.",
+  rep:`<p>Protein bars grew 12% in value this year. They are still the fastest-growing part of the snack bar aisle, and the arrival of Vital Bar has grown the shelf further.</p>
+   <p>Forge's share of protein bar sales fell from 4.0% in its first month to 2.6% by August, while most of the brands around it held steady or grew.</p>
+   <p>When a category is growing and one brand is shrinking, that is a brand problem, not a market problem.</p>`}
+};
+const SHORTLIST={A:["auditor","sensory","shopper"],B:["shopper","pricing","social"],C:["category","auditor","pricing"]};
+
+const WIT={
+ rupert:{name:"Rupert Bell",role:"Director of Marketing Strategy",voice:"male, southern English, polished and confident",
+  account:`<p class="sd">[Office. Relaxed, polished, a little defensive.]</p><p>Look, I've launched a lot of products. The research was strong: nearly eighty per cent. The focus groups loved it. Leeds was one region, in the first few weeks of a pilot, and you don't redraw a national plan on that.</p><p>And then Vital Bar walks in, forty pence cheaper, on the same shelf, two days after we go national. Shoppers in this category follow price. I'm not saying we got everything right. But the market moved under us.</p>`,
+  qs:[["Did you see the taste test results before the launch?","[pause] I did. Taste and texture “average”, a few comments about it being chalky. Next to seventy-eight per cent interest, I treated it as minor. In hindsight, I'd want a second test before fixing a date."],
+      ["Who exactly did the survey ask?","Our research panel, the one we always use. Lydia's team can give you the detail. It's a very engaged group of people."],
+      ["What did the steering group do with Deja's Leeds report on 5 May?","We noted it. One region, three weeks in, and the rollout was already booked with the retailers. Moving it would have cost us our slots. [pause] Perhaps we could have asked her a few more questions."]]},
+ deja:{name:"Deja Boakye",role:"Regional Account Manager",voice:"female, Yorkshire accent, careful",
+  account:`<p class="sd">[Quiet office, a phone ringing in the distance.]</p><p>I've run five pilots for this company. Most new bars start slowly, then pick up in week three, when people come back for a second one. Forge didn't. It sat at about fifty-five per cent, and the people who'd tried it weren't coming back.</p><p>I wrote it up carefully, because week three is early, and I sent it in before the national rollout. I didn't say stop. I said look. I'm still not sure anyone did. You might ask Rupert what happened to my report.</p>`,
+  qs:[["How long does a pilot normally run?","Four to six weeks, usually. Week three is still early, I know that. That's why I was careful how I wrote it up."],
+      ["Who did you send your report to?","The Launch Steering Group, on the fourth of May. Rupert chairs it. The minutes say my report was “noted”. Nobody asked me a single question, and two weeks later Forge was in every store."],
+      ["Why do you think Leeds buyers didn't come back?","Most of them had never bought from us before, so they had no reason to be kind to us. They tried it once, and they didn't love it. My team heard “dry” again and again."]]}
+};
+
+const DEC={
+ d1:["Finding 1: What was the main cause of Forge's weak sales?",
+   ["Flawed research","The pre-launch research was flawed: the survey asked mostly existing fans about an idea, and the blind taste test was set aside, so the launch decision never reflected how a new shopper would respond."],
+   ["The market shifted","The research was reasonable at the time, but the market shifted around the launch: a cheaper rival bar arrived on the same shelf in the same week and took the sales Forge needed."]],
+ d2:["Finding 2: Should the Leeds pilot numbers have paused the national rollout?",
+   ["No pause was needed","A slow start over the first three weeks, with weak repeat purchase, is normal for a new product finding its audience. It didn't need to change the rollout plan."],
+   ["It should have paused","A stalled recovery and weak repeat purchase by week three was a real warning sign that should have paused the wider rollout."]],
+ d3:["Recommendation: What should Harrow & Vane change for future launches?",
+   ["In-market pause triggers","Weekly in-market tracking with clear pause rules, so a stalling pilot can stop a wider rollout, whatever caused the problem. About £80,000 a year."],
+   ["Stronger research checks","An independent check of every research sample, and a signed-off blind taste test before any launch date is set. About £150,000 a year."]]
+};
+const D3COST=o=>o==="A"?80000:(ok(1)?90000:150000);
+const CAP=()=>failed(3)?100000:Infinity;
+
+const EPI_D1={
+ A:{sample:"BOARD accepted that the research had misled the launch. Forge was tested again, this time with shoppers who had never bought from Harrow & Vane, and the notes from September's tasting stands went straight into the recipe brief. A softer, less chalky Forge reached shops in November, and repeat purchase in the first stores rose for the first time.",
+    price:"BOARD accepted that the research had misled the launch. Forge was tested again, this time with shoppers who had never bought from Harrow & Vane, and the recipe was changed to fix the texture. But the new Forge went back to £1.99, and Northfield shoppers who had paid £1.59 in September saw it as a price rise. Repeat purchase is rising, slowly."},
+ B:{sample:p=>`The board accepted the competitor explanation and ${p}. Sales rose for a few weeks, then fell back: repeat purchase stayed weak. After the tastings, “chalky” has become the word people use for Forge online, and nobody has looked at the recipe.`,
+    price:p=>`The board accepted the competitor explanation and ${p}. Sales rose for a few weeks, then fell back: repeat purchase stayed weak, nobody looked at the taste, and Northfield's buyers now see Forge as a discount bar.`}
+};
+const EPI_D2={A:"The panel judged the Leeds numbers normal noise. Regional managers noticed, and the next pilot report arrived late and carefully worded.",
+ B:"The panel's view that Leeds should have paused the rollout went to every regional manager. Deja Boakye's report became the example in the company's new launch guide."};
+const EPI_D3={A:"Harrow & Vane has set up weekly in-market tracking with automatic pause triggers. It works, but it only catches problems once a product is already on the shelves.",
+ B:"Every launch now needs an independent check of the research sample and a signed-off blind taste test before a date can be set. The next launch has already slipped by a month, and nobody on the board has complained."};
+
+const RANK=[["r1","The research behind the launch, and the bar itself"],["r2","Vital Bar's lower price"],["r3","Poor placement in the shops"],["r4","Too little advertising"],["r5","Protein bars going out of fashion"]];
+const RANK_START=["r2","r4","r3","r1","r5"];
+const COMMENTS=`<div class="attach"><div class="an">📎 Blind taste test, February: testers' comments (M. Gorski)</div>
+ <p>Tester 7: “Looks like something an athlete would eat. Tastes like the box it came in.” Tester 14: “Dry. I needed the water.” Tester 22: “Great wrapper. I'd buy one to try it, but not a second.” Tester 31: “Chalky, but the protein number is impressive.”</p>
+ <p>Testers who said they would buy Forge again after tasting it: 19 of 60.</p></div>`;
+const REPLIES={
+ r1:()=>`<p>You've put the research and the bar itself first, so that's where I'm acting, though the board will want proof. I've asked Lydia to test Forge again with shoppers who don't know us, and Mateusz to brief the recipe team. I've also held back the £400,000 autumn advertising push for Forge until we know what we're advertising.</p><p>Mateusz has sent me the testers' comments from February. Only a one-line summary went to the steering group. Read them before you write anything.</p>${COMMENTS}`,
+ r2:()=>`<p>Right. If Vital Bar wants a price war, it can have one. I've cut Forge to £1.59 in every store from Monday. It will cost us about £110,000 a quarter in margin. Let's hope it brings the shoppers back.</p>`,
+ r3:()=>`<p>I've paid Northfield £45,000 for end-of-aisle displays for Forge for six weeks. If shoppers can't find it, they can't buy it.</p>`,
+ r4:()=>`<p>I've approved an extra £150,000 of social media advertising for Forge this autumn. If people don't know about it, let's make sure they do.</p>`,
+ r5:()=>`<p>I've asked a research agency for a report on whether protein bars are going out of fashion. If the whole category is cooling, we need to know.</p><p><em>Two days later:</em> the report is in. Protein bars grew 12% this year. The board is asking why we paid £8,000 to find that out.</p>`
+};
+function reply(){
+ const first=S.rank[0], p=S.rank.indexOf("r1");
+ let extra="";
+ if(first!=="r1") extra = p===1?"<p>You've put the research and the bar second, so I've asked Lydia and Mateusz to look into them as well.</p>":"";
+ return {from:"Moira Kinnaird, Chief Executive",subj:"Re: Interim briefing",rel:"medium",body:REPLIES[first]()+extra+(S.ev?EV_REPLY[S.ev]:"")+`<p class="sig">Moira</p>`};
+}
+const CONSEQ={
+ r1:{from:"Mateusz Gorski, Research Assistant",subj:"The recipe team can fix it",rel:"high",body:`<p>I took the February comments to the recipe team yesterday. They tried bars from a shop shelf next to bars from the factory, and the shelf bars are much drier. The protein blend pulls the moisture out over a few weeks.</p><p>They think a different blend and a little more moisture will fix it, in about eight weeks. Lydia is lining up shoppers who have never bought from us to taste the new version.</p><p>Thank you for asking about the taste. It's the first time anyone has.</p><p class="sig">Mateusz</p>`},
+ r2:{from:"Grant Sillitoe, Category Buyer, Northfield Retail Group",subj:"About your price cut",rel:"high",body:`<p>Your new price is on the shelf. Vital Bar went down to £1.49 two days later, so the gap is back.</p><p>Forge's sales rose a little and then flattened. Most of the extra buyers are trying it for the first time. The people who tried it before still aren't coming back.</p><p class="sig">Grant</p>`},
+ r3:{from:"Grant Sillitoe, Category Buyer, Northfield Retail Group",subj:"The end-of-aisle displays",rel:"high",body:`<p>Thanks for the payment. The displays are up. To be honest, Forge already had one of the best spots on the shelf, and sales have moved by about 3%.</p><p>Shoppers can find Forge. It's the second purchase that isn't happening.</p><p class="sig">Grant</p>`},
+ r4:{from:"Deja Boakye, Regional Account Manager (Leeds)",subj:"The new advertising",rel:"high",body:`<p>The new adverts are working, in one way: more people are trying Forge. They still aren't coming back for a second bar.</p><p>We're paying to introduce people to a bar they don't buy twice.</p><p class="sig">Deja</p>`},
+ r5:{from:"Celia Whitcombe, Finance Director",subj:"The category report",rel:"high",body:`<p>The board asked me about the £8,000 report this morning. I had to explain that it told us something Grant at Northfield could have told us for free.</p><p>Meanwhile Forge's numbers haven't moved.</p><p class="sig">Celia</p>`}
+};
+const STANDING={r1:()=>"Moira has held back the £400,000 autumn advertising push. Lydia is re-testing Forge with shoppers who don't know the brand, and the recipe team thinks it can fix the texture in about eight weeks.",
+ r2:()=>"Forge has been cut to £1.59, at a cost of about £110,000 a quarter. Vital Bar has gone down to £1.49, and the old buyers still aren't coming back.",
+ r3:()=>"Moira has paid £45,000 for end-of-aisle displays. Sales have moved by about 3%.",
+ r4:()=>"An extra £150,000 of advertising is bringing in first-time buyers, but they aren't coming back.",
+ r5:()=>"The £8,000 category report says protein bars grew 12% this year. Forge's numbers haven't moved."};
+function pinsHTML(){const N=S.notes[R()], items=Object.entries(N.hl);
+ return `<h3>Your evidence</h3><p>Pin up to three of your highlights as evidence for the explanation you've put first. Moira will show them to the board.</p>`+
+ (items.length?`<div class="pins">${items.map(([k,h])=>`<button class="pin" data-act="pin" data-v="${k}" aria-pressed="${N.pins.includes(k)}"><i style="background:${HLC[h.c]}"></i><span>${esc(h.t)}<small>${esc(h.src)}</small></span></button>`).join("")}</div>`
+   :`<p class="muted small">You haven't highlighted anything yet. Tap sentences in your emails or reports to highlight them, then come back.</p>`);}
+function inboxList(){const list=[...INBOX[R()]]; if(R()==="B"&&S.fork) list.splice(1,0,BRANCH[S.fork]); list.push(FWD); if(S.ranked) list.unshift(CONSEQ[S.rank[0]]); return list;}
+const EPI_RANK={r2:"The price cut to £1.59 cost about £110,000 a quarter. Vital Bar followed it down within days.",r3:"The £45,000 end-of-aisle displays moved sales by about 3%.",r4:"The extra £150,000 of advertising brought in first-time buyers who didn't come back.",r5:"The board still jokes about the £8,000 report that said protein bars were growing."};
+
+/* ---------- team puzzles ---------- */
+const PZ={
+ 1:{owner:"A",title:"The questionnaire",
+   intro:"Lydia has sent the questionnaire exactly as it went out in February. The board will ask whether the 78% can be trusted. Work out what the survey really measured, and who it measured it on.",
+   screen:`<div class="attach"><div class="an">Forge concept survey · 2–20 February · 1,214 replies</div>
+     <p class="muted small">Sent in the Harrow & Vane app (which many head office staff use) and the monthly newsletter, with a picture of the wrapper.</p>
+     <div class="tw"><table><thead><tr><th>Question</th><th class="num">Result</th></tr></thead><tbody>
+      <tr><td><b>Q1.</b> How often do you buy snack bars?</td><td class="num">71% at least weekly</td></tr>
+      <tr><td><b>Q2.</b> Harrow & Vane has made snacks people love for forty years. How likely would you be to buy a high-protein bar from us?</td><td class="num">78% very likely or likely</td></tr>
+      <tr><td><b>Q3.</b> Would you buy a high-protein bar at £1.60?</td><td class="num">64% yes</td></tr></tbody></table></div></div>`,
+   qs:[{q:"What did Q2's 78% really measure?",type:"choice",opts:["How many shoppers would buy Forge at the price it sells for","Interest in the idea of a protein bar from a brand people already like","How much people enjoyed Forge when they tasted it"],ans:"Interest in the idea of a protein bar from a brand people already like"},
+       {q:"Q3 asked about a price of £1.60. Why does that matter?",type:"choice",opts:["It doesn't: a few pence either way makes no real difference to shoppers","Shoppers can't answer price questions until they have tasted the product","Forge costs more than that in the shops, so the survey tested a cheaper bar"],ans:"Forge costs more than that in the shops, so the survey tested a cheaper bar"},
+       {q:"How well did the people who answered match the shoppers Forge was made for?",type:"choice",opts:["Badly: almost all of them already buy from us, but Forge was made for people who don't","Well: most of them buy snack bars every week, so they're the right kind of shopper","Well enough: over a thousand people answered, which is plenty for a fair result"],ans:"Badly: almost all of them already buy from us, but Forge was made for people who don't"}],
+   hint:"Forge's shelf price is in Retail's and Strategy's emails. Who Forge was made for is in Strategy's launch brief, and Retail knows who actually bought it in Leeds.",
+   out:{ok:"Lydia asked the key question again, neutrally and at the real price, to 400 protein bar buyers who have never bought from Harrow & Vane: 31% said they'd be likely to buy. Lydia now has a ready-made method for checking research independently.",
+        fail:"Without a clear case against the survey, Rupert has told the board the research was “sound, but overtaken by events”. Nobody has tested it again."}},
+ 2:{owner:"B",title:"Said and did",
+   intro:"In June, Deja's team asked Leeds shoppers who had tried Forge what they thought of it, then followed six of them on their loyalty cards for eight weeks. Grant wants to know what is really stopping people coming back. Work out what each basket tells you.",
+   screen:"",
+   qs:[{q:"For each shopper, what does their basket show?",type:"sort",cats:["The price put them off","The bar itself put them off","They kept buying Forge"],
+        items:[["<b>Said:</b> “Too pricey for what it is.” <b>Did:</b> switched to Vital Bar and buys it most weeks.","The price put them off"],
+               ["<b>Said:</b> “Too expensive, to be honest.” <b>Did:</b> buys a Brawn bar every week.","The bar itself put them off"],
+               ["<b>Said:</b> “A bit dry. Like chewing chalk.” <b>Did:</b> hasn't bought a protein bar since.","The bar itself put them off"],
+               ["<b>Said:</b> “Great. I'll have another.” <b>Did:</b> bought Forge five more times.","They kept buying Forge"],
+               ["<b>Said:</b> “The price, mainly.” <b>Did:</b> buys a Peakform bar twice a week.","The bar itself put them off"],
+               ["<b>Said:</b> “Loved it! I'll definitely get it again.” <b>Did:</b> hasn't bought Forge again, and buys Peakform now.","The bar itself put them off"]]},
+       {q:"What do the baskets show that the interviews alone didn't?",type:"choice",opts:["Most of these shoppers left Forge for Vital Bar because it's 40p cheaper","Several shoppers who blamed the price now pay more for a different protein bar","Shoppers in Leeds are buying fewer protein bars than they did before"],ans:"Several shoppers who blamed the price now pay more for a different protein bar"},
+       {q:"The third shopper said Forge was “like chewing chalk”. What else backs them up?",type:"choice",opts:["Grant's report that the Forge display has stayed full all summer","The blind taste test in February, where testers kept writing “chalky” and “dry”","The focus groups, where people loved the name and the black wrapper"],ans:"The blind taste test in February, where testers kept writing “chalky” and “dry”"}],
+   hint:"What do the bars these shoppers switched to cost? Strategy has Northfield's price list; Research knows which rival bars beat Forge on taste, and what the testers wrote.",
+   out:{ok:"Grant can show Northfield's range review exactly why shoppers aren't coming back, and that Harrow & Vane is investigating. Northfield will keep Forge on its shelves for another twelve weeks.",
+        fail:"Grant has nothing new for the range review: a slow seller with weak repeat sales. Northfield will delist Forge from its 300 smaller stores: about £80,000 in lost sales next quarter."}},
+ 3:{owner:"C",title:"Rupert's board paper",
+   intro:"Rupert has sent Celia his paper for Thursday's board meeting. Decide whether each claim is true, misleading or false. Celia will only challenge Rupert if she knows exactly what's wrong.",
+   screen:`<div class="attach"><div class="an">Forge: what happened · draft for the board · Rupert Bell</div>
+     <p><b>Claim 1:</b> Our research showed that nearly 80% of shoppers wanted Forge.</p>
+     <p><b>Claim 2:</b> Forge was on track until Vital Bar undercut it.</p>
+     <p><b>Claim 3:</b> No one raised concerns before the national launch.</p></div>`,
+   qs:[{q:"Claim 1",type:"choice",opts:["True: 78% said they were very likely or likely to buy it","Misleading: most were our own app users, asked about an idea before anyone had tasted it","False: fewer than half of the people in the survey said yes"],ans:"Misleading: most were our own app users, asked about an idea before anyone had tasted it"},
+       {q:"Claim 2",type:"choice",opts:["False: in Leeds, Forge was at about 55% of forecast weeks before Vital Bar arrived","True: Forge's problems started in the same week that Vital Bar arrived","Misleading: Vital Bar is cheaper, but only by about 10p a bar"],ans:"False: in Leeds, Forge was at about 55% of forecast weeks before Vital Bar arrived"},
+       {q:"Claim 3",type:"choice",opts:["True: the first warnings only came after the national rollout","Misleading: concerns were raised, but only by people outside the company","False: the taste test in February and the Leeds report in May both came before it"],ans:"False: the taste test in February and the Leeds report in May both came before it"}],
+   hint:"Claim 1: ask Research who answered the survey and what it asked. Claim 2: Retail has the Leeds figures and dates; compare them with the date Vital Bar arrived. Claim 3: Research and Retail both sent warnings to the steering group; ask them when.",
+   out:{ok:"Celia showed Moira the problems before the meeting, and Rupert has rewritten his paper. The board will give your findings a fair hearing.",
+        fail:"Rupert's paper went to the board unchallenged. Convinced the market was to blame, the board has capped spending on any change to the launch process at £100,000 a year."}}
+};
+const CODES={1:{first:"3518",help:"3546",fail:"3592"},2:{first:"5724",help:"5763",fail:"5781"},3:{first:"7139",help:"7175",fail:"7198"}};
+const TIER_LABEL={first:"Solved first time",help:"Solved with help",fail:"Not solved"};
+const pzDone=(r,n)=>!!S.pz[n].tier&&!!S.gate[r][n];
+const allPz=r=>[1,2,3].every(n=>pzDone(r,n));
+const ok=n=>S.pz[n].tier&&S.pz[n].tier!=="fail";
+const failed=n=>S.pz[n].tier==="fail";
+const MISSTEP={r2:110000,r3:45000,r4:150000,r5:8000};
+const priceCutAlready=()=>S.ranked&&S.rank[0]==="r2";
+function totalCost(){let t=0;
+ if(S.fork) t+=S.fork==="price"?30000:50000;
+ if(S.ranked) t+=MISSTEP[S.rank[0]]||0;
+ if(failed(2)) t+=80000;
+ if(S.ev==="pushback") t+=15000;
+ if(S.d1==="A") t+=60000; else if(S.d1==="B"&&!priceCutAlready()) t+=110000;
+ if(S.d3) t+=D3COST(S.d3)+(S.d3==="B"&&D3COST("B")>CAP()?20000:0);
+ return t;}
+function salesNow(){let s=40; const a=S.d1==="A";
+ s+=a?20:2;
+ if(S.fork==="sample") s+=a?4:-2;
+ if(S.fork==="price") s+=a?-3:0;
+ if(S.ranked){if(S.rank[0]==="r1")s+=6; if(S.rank[0]==="r4")s+=2;}
+ if(failed(2)) s-=8;
+ return s;}
+const D1COST={A:"The board paid about £60,000 to test Forge again and change the recipe.",B:"Matching Vital Bar's price costs about £110,000 a quarter in margin."};
+
+/* evidence pinned to the briefing */
+function evScore(){const N=S.notes[R()], pins=N.pins.map(k=>N.hl[k]).filter(Boolean);
+ const strong=pins.filter(h=>h.q==="high").length, weak=pins.filter(h=>h.q==="low").length;
+ return weak?"pushback":strong>=2?"backed":"unsure";}
+const EV_REPLY={backed:"<p>The evidence you pinned was solid: figures and documents, not opinions. I showed it to the board, and they accepted it.</p>",
+ unsure:"<p>Your evidence was thin. The board took your explanation on trust, but they'll want more next time.</p>",
+ pushback:"<p>The board wasn't convinced by your evidence. They've asked for an outside second opinion before they'll accept any finding from the panel: another week, and about £15,000.</p>"};
+const EV_STANDING={backed:"The board accepted the evidence behind your briefing.",unsure:"The board took your briefing on trust.",pushback:"The board has asked for an outside second opinion before it accepts any finding (about £15,000, and a week)."};
+
+/* ---------- notes: highlights, colour code, free notes ---------- */
+const HL=[["yellow","#FFF176"],["green","#B9F6CA"],["pink","#F8BBD0"],["blue","#B3E5FC"],["orange","#FFE0B2"],["purple","#E1BEE7"]];
+const HLC=Object.fromEntries(HL);
+const HL_HINT=["Key fact","Evidence","Doubt","Number","Ask the team","Use in writing"];
+function hsh(t){let h=5381;for(const c of t)h=((h<<5)+h+c.charCodeAt(0))>>>0;return h.toString(36);}
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function wrapSentences(root){
+ root.querySelectorAll("[data-src]").forEach(box=>{
+  const src=box.dataset.src, q=box.dataset.q||"medium";
+  box.querySelectorAll("p").forEach(p=>{
+   if(p.dataset.w||p.closest(".audio")||p.classList.contains("sig")||p.querySelector("button,input,svg"))return;
+   const t=p.textContent.replace(/\s+/g," ").trim(); if(!t)return;
+   const parts=t.match(/(?:[^.!?]|\.(?=\d))+(?:[.!?]+["”’)]*|$)/g)||[t];
+   const N=S.notes[R()];
+   p.innerHTML=parts.map(x=>{x=x.trim(); const k=hsh(src+"|"+x), h=N.hl[k];
+     return `<span class="sn" data-k="${k}" data-src="${esc(src)}" data-q="${q}"${h?` style="background:${HLC[h.c]}"`:""}>${esc(x)}</span>`;}).join(" ");
+   p.dataset.w="1";});
+ });
+}
+let palFor=null;
+function openPal(el){palFor=el;const pal=document.getElementById("hlpal");const r=el.getBoundingClientRect();
+ pal.hidden=false; pal.style.top=(window.scrollY+r.bottom+6)+"px"; pal.style.left=Math.max(8,Math.min(window.scrollX+r.left,window.scrollX+document.documentElement.clientWidth-pal.offsetWidth-8))+"px";}
+function closePal(){document.getElementById("hlpal").hidden=true;palFor=null;}
+function notesHTML(){
+ const N=S.notes[R()], items=Object.entries(N.hl);
+ const cc=`<details class="cc"><summary>${HL.map(([,c])=>`<i style="background:${c}"></i>`).join("")}<span>My colour code</span></summary><div class="ccgrid">${HL.map(([k,c],i)=>`<label><i style="background:${c}"></i><input data-cc="${k}" maxlength="24" value="${esc(N.cc[k]||"")}" placeholder="${HL_HINT[i]}" aria-label="${k} means"></label>`).join("")}</div></details>`;
+ const add=`<div class="nbadd"><textarea id="nbnew" maxlength="400" placeholder="A note of your own…" aria-label="A note of your own"></textarea><button class="btn small" data-act="noteadd">Add note</button></div>`;
+ const free=N.free.map((t,i)=>`<div class="nbcard mine"><p>${esc(t)}</p><div class="src">Your note <button class="lnk" data-act="noterm" data-v="${i}">Delete</button></div></div>`).join("");
+ const groups=HL.map(([k,c])=>{const g=items.filter(([,h])=>h.c===k); if(!g.length)return "";
+   return `<div class="nbgroup"><i style="background:${c}"></i>${esc(N.cc[k]||k[0].toUpperCase()+k.slice(1))}</div>`+g.map(([key,h])=>`<div class="nbcard" style="border-left-color:${c}"><p>${esc(h.t)}</p><div class="src">${esc(h.src)} <button class="lnk" data-act="hlrm" data-v="${key}">Remove</button></div></div>`).join("");}).join("");
+ return `<div class="nbhead"><h2>Your highlights and notes</h2><button class="lnk" data-act="nbclose" aria-label="Close notes">Close ✕</button></div>${cc}${add}${free}${items.length?groups:`<p class="muted small">Tap any sentence in the Context, your emails or a report to highlight it. Your highlights collect here.</p>`}`;
+}
+
+/* ---------- state ---------- */
+const fresh=()=>({role:null,tab:"context",unlock:false,fork:null,expert:null,picks:{rupert:null,deja:null},d1:null,d2:null,d3:null,decided:false,text:"",handed:false,rank:[...RANK_START],ranked:false,mailOpen:{},mailRead:{},notes:{A:{hl:{},cc:{},free:[],pins:[]},B:{hl:{},cc:{},free:[],pins:[]},C:{hl:{},cc:{},free:[],pins:[]}},nbOpen:false,pz:{1:{tier:null,tries:[0,0,0],ok:[0,0,0],hint:false,sel:{}},2:{tier:null,tries:[0,0,0],ok:[0,0,0],hint:false,sel:{}},3:{tier:null,tries:[0,0,0],ok:[0,0,0],hint:false,sel:{}}},gate:{A:{},B:{},C:{}},gateMsg:"",ev:null});
+let S=fresh();
+const STORE_KEY="simlearn-pro-forgepro";
+try{const x=JSON.parse(sessionStorage.getItem(STORE_KEY)||"null"); if(x&&typeof x==="object"&&!Array.isArray(x)) S=Object.assign(fresh(),x);}catch(e){}
+function save(){try{sessionStorage.setItem(STORE_KEY,JSON.stringify(S));}catch(e){}}
+const TABS=[["context","Context"],["inbox","Inbox"],["puzzles","Team puzzles"],["investigate","Investigate"],["decide","Decide"]];
+const ready=()=>S.unlock||(S.role&&S.fork);
+const tabOpen=t=>t==="context"||(ready()&&(["inbox","puzzles"].includes(t)||S.unlock||allPz(R())));
+
+function render(){
+  save();
+  document.getElementById("who").textContent=S.role?`You are the ${ROLES[S.role].name}${S.fork?` · Path: ${S.fork==="price"?"price promotion":"free tastings"}`:""}`:"Read the context, then choose your role.";
+  document.getElementById("tabs").innerHTML=TABS.map(([k,l])=>`<button data-act="tab" data-v="${k}" aria-current="${S.tab===k}" ${tabOpen(k)?"":"disabled"}>${l}${k==="inbox"&&tabOpen(k)&&inboxList().some(m=>!S.mailRead[m.from+"|"+m.subj])?`<span class="tdot" aria-label="unread emails"></span>`:""}</button>`).join("");
+  document.getElementById("main").innerHTML=V[S.tab]();
+  wrapSentences(document.getElementById("main"));
+  const nb=document.getElementById("nb"); nb.hidden=!S.nbOpen; if(S.nbOpen) nb.innerHTML=notesHTML();
+  const fab=document.getElementById("fab"); fab.hidden=!S.role; fab.textContent=`Notes (${Object.keys(S.notes[R()].hl).length+S.notes[R()].free.length})`;
+  if(S.tab==="investigate"&&!S.ranked) bindDrag("rank");
+  if(S.tab==="decide"){const ta=document.getElementById("cf"); if(ta){ta.value=S.text; wc();}}
+}
+const task=t=>`<div class="task"><b>Your task</b><span>${t}</span></div>`;
+const R=()=>S.role||"A";
+
+const V={
+ context(){
+  const r=S.role;
+  return task("Read from top to bottom. Choose your role, then make your first decision: agree as a team, then everyone enters the same choice.")
+  +`<section class="card" data-src="Context" data-q="medium"><span class="step">1 · Where you work</span><h2>Harrow & Vane, York</h2>
+    <div class="pic">Scenario picture to come: a Forge protein bar in its black wrapper on a supermarket shelf, next to a cheaper rival bar</div>
+    <p>In 1985, two friends from York, Alan Harrow and Jean Vane, started baking oat bars in a rented kitchen. Forty years on, Harrow & Vane bakes oat and fruit bars in York and in Livingston, near Edinburgh, for every big UK supermarket chain.</p>
+    <p>In this business, the fight is for shelf space. Supermarkets charge a listing fee to stock a new bar and remove it if it doesn't sell. So nobody launches without research: usually a concept test, where people see a picture and say how likely they'd be to buy, then a product test, where they eat the bar, ideally blind, without the wrapper. Lydia Carden likes to say that a survey tells you what people say and the till tells you what they do, and that the people you ask should look like the shoppers you want.</p>
+    <p>After a launch, everyone watches two numbers: trial, how many shoppers buy a bar once, and repeat, how many come back for a second. Advertising can buy trial; only the bar itself wins repeat. As Jean Vane puts it, “Anyone can sell a bar once.”</p>
+</section>`
+  +`<section class="card" data-src="Context" data-q="medium"><span class="step">2 · Who you are</span><h2>The review panel</h2>
+    <p>The board has asked three managers to form a review panel. Each of you sees different information. Choose your role.</p>
+    <div class="roles">${Object.entries(ROLES).map(([k,v])=>`<button class="role" data-act="role" data-v="${k}" aria-pressed="${r===k}" ${S.fork&&S.role?"disabled":""}><b>${v.name}</b><span>${v.line}</span></button>`).join("")}</div>${S.fork&&S.role?`<p class="muted small">Your role is fixed now that your team has made its first decision.</p>`:""}
+    ${r?`<p><strong>You are the ${ROLES[r].name}.</strong> ${ROLES[r].detail}</p>`:""}
+    <h3 style="margin-top:6px">Other people you'll hear from</h3>
+    <div class="people"><div class="person"><b>Moira Kinnaird</b><span class="muted small">Chief Executive, your boss. Used to run the Livingston bakery.</span></div><div class="person"><b>Rupert Bell</b><span class="muted small">Director of Marketing Strategy. Chairs the Launch Steering Group.</span></div><div class="person"><b>Lydia Carden</b><span class="muted small">Senior Research Analyst. Ran the pre-launch research.</span></div><div class="person"><b>Deja Boakye</b><span class="muted small">Regional Account Manager. Ran the Leeds pilot.</span></div><div class="person"><b>Grant Sillitoe</b><span class="muted small">Buyer at Northfield Retail Group, Forge's biggest supermarket customer.</span></div></div></section>`
+  +`<section class="card" data-src="Context" data-q="medium"><span class="step">3 · The situation</span><h2>Forge</h2>
+    <p>High-protein bars are the fastest-growing part of the snack aisle, and Harrow & Vane had nothing in it. So last winter the board set a deadline: a protein bar on national shelves before the financial year ended. The result was Forge, with 20 grams of protein, a bold black wrapper and the snacking division's biggest launch budget of the year. After a pilot around Leeds, Forge went into 2,400 stores on 18 May.</p>
+    <p>After a full quarter, Forge is selling at about 40% of forecast. The board wants you to diagnose the cause: not to fix it yet, and not to find someone to blame.</p>
+    <p>The company has misread early signs before, in both directions. Two years ago it pulled its Oat Crisp bar after one slow fortnight in a test region, and a rival took the category. Eighteen months ago, one manager's first-week figures on a new Berry Crunch bar led to a pause, a fixed seal and a relaunch with no lasting damage.</p>
+    <div class="facts"><div class="fact"><div class="l">National launch</div><div class="v">18 May</div></div><div class="fact"><div class="l">Stores</div><div class="v">2,400</div></div><div class="fact"><div class="l">Protein per bar</div><div class="v">20 g</div></div><div class="fact"><div class="l">Sales vs forecast</div><div class="v">About 40%</div></div></div></section>`
+  +`<section class="card" data-src="Context" data-q="medium"><span class="step">4 · It starts</span><h2>A voicemail from Moira</h2>
+    ${audio("Voicemail from Moira Kinnaird","female, Scottish (Fife) accent, brisk but warm",`<p class="sd">[Phone line. A car indicator ticking.]</p><p>It's Moira. I've just come out of the board meeting. Forge is at forty per cent of forecast after a full quarter, and everyone in that room had a different theory. Rupert says the market moved under us: Vital Bar came in cheaper and took our customers. Maybe he's right.</p><p>But remember Oat Crisp. We panicked over two slow weeks and handed a rival the whole category. And remember Berry Crunch, where one manager's first-week numbers saved us. So I don't want a panic, and I don't want a scapegoat. I want to know what actually went wrong: who we asked, what we tested, what we knew, and when.</p><p>And there's one thing that can't wait. Grant at Northfield needs an answer from us by Friday.</p>`,"forgepro_voicemail")}</section>`
+  +`<section class="card" data-src="Context" data-q="medium"><span class="step">5 · Your first decision</span><h2>Cut the price, or let shoppers taste it?</h2>
+    <p>Forge faces Northfield's range review on 14 September, where slow sellers get delisted. Grant has offered two ways to support Forge in Northfield's stores until then, and needs an answer by Friday. Rupert wants the price promotion: “Close the gap with Vital Bar.” Deja wants the tastings: “Let shoppers try it before they pay.” You haven't seen the evidence yet. Agree as a team, then everyone enters the same choice.</p>
+    <div class="choices">${[["price","A","Match Vital Bar's price (£1.59) at Northfield until the range review","About £30,000 in lost margin: one chain, for three weeks. Sales should rise, but shoppers may get used to the lower price."],["sample","B","Run free tastings in 200 Northfield stores for two weeks","About £50,000. Shoppers taste Forge before they buy, but nobody knows how they'll react."]].map(([v,k,t,c])=>`<button class="choice" data-act="fork" data-v="${v}" aria-pressed="${S.fork===v}" ${S.fork?"disabled":""}><span class="k">OPTION ${k}</span><b>${t}</b><small>${c}</small></button>`).join("")}</div>
+    ${S.fork?(S.role?`<p class="done">Decision made. Some of the evidence you see depends on this choice. Go to your inbox.</p><button class="btn" data-act="tab" data-v="inbox">Open your inbox</button>`:`<p class="done">Decision made. Now choose your role above.</p>`):""}</section>`;
+ },
+ inbox(){
+  const list=inboxList();
+  return task("Read your emails and tell your team what you've found, in your own words. Your teammates have different emails. Not every source is equally reliable.")
+  +`<div style="display:flex;flex-direction:column;gap:10px">${list.map(m=>mail(m)).join("")}</div>`;
+ },
+ puzzles(){
+  const r=R(); let h=task("Each of you has one puzzle, and nobody can solve theirs alone. When a puzzle appears on someone's screen, everyone gathers round that screen until it's solved. Each result changes what happens next.");
+  const done=[1,2,3].filter(n=>pzDone(r,n));
+  if(done.length) h+=`<section class="card"><h2>Results so far</h2>${done.map(n=>`<p><b>${PZ[n].title}</b> (${ROLES[PZ[n].owner].name}): ${TIER_LABEL[S.pz[n].tier]}. ${ok(n)?PZ[n].out.ok:PZ[n].out.fail}</p>`).join("")}</section>`;
+  const n=[1,2,3].find(x=>!pzDone(r,x));
+  if(!n) return h+`<p class="done">All three puzzles are done.</p><button class="btn" data-act="tab" data-v="investigate">Go to Investigate</button>`;
+  const P=PZ[n];
+  if(P.owner!==r) return h+`<section class="card gate"><span class="step">Puzzle ${n} of 3</span><h2>${ROLES[P.owner].name} needs your help</h2>
+     <p>Go and look at their screen. They have a puzzle called <b>${P.title}</b>, and they need facts from your emails to solve it. When it's done, their screen shows a four-digit code. Type it here to carry on.</p>
+     <div class="coderow"><input id="gatecode" inputmode="numeric" maxlength="4" placeholder="0000" aria-label="Code from ${ROLES[P.owner].name}"><button class="btn" data-act="gate" data-v="${n}">Carry on</button></div>${S.gateMsg?`<p class="msg">${S.gateMsg}</p>`:""}</section>`;
+  const Z=S.pz[n];
+  if(Z.tier) return h+`<section class="card"><span class="step">Puzzle ${n} of 3 · ${P.title}</span><h2>${TIER_LABEL[Z.tier]}</h2><p>${ok(n)?P.out.ok:P.out.fail}</p>
+     <p>Show this code to your teammates. They need it to carry on.</p><div class="bigcode">${CODES[n][Z.tier]}</div>
+     <button class="btn" data-act="pznext" data-v="${n}">I've shared the code</button></section>`;
+  return h+`<section class="card"><span class="step">Puzzle ${n} of 3 · your puzzle</span><h2>${P.title}</h2><p>${P.intro}</p>
+    <p class="note-strong"><strong>Call your teammates over.</strong> You can't solve this from your own emails alone.</p>${P.screen}
+    ${P.qs.map((q,i)=>{const done=Z.ok[i], left=2-Z.tries[i];
+      return `<div class="pzq ${done?"okq":""}"><h3>${i+1}. ${q.q}</h3>${done?(Z.qfail&&Z.qfail[i]?`<p class="msg">Not solved. The answer: ${q.type==="sort"?q.items.map(([x,c])=>esc(x)+" → "+c).join(" · "):q.ans}</p>`:`<p class="done">${q.type==="sort"?"All shoppers sorted":q.ans} ✓</p>`):
+       (q.type==="sort"?`<div class="sortq">${q.items.map(([t],j)=>`<div class="sortrow"><p>${t}</p><select data-sort="${n}_${i}_${j}" aria-label="Shopper ${j+1}"><option value="">Choose…</option>${q.cats.map(c=>`<option${(Z.sort&&Z.sort[i]&&Z.sort[i][j])===c?" selected":""}>${c}</option>`).join("")}</select></div>`).join("")}</div>${Z.sortMsg&&Z.sortMsg[i]?`<p class="msg">${Z.sortMsg[i]}</p>`:""}`:
+        `<div class="opts2">${q.opts.map(o=>`<button class="opt" data-act="pzsel" data-n="${n}" data-i="${i}" data-v="${esc(o)}" aria-pressed="${Z.sel[i]===o}">${o}</button>`).join("")}</div>`)+
+       `<div class="coderow"><button class="btn" data-act="pzcheck" data-n="${n}" data-i="${i}">Check</button>${Z.tries[i]?`<span class="msg">Not yet. ${left} ${left===1?"try":"tries"} left.</span>`:""}</div>`}</div>`;}).join("")}
+    ${Z.hint?`<p class="hint">${P.hint}</p>`:`<button class="lnk" data-act="pzhint" data-v="${n}">Show a hint (counts as help)</button>`}</section>`;
+ },
+ investigate(){
+  const sl=SHORTLIST[R()], e=S.expert;
+  return task("Hire one outside expert (agree as a team so you don't all hire the same one), question the two witnesses, then agree your interim briefing as a team. Everyone enters the same ranking on their own screen and pins their own best evidence.")
+  +`<section class="card"><h2>Hire an expert</h2><p>Moira has set aside money for outside help, enough for each of you to bring in one expert. Experts are expensive and they only answer the question you hire them for, so think about what your team most needs to know. Each role has a different shortlist, and some experts appear on more than one list.</p>
+    <div class="choices">${sl.map(k=>`<button class="choice" data-act="expert" data-v="${k}" aria-pressed="${e===k}" ${e?"disabled":""}><b>${EXPERTS[k].name}</b><small><em>${EXPERTS[k].who}</em><br>${EXPERTS[k].what}</small></button>`).join("")}</div>
+    ${e?`<div class="attach" data-src="${EXPERTS[e].who.split(",")[0]}" data-q="${e==="social"?"medium":"high"}"><div class="an">📎 Report from ${EXPERTS[e].who}</div>${EXPERTS[e].rep}</div>`:""}</section>`
+  +`<section class="card"><h2>The witnesses</h2><p>Rupert and Deja describe the same months differently. <strong>One of them is leaving things out.</strong> Listen for what's missing, then choose your one question for each.</p>
+    <div class="two">${Object.entries(WIT).map(([k,w])=>{const p=S.picks[k];
+      return `<div style="display:flex;flex-direction:column;gap:10px"><h3>${w.name} <span class="muted small">· ${w.role}</span></h3>
+       ${audio(`${w.name}'s account`,w.voice,w.account,"forgepro_"+k)}
+       <div class="qs">${w.qs.map((q,i)=>`<button class="q" data-act="ask" data-w="${k}" data-v="${i}" aria-pressed="${p===i}" ${p!==null?"disabled":""}>${q[0]}</button>`).join("")}</div>
+       ${p!==null?audio(`${w.name} answers`,w.voice,`<p>${w.qs[p][1]}</p>`,"forgepro_"+k+"_"+(p+1)):""}</div>`;}).join("")}</div></section>`
+  +`<section class="card"><h2>Interim briefing for Moira</h2>
+    <p>Moira meets the board again on Thursday and needs your best explanation now, before your final findings. Below is the list Rupert drew up for her, in his order. Put the explanations in order, from most to least likely.</p>
+    <p class="note-strong"><strong>Moira will act on whatever you put first, straight away.</strong></p>
+    <ol class="tl" id="rk">${S.rank.map((id,i)=>{const t=RANK.find(x=>x[0]===id);
+      return `<li class="tc" data-id="${id}" draggable="${!S.ranked}"><span class="n">${i+1}</span><span>${t[1]}</span><span class="arr">${S.ranked?"":`<button data-act="mv" data-l="rank" data-v="${i}" data-d="-1" aria-label="Move up" ${i?"":"disabled"}>↑</button><button data-act="mv" data-l="rank" data-v="${i}" data-d="1" aria-label="Move down" ${i<RANK.length-1?"":"disabled"}>↓</button>`}</span></li>`;}).join("")}</ol>
+    ${S.ranked?`<p class="done">Sent to Moira. Her reply is below, and there's a new email in your inbox.</p>${mail(reply())}`:pinsHTML()+`<button class="btn" data-act="sendrank">Send to Moira</button>`}</section>`;
+ },
+ decide(){
+  const dis=S.decided?"disabled":"";
+  let h=task("Agree two findings and one recommendation as a team, then everyone enters the same choices on their own screen. Write a short root cause report for the board. After you hand in, you'll hear what happened next.");
+  h+=`<section class="card"><h2>Where things stand</h2><p>${S.fork==="price"?"Forge has been on promotion at £1.59 in Northfield's stores for three weeks, at a cost of about £30,000 in margin.":"Free tastings have been running in 200 Northfield stores, at a cost of about £50,000."} ${S.ranked?STANDING[S.rank[0]]():"Moira is still waiting for your interim briefing."} ${S.ev?EV_STANDING[S.ev]:""}</p>${[1,2,3].filter(n=>S.pz[n].tier).map(n=>`<p><b>${PZ[n].title}:</b> ${ok(n)?PZ[n].out.ok:PZ[n].out.fail}</p>`).join("")}</section>`;
+  h+=["d1","d2","d3"].map(k=>{const D=DEC[k];return `<section class="card"><h2>${D[0]}</h2><div class="choices">${[1,2].map(i=>{const v=i===1?"A":"B";
+    let desc=D[i][1], off=false;
+    if(k==="d3"){const c=D3COST(v); desc=desc.replace(/About £[\d,]+/,"About "+fmt(c)); if(v==="B"&&ok(1))desc+=" Lydia's re-test gives the team a ready-made method."; if(c>CAP())desc+=" Over the board's £100,000 cap on process changes: Moira would have to take it back to the board, which means about a month and £20,000 for an outside review to make the case.";}
+    return `<button class="choice" data-act="dec" data-q="${k}" data-v="${v}" aria-pressed="${S[k]===v}" ${dis||(off?"disabled":"")}><span class="k">OPTION ${v}</span><b>${D[i][0]}</b><small>${desc}</small></button>`;}).join("")}</div></section>`;}).join("");
+  if(!S.decided) return h+`<button class="btn" data-act="lock" ${S.d1&&S.d2&&S.d3?"":"disabled"}>Confirm our findings</button>`;
+  if(!S.handed)h+=`<p><button class="btn small" data-act="undec">Change our decisions</button> <span class="muted small">Until you hand in, your team can still change its decisions.</span></p>`;
+  h+=`<section class="card"><h2>Root cause report</h2><p>Write 120–180 words for the board: the main cause and what made it worse, the evidence that convinced you (name the person or document, and use the numbers), why the rival explanation is weaker, and what Harrow & Vane should change.</p>
+   <p class="muted small">Useful language: <em>The main cause was…</em> · <em>This was made worse by…</em> · <em>At the time, the data showed…</em> · <em>Although Rupert argued that…, the dates show…</em> · <em>Future launches should…</em></p>
+   <textarea id="cf" aria-label="Root cause report"></textarea>
+   <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><span class="wc" id="wc">0 words</span></div>${handinHTML()}</section>`;
+  if(!S.handed) return h;
+  const fk=S.fork||"sample", d1=S.d1==="A"?EPI_D1.A[fk].replace("BOARD",failed(3)?"Rupert's paper had blamed the market, but the panel's report changed the board's mind: it":"The board"):EPI_D1.B[fk](priceCutAlready()?"kept Forge's price low, even after Vital Bar went down to £1.49":"cut Forge's price for good to match Vital Bar");
+  const forced=S.d3==="B"&&D3COST("B")>CAP();
+  h+=`<section class="card"><h2>Three months later</h2>${audio("News report: Shelf Life","newsreader, light music bed under",`<p class="sd">[News jingle, music bed under]</p><p>${d1}${S.d1==="B"&&priceCutAlready()?"":" "+D1COST[S.d1]}</p><p>${EPI_D2[S.d2]}</p><p>${EPI_D3[S.d3]}${forced?" Going over the board's £100,000 cap took a second board meeting, a month and a £20,000 outside review, but the checks were approved.":""}</p>${S.ranked&&EPI_RANK[S.rank[0]]?`<p>${EPI_RANK[S.rank[0]]}</p>`:""}<p>${ok(2)?"At Northfield's range review, Forge kept its place on the shelf.":"At Northfield's range review, Forge lost its place in 300 smaller stores."}${S.ev==="pushback"?" The board's outside second opinion cost another week.":S.ev==="backed"?" The board later praised the review panel's evidence.":""}</p><p>Since the review began, Forge has cost Harrow & Vane about ${fmt(totalCost())} in extra spending and lost sales. It now sells at about ${salesNow()}% of its original forecast.</p>`)}
+   <div class="board"><div class="tile"><div class="l">Extra cost since the review began</div><div class="v" id="total">${fmt(totalCost())}</div></div><div class="tile"><div class="l">Forge sales now</div><div class="v" id="sales">${salesNow()}% of forecast</div></div></div>
+   <p>Now find a group that made the other choice at the start, and ask them what happened to them.</p></section>`;
+  return h;
+ }
+};
+
+/* ---------- actions ---------- */
+function wc(){const ta=document.getElementById("cf");document.getElementById("wc").textContent=`${(ta.value.trim().match(/\S+/g)||[]).length} words`;}
+document.addEventListener("toggle",e=>{const d=e.target;if(!d.dataset||!d.dataset.mail)return;const k=decodeURIComponent(d.dataset.mail);
+ S.mailOpen[k]=d.open; if(d.open&&!S.mailRead[k]){S.mailRead[k]=true;d.classList.replace("unread","read");const u=d.querySelector(".udot");if(u)u.remove();}},true);
+document.addEventListener("input",e=>{if(e.target.id==="cf"){S.text=e.target.value;wc();}});
+document.addEventListener("click",e=>{
+ const sw=e.target.closest("[data-hlc]"); if(sw&&palFor){const N=S.notes[R()],k=palFor.dataset.k;
+   if(sw.dataset.hlc==="none"){delete N.hl[k];N.pins=N.pins.filter(x=>x!==k);} else N.hl[k]={c:sw.dataset.hlc,t:palFor.textContent,src:palFor.dataset.src,q:palFor.dataset.q};
+   closePal(); render(); return;}
+ const sn=e.target.closest(".sn"); if(sn){openPal(sn);return;}
+ if(!e.target.closest("#hlpal"))closePal();
+ const b=e.target.closest("[data-act]");if(!b||b.disabled)return;act(b.dataset.act,b.dataset);});
+document.addEventListener("change",e=>{const v=e.target.dataset&&e.target.dataset.sort; if(!v)return; const [n,i,j]=v.split("_"); const Z=S.pz[n]; Z.sort=Z.sort||{}; Z.sort[i]=Z.sort[i]||{}; if(e.target.value)Z.sort[i][j]=e.target.value; else delete Z.sort[i][j];});
+document.addEventListener("input",e=>{if(e.target.dataset&&e.target.dataset.cc){S.notes[R()].cc[e.target.dataset.cc]=e.target.value;}});
+function act(a,d){
+ switch(a){
+  case "role":if(!(S.fork&&S.role))S.role=d.v;break;
+  case "undec":if(!S.handed){S.decided=false;S.sub=null;S.issues=[];}break;
+  case "tab":if(tabOpen(d.v)){S.tab=d.v;window.scrollTo({top:0});}break;
+  case "fork":if(!S.fork)S.fork=d.v;break;
+  case "expert":if(!S.expert)S.expert=d.v;break;
+  case "ask":if(S.picks[d.w]===null)S.picks[d.w]=+d.v;break;
+  case "mv":{const L=S[d.l],i=+d.v,j=i+(+d.d);if(j<0||j>=L.length)return;flip(d.l,()=>{[L[i],L[j]]=[L[j],L[i]];});return;}
+  case "sendrank":S.ev=evScore();S.ranked=true;break;
+  case "pin":{const N=S.notes[R()],i=N.pins.indexOf(d.v); if(i>=0)N.pins.splice(i,1); else if(N.pins.length<3)N.pins.push(d.v); break;}
+  case "nbopen":S.nbOpen=true;break;
+  case "nbclose":S.nbOpen=false;break;
+  case "hlrm":{const N=S.notes[R()];delete N.hl[d.v];N.pins=N.pins.filter(x=>x!==d.v);break;}
+  case "noteadd":{const t=(document.getElementById("nbnew")||{}).value||""; if(t.trim())S.notes[R()].free.push(t.trim()); break;}
+  case "noterm":S.notes[R()].free.splice(+d.v,1);break;
+  case "pzsel":S.pz[d.n].sel[d.i]=d.v;break;
+  case "pzhint":S.pz[d.v].hint=true;break;
+  case "pzcheck":{const n=+d.n,i=+d.i,Z=S.pz[n],q=PZ[n].qs[i];
+    let right;
+    if(q.type==="sort"){const got=(Z.sort&&Z.sort[i])||{}; if(Object.keys(got).length<q.items.length){Z.sortMsg={...(Z.sortMsg||{}),[i]:"Sort every shopper first."};break;}
+      const n2=q.items.filter(([,c],j)=>got[j]===c).length; right=n2===q.items.length; Z.sortMsg={...(Z.sortMsg||{}),[i]:right?"":`${n2} of ${q.items.length} are right.`};}
+    else{const a=Z.sel[i]; if(!a)return; right=a===q.ans;}
+    if(right)Z.ok[i]=1; else {Z.tries[i]++; if(Z.tries[i]>=2){Z.ok[i]=1;Z.failq=true;Z.qfail=Object.assign({},Z.qfail,{[i]:1});}}
+    if(Z.ok.slice(0,PZ[n].qs.length).every(Boolean)) Z.tier=Z.failq?"fail":(Z.hint||Z.tries.some(t=>t>0))?"help":"first";
+    break;}
+  case "pznext":S.gate[R()][d.v]=S.pz[d.v].tier;S.gateMsg="";break;
+  case "gate":{const n=+d.v,c=((document.getElementById("gatecode")||{}).value||"").trim(),t=Object.keys(CODES[n]).find(k=>CODES[n][k]===c);
+    if(t&&(!S.pz[n].tier||S.pz[n].tier===t)){S.pz[n].tier=t;S.gate[R()][n]=t;S.gateMsg="";} else S.gateMsg="That code doesn't work. Check it with your teammate."; break;}
+  case "dec":S[d.q]=d.v;break;
+  case "lock":if(S.d1&&S.d2&&S.d3)S.decided=true;break;
+  case "hand":makeSub();render();{const bl=document.getElementById("block")||document.getElementById("issues");if(bl&&bl.scrollIntoView)bl.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"center"});}return;
+  case "pdf":downloadPdf();return;
+  case "copy":copyBlock();return;
+ }
+ render();
+}
+const LIST_ID={rank:"rk"};
+function flip(key,mutate){
+ const sel=`#${LIST_ID[key]} .tc`, before={};
+ document.querySelectorAll(sel).forEach(c=>before[c.dataset.id]=c.getBoundingClientRect().top);
+ mutate();render();
+ if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+ document.querySelectorAll(sel).forEach(c=>{const dy=before[c.dataset.id]-c.getBoundingClientRect().top;
+  if(dy){c.style.transition="none";c.style.transform=`translateY(${dy}px)`;requestAnimationFrame(()=>{c.style.transition="transform .22s ease";c.style.transform="";});}});
+}
+let drag=null;
+function bindDrag(key){
+ const L=S[key];
+ document.querySelectorAll(`#${LIST_ID[key]} .tc[draggable="true"]`).forEach(c=>{
+  c.addEventListener("dragstart",e=>{drag=c.dataset.id;c.classList.add("dragging");try{e.dataTransfer.setData("text/plain",drag);}catch(_){}});
+  c.addEventListener("dragend",()=>{c.classList.remove("dragging");drag=null;});
+  c.addEventListener("dragover",e=>{e.preventDefault();if(c.dataset.id!==drag)c.classList.add("over");});
+  c.addEventListener("dragleave",()=>c.classList.remove("over"));
+  c.addEventListener("drop",e=>{e.preventDefault();const to=c.dataset.id;if(!drag||to===drag||!L.includes(drag))return;
+   flip(key,()=>{const from=L.indexOf(drag);L.splice(from,1);const ti=L.indexOf(to);L.splice(from<=ti?ti+1:ti,0,drag);});});
+ });
+}
+
+/* ---------- hand-in: Lite's submission block and PDF (GUIDE 2n). Everything below up to "Pro hand-in" is copied
+   verbatim from studio/template.html by cartridges/authoring/_pro_common.py, so the check code matches blocks.py.
+   Nothing is sent anywhere: the block and the PDF are made here in the browser. ---------- */
+const LITE={"id": "forgepro", "version": 1, "title": "Harrow & Vane: The Forge Inquiry (Pro)", "writing": {"label": "root cause report", "addressee": "the Harrow & Vane board"}, "roles": {"A": {"dept": "Insights Manager", "chars": {"expert": "expert_a", "rupert": "rupert_a", "deja": "deja_a"}}, "B": {"dept": "Retail Account Manager", "chars": {"expert": "expert_b", "rupert": "rupert_b", "deja": "deja_b"}}, "C": {"dept": "Strategy & Finance Manager", "chars": {"expert": "expert_c", "rupert": "rupert_c", "deja": "deja_c"}}}, "decisions": {"d1": "D1", "d2": "D2", "d3": "D3"}};
+function fnv(str){ let h = 0x811c9dc5; for (const ch of new TextEncoder().encode(str)) { h ^= ch; h = Math.imul(h, 0x01000193) >>> 0; } return h >>> 0; }
+function checkCode(parts){
+  const A = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
+  const s = parts.join("|");
+  const four = h => { let n = h % 923521, o = ""; for (let i = 0; i < 4; i++) { o += A[n % 31]; n = Math.floor(n / 31); } return o; };
+  return four(fnv(s)) + "-" + four(fnv(s + "#"));
+}
+const norm = t => t.replace(/\s+/g, " ").trim();
+function words(t){ return (t.trim().match(/\S+/g) || []).length; }
+function taskName(W){ return W.addressee ? `${W.label} to ${W.addressee}` : W.label; }
+const PDFW = {"R":[278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584,761,556,0,222,556,333,1000,556,556,333,1000,667,333,1000,0,611,0,0,222,222,333,333,350,556,1000,333,1000,500,333,944,0,500,667,278,333,556,556,556,556,260,556,333,737,370,556,584,333,737,333,400,584,333,333,333,556,537,278,333,333,365,556,834,834,834,611,667,667,667,667,667,667,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,500,556,556,556,556,278,278,278,278,556,556,556,556,556,556,556,584,611,556,556,556,556,500,556,500],"B":[278,333,474,556,556,889,722,238,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,333,333,584,584,584,611,975,722,722,722,722,667,611,778,722,278,556,722,611,833,722,778,667,778,722,667,611,722,667,944,667,667,611,333,278,333,584,556,333,556,611,556,611,556,333,611,611,278,278,556,278,889,611,611,611,611,389,556,333,611,556,778,556,556,500,389,280,389,584,761,556,0,278,556,500,1000,556,556,333,1000,667,333,1000,0,611,0,0,278,278,500,500,350,556,1000,333,1000,556,333,944,0,500,667,278,333,556,556,556,556,280,556,333,737,370,556,584,333,737,333,400,584,333,333,333,611,556,278,333,333,365,556,834,834,834,611,722,722,722,722,722,722,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,556,556,556,556,556,278,278,278,278,611,611,611,611,611,611,611,584,611,611,611,611,611,556,611,556]};
+const PDF_WIN = {"8364":128,"8218":130,"402":131,"8222":132,"8230":133,"8224":134,"8225":135,"710":136,"8240":137,"352":138,"8249":139,"338":140,"381":142,"8216":145,"8217":146,"8220":147,"8221":148,"8226":149,"8211":150,"8212":151,"732":152,"8482":153,"353":154,"8250":155,"339":156,"382":158,"376":159};   // Unicode -> WinAnsi byte, for 0x80-0x9F
+const PDF_ALT = {"Ł":"L","ł":"l","Đ":"D","đ":"d","ı":"i","ħ":"h","‐":"-","‑":"-","−":"-","′":"'","″":"\"","\u2009":" ","\u202f":" ","→":"->","←":"<-","≈":"~","≤":"<=","≥":">="};
+function pdfByte(ch){
+  const u = ch.codePointAt(0);
+  if (u >= 32 && u <= 126) return u;
+  if (u >= 160 && u <= 255) return u;
+  if (PDF_WIN[u] !== undefined) return PDF_WIN[u];
+  if (u === 9) return 32;
+  const base = ch.normalize("NFKD").replace(/[̀-ͯ]/g, "");   // ł, ő, ş… fall back to the plain letter
+  if (base && base !== ch && base.length === 1) return pdfByte(base);
+  return 63;   // ?
+}
+// Letters the PDF font can't show: a few by hand, then compatibility forms (ﬁ -> fi, ² -> 2), else "?".
+const pdfClean = s => [...String(s).replace(/[ŁłĐđıħ‐‑−′″\u2009\u202f→←≈≤≥]/g, c => PDF_ALT[c])].map(c => {
+  if (c === "\n" || pdfByte(c) !== 63 || c === "?") return c;
+  const k = c.normalize("NFKD").replace(/[\u0300-\u036f]/g, "");
+  return k && [...k].every(x => pdfByte(x) !== 63) ? k : c;
+}).join("");
+function pdfWidth(text, font, size){
+  let w = 0; for (const ch of text) { const b = pdfByte(ch); w += PDFW[font][b - 32] || 556; } return w * size / 1000;
+}
+function pdfStr(text){   // a PDF literal string in WinAnsi, with octal escapes
+  let out = "(";
+  for (const ch of text) {
+    const b = pdfByte(ch);
+    if (b === 40 || b === 41 || b === 92) out += "\\" + String.fromCharCode(b);
+    else if (b > 126) out += "\\" + b.toString(8).padStart(3, "0");
+    else out += String.fromCharCode(b);
+  }
+  return out + ")";
+}
+function pdfWrap(text, font, size, width){
+  const lines = [];
+  text.split("\n").forEach(par => {
+    if (!par.trim()) { lines.push(""); return; }
+    let line = "";
+    par.split(/\s+/).filter(Boolean).forEach(word => {
+      const tryLine = line ? line + " " + word : word;
+      if (pdfWidth(tryLine, font, size) <= width) { line = tryLine; return; }
+      if (line) lines.push(line);
+      while (pdfWidth(word, font, size) > width) {          // a very long word: break it (one pass per line)
+        const chars = [...word]; let n = 0, w = 0;
+        while (n < chars.length) { const cw = pdfWidth(chars[n], font, size); if (n > 0 && w + cw > width) break; w += cw; n++; }
+        lines.push(chars.slice(0, n).join("")); word = chars.slice(n).join("");
+      }
+      line = word;
+    });
+    lines.push(line);
+  });
+  return lines;
+}
+function utf16Hex(text){
+  let h = "FEFF";
+  for (let i = 0; i < text.length; i++) h += text.charCodeAt(i).toString(16).padStart(4, "0").toUpperCase();
+  return "<" + h + ">";
+}
+function makePdf({title, subtitle, body, note, footer, block, fileName}){
+  [title, subtitle, body, note, footer] = [title, subtitle, body, note, footer].map(pdfClean);
+  const W = 595.28, H = 841.89, M = 64, TW = W - 2 * M;
+  const pages = []; let ops = [], y = H - M;
+  const newPage = () => { if (ops.length) pages.push(ops); ops = []; y = H - M; };
+  const text = (s, font, size, x, yy, grey) => ops.push(`BT /${font} ${size} Tf ${grey ? "0.4 0.45 0.5 rg" : "0.11 0.15 0.2 rg"} ${x.toFixed(2)} ${yy.toFixed(2)} Td ${pdfStr(s)} Tj ET`);
+  const para = (s, font, size, lead, grey) => pdfWrap(s, font, size, TW).forEach(l => {
+    if (y - lead < M + 20) newPage();
+    y -= lead; if (l) text(l, font, size, M, y, grey);
+  });
+  para(title, "B", 16, 21);
+  para(subtitle, "R", 9.5, 13, true);
+  y -= 14;
+  para(body, "R", 11, 15.5);
+  y -= 18;
+  para(note, "R", 8, 11, true);
+  newPage();
+  // objects: 1 catalog, 2 pages, 3 font R, 4 font B, 5 embedded file, 6 filespec, 7 info, then page/content pairs
+  const objs = [];
+  const enc = new TextEncoder(), blockBytes = enc.encode(block);
+  const kids = pages.map((_, i) => `${8 + i * 2} 0 R`).join(" ");
+  objs[1] = `<< /Type /Catalog /Pages 2 0 R /Names << /EmbeddedFiles << /Names [${pdfStr(fileName)} 6 0 R] >> >> /PageMode /UseNone >>`;
+  objs[2] = `<< /Type /Pages /Kids [${kids}] /Count ${pages.length} >>`;
+  objs[3] = `<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>`;
+  objs[4] = `<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>`;
+  objs[5] = {dict: `<< /Type /EmbeddedFile /Subtype /text#2Fplain /Length ${blockBytes.length} >>`, data: blockBytes};
+  objs[6] = `<< /Type /Filespec /F ${pdfStr(fileName)} /UF ${utf16Hex(fileName)} /EF << /F 5 0 R >> /Desc ${pdfStr("SimLearn answers for the teacher tool")} >>`;
+  objs[7] = `<< /Title ${utf16Hex(title)} /Creator (SimLearn) /Producer (SimLearn) /SimLearnSubmission ${utf16Hex(block)} >>`;
+  pages.forEach((p, i) => {
+    const foot = `BT /R 7.5 Tf 0.4 0.45 0.5 rg ${M} 36 Td ${pdfStr(footer + (pages.length > 1 ? ` · page ${i + 1} of ${pages.length}` : ""))} Tj ET`;
+    const content = enc.encode([...p, foot].join("\n").split("").map(c => c.charCodeAt(0) < 256 ? c : "?").join(""));
+    objs[8 + i * 2] = `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${W} ${H}] /Resources << /Font << /R 3 0 R /B 4 0 R >> >> /Contents ${9 + i * 2} 0 R >>`;
+    objs[9 + i * 2] = {dict: `<< /Length ${content.length} >>`, data: content};
+  });
+  // assemble with byte offsets (all strings here are ASCII)
+  const parts = [], offs = []; let len = 0;
+  const add = b => { parts.push(b); len += b.length; };
+  add(enc.encode("%PDF-1.7\n")); add(new Uint8Array([0x25, 0xE2, 0xE3, 0xCF, 0xD3, 0x0A]));   // marks the file as binary
+  for (let n = 1; n < objs.length; n++) {
+    offs[n] = len;
+    const o = objs[n];
+    if (typeof o === "string") add(enc.encode(`${n} 0 obj\n${o}\nendobj\n`));
+    else { add(enc.encode(`${n} 0 obj\n${o.dict}\nstream\n`)); add(o.data); add(enc.encode(`\nendstream\nendobj\n`)); }
+  }
+  const xref = len;
+  let x = `xref\n0 ${objs.length}\n0000000000 65535 f \n`;
+  for (let n = 1; n < objs.length; n++) x += String(offs[n]).padStart(10, "0") + " 00000 n \n";
+  add(enc.encode(x + `trailer\n<< /Size ${objs.length} /Root 1 0 R /Info 7 0 R >>\nstartxref\n${xref}\n%%EOF\n`));
+  return new Blob(parts, {type: "application/pdf"});
+}
+
+/* ---------- Pro hand-in ---------- */
+function proChoices(r){
+ const c=LITE.roles[r].chars, sl=SHORTLIST[r]||[], out=[];
+ out.push(`${c.expert}=${S.expert&&sl.includes(S.expert)?"o"+(sl.indexOf(S.expert)+1):"-"}`);
+ Object.keys(WIT).forEach(w=>{const p=S.picks[w]; out.push(`${c[w]}=${p===null||p===undefined?"-":"o"+(p+1)}`);});
+ return out.join(", ");
+}
+// The Pro line: the team's fork, interim briefing (Morven/Moira acts on the first), evidence verdict and puzzle tiers.
+// Not part of the check code (blocks.py reads it into sub["pro"]).
+function proLine(){
+ return `Pro: fork=${S.fork||"none"}, briefing=${S.ranked?S.rank.join(">"):"none"}, evidence=${S.ranked&&S.ev?S.ev:"none"}, puzzles=${[1,2,3].map(n=>`${n}:${S.pz[n].tier||"none"}`).join(",")}`;
+}
+function makeSub(){
+ const r=S.role, W=LITE.writing, missing=[];
+ S.sub=null;
+ if(!r||!LITE.roles[r]){S.issues=["Choose your role first (Context)."];return;}
+ const memoText=(S.text||"").trim();
+ const open=Object.entries(WIT).filter(([k])=>S.picks[k]===null||S.picks[k]===undefined).map(([,w])=>w.name);
+ if(open.length) missing.push(`You haven't chosen what to ask ${open.join(", ")} yet (Investigate).`);
+ const openDec=Object.keys(LITE.decisions).filter(k=>!S[k]);
+ if(openDec.length) missing.push(`Your group's answer is missing for ${openDec.map(k=>LITE.decisions[k]).join(", ")} (Decide).`);
+ if(words(memoText)<50) missing.push("Your text is very short — write your "+W.label+" first.");
+ S.issues=missing;
+ if(openDec.length||words(memoText)<50) return;
+ const ai=S.consent?"yes":"no";
+ const choices=proChoices(r);
+ const decisions=Object.entries(LITE.decisions).map(([k,id])=>`${id}=${S[k]}`).join(", ");
+ const parts=[LITE.id, LITE.version, r, choices, decisions, ai, ai==="yes"?norm(memoText):""];
+ const code=checkCode(parts);
+ const head=[
+  "=== SIMLEARN SUBMISSION ===",
+  ai==="yes"?"AI check: ALLOWED":"AI check: NOT ALLOWED - grade by hand",
+  `Scenario: ${LITE.id} v${LITE.version} (${LITE.title})`,
+  `Role: ${r} (${LITE.roles[r].dept})`,
+  `Info choices: ${choices}`,
+  `Group decisions: ${decisions}`,
+  proLine(),
+  `Check: ${code}`,
+ ];
+ const block=ai==="yes"?[...head,`--- ${taskName(W)} (${words(memoText)} words) ---`,memoText,"=== END ==="].join("\n")
+                       :[...head,"=== END ===","",`My ${taskName(W)} (${words(memoText)} words):`,"",memoText].join("\n");
+ S.sub={block, blockOnly: ai==="yes"?block:[...head,"=== END ==="].join("\n"), code, ai, r, n:words(memoText), memo:memoText};
+ S.handed=true;
+}
+function subHTML(){const x=S.sub; if(!x) return "";
+ return `
+    <h2>Your submission</h2>
+    <p>Hand it in the way your <b>Moodle assignment</b> asks for:</p>
+    <p><b>A file upload?</b> Download your PDF and upload it to the assignment.</p>
+    <p><button type="button" class="btn" id="pdf" data-act="pdf">Download my submission (PDF)</button> <span id="pdfmsg" class="ok" aria-live="polite"></span></p>
+    <p><b>A text box?</b> Copy everything in the box below and paste it in. ${x.ai==="yes" ? "" : "Your text sits below the SimLearn part, so your teacher can mark it by hand."}</p>
+    <textarea class="block" id="block" readonly>${esc(x.block)}</textarea>
+    <p><button type="button" class="btn" id="copy" data-act="copy">Copy to clipboard</button> <span id="copied" class="ok" aria-live="polite"></span></p>
+    <p class="muted small">If you change your text or your answers later, create your submission again before you hand it in.</p>`;}
+function handinHTML(){
+ return `<div class="consent">
+      <b>Can your teacher check your text with AI?</b>
+      <p class="small">Your teacher may use the SimLearn teacher tool, which can ask an AI system (Claude, by Anthropic) to suggest feedback on your writing. Only your text and your group's choices would be sent — not your name. Your teacher always makes the final decision about your grade. If you say no, your teacher marks your text by hand. Saying no has no effect on your grade.</p>
+      <label><input type="checkbox" id="consent" ${S.consent?"checked":""}> Yes, my teacher may check my text with AI.</label>
+    </div>
+    <div id="issues" class="issues">${(S.issues||[]).map(m=>`<p>${esc(m)}</p>`).join("")}</div>
+    <button type="button" class="btn" data-act="hand">Create my submission</button>
+    <div id="out">${subHTML()}</div>`;
+}
+function downloadPdf(){
+ const x=S.sub; if(!x) return;
+ const W=LITE.writing, rr=LITE.roles[x.r];
+ const cap=taskName(W).charAt(0).toUpperCase()+taskName(W).slice(1);
+ const today=new Date().toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"});
+ const blob=makePdf({
+  title: cap,
+  subtitle: `${LITE.title} · Role ${x.r}${rr.dept?" ("+rr.dept+")":""} · ${x.n} words · ${today}`,
+  body: x.memo,
+  note: (x.ai==="yes"
+   ? "This file also carries your SimLearn answers for your teacher's SimLearn tool: your information choices, your group's decisions and a copy of your text. You agreed that your teacher may check your text with AI."
+   : "This file also carries your SimLearn answers for your teacher's SimLearn tool: your information choices and your group's decisions, but not your text. You did not agree to an AI check, so your teacher will mark your text by hand.")
+   + ` Check code: ${x.code}.`,
+  footer: `SimLearn · ${LITE.title}`,
+  block: x.blockOnly, fileName: "simlearn-submission.txt"});
+ const a=document.createElement("a");
+ a.href=URL.createObjectURL(blob); a.download=`simlearn-${LITE.id}-role-${x.r}.pdf`;
+ document.body.appendChild(a); a.click(); a.remove();
+ setTimeout(()=>URL.revokeObjectURL(a.href),120000);
+ const m=document.getElementById("pdfmsg"); if(m) m.textContent="Look in your Downloads, then upload the file to Moodle. If nothing downloaded, open this page in Safari, Chrome or Firefox (not inside an app), or use the text box below.";
+}
+async function copyBlock(){
+ const ta=document.getElementById("block"), msg=document.getElementById("copied"); if(!ta) return;
+ const done=()=>{msg.textContent="Copied — now paste it into Moodle.";};
+ try{await navigator.clipboard.writeText(ta.value); return done();}catch(e){}
+ // older method: still works in many embedded frames where the modern one is blocked
+ ta.focus(); ta.select(); ta.setSelectionRange(0,ta.value.length);
+ let ok=false; try{ok=document.execCommand("copy");}catch(e){}
+ if(ok) return done();
+ msg.textContent="Your browser blocked copying. The text is selected — press Ctrl+C (or ⌘C) to copy it.";
+}
+
+// a recorded clip's text appears once the student has listened to the end (GUIDE 2h); media events don't bubble
+document.addEventListener("ended",e=>{const a=e.target; if(!a||a.tagName!=="AUDIO"||!a.dataset.f)return;
+ S.heard=Object.assign({},S.heard,{[a.dataset.f]:1}); const box=a.closest(".audio"), dt=box&&box.querySelector("details"); if(dt)dt.hidden=false; save();},true);
+
+document.addEventListener("change",e=>{if(e.target.id==="consent"){S.consent=e.target.checked;S.sub=null;S.issues=[];render();}});
+document.addEventListener("input",e=>{if(e.target.id!=="cf")return; if(S.sub){S.sub=null;const o=document.getElementById("out");if(o)o.innerHTML="";} save();});
+
+render();
+</script>
+</body>
+</html>
