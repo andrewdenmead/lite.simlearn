@@ -726,6 +726,7 @@ function epilogue(){
 
 /* ---------- actions ---------- */
 function wc(){const ta=document.getElementById("cf");document.getElementById("wc").textContent=`${(ta.value.trim().match(/\S+/g)||[]).length} words`;}
+document.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.id==="gatecode"){const bt=document.querySelector("[data-act=gate]");if(bt){e.preventDefault();bt.click();}}});
 document.addEventListener("toggle",e=>{const d=e.target;if(d.dataset&&d.dataset.tf){S.tOpen=Object.assign({},S.tOpen,{[d.dataset.tf]:d.open});save();return;}if(!d.dataset||!d.dataset.mail)return;const k=decodeURIComponent(d.dataset.mail);
  S.mailOpen[k]=d.open; if(d.open&&!S.mailRead[k]){S.mailRead[k]=true;d.classList.replace("unread","read");const u=d.querySelector(".udot");if(u)u.remove();}},true);
 document.addEventListener("input",e=>{if(e.target.id==="cf"){S.text=e.target.value;wc();}});
@@ -766,8 +767,8 @@ function act(a,d){
     if(Z.ok.slice(0,PZ[n].qs.length).every(Boolean)) Z.tier=Z.failq?"fail":(Z.hint||Z.tries.some(t=>t>0))?"help":"first";
     break;}
   case "pznext":S.gate[R()][d.v]=S.pz[d.v].tier;S.gateMsg="";break;
-  case "gate":{const n=+d.v,c=((document.getElementById("gatecode")||{}).value||"").trim(),t=Object.keys(CODES[n]).find(k=>CODES[n][k]===c);
-    if(t&&(!S.pz[n].tier||S.pz[n].tier===t)){S.pz[n].tier=t;S.gate[R()][n]=t;S.gateMsg="";} else S.gateMsg="That code doesn't work. Check it with your teammate."; break;}
+  case "gate":{const n=+d.v,c=((document.getElementById("gatecode")||{}).value||"").replace(/[\uFF10-\uFF19]/g,x=>String.fromCharCode(x.charCodeAt(0)-0xFEE0)).replace(/\D/g,""),t=Object.keys(CODES[n]).find(k=>CODES[n][k]===c);
+    if(t){S.pz[n].tier=t;S.gate[R()][n]=t;S.gateMsg="";} else {const m=[1,2,3].find(x=>x!==n&&Object.values(CODES[x]).includes(c));if(m&&PZ[m].owner!==R()){const tm=Object.keys(CODES[m]).find(k=>CODES[m][k]===c);S.pz[m].tier=tm;S.gate[R()][m]=tm;}S.gateMsg=m?`That's the code for puzzle ${m}${m>n?" (saved)":""}. This box needs the code for puzzle ${n} (“${PZ[n].title}”).`:"That code doesn't work. Check it with your teammate.";} break;}
   case "chk":if(S.checks[d.q]===undefined)S.checks[d.q]=+d.v;break;
   case "dec":if(!S.decided)S[d.q]=d.v;break;
   case "lock":if(canLock())S.decided=true;break;
