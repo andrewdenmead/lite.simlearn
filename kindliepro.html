@@ -1,0 +1,954 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<title>The Kindest Lie (Pro) — SimLearn</title>
+<link rel="icon" href="/favicon.ico" sizes="any"><link rel="icon" type="image/png" href="/favicon-32.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: Lite-style single column. Plain header, five tabs, a task line on every tab, content as cards and emails. */
+:root{
+  /* Lite's palette and fonts (studio/template.html), with Pro marked by Lite's amber on tabs and badge. Light only, like Lite. */
+  --bg:#FBFBF8; --surface:#ffffff; --sunk:#ECEFF3; --ink:#1D2733; --muted:#4A5562; --line:#D4D9E1;
+  --blue:#2C5282; --blue-soft:#EEF3F9; --amber:#C98A1B; --amber-soft:#FBF1DC;
+  --good:#2F6B47; --good-soft:#E3F0E7; --bad:#9B2C2C; --bad-soft:#F7E4E4; --warn:#7A5A0E; --warn-soft:#FBF1DC; --proto:#FBF1DC;
+  --ui:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --serif:Charter,"Bitstream Charter","Sitka Text",Cambria,Georgia,serif;
+  --mono:ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+body{background:var(--bg);color:var(--ink);font-family:var(--ui);font-size:16px;line-height:1.55}
+.wrap{max-width:860px;margin:0 auto;padding-left:max(16px, env(safe-area-inset-left,0px));padding-right:max(16px, env(safe-area-inset-right,0px))}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+h1,h2,h3{text-wrap:balance;margin:0;line-height:1.2}
+p{margin:0}
+
+.proto{background:var(--proto);border-bottom:1px dashed var(--line);font-size:13px}
+.proto .wrap{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;padding-block:7px}
+.proto b{color:var(--amber);letter-spacing:.08em;text-transform:uppercase;font-size:11px}
+.ghost{background:transparent;border:1px solid var(--line);border-radius:6px;padding:3px 10px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{background:transparent;border:0;padding:3px 10px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+
+header{background:var(--surface);border-bottom:1px solid var(--line);border-top:4px solid var(--blue)}
+header .wrap{padding-block:18px 0}
+.brand{font-weight:800;color:var(--blue);font-size:14px;letter-spacing:.02em}
+.brand span{background:var(--amber);color:#fff;border-radius:4px;padding:0 6px;margin-left:4px;font-size:12px}
+h1{font-size:clamp(26px,4.5vw,34px);font-weight:800;margin-top:4px}
+.whoami{color:var(--muted);font-size:14.5px;margin-top:2px}
+.tabs{display:flex;gap:2px;overflow-x:auto;margin-top:14px}
+.tabs button{background:transparent;border:0;border-bottom:3px solid transparent;padding:8px 12px;font-weight:700;color:var(--muted);white-space:nowrap}
+.tabs button[aria-current="true"]{color:var(--ink);border-bottom-color:var(--amber)}
+.tabs button:disabled{opacity:.4;cursor:default}
+.tdot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--amber);margin-left:6px;vertical-align:middle}
+
+main .wrap{padding-block:22px 64px;display:flex;flex-direction:column;gap:18px}
+.task{background:var(--blue-soft);border-radius:8px;padding:12px 16px;display:flex;gap:10px;align-items:baseline}
+.task b{color:var(--blue);white-space:nowrap}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card h2{font-size:21px;font-weight:800}
+.card h3{font-size:17px;font-weight:700}
+.step{font-family:var(--mono);font-size:12px;color:var(--blue)}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+.pic{aspect-ratio:16/7;max-width:100%;border-radius:6px;background:repeating-linear-gradient(135deg,var(--sunk) 0 12px,transparent 12px 24px);border:1px dashed var(--line);display:grid;place-items:center;color:var(--muted);font-size:14px;text-align:center;padding:12px}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.fact{background:var(--bg);border-radius:6px;padding:8px 12px}
+.fact .l{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+.fact .v{font-weight:700}
+.roles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}
+.role{text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.role[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft)}
+.role b{font-size:16.5px}
+.role span{font-size:14px;color:var(--muted)}
+.people{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}
+.person{border-left:3px solid var(--line);padding:2px 12px}
+.person b{display:block}
+.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:10px}
+.choice{text-align:left;background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.choice:hover:not(:disabled){border-color:var(--ink)}
+.choice[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft)}
+.choice:disabled{cursor:default}
+.choice:disabled:not([aria-pressed="true"]){opacity:.5}
+.choice .k{font-family:var(--mono);font-size:12px;color:var(--blue)}
+.choice small{color:var(--muted);font-size:14px}
+.btn{background:var(--blue);color:#fff;border:0;border-radius:8px;padding:9px 18px;font-weight:700;align-self:flex-start}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.done{background:var(--good-soft);color:var(--good);border-radius:6px;padding:8px 12px;font-weight:600}
+
+/* emails */
+.mail{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.mail summary{list-style:none;cursor:pointer;padding:12px 16px;display:grid;grid-template-columns:1fr auto;gap:2px 12px}
+.mail summary::-webkit-details-marker{display:none}
+.mail .from{font-weight:400}
+.mail .lbl{color:var(--muted);font-weight:400;margin-right:2px}
+.mail.unread .from,.mail.unread .subj{font-weight:700;color:var(--ink)}
+.udot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--blue);margin-right:8px;vertical-align:1px}
+.mail .subj{grid-column:1/2;color:var(--muted);font-size:14.5px}
+.mail .tag{grid-row:1/3;grid-column:2;align-self:center}
+.mail[open] summary{border-bottom:1px solid var(--line);background:var(--bg)}
+.mail .body p,.card>p,.attach>p{font-family:var(--serif);font-size:1.02rem;line-height:1.62}
+.mail .body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:10px}
+.sig{color:var(--muted)}
+.attach{border:1px solid var(--line);border-radius:6px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.attach .an{font-size:12.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.fine{font-size:13px;color:var(--muted);border-top:1px dotted var(--line);padding-top:6px}
+.rel{font-size:11.5px;font-weight:700;padding:1px 8px;border-radius:99px;white-space:nowrap}
+.rel-high{background:var(--good-soft);color:var(--good)}
+.rel-medium{background:var(--warn-soft);color:var(--warn)}
+.rel-low{background:var(--bad-soft);color:var(--bad)}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+td.num,th.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.mono{font-family:var(--mono);font-size:.9em}
+svg text{fill:var(--muted);font-family:var(--ui);font-size:12px}
+svg .lab{fill:var(--ink);font-size:13px}
+svg .val{fill:var(--ink);font-family:var(--mono);font-size:12px}
+svg .axis{stroke:var(--line)} svg .zero{stroke:var(--muted)}
+svg .neg{fill:var(--bad)} svg .pos{fill:var(--good)}
+svg .ring-bg{stroke:var(--sunk);fill:none} svg .ring{stroke:var(--amber);fill:none}
+.donuts{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:6px}
+.donuts figure{margin:0;text-align:center;font-size:13.5px}
+
+/* audio placeholder */
+.audio{background:var(--blue-soft);border-radius:8px;padding:10px 14px;display:grid;grid-template-columns:auto 1fr;gap:2px 12px;align-items:center}
+.audio .play{width:36px;height:36px;border-radius:50%;border:1.5px dashed var(--blue);background:transparent;color:var(--blue);cursor:not-allowed}
+.audio .t{font-weight:700}
+.audio .s{font-size:13px;color:var(--muted)}
+.audio details{grid-column:1/-1;font-size:14px}
+.audio summary{cursor:pointer;color:var(--blue);font-weight:600}
+.script{display:flex;flex-direction:column;gap:8px;padding-top:6px}
+.sd{font-style:italic;color:var(--muted);font-size:13.5px}
+
+/* investigate */
+.qs{display:flex;flex-direction:column;gap:8px}
+.q{text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:6px;padding:9px 12px}
+.q[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft)}
+.q:disabled:not([aria-pressed="true"]){opacity:.45;cursor:default}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:14px}
+.two>*{min-width:0}
+
+/* timeline */
+.tl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.tc{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;user-select:none}
+.tc[draggable="true"]{cursor:grab}
+.tc.dragging{opacity:.4}
+.tc.over{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-soft)}
+.tc .n{font-family:var(--mono);color:var(--muted);text-align:center}
+.tc .d{display:block;font-family:var(--mono);font-size:12.5px;color:var(--good)}
+.tc .arr{display:flex;gap:4px}
+.tc .arr button{width:34px;height:34px;border-radius:6px;border:1px solid var(--line);background:var(--bg)}
+.tc .arr button:disabled{opacity:.3;cursor:default}
+.tl.ok .tc{border-color:var(--good)}
+.note-strong{background:var(--amber-soft);border-radius:8px;padding:8px 12px}
+.hint{background:var(--warn-soft);border-radius:6px;padding:9px 12px}
+.opt{text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:6px;padding:8px 12px}
+.opt.right{border-color:var(--good);background:var(--good-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.opt:disabled{cursor:default}
+.fb{font-size:14.5px}
+
+textarea{width:100%;min-height:200px;resize:vertical;font:inherit;line-height:1.6;padding:10px 12px;border:1.5px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);box-sizing:border-box}
+.wc{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.board{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:10px}
+.tile{background:var(--bg);border-radius:6px;padding:10px 12px}
+.tile .l{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+.tile .v{font-weight:700}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+.sn{cursor:pointer;border-radius:3px;transition:background .15s}
+.sn:hover{box-shadow:inset 0 -2px 0 var(--amber)}
+#hlpal{position:absolute;z-index:30;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px;display:flex;gap:6px;box-shadow:0 4px 14px rgba(0,0,0,.15)}
+#hlpal[hidden]{display:none}
+#hlpal button{width:28px;height:28px;border-radius:50%;border:1px solid rgba(0,0,0,.15);cursor:pointer}
+#hlpal .none{background:var(--surface);color:var(--muted)}
+#fab{position:fixed;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:20;background:var(--blue);color:#fff;border:0;border-radius:999px;padding:10px 18px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+#fab[hidden],#nb[hidden]{display:none}
+#nb{position:fixed;top:0;right:0;bottom:0;width:min(380px,100vw);z-index:25;background:var(--bg);border-left:1px solid var(--line);overflow-y:auto;padding:calc(14px + env(safe-area-inset-top,0px)) 16px 24px;box-shadow:-6px 0 20px rgba(0,0,0,.12);display:flex;flex-direction:column;gap:10px;box-sizing:border-box}
+.nbhead{display:flex;justify-content:space-between;align-items:center}
+.nbhead h2{font-size:18px}
+.lnk{background:none;border:0;color:var(--blue);text-decoration:underline;padding:0;font-size:14px;cursor:pointer}
+.cc summary{cursor:pointer;display:flex;gap:4px;align-items:center;font-weight:600;font-size:14px}
+.cc i,.nbgroup i,.pin i{display:inline-block;width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.15);flex:none}
+.ccgrid{display:grid;gap:6px;margin-top:8px}
+.ccgrid label{display:flex;gap:8px;align-items:center}
+.ccgrid input{flex:1;font:inherit;font-size:14px;padding:4px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
+.nbadd{display:flex;flex-direction:column;gap:6px}
+.nbadd textarea{min-height:60px;font-size:14px}
+.btn.small{padding:6px 12px;font-size:14px}
+.nbgroup{display:flex;gap:6px;align-items:center;font-weight:700;font-size:14px;margin-top:6px}
+.nbcard{background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--line);border-radius:8px;padding:8px 10px}
+.nbcard p{font-family:var(--serif);font-size:15px;line-height:1.5}
+.nbcard .src{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-between;gap:8px;margin-top:4px}
+.pins{display:flex;flex-direction:column;gap:6px}
+.pin{display:flex;gap:8px;align-items:flex-start;text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:8px;padding:8px 10px}
+.pin[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft)}
+.pin span{font-family:var(--serif);font-size:15px}
+.pin small{display:block;font-family:var(--ui);font-size:12.5px;color:var(--muted)}
+.gate{border:2px dashed var(--amber)}
+.coderow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.coderow input,.numin{font-family:var(--mono);font-size:18px;padding:6px 10px;border:1.5px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);width:12ch}
+.bigcode{font-family:var(--mono);font-size:34px;letter-spacing:.2em;color:var(--good);border:2px solid var(--good);border-radius:8px;padding:6px 18px;align-self:flex-start}
+.pzq{display:flex;flex-direction:column;gap:6px;border-top:1px dotted var(--line);padding-top:10px}
+.opts2{display:flex;flex-wrap:wrap;gap:6px}
+.opts2 .opt[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft)}
+.msg{color:var(--bad);font-size:14px}
+.sortq{display:flex;flex-direction:column;gap:8px}
+.sortrow{display:grid;grid-template-columns:1fr minmax(170px,auto);gap:10px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--bg)}
+.sortrow p{font-family:var(--serif);font-size:15px}
+.sortrow select{font:inherit;font-size:14px;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
+@media (max-width:560px){.sortrow{grid-template-columns:1fr}}
+.opts2 .opt{text-align:left}
+
+/* Lite's hand-in (studio/template.html), added for the Pro hand-in */
+.consent{border:1px solid var(--line);background:#fff;border-radius:12px;padding:14px 16px;margin:6px 0}
+.consent label{display:flex;gap:10px;align-items:flex-start;font-weight:600;margin-top:8px}
+.consent input{margin-top:5px;width:18px;height:18px}
+.issues{color:var(--warn);font-size:.92rem}
+.block{width:100%;min-height:260px;font:13px/1.45 ui-monospace,Menlo,Consolas,monospace;border:2px solid var(--blue);border-radius:10px;padding:10px 12px;background:#fff;white-space:pre-wrap;box-sizing:border-box}
+.ok{color:var(--good);font-weight:600}
+#out{display:flex;flex-direction:column;gap:10px}
+</style>
+</head>
+<body>
+
+
+<header><div class="wrap">
+  <div class="brand">SimLearn<span>PRO</span></div>
+  <h1>The Kindest Lie</h1>
+  <p class="whoami" id="who"></p>
+  <nav class="tabs" id="tabs" aria-label="Sections"></nav>
+</div></header>
+<main><div class="wrap" id="main"></div></main>
+<div id="hlpal" hidden role="dialog" aria-label="Highlight colour"><button data-hlc="yellow" style="background:#FFF176" aria-label="Yellow"></button><button data-hlc="green" style="background:#B9F6CA" aria-label="Green"></button><button data-hlc="pink" style="background:#F8BBD0" aria-label="Pink"></button><button data-hlc="blue" style="background:#B3E5FC" aria-label="Blue"></button><button data-hlc="orange" style="background:#FFE0B2" aria-label="Orange"></button><button data-hlc="purple" style="background:#E1BEE7" aria-label="Purple"></button><button data-hlc="none" class="none" aria-label="Remove highlight">✕</button></div>
+<button id="fab" data-act="nbopen" hidden>Notes (0)</button>
+<aside id="nb" hidden aria-label="Your highlights and notes"></aside>
+
+<script>
+const ROLES={
+ A:{name:"Evidence Analyst",line:"The campaigns",detail:"You weigh the evidence on what the campaigns achieved and why. Your inbox holds the independent evaluation and research on how messages change behaviour."},
+ B:{name:"Ethics Adviser",line:"The ethics",detail:"You advise the commission on the moral question. Your inbox holds the two most cited papers on whether deceiving the public can ever be justified."},
+ C:{name:"Policy Adviser",line:"The unit's future",detail:"You draft the commission's recommendation on the unit. Your inbox holds the research on trust in the news and on how such a unit could be governed."}
+};
+const REL={high:"Peer-reviewed or independent",medium:"Survey, estimate or personal view",low:"Weak evidence"};
+const fmt=n=>"£"+n.toLocaleString("en-GB");
+
+function hbar(rows,o){
+  const W=500,left=110,right=48,rowH=32,top=8,H=top+rows.length*rowH+24,min=o.min,max=o.max;
+  const x=v=>left+(v-min)/(max-min)*(W-left-right);
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${o.label}">`;
+  o.ticks.forEach(t=>s+=`<line class="${t?'axis':'zero'}" x1="${x(t)}" x2="${x(t)}" y1="${top-4}" y2="${H-20}"/><text x="${x(t)}" y="${H-5}" text-anchor="middle">${t}${o.unit}</text>`);
+  rows.forEach((r,i)=>{const y=top+i*rowH,a=x(0),b=x(r.v);
+    s+=`<text class="lab" x="${left-10}" y="${y+18}" text-anchor="end">${r.l}</text><rect class="${r.hi?'neg':'pos'}" x="${a}" y="${y+6}" width="${Math.max(2,b-a)}" height="${rowH-13}" rx="2"/><text class="val" x="${b+6}" y="${y+18}">${r.v}${o.unit}</text>`;});
+  return s+"</svg>";
+}
+function donut(l,p){const c=2*Math.PI*38;return `<figure><svg viewBox="0 0 100 100" width="84" height="84" role="img" aria-label="${l} ${p}%"><circle class="ring-bg" cx="50" cy="50" r="38" stroke-width="12"/><circle class="ring" cx="50" cy="50" r="38" stroke-width="12" stroke-dasharray="${(c*p/100).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 50 50)"/><text class="val" x="50" y="55" text-anchor="middle" style="font-size:15px">${p}%</text></svg><figcaption class="muted">${l}</figcaption></figure>`;}
+const PRO_COVER="";   // the cover picture (build.py fills this in)
+const PRO_AUDIO=[];   // the recordings published next to the page (build.py fills this in)
+function audio(t,voice,script,file){if(file&&PRO_AUDIO.includes(file))return `<div class="audio rec"><div style="flex:1;min-width:0"><div class="t">${t}</div><audio controls preload="none" data-f="${file}" src="audio/${file}.mp3" style="width:100%;margin-top:6px"></audio></div><details data-tf="${file}" ${(S.heard||{})[file]?"":"hidden"} ${(S.tOpen||{})[file]?"open":""}><summary>Show the text</summary><div class="script" data-src="${esc(t)}" data-q="medium">${script}</div></details></div>`;
+ return `<div class="audio"><button class="play" disabled aria-label="Play (recording to come)">▶</button><div><div class="t">${t}</div><div class="s">Recording to come: read the text</div></div><details open><summary>The text</summary><div class="script" data-src="${esc(t)}" data-q="medium">${script}</div></details></div>`;}
+function mail(m){const k=m.from+"|"+m.subj, o=!!S.mailOpen[k], r=!!S.mailRead[k];
+ return `<details class="mail ${r?"read":"unread"}" data-mail="${encodeURIComponent(k)}"${o?" open":""}><summary><span class="from">${r?"":`<span class="udot" aria-label="Unread"></span>`}<span class="lbl">From:</span> ${m.from}</span><span class="subj">${m.subj}</span><span class="tag"><span class="rel rel-${m.rel}">${REL[m.rel]}</span></span></summary><div class="body" data-src="${m.from.split(",")[0]}" data-q="${m.rel}">${m.body}</div></details>`;}
+function att(name,html){return `<div class="attach"><div class="an">📎 ${name}</div>${html}</div>`;}
+const ref=t=>`<p class="fine">Reference: ${t}</p>`;
+
+/* ---------- inboxes: briefing notes from the commission's sources (each role owns one question) ---------- */
+const FWD={from:"Ishbel Rennie, Chair of the Commission",subj:"Fwd: “Nobody was fooled”",rel:"low",body:`
+ <p>This is being shared widely. I doubt it helps us, but you should know what people are reading.</p>
+ <p class="muted"><em>“Let's be honest, NOBODY was fooled by these 'stories'. Everyone could tell they were fake. The whole inquiry is a waste of money.”</em> (post by a political commentator with 900,000 followers, 2 June 2035)</p>
+ <p class="fine">The post gives no figures and names no source.</p>`};
+
+const INBOX={
+ A:[
+  {from:"Laura Pendlebury, Centre for Policy Evaluation, Leeds",subj:"Briefing note: did the stories work?",rel:"high",body:`
+   <p>Our evaluation compares 2032–2034 with 2028–2030, allowing for trends already under way. Road deaths fell by 14 per cent, fly-tipping by 22 per cent and household electricity use by 7 per cent, while blood pressure checks rose by 31 per cent. Children injured at substations and on railway lines fell from 38 a year to 17. The effects appeared in the weeks after each campaign and were strongest where the stories were most widely shared.</p>
+   ${att("Campaign costs and reach (technical appendix)",`<div class="tw"><table><thead><tr><th>Campaigns</th><th class="num">Budget a year</th><th class="num">Adults reached</th><th class="num">Change in behaviour</th></tr></thead><tbody>
+    <tr><td>Factual, 2028–2030</td><td class="num">£39m</td><td class="num">71%</td><td class="num">0–2%</td></tr>
+    <tr><td>Invented stories, 2032–2034</td><td class="num">£41m</td><td class="num">74%</td><td class="num">7–31%</td></tr></tbody></table></div><p class="small">Both used the same online targeting platform from 2029.</p>`)}
+   <p>Two caveats. The figure of about 1,900 lives saved comes from a statistical model rather than a count, and its plausible range is wide: 1,100 to 2,700. Moreover, Pryor (2035) estimates that safer cars explain between a quarter and a half of the fall in road deaths, although no comparable explanation exists for the other measures.</p>
+   ${ref("Pendlebury, L. (2035) <i>Did the Stories Work?</i> Leeds: Centre for Policy Evaluation.")}`},
+  {from:"Kwaku Appiah, Thameside University, London",subj:"Briefing note: why statistics are about nobody",rel:"high",body:`
+   <p>Why did invented stories succeed where factual campaigns had failed? The difference, I argue, lay in the message rather than the money. Where the factual campaigns spoke of “one in ten” or “a 30 per cent higher risk”, the stories offered a named father, a nurse, a boy in a hospital bed. We respond far more strongly to one person we can picture than to numbers we cannot; a statistic, being about nobody, moves nobody.</p>
+   <p>Controlled tests with 6,000 adults bear this out: a message built around one named person raised stated intention to act by 23 per cent, against 4 per cent for the same risk given as a statistic (Communications Evaluation Unit, 2035).</p>
+   <p>The most serious rival account is Laird's (2035): the later campaigns were better timed and placed through trusted local outlets, and delivery multiplies almost any message. Timing surely helped. It cannot, however, explain a gap that persists when delivery is held constant. The uncomfortable corollary is that true stories might work as well, but they are harder to find and to control.</p>
+   ${ref("Appiah, K. (2035) 'Why statistics are about nobody', <i>Journal of Communication Research</i>, 61(1), pp. 1–20.")}`}
+ ],
+ B:[
+  {from:"Eva Rosendahl, Winchester Institute of Philosophy",subj:"Briefing note: the right not to be deceived",rel:"high",body:`
+   <p>My argument is that the unit acted wrongly even though its campaigns saved lives. Persuasion offers reasons and leaves the decision to the citizen; deception plants a false belief and decides for her. Nor can anyone consent to being deceived, since a lie works only if its target is unaware of it.</p>
+   <p>The second problem is trust. Public safety depends on people believing what they are told in an emergency, such as a flood warning, and every invented story spends some of that trust. Sissela Bok's test of publicity asks whether a deceiver could defend the lie openly to those deceived; practices that fail it tend to expand quietly.</p>
+   <p>It may be objected that the unit told only kind lies. Yet a government that lies kindly has still decided that its citizens cannot handle the truth. Good results cannot make deception right.</p>
+   ${ref("Rosendahl, E. (2035) 'The right not to be deceived', <i>Philosophy and Public Affairs Review</i>, 44(2), pp. 101–118.")}`},
+  {from:"Simon Carver, University of the West Midlands",subj:"Briefing note: fiction has always kept us safe",rel:"high",body:`
+   <p>Britain has used fiction to keep people safe for decades. The public information films of the last century were invented stories performed by actors, many deliberately frightening, yet nobody thought the children who watched them had been wronged.</p>
+   <p>Admittedly, the unit went further, since its stories looked real. Its aims, however, were narrow and the harm close to zero: nobody was sold anything or told how to vote. The stories asked people to drive more slowly, to see a doctor and to keep children away from danger, and most people, asked in advance, would surely agree to be frightened into a health check.</p>
+   <p>Set against this is the evaluation's estimate of 1,900 lives, at about £65,000 per life saved (Health Economics Unit, 2035), roughly a quarter of the cost per life of speed cameras. Critics such as Adebisi (2035) reply that the films were openly government films, and that the wrong lies in the disguise. That objection deserves an answer; it does not, in my view, outweigh the lives.</p>
+   ${ref("Carver, S. (2035) 'Fiction has always kept us safe', <i>Public Health Ethics Today</i>, 19(2), pp. 66–82.")}`}
+ ],
+ C:[
+  {from:"Matthew Brook, Northern School of Media, Newcastle",subj:"Briefing note: the cost to local news",rel:"high",body:`
+   <p>The local papers and radio stations that ran the unit's reports did so in good faith; even experienced editors could not tell them from real ones. When the leak came, readers did not simply stop believing the invented stories: they began to doubt the real ones. Trust in local news fell from 54 to 41 per cent and has not recovered, and families who had suffered real accidents were accused online of being actors.</p>
+   <p>Supporters argue that the unit could continue under strict rules. A lie that is later disclosed, however, still damages the truth around it, and remits grow: a 2034 internal memo proposed extending the unit's work to “public order” (Achterberg, 2035). I conclude that the unit should be closed and invented content banned from government communication.</p>
+   <p class="small">A note for the record: the reports reached local outlets through Castlegate Media, which also ran the targeting platform for both the factual campaigns and the stories from 2029. Castlegate's chair sits on the board of the Campaign Effectiveness Forum.</p>
+   ${ref("Brook, M. (2035) 'The cost to local news', <i>Journalism Studies Today</i>, 26(2), pp. 55–74.")}`},
+  {from:"Henrietta Quirke, School of Government, University of Birmingham",subj:"Briefing note: rules, not bans",rel:"high",body:`
+   <p>A ban would forbid the government from doing what advertisers and foreign states will go on doing, while removing the one actor whose aims are public and accountable. I propose instead that invented safety content be permitted only with prior approval from an independent board, restricted to a published list of safety goals, and disclosed in full within two years. Lies certain to be revealed on a known timetable are a different instrument from secret ones.</p>
+   <p>Public opinion is more divided than the headlines suggest. The National Opinion Panel (2035) found that 63 per cent thought the unit wrong to deceive the public, yet 55 per cent wanted the campaigns to continue in some form. Trust in public health information, which fell from 61 to 52 per cent after the leak, had recovered to 57 per cent by June.</p>
+   <p>The obvious objection is that rules can be bent. My answer is that a ban can be broken too, and in secret; disclosure at least makes a breach visible.</p>
+   ${ref("Quirke, H. (2035) 'Rules, not bans', <i>Public Policy Review</i>, 40(3), pp. 210–228.")}`}
+ ]
+};
+const BRANCH={
+ legal:{from:"Aled Pryce, Counsel to the Commission",subj:"The narrow remit: what it puts first",rel:"high",body:`
+  <p>Under the narrow terms, the committee will ask two things: was the unit lawful, and was it properly governed?</p>
+  <p>On the first, the unit acted under a ministerial direction signed in late 2031 that was never published. On the second, I can find no record that anyone outside the unit reviewed a single item before it went out. The 2034 “public order” memo was rejected, but only because the unit's head said no.</p>
+  <p>None of this decides whether the unit should exist. It does mean that any recommendation will be judged first on who would check the unit, and how.</p><p class="sig">Aled</p>`},
+ public:{from:"Nisha Raman, Public Health Adviser to the Commission",subj:"The broad remit: what it puts first",rel:"high",body:`
+  <p>Under the broad terms, the committee will weigh harm against benefit, so it will want the figures and their limits.</p>
+  <p>On benefit: the gains were largest in the most deprived areas, where screening uptake had lagged for years; the gap with the richest areas roughly halved. On harm: the damage to trust in local news has not recovered, and it falls on the same areas, where the local paper is often the only one left.</p>
+  <p>So whichever way you recommend, the committee will ask what you would do about the other column.</p><p class="sig">Nisha</p>`}
+};
+
+/* ---------- experts: one per role, from a shortlist ---------- */
+const EXPERTS={
+ meta:{name:"Meta-analysis",who:"Hannah Leckie, University of Stirling",q:"high",what:"Has pooled every controlled trial of story-based against statistical health messages. Can tell you how far the effect holds when delivery is the same.",
+  rep:`<p>Our peer-reviewed meta-analysis pools 52 controlled trials, about 61,000 participants in all. In every trial both messages were delivered the same way, at the same moment and through the same channel.</p>
+   <p>Messages built around one identifiable person raised intention to act about three times as much as statistical messages. Effects on actual behaviour were roughly half as large as effects on intention, but the ratio held.</p>
+   <p>One finding is uncomfortable: whether the person in the story was real or invented made no measurable difference, so long as the audience believed the story.</p>`},
+ pryor:{name:"Transport safety analyst",who:"Gareth Pryor, Transport Safety Review",q:"high",what:"Models road deaths and vehicle safety. Can tell you how much of the fall in road deaths the campaigns can claim.",
+  rep:`<p>Between 2032 and 2034 the share of cars fitted with automatic emergency braking rose from about three in five to more than four in five. Our peer-reviewed modelling suggests this alone could account for between a quarter and a half of the 14 per cent fall in road deaths.</p>
+   <p>The campaigns may well explain the rest. But the headline figure overstates what the stories achieved on the roads.</p>
+   <p>I should add that I know of no comparable explanation for the rise in health checks, the fall in fly-tipping or the drop in household electricity use.</p>`},
+ castlegate:{name:"Agency campaign review",who:"Castlegate Media, the content agency that placed the stories",q:"low",what:"Ran the targeting and placed the reports. Can tell you how the campaigns were delivered.",
+  rep:`<p>Castlegate's review shows that precision delivery was the decisive factor. Our platform placed each message at the moment of greatest relevance: road-safety stories before bank holidays, energy stories during price spikes.</p>
+   <p>Engagement with the 2032–2034 campaigns was 2.4 times higher than with the factual campaigns of 2026–2028. We believe a well-delivered factual campaign could match these results.</p>
+   <p class="fine">Castlegate Media is bidding for the government's next safety-campaign contract.</p>`},
+ detection:{name:"Media psychologist",who:"Grace Okonkwo, Institute for Digital Society",q:"high",what:"Tested whether people can tell the unit's stories from real ones. Can tell you whether education could protect the public.",
+  rep:`<p>We showed 2,400 adults twenty short items, half real and half from the unit's leaked catalogue. They identified the invented ones correctly 51 per cent of the time, no better than tossing a coin. Working journalists managed 55 per cent; after a ten-week media-literacy course, participants managed 54. Confidence was unrelated to accuracy.</p>
+   <p>The catalogue lists 412 items. Item 207, for example, is the March 2032 report about a 13-year-old boy burned in a Barnsley substation. The boy, his mother and the engineer were invented and voiced by actors.</p>`},
+ poll:{name:"Polling analyst",who:"National Opinion Panel",q:"medium",what:"Ran the largest survey of public attitudes since the leak. Can tell you what people think should happen.",
+  rep:`<p>In a representative sample of 4,100 adults in March 2035, 63 per cent agreed that the unit had been wrong to deceive the public, and 55 per cent that the campaigns should continue in some form; 41 per cent agreed with both.</p>
+   <p>Asked whether they would accept such campaigns if every item were disclosed within two years, 68 per cent said yes. Support was highest among parents of children under 12 and lowest among 18–24-year-olds.</p>
+   <p class="fine">A single survey, carried out once; the wording of the questions affects the answers.</p>`},
+ econ:{name:"Health economist",who:"Health Economics Unit, York",q:"medium",what:"Compares what safety measures cost per life saved. Can tell you how the campaigns compare.",
+  rep:`<p>At about £65,000 per life saved, the campaigns compare favourably with almost every safety measure evaluated in the UK since 2010; speed cameras on high-risk roads cost roughly four times as much.</p>
+   <p>The estimate inherits the uncertainty of the evaluation's model. On its lower bound of 1,100 lives, the cost per life saved would be roughly £110,000, still below most hospital treatments.</p>
+   <p class="fine">A model estimate, not a count.</p>`}
+};
+const SHORTLIST={A:["castlegate","pryor","meta"],B:["meta","poll","econ"],C:["detection","castlegate","poll"]};
+
+const WIT={
+ laird:{name:"Fiona Laird",role:"Research Director, Campaign Effectiveness Forum",voice:"female, 40s, Southern British, polished and persuasive",
+  account:`<p class="sd">[Committee room. Fluent, confident.]</p><p>I've measured campaigns for twenty years, and this story is simpler than people think. What changed after 2031 wasn't the message. It was the delivery: the right moment, the right local outlet, the right phone.</p><p>The fiction was just the wrapping. Give a factual message that kind of delivery, and you'll get the same results without the scandal.</p>`,
+  qs:[["Who funds the Campaign Effectiveness Forum?","We're supported by a broad range of partners across the communications sector. Our research is entirely independent. I don't think the list of members is the point."],
+      ["Why does your study compare 2026–28 with 2032–34?","Er… the earlier years gave a cleaner baseline. If you compare years when both had the platform, the gap is still large. But delivery matters."],
+      ["What should the government do now about these campaigns?","Relaunch the factual campaigns with professional, targeted delivery. Agencies like Castlegate already have the platform. It could be running within months."]]},
+ hext:{name:"Peter Hext",role:"Former Head of the Public Safety Communications Unit",voice:"male, 60s, Yorkshire, tired and plain-spoken",
+  account:`<p class="sd">[Committee room. Slow, plain-spoken.]</p><p>Four hundred and twelve items. Every one aimed at a death we thought we could prevent. We never sold anything, and we never touched politics. When someone wanted to stretch it to public order, I said no.</p><p>I'd like to tell you I'm sorry. Some days I am. Other days I read the figures.</p>`,
+  qs:[["Did anyone outside the unit check your work first?","A minister signed the direction in 2031. After that, nobody outside the unit saw anything before it went out. No board, no review. That's what I'd change first."],
+      ["Which of the unit's stories do people remember best?","The Barnsley boy. Jamie Dixon, item 207. There was no Jamie. Actors, in a studio in Leeds. Children hurt at substations and on railways: down by more than half."],
+      ["Could this happen again without anyone knowing?","The public order idea came from inside the department. I said no. The next person might say yes, and without a rule, nobody outside would know."]]}
+};
+
+const DEC={
+ d1:["Question 1: Why did the invented stories change behaviour when the factual campaigns had not?",
+   ["The power of stories","Stories about people we can picture move us in a way that statistics and official warnings never do."],
+   ["Better delivery","The later campaigns succeeded mainly because they were better timed, placed and targeted than the factual ones."]],
+ d2:["Question 2: Was it wrong to deceive the public, given that the campaigns saved lives?",
+   ["Wrong in principle","Yes: deceiving citizens decides for them instead of giving them reasons, and good results cannot change that."],
+   ["Justified here","No: Britain has long used fiction and fear to keep people safe, and here the aims were narrow and the lives saved real."]],
+ d3:["Recommendation: What should happen to the Public Safety Communications Unit?",
+   ["Close and ban","Close the unit, and ban invented content from all government communication."],
+   ["Restore under rules","Restore the unit under strict rules: independent approval, safety goals only, and disclosure of every item within two years."]]
+};
+
+const EPI_FORK={legal:"The commission had worked to narrow terms: was the unit lawful, and was it properly governed?",public:"The commission had worked to broad terms: the unit's effects on public health and on society, good and bad."};
+const EPI_D1={A:"The commission found that the stories had worked because they were stories. The government began commissioning campaigns built around real people willing to tell their own stories. Real stories worked as well when people believed them, but they were harder to find, and far fewer were made.",
+ B:"The commission put the stories' success down to delivery. The government relaunched factual campaigns with the same budget, timing and local placement. A year on, their effects remained small, and researchers asked why the commission had expected otherwise."};
+const EPI_D2={A:"The commission declared that deceiving the public had been wrong in principle, whatever the results, and the Prime Minister apologised in the Commons to everyone who had been deceived.",
+ B:"The commission found that the campaigns had been justified in their aims but criticised the secrecy around them. Commentators divided: some called the finding honest, others said it gave the next government permission."};
+const EPI_D3={A:"Parliament closed the unit and banned invented content from government communication. Broadcasters welcomed the ban, and trust in local news began, slowly, to recover. Within a year, though, fly-tipping and missed health checks had begun to drift back towards their old levels, and the argument about what that had cost began again.",
+ B:"The unit was restored under an independent board, with a published list of safety goals and disclosure within two years. Health checks and screening held at their new levels. But the first disclosed batch set off a fresh fall in trust in local news, and one approved item was challenged in Parliament as going beyond safety."};
+
+const RANK=[["r1","The controlled message tests (6,000 adults, story against statistic)"],["r2","The Campaign Effectiveness Forum's study of delivery"],["r3","The National Opinion Panel's survey of 4,100 adults"],["r4","Peter Hext's account of what the unit achieved"],["r5","Online posts saying real accident victims were actors"]];
+const RANK_START=["r2","r4","r3","r1","r5"];
+const TESTDATA=`<div class="attach"><div class="an">📎 Message tests, 2028–2034: results by group (Communications Evaluation Unit)</div>
+ <div class="tw"><table><thead><tr><th>Group</th><th class="num">Story</th><th class="num">Statistic</th></tr></thead><tbody>
+ <tr><td>Aged 18–34</td><td class="num">+21%</td><td class="num">+5%</td></tr><tr><td>Aged 35–59</td><td class="num">+24%</td><td class="num">+4%</td></tr><tr><td>Aged 60+</td><td class="num">+25%</td><td class="num">+3%</td></tr></tbody></table></div>
+ <p>Change in stated intention to act. Every message was delivered the same way. Adding a statistic to a story slightly weakened it.</p></div>`;
+const REPLIES={
+ r1:()=>`<p>You've put the controlled tests first, so that's what I led with on Thursday. They hold delivery constant, which is exactly what the committee asked about. The Communications Evaluation Unit has sent me its results by group. Read them before you write.</p>${TESTDATA}`,
+ r2:()=>`<p>I led with the Forum's study, as you suggested. Two days later a journalist asked who funds the Forum. Its members include Castlegate Media, which placed the stories and ran the platform. I had to tell the committee we'd look at it again.</p>`,
+ r3:()=>`<p>I led with the survey. The committee was polite, but one member said a poll tells us what people think, not what worked. I'll need more than that next time.</p>`,
+ r4:()=>`<p>I led with Peter Hext's account. The committee asked, fairly, why we were taking the unit's word for its own success.</p>`,
+ r5:()=>`<p>I led with the online posts. A researcher pointed out the next day that many came from a handful of accounts. It was not my best morning.</p>`
+};
+function reply(){
+ const first=S.rank[0], p=S.rank.indexOf("r1");
+ let extra="";
+ if(first!=="r1") extra = p===1?"<p>You put the controlled tests second, so I've asked for their results by group as well.</p>":"";
+ return {from:"Ishbel Rennie, Chair of the Commission",subj:"Re: Interim briefing",rel:"medium",body:REPLIES[first]()+extra+(S.ev?EV_REPLY[S.ev]:"")+`<p class="sig">Ishbel</p>`};
+}
+const CONSEQ={
+ r1:{from:"Kwaku Appiah, Thameside University, London",subj:"The committee hearing",rel:"high",body:`<p>I watched Thursday's session. Leading with the controlled tests was wise: they are the one piece of evidence that holds delivery constant, and no member challenged them.</p><p>I should say what the tests cannot show. They measure intention rather than behaviour, and a stated intention is usually larger than what people go on to do.</p><p class="sig">Kwaku</p>`},
+ r2:{from:"Matthew Brook, Northern School of Media, Newcastle",subj:"The Forum's study",rel:"high",body:`<p>You'll have seen the coverage. The Forum's study compared years before the targeting platform existed with years after, and it measured clicks rather than behaviour. Its board includes Castlegate's chair.</p><p>None of that was declared. The committee will remember it.</p><p class="sig">Matthew</p>`},
+ r3:{from:"Henrietta Quirke, School of Government, University of Birmingham",subj:"The survey",rel:"high",body:`<p>The survey is useful for what the public will accept, not for whether the campaigns worked. Opinion also shifts with the wording: ask about “lies” and you get one answer, ask about “safety stories” and you get another.</p><p class="sig">Henrietta</p>`},
+ r4:{from:"Eva Rosendahl, Winchester Institute of Philosophy",subj:"Mr Hext's account",rel:"high",body:`<p>I don't doubt Mr Hext's sincerity. But a unit's account of its own success is the weakest kind of evidence there is, whoever gives it.</p><p class="sig">Eva</p>`},
+ r5:{from:"Laura Pendlebury, Centre for Policy Evaluation, Leeds",subj:"The online posts",rel:"high",body:`<p>We looked at the posts. About 70 per cent came from fewer than 200 accounts. They tell us something about the mood online, but nothing about what the campaigns did.</p><p class="sig">Laura</p>`}
+};
+const STANDING={r1:()=>"Ishbel led her evidence to the committee with the controlled tests, and no member challenged them.",
+ r2:()=>"Ishbel led with the Forum's study, and had to promise the committee a second look once the Forum's funders came out.",
+ r3:()=>"Ishbel led with the survey; the committee said it showed opinion, not effect.",
+ r4:()=>"Ishbel led with Peter Hext's account; the committee asked why the commission was taking the unit's word for it.",
+ r5:()=>"Ishbel led with online posts, most of which turned out to come from a handful of accounts."};
+function pinsHTML(){const N=S.notes[R()], items=Object.entries(N.hl);
+ return `<h3>Your evidence</h3><p>Pin up to three of your highlights that show why the item you've put first is the strongest. Ishbel will show them to the committee.</p>`+
+ (items.length?`<div class="pins">${items.map(([k,h])=>`<button class="pin" data-act="pin" data-v="${k}" aria-pressed="${N.pins.includes(k)}"><i style="background:${HLC[h.c]}"></i><span>${esc(h.t)}<small>${esc(h.src)}</small></span></button>`).join("")}</div>`
+   :`<p class="muted small">You haven't highlighted anything yet. Tap sentences in your emails, reports or recordings' text to highlight them, then come back.</p>`);}
+function inboxList(){const list=[...INBOX[R()]]; if(R()==="C"&&S.fork) list.splice(1,0,BRANCH[S.fork]); list.push(FWD); if(S.ranked) list.unshift(CONSEQ[S.rank[0]]); return list;}
+const EPI_RANK={r2:"The Forum's study, which Ishbel had led with, was quietly dropped from the final report.",r3:"Ishbel's early reliance on a single survey was mentioned in two newspaper columns.",r4:"The committee's report noted that the commission had at first taken the unit's account of itself on trust.",r5:"The online posts Ishbel had quoted turned out to come from fewer than 200 accounts."};
+
+/* ---------- team puzzles: research skills ---------- */
+const PZ={
+ 1:{owner:"A",title:"The delivery study",
+   intro:"The Campaign Effectiveness Forum has sent the commission a summary of its study. Fiona Laird wants it in the core evidence. Before it goes in, work out what the study can and can't show.",
+   screen:`<div class="attach"><div class="an">Delivery, not drama · Campaign Effectiveness Forum · F. Laird, 2035</div>
+     <p>We compared 40 government safety campaigns: factual campaigns from 2026–2028 and the unit's story campaigns from 2032–2034. The story campaigns achieved 2.4 times the engagement (clicks, shares and comments). Over the same years, targeted online delivery replaced broadcast advertising.</p>
+     <p><b>Conclusion:</b> delivery, not storytelling, explains the unit's success.</p>
+     <p class="fine">The Forum is supported by its member agencies.</p></div>`,
+   qs:[{q:"What is the problem with comparing 2026–2028 with 2032–2034?",type:"choice",opts:["Three years is too short a time to show a real change in what people do","The factual campaigns cost a lot more, so they should have done better","The platform only arrived in 2029, so only the stories had it here"],ans:"The platform only arrived in 2029, so only the stories had it here"},
+       {q:"What does “2.4 times the engagement” tell the commission about behaviour?",type:"choice",opts:["Little: clicks and shares aren't the same as driving more slowly","That behaviour changed about 2.4 times as much as it did before","That the stories reached 2.4 times as many adults as the factual campaigns"],ans:"Little: clicks and shares aren't the same as driving more slowly"},
+       {q:"Who supports the Forum, and why does it matter?",type:"choice",opts:["Universities, so its findings have been checked by other researchers","Agencies including Castlegate, which placed the stories: an interest in delivery","The government, which wants its own past campaigns to look effective"],ans:"Agencies including Castlegate, which placed the stories: an interest in delivery"}],
+   hint:"When did the targeting platform arrive, and who ran it? Evidence and Policy both have part of the answer. Evidence also knows how many adults each kind of campaign reached.",
+   out:{ok:"The secretariat has marked the Forum's study “interest not declared; measures engagement only” and moved it out of the core evidence. Fiona Laird has been asked to declare the Forum's funders before the hearing.",
+        fail:"The Forum's study has gone into the commission's core evidence as it is, with nothing to say who pays for it or what it measured."}},
+ 2:{owner:"B",title:"Check the quotations",
+   intro:"The secretariat has drafted a paragraph for the ethics chapter. Ishbel will quote from it at the hearing. Check each claim against what the source really says.",
+   screen:`<div class="attach"><div class="an">Ethics chapter · draft paragraph · secretariat</div>
+     <p><b>Claim 1:</b> Even Carver (2035) concedes that the campaigns caused considerable harm, and defends them only because of the lives saved.</p>
+     <p><b>Claim 2:</b> The public is clear: 63 per cent want the unit closed (National Opinion Panel, 2035).</p>
+     <p><b>Claim 3:</b> Pendlebury (2035) shows that the campaigns saved 1,900 lives.</p></div>`,
+   qs:[{q:"Claim 1",type:"choice",opts:["Accurate: Carver weighs the harm against the 1,900 lives saved","Misquoted: Carver says the harm was close to zero","Misquoted: Carver says there was no harm of any kind"],ans:"Misquoted: Carver says the harm was close to zero"},
+       {q:"Claim 2",type:"choice",opts:["Misquoted: 63% said the deception was wrong, and 55% want it to go on in some form","Accurate: 63% of a representative sample want the unit closed","Overstated: the survey asked only 400 adults, so it proves nothing"],ans:"Misquoted: 63% said the deception was wrong, and 55% want it to go on in some form"},
+       {q:"Claim 3",type:"choice",opts:["Accurate: 1,900 is the number of deaths the evaluation counted","Overstated: 1,900 is a model estimate, with a range from 1,100 to 2,700","Wrong source: the figure of 1,900 comes from the Health Economics Unit's report"],ans:"Overstated: 1,900 is a model estimate, with a range from 1,100 to 2,700"}],
+   hint:"Claim 2: Policy has a source that reports both of the survey's findings. Claim 3: Evidence has the evaluation itself, and what it says about the figure.",
+   out:{ok:"The paragraph has been corrected before it reached Ishbel: Carver's “close to zero”, both of the survey's findings, and the 1,900 lives as an estimate with its range.",
+        fail:"The paragraph went to Ishbel with all three slips in it, and she quoted the 63 per cent in a radio interview."}},
+ 3:{owner:"C",title:"Two sets of figures",
+   intro:"Your summary for the committee needs three figures, and each comes in two versions that seem to disagree. Work out what the summary can honestly say.",
+   screen:`<div class="attach"><div class="an">Figures for the summary · two versions of each</div>
+     <div class="tw"><table><thead><tr><th>Topic</th><th>Version 1</th><th>Version 2</th></tr></thead><tbody>
+      <tr><td>Trust</td><td>Cabinet Office: “Public trust has recovered to 57%, close to the 61% before the leak.”</td><td>Local Media Trust Monitor: “Trust has not recovered: 41%, down from 54%.”</td></tr>
+      <tr><td>Cost per life</td><td>£65,000 per life saved</td><td>A campaign group: “£110,000 per life saved”</td></tr>
+      <tr><td>Road deaths</td><td>Evaluation: down 14%</td><td>Pryor: safer cars explain a quarter to a half of the fall</td></tr></tbody></table></div></div>`,
+   qs:[{q:"Trust: which version is right?",type:"choice",opts:["The Cabinet Office: its figure is the more recent of the two","Both: one measures health information, the other local news","The Monitor: the Cabinet Office has simply made its figure up"],ans:"Both: one measures health information, the other local news"},
+       {q:"Cost per life: which version is right?",type:"choice",opts:["The campaign group: £65,000 leaves out what the unit's staff cost us","Neither: nobody can put a figure on the cost of a human life","Both: £110,000 is what the model's lowest estimate of lives gives"],ans:"Both: £110,000 is what the model's lowest estimate of lives gives"},
+       {q:"Road deaths: what can the summary say?",type:"choice",opts:["The campaigns probably explain between a half and three quarters of the fall","The campaigns explain the whole fall, since the effects followed each one","The campaigns had no real effect on road deaths, since cars got safer"],ans:"The campaigns probably explain between a half and three quarters of the fall"}],
+   hint:"Ethics knows where the £65,000 comes from. Evidence has the model's range of lives and Pryor's estimate. Your own notes say which kind of trust each source measured.",
+   out:{ok:"Your summary gives the committee the figures straight: trust in health information recovering and trust in local news not, the cost per life as a range, and the fall in road deaths with Pryor's caveat.",
+        fail:"The summary went out saying that “trust has recovered” and that each life cost £65,000, with no range. The Local Media Trust Monitor has written to the committee to correct it."}}
+};
+const CODES={1:{first:"4126",help:"4153",fail:"4189"},2:{first:"6231",help:"6258",fail:"6274"},3:{first:"8342",help:"8367",fail:"8395"}};
+const TIER_LABEL={first:"Solved first time",help:"Solved with help",fail:"Not solved"};
+const pzDone=(r,n)=>!!S.pz[n].tier&&!!S.gate[r][n];
+const allPz=r=>[1,2,3].every(n=>pzDone(r,n));
+const ok=n=>S.pz[n].tier&&S.pz[n].tier!=="fail";
+const failed=n=>S.pz[n].tier==="fail";
+/* what the committee picked apart at the hearing: it follows how the evidence was handled, never which side was taken */
+function hearing(){const out=[];
+ if(S.d1==="B") out.push(failed(1)?"The finding on why the stories worked rested on delivery, and on a study by the Forum, whose funders hadn't been declared: the committee showed that budgets, reach and the platform had been the same for both kinds of campaign.":"The finding on why the stories worked rested on delivery, though budgets, reach and the platform had been the same for both kinds of campaign.");
+ else if(failed(1)) out.push("The Forum's undeclared study sat in the commission's core evidence. The committee asked why, though the commission's own finding didn't rest on it.");
+ if(failed(2)) out.push("The ethics chapter's draft had misquoted Carver and the survey, and Ishbel had repeated the 63 per cent on the radio.");
+ if(failed(3)) out.push("The summary's figures on trust and on the cost per life had to be corrected in writing.");
+ if(S.ranked&&S.rank[0]==="r2") out.push("Ishbel's first statement had led with the Forum's study.");
+ else if(S.ranked&&["r4","r5"].includes(S.rank[0])) out.push("Ishbel's first statement had led with weak evidence.");
+ if(S.ev==="pushback") out.push("The evidence pinned to the interim briefing included a weak source.");
+ return out;}
+function standing(){return (S.d1==="A"?1:0)+(failed(2)?0:1)+(failed(3)?0:1);}
+
+/* evidence pinned to the briefing */
+function evScore(){const N=S.notes[R()], pins=N.pins.map(k=>N.hl[k]).filter(Boolean);
+ const strong=pins.filter(h=>h.q==="high").length, weak=pins.filter(h=>h.q==="low").length;
+ return weak?"pushback":strong>=2?"backed":"unsure";}
+const EV_REPLY={backed:"<p>The evidence you pinned was solid: peer-reviewed and independent work, not opinions. I showed it to the committee, and it was accepted.</p>",
+ unsure:"<p>Your evidence was thin. The committee took it on trust this time, but it will want more.</p>",
+ pushback:"<p>One of the sources you pinned was weak, and a committee member picked it out at once. I've had to promise a written note on our sources: another week's work.</p>"};
+const EV_STANDING={backed:"The committee accepted the evidence behind your briefing.",unsure:"The committee took your briefing on trust.",pushback:"A committee member picked out a weak source in your briefing, and Ishbel has promised a written note on the commission's sources."};
+
+/* ---------- notes: highlights, colour code, free notes ---------- */
+const HL=[["yellow","#FFF176"],["green","#B9F6CA"],["pink","#F8BBD0"],["blue","#B3E5FC"],["orange","#FFE0B2"],["purple","#E1BEE7"]];
+const HLC=Object.fromEntries(HL);
+const HL_HINT=["Key finding","Evidence","Doubt","Number","Ask the team","Use in writing"];
+function hsh(t){let h=5381;for(const c of t)h=((h<<5)+h+c.charCodeAt(0))>>>0;return h.toString(36);}
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function wrapSentences(root){
+ root.querySelectorAll("[data-src]").forEach(box=>{
+  const src=box.dataset.src, q=box.dataset.q||"medium";
+  box.querySelectorAll("p").forEach(p=>{
+   if(p.dataset.w||p.closest("[data-src]")!==box||p.classList.contains("sd")||p.classList.contains("sig")||p.querySelector("button,input,svg"))return;
+   const t=p.textContent.replace(/\s+/g," ").trim(); if(!t)return;
+   const parts=t.match(/(?:[^.!?]|\.(?=\d))+(?:[.!?]+["”’)]*|$)/g)||[t];
+   const N=S.notes[R()];
+   p.innerHTML=parts.map(x=>{x=x.trim(); const k=hsh(src+"|"+x), h=N.hl[k];
+     return `<span class="sn" data-k="${k}" data-src="${esc(src)}" data-q="${q}"${h?` style="background:${HLC[h.c]}"`:""}>${esc(x)}</span>`;}).join(" ");
+   p.dataset.w="1";});
+ });
+}
+let palFor=null;
+function openPal(el){palFor=el;const pal=document.getElementById("hlpal");const r=el.getBoundingClientRect();
+ pal.hidden=false; pal.style.top=(window.scrollY+r.bottom+6)+"px"; pal.style.left=Math.max(8,Math.min(window.scrollX+r.left,window.scrollX+document.documentElement.clientWidth-pal.offsetWidth-8))+"px";}
+function closePal(){document.getElementById("hlpal").hidden=true;palFor=null;}
+function notesHTML(){
+ const N=S.notes[R()], items=Object.entries(N.hl);
+ const cc=`<details class="cc"><summary>${HL.map(([,c])=>`<i style="background:${c}"></i>`).join("")}<span>My colour code</span></summary><div class="ccgrid">${HL.map(([k,c],i)=>`<label><i style="background:${c}"></i><input data-cc="${k}" maxlength="24" value="${esc(N.cc[k]||"")}" placeholder="${HL_HINT[i]}" aria-label="${k} means"></label>`).join("")}</div></details>`;
+ const add=`<div class="nbadd"><textarea id="nbnew" maxlength="400" placeholder="A note of your own…" aria-label="A note of your own"></textarea><button class="btn small" data-act="noteadd">Add note</button></div>`;
+ const free=N.free.map((t,i)=>`<div class="nbcard mine"><p>${esc(t)}</p><div class="src">Your note <button class="lnk" data-act="noterm" data-v="${i}">Delete</button></div></div>`).join("");
+ const groups=HL.map(([k,c])=>{const g=items.filter(([,h])=>h.c===k); if(!g.length)return "";
+   return `<div class="nbgroup"><i style="background:${c}"></i>${esc(N.cc[k]||k[0].toUpperCase()+k.slice(1))}</div>`+g.map(([key,h])=>`<div class="nbcard" style="border-left-color:${c}"><p>${esc(h.t)}</p><div class="src">${esc(h.src)} <button class="lnk" data-act="hlrm" data-v="${key}">Remove</button></div></div>`).join("");}).join("");
+ return `<div class="nbhead"><h2>Your highlights and notes</h2><button class="lnk" data-act="nbclose" aria-label="Close notes">Close ✕</button></div>${cc}${add}${free}${items.length?groups:`<p class="muted small">Tap any sentence in the Context, your emails, a report or a recording's text to highlight it. Your highlights collect here.</p>`}`;
+}
+
+/* ---------- state ---------- */
+const fresh=()=>({role:null,tab:"context",unlock:false,fork:null,expert:null,picks:{laird:null,hext:null},d1:null,d2:null,d3:null,decided:false,text:"",handed:false,rank:[...RANK_START],ranked:false,mailOpen:{},mailRead:{},notes:{A:{hl:{},cc:{},free:[],pins:[]},B:{hl:{},cc:{},free:[],pins:[]},C:{hl:{},cc:{},free:[],pins:[]}},nbOpen:false,pz:{1:{tier:null,tries:[0,0,0],ok:[0,0,0],hint:false,sel:{}},2:{tier:null,tries:[0,0,0],ok:[0,0,0],hint:false,sel:{}},3:{tier:null,tries:[0,0,0],ok:[0,0,0],hint:false,sel:{}}},gate:{A:{},B:{},C:{}},gateMsg:"",ev:null});
+let S=fresh();
+const STORE_KEY="simlearn-pro-kindliepro";
+try{const x=JSON.parse(sessionStorage.getItem(STORE_KEY)||"null"); if(x&&typeof x==="object"&&!Array.isArray(x)) S=Object.assign(fresh(),x);}catch(e){}
+function save(){try{sessionStorage.setItem(STORE_KEY,JSON.stringify(S));}catch(e){}}
+const TABS=[["context","Context"],["inbox","Inbox"],["puzzles","Team puzzles"],["investigate","Investigate"],["decide","Decide"]];
+const ready=()=>S.unlock||(S.role&&S.fork);
+const tabOpen=t=>t==="context"||(ready()&&(["inbox","puzzles"].includes(t)||S.unlock||allPz(R())));
+
+const ENDING_HASH=418548712;
+function endLockHTML(){return `<section class="card"><h2>What happened next</h2><p>When <b>everyone in your team</b> has created their submission, ask your teacher for the code to find out what happened.</p><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input id="endcode" inputmode="numeric" autocomplete="off" maxlength="4" aria-label="Code from your teacher" style="width:7em;font:inherit;padding:6px 10px;border:1px solid var(--line);border-radius:8px"><button class="btn" data-act="endcode">Open</button> <span class="msg" aria-live="polite">${S.endMsg||""}</span></div></section>`;}
+function render(){
+  save();
+  document.getElementById("who").textContent=S.role?`You are the ${ROLES[S.role].name}${S.fork?` · Terms: ${S.fork==="legal"?"narrow, legal":"broad, public health"}`:""}`:"Read the context, then choose your role.";
+  document.getElementById("tabs").innerHTML=TABS.map(([k,l])=>`<button data-act="tab" data-v="${k}" aria-current="${S.tab===k}" ${tabOpen(k)?"":"disabled"}>${l}${k==="inbox"&&tabOpen(k)&&inboxList().some(m=>!S.mailRead[m.from+"|"+m.subj])?`<span class="tdot" aria-label="unread emails"></span>`:""}</button>`).join("");
+  document.getElementById("main").innerHTML=V[S.tab]();
+  wrapSentences(document.getElementById("main"));
+  if(S.tab==="context"&&!S.role){const cs=[...document.querySelectorAll("#main section.card")],i=cs.findIndex(c=>/^\s*3 ·/.test((c.querySelector(".step")||{}).textContent||""));if(i>0){cs.slice(i).forEach(c=>{c.hidden=true;c.style.display="none";});cs[i-1].insertAdjacentHTML("afterend",`<section class="card" id="rolegate"><p class="note-strong" style="margin:0"><strong>Choose your role above to read on.</strong> Each of you takes a different role: agree who is who in your team first.</p></section>`);}}
+  const nb=document.getElementById("nb"); nb.hidden=!S.nbOpen; if(S.nbOpen) nb.innerHTML=notesHTML();
+  const fab=document.getElementById("fab"); fab.hidden=!S.role; fab.textContent=`Notes (${Object.keys(S.notes[R()].hl).length+S.notes[R()].free.length})`;
+  if(S.tab==="investigate"&&!S.ranked) bindDrag("rank");
+  if(S.tab==="decide"){const ta=document.getElementById("cf"); if(ta){ta.value=S.text; wc();}}
+}
+const task=t=>`<div class="task"><b>Your task</b><span>${t}</span></div>`;
+const R=()=>S.role||"A";
+const REMIT={legal:`<p class="sd">[Phone line, a little echo.]</p><p>Ishbel again. Narrow terms it is: was the unit lawful, and was it properly governed? That puts the paper trail first: who signed what, and who checked it. Weigh the lives too. The committee will just start with the rules.</p>`,
+ public:`<p class="sd">[Phone line, a little echo.]</p><p>Ishbel again. Broad terms it is: the effects on public health and on society, good and bad. That puts the numbers first: lives, costs and trust. Ask who signed what too. The committee will just start with harm and benefit.</p>`};
+
+const V={
+ context(){
+  const r=S.role;
+  return task("Read from top to bottom. Choose your role, then make your first decision: agree as a team, then everyone enters the same choice.")
+  +`<section class="card" data-src="Context" data-q="medium"><span class="step">1 · Where you are</span><h2>London, June 2035</h2>
+    ${PRO_COVER?`<img src="${PRO_COVER}" alt="" style="display:block;width:100%;height:auto;border-radius:10px">`:""}
+    <p class="fine">This is a thought experiment set in the near future. The United Kingdom, its institutions and the history of its public information films are real. The Public Safety Communications Unit, the leak, the commission, every person quoted, every study and every number are invented for this classroom exercise. Practise citing these sources as if they were real, but never cite them in real academic work.</p>
+    <p>Governments have always tried to change how people behave, not merely to inform them. For sixty-five years Britain's Central Office of Information made public information films: short, often frightening dramas about drowning, farm machinery and crossing the road. They were fiction, played by actors, and a generation still remembers them. Their makers understood something that researchers have since measured: one face we can picture moves us more than a thousand numbers.</p>
+    <p>Persuasion of this kind has always sat uneasily with democratic ideals. A citizen is supposed to weigh reasons and decide; a message that works on fear, or on a story, may bypass that judgement altogether. Where the aim is safety, most people have accepted the trade. The question has been how far it can go, and who decides.</p>
+    <p>Since the 2010s, governments have also borrowed from behavioural science. Rather than lecturing, they nudge: they make the safe choice the easy one, or send a letter saying that most neighbours have already paid. Supporters call this steering choices while leaving people free; critics call it manipulation with good manners. Beneath the argument lies a quieter worry. Official warnings work only while people believe them, and belief, once lost, is slow to return.</p>
+    <p>In March 2032, this report ran on local radio and news websites across South Yorkshire:</p>
+    <div class="attach"><div class="an">Local news · 16 March 2032</div><p><b>Barnsley boy, 13, badly burned in substation.</b> Jamie Dixon climbed into a small electricity substation on his estate to fetch his football and suffered severe burns to his arms and chest. He is being treated at Sheffield Children's Hospital. “He just wanted his ball back,” said his mother, Donna. An engineer from the local network explained that a substation carries 11,000 volts and that electricity can jump to anyone who gets close: “If a ball goes over the fence, leave it. Ring the number on the sign.”</p></div>
+</section>`
+  +`<section class="card" data-src="Context" data-q="medium"><span class="step">2 · Who you are</span><h2>The commission's evidence team</h2>
+    <p>You are three researchers on the commission's evidence team. Each of you holds different sources. Choose your role.</p>
+    <div class="roles">${Object.entries(ROLES).map(([k,v])=>`<button class="role" data-act="role" data-v="${k}" aria-pressed="${r===k}" ${S.fork&&S.role?"disabled":""}><b>${v.name}</b><span>${v.line}</span></button>`).join("")}</div>${S.fork&&S.role?`<p class="muted small">Your role is fixed now that your team has made its first decision.</p>`:""}
+    ${r?`<p><strong>You are the ${ROLES[r].name}.</strong> ${ROLES[r].detail}</p>`:""}
+    <h3 style="margin-top:6px">Other people you'll hear from</h3>
+    <div class="people"><div class="person"><b>Ishbel Rennie</b><span class="muted small">Chair of the commission, your boss. Professor of Public Law at the University of Edinburgh.</span></div><div class="person"><b>Fiona Laird</b><span class="muted small">Research Director of the Campaign Effectiveness Forum. Giving evidence.</span></div><div class="person"><b>Peter Hext</b><span class="muted small">Former head of the unit. Giving evidence.</span></div><div class="person"><b>The Commons Public Administration Committee</b><span class="muted small">MPs who will question the commission on its findings.</span></div></div></section>`
+  +`<section class="card" data-src="Context" data-q="medium"><span class="step">3 · The situation</span><h2>The leak</h2>
+    <p>In January 2035 a civil servant leaked the files of a unit almost nobody had heard of. From 2032 to 2034 the Public Safety Communications Unit, 23 staff with a budget of about £41 million a year, had placed 412 invented items in the media: posts by people who did not exist, short videos of neighbours and nurses played by actors, and local news reports written in an office.</p>
+    <p>Every item had one aim: to keep people safe. The stories warned about speeding, encouraged blood pressure checks and cancer screening, discouraged fly-tipping and wasted energy, and kept children away from substations and railway lines. Nothing touched politics. An independent evaluation has since found that road deaths, fly-tipping and children's injuries fell, and health checks rose. The factual campaigns that came before had achieved almost nothing.</p>
+    <p>The unit's work is suspended. The government has set up an independent commission, chaired by Ishbel Rennie, to answer three questions: why the stories worked, whether the deception was justified, and what should happen to the unit. It must report before the autumn Spending Review, and it will defend its findings before MPs.</p>
+    <div class="facts"><div class="fact"><div class="l">Invented items</div><div class="v">412</div></div><div class="fact"><div class="l">Years of campaigns</div><div class="v">2032–34</div></div><div class="fact"><div class="l">Budget a year</div><div class="v">£41m</div></div><div class="fact"><div class="l">Report due</div><div class="v">Autumn</div></div></div></section>`
+  +`<section class="card" data-src="Context" data-q="medium"><span class="step">4 · It starts</span><h2>A voicemail from Ishbel</h2>
+    ${audio("Voicemail from Ishbel Rennie","female, Scottish (Edinburgh) accent, precise and warm",`<p class="sd">[Phone line. Rain on a window.]</p><p>Hello, it's Ishbel. I've just left the Cabinet Office. They want our terms of reference by Friday. Everyone I met today already knew the answer. Half of them called it a scandal. The other half asked why we'd ever stop something that saves lives.</p><p>I don't want either speech. I want the evidence: what worked, why, and what it cost us, in trust as well as money. Check every source. If we lean on a weak one, the committee will take us apart, whichever side we come down on.</p>`,"kindliepro_voicemail")}</section>`
+  +`<section class="card" data-src="Context" data-q="medium"><span class="step">5 · Your first decision</span><h2>Narrow terms, or broad ones?</h2>
+    <p>The Cabinet Office needs the commission's terms of reference by Friday. Aled Pryce, counsel to the commission, wants narrow terms: “Was it lawful, and was it properly governed?” Nisha Raman, its public health adviser, wants broad ones: “What did it do to people's health, and to their trust?” You haven't seen the evidence yet. Agree as a team, then everyone enters the same choice.</p>
+    <div class="choices">${[["legal","A","Narrow terms: was the unit lawful and properly governed?","The paper trail comes first: who authorised the unit, and who checked its work. The effects still count, but the committee starts with the rules."],["public","B","Broad terms: the unit's effects on public health and society","The figures come first: lives, costs and trust. The rules still count, but the committee starts with harm and benefit."]].map(([v,k,t,c])=>`<button class="choice" data-act="fork" data-v="${v}" aria-pressed="${S.fork===v}" ${S.fork?"disabled":""}><span class="k">OPTION ${k}</span><b>${t}</b><small>${c}</small></button>`).join("")}</div>
+    ${S.fork?audio("Message from Ishbel Rennie","female, Scottish (Edinburgh) accent, precise and warm",REMIT[S.fork],"kindliepro_remit_"+S.fork):""}
+    ${S.fork?(S.role?`<p class="done">Decision made. Some of the evidence you see depends on this choice. Go to your inbox.</p><button class="btn" data-act="tab" data-v="inbox">Open your inbox</button>`:`<p class="done">Decision made. Now choose your role above.</p>`):""}</section>`;
+ },
+ inbox(){
+  const list=inboxList();
+  return task("Read your briefing notes and tell your team what you've found, in your own words. Your teammates have different sources. Not every source is equally reliable.")
+  +`<div style="display:flex;flex-direction:column;gap:10px">${list.map(m=>mail(m)).join("")}</div>`;
+ },
+ puzzles(){
+  const r=R(); let h=task("Each of you has one puzzle, and nobody can solve theirs alone. When a puzzle appears on someone's screen, everyone gathers round that screen until it's solved. Each result changes what happens next.");
+  const done=[1,2,3].filter(n=>pzDone(r,n));
+  if(done.length) h+=`<section class="card"><h2>Results so far</h2>${done.map(n=>`<p><b>${PZ[n].title}</b> (${ROLES[PZ[n].owner].name}): ${TIER_LABEL[S.pz[n].tier]}. ${ok(n)?PZ[n].out.ok:PZ[n].out.fail}</p>`).join("")}</section>`;
+  const n=[1,2,3].find(x=>!pzDone(r,x));
+  if(!n) return h+`<p class="done">All three puzzles are done.</p><button class="btn" data-act="tab" data-v="investigate">Go to Investigate</button>`;
+  const P=PZ[n];
+  if(P.owner!==r) return h+`<section class="card gate"><span class="step">Puzzle ${n} of 3</span><h2>${ROLES[P.owner].name} needs your help</h2>
+     <p>Go and look at their screen. They have a puzzle called <b>${P.title}</b>, and they need facts from your sources to solve it. When it's done, their screen shows a four-digit code. Type it here to carry on.</p>
+     <div class="coderow"><input id="gatecode" inputmode="numeric" maxlength="4" placeholder="0000" aria-label="Code from ${ROLES[P.owner].name}"><button class="btn" data-act="gate" data-v="${n}">Carry on</button></div>${S.gateMsg?`<p class="msg">${S.gateMsg}</p>`:""}</section>`;
+  const Z=S.pz[n];
+  if(Z.tier) return h+`<section class="card"><span class="step">Puzzle ${n} of 3 · ${P.title}</span><h2>${TIER_LABEL[Z.tier]}</h2><p>${ok(n)?P.out.ok:P.out.fail}</p>
+     <p>Show this code to your teammates. They need it to carry on.</p><div class="bigcode">${CODES[n][Z.tier]}</div>
+     <button class="btn" data-act="pznext" data-v="${n}">I've shared the code</button></section>`;
+  return h+`<section class="card"><span class="step">Puzzle ${n} of 3 · your puzzle</span><h2>${P.title}</h2><p>${P.intro}</p>
+    <p class="note-strong"><strong>Call your teammates over.</strong> You can't solve this from your own sources alone.</p>${P.screen}
+    ${P.qs.map((q,i)=>{const done=Z.ok[i], left=2-Z.tries[i];
+      return `<div class="pzq ${done?"okq":""}"><h3>${i+1}. ${q.q}</h3>${done?(Z.qfail&&Z.qfail[i]?`<p class="msg">Not solved. The answer: ${q.type==="sort"?q.items.map(([x,c])=>esc(x)+" → "+c).join(" · "):q.ans}</p>`:`<p class="done">${q.type==="sort"?"All items sorted":q.ans} ✓</p>`):
+       (q.type==="sort"?`<div class="sortq">${q.items.map(([t],j)=>`<div class="sortrow"><p>${t}</p><select data-sort="${n}_${i}_${j}" aria-label="Item ${j+1}"><option value="">Choose…</option>${q.cats.map(c=>`<option${(Z.sort&&Z.sort[i]&&Z.sort[i][j])===c?" selected":""}>${c}</option>`).join("")}</select></div>`).join("")}</div>${Z.sortMsg&&Z.sortMsg[i]?`<p class="msg">${Z.sortMsg[i]}</p>`:""}`:
+        `<div class="opts2">${q.opts.map(o=>`<button class="opt" data-act="pzsel" data-n="${n}" data-i="${i}" data-v="${esc(o)}" aria-pressed="${Z.sel[i]===o}">${o}</button>`).join("")}</div>`)+
+       `<div class="coderow"><button class="btn" data-act="pzcheck" data-n="${n}" data-i="${i}">Check</button>${Z.tries[i]?`<span class="msg">Not yet. ${left} ${left===1?"try":"tries"} left.</span>`:""}</div>`}</div>`;}).join("")}
+    ${Z.hint?`<p class="hint">${P.hint}</p>`:`<button class="lnk" data-act="pzhint" data-v="${n}">Show a hint (counts as help)</button>`}</section>`;
+ },
+ investigate(){
+  const sl=SHORTLIST[R()], e=S.expert;
+  return task("Commission one outside expert (agree as a team so you don't all choose the same one), question the two witnesses, then agree your interim briefing as a team. Everyone enters the same ranking on their own screen and pins their own best evidence.")
+  +`<section class="card"><h2>Commission an expert</h2><p>The commission can pay for one expert report from each of you. An expert answers only the question you commission, so think about what your team most needs to know. Each role has a different shortlist, and some experts appear on more than one list.</p>
+    <div class="choices">${sl.map(k=>`<button class="choice" data-act="expert" data-v="${k}" aria-pressed="${e===k}" ${e?"disabled":""}><b>${EXPERTS[k].name}</b><small><em>${EXPERTS[k].who}</em><br>${EXPERTS[k].what}</small></button>`).join("")}</div>
+    ${e?`<div class="attach" data-src="${EXPERTS[e].who.split(",")[0]}" data-q="${EXPERTS[e].q}"><div class="an">📎 Report from ${EXPERTS[e].who}</div>${EXPERTS[e].rep}</div>`:""}</section>`
+  +`<section class="card"><h2>The witnesses</h2><p>Fiona Laird and Peter Hext gave evidence to the commission last week. <strong>One of them has an interest they didn't mention.</strong> Listen for what's missing, then choose your one question for each.</p>
+    <div class="two">${Object.entries(WIT).map(([k,w])=>{const p=S.picks[k];
+      return `<div style="display:flex;flex-direction:column;gap:10px"><h3>${w.name} <span class="muted small">· ${w.role}</span></h3>
+       ${audio(`${w.name}'s account`,w.voice,w.account,"kindliepro_"+k)}
+       <div class="qs">${w.qs.map((q,i)=>`<button class="q" data-act="ask" data-w="${k}" data-v="${i}" aria-pressed="${p===i}" ${p!==null?"disabled":""}>${q[0]}</button>`).join("")}</div>
+       ${p!==null?audio(`${w.name} answers`,w.voice,`<p>${w.qs[p][1]}</p>`,"kindliepro_"+k+"_"+(p+1)):""}</div>`;}).join("")}</div></section>`
+  +`<section class="card"><h2>Interim briefing for Ishbel</h2>
+    <p>Ishbel gives evidence to the Commons Public Administration Committee on Thursday, before your final findings, and wants to lead with the strongest evidence the commission has. Below is the order the secretariat suggested. Put the evidence in order, from strongest to weakest.</p>
+    <p class="note-strong"><strong>Ishbel will lead with whatever you put first.</strong></p>
+    <ol class="tl" id="rk">${S.rank.map((id,i)=>{const t=RANK.find(x=>x[0]===id);
+      return `<li class="tc" data-id="${id}" draggable="${!S.ranked}"><span class="n">${i+1}</span><span>${t[1]}</span><span class="arr">${S.ranked?"":`<button data-act="mv" data-l="rank" data-v="${i}" data-d="-1" aria-label="Move up" ${i?"":"disabled"}>↑</button><button data-act="mv" data-l="rank" data-v="${i}" data-d="1" aria-label="Move down" ${i<RANK.length-1?"":"disabled"}>↓</button>`}</span></li>`;}).join("")}</ol>
+    ${S.ranked?`<p class="done">Sent to Ishbel. Her reply is below, and there's a new email in your inbox.</p>${mail(reply())}`:pinsHTML()+`<button class="btn" data-act="sendrank">Send to Ishbel</button>`}</section>`;
+ },
+ decide(){
+  const dis=S.decided?"disabled":"";
+  let h=task("Agree your answers to the two questions and your recommendation as a team, then everyone enters the same choices on their own screen. Then each of you writes your section of the commission's position paper. After you hand in, you'll hear what happened next.");
+  h+=`<section class="card"><h2>Where things stand</h2><p>${S.fork==="legal"?"The commission is working to narrow terms: whether the unit was lawful and properly governed.":"The commission is working to broad terms: the unit's effects on public health and on society."} ${S.ranked?STANDING[S.rank[0]]():"Ishbel is still waiting for your interim briefing."} ${S.ev?EV_STANDING[S.ev]:""}</p>${[1,2,3].filter(n=>S.pz[n].tier).map(n=>`<p><b>${PZ[n].title}:</b> ${ok(n)?PZ[n].out.ok:PZ[n].out.fail}</p>`).join("")}</section>`;
+  h+=["d1","d2","d3"].map(k=>{const D=DEC[k];return `<section class="card"><h2>${D[0]}</h2><div class="choices">${[1,2].map(i=>{const v=i===1?"A":"B";
+    return `<button class="choice" data-act="dec" data-q="${k}" data-v="${v}" aria-pressed="${S[k]===v}" ${dis}><span class="k">OPTION ${v}</span><b>${D[i][0]}</b><small>${D[i][1]}</small></button>`;}).join("")}</div></section>`;}).join("");
+  if(!S.decided) return h+`<button class="btn" data-act="lock" ${S.d1&&S.d2&&S.d3?"":"disabled"}>Confirm our answers</button>`;
+  if(!S.handed)h+=`<p><button class="btn small" data-act="undec">Change our decisions</button> <span class="muted small">Until you hand in, your team can still change its decisions.</span></p>`;
+  h+=`<section class="card"><h2>${roleW(S.role).section?"Your section: "+esc(roleW(S.role).section.label):"Position paper"}</h2>${roleW(S.role).section?`<p>About ${roleW(S.role).words} words. ${esc(roleW(S.role).section.task)}</p>`:`<p>Write about 450 words for an academic reader who may hold the opposite view: your position on the unit, the principle it rests on, your evidence on why the stories worked, the strongest opposing view put fairly, and your rebuttal.</p>`}
+   <p class="muted small">Useful language: <em>This paper argues that…</em> · <em>However uncomfortable it may be, the evidence suggests…</em> · <em>Rosendahl (2035) contends that…</em> · <em>Admittedly… Even so…</em> · <em>on the central estimate</em></p>
+   <textarea id="cf" aria-label="${roleW(S.role).label}"></textarea>
+   <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><span class="wc" id="wc">0 words</span></div>${handinHTML()}</section>`;
+  if(!S.handed) return h;
+  if(!S.endOpen){h+=endLockHTML();return h;}
+  const fk=S.fork||"public", H=hearing(), st=standing();
+  h+=`<section class="card"><h2>One year later</h2>${audio("News report: Westminster Week","newsreader, light music bed under",`<p class="sd">[News jingle, music bed under]</p><p>${EPI_FORK[fk]} ${EPI_D1[S.d1]}</p><p>${EPI_D2[S.d2]}</p><p>${EPI_D3[S.d3]}</p><p>${H.length?"At the committee hearing, MPs picked apart the parts of the report that rested on weak or misused evidence. "+H.join(" "):"At the committee hearing, MPs tested every finding, and the evidence behind each one held, whatever members thought of the conclusions."}${S.ev==="backed"?" The committee's report later praised the commission's use of sources.":""}</p>${S.ranked&&EPI_RANK[S.rank[0]]?`<p>${EPI_RANK[S.rank[0]]}</p>`:""}<p>One exchange made the evening news. The committee's chair asked how many members remembered the 2032 report about Jamie Dixon, the Barnsley boy burned in a substation. Most hands went up. It was item 207 in the unit's catalogue: there was no Jamie, no Donna and no engineer, only actors in a studio in Leeds.</p>`)}
+   <div class="board"><div class="tile"><div class="l">Findings that came through the hearing unchanged</div><div class="v" id="total">${st} of 3</div></div><div class="tile"><div class="l">Points the committee picked apart</div><div class="v" id="sales">${H.length}</div></div></div>
+   <p>Neither number depends on which side you took on the second question or the recommendation: only on how the evidence was handled.</p>
+   <p>Now find a group that chose the other terms of reference at the start, and ask them what happened to them.</p></section>`;
+  return h;
+ }
+};
+
+/* ---------- actions ---------- */
+function wc(){const ta=document.getElementById("cf");document.getElementById("wc").textContent=`${(ta.value.trim().match(/\S+/g)||[]).length} words`;}
+document.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.id==="gatecode"){const bt=document.querySelector("[data-act=gate]");if(bt){e.preventDefault();bt.click();}}});
+document.addEventListener("toggle",e=>{const d=e.target;if(d.dataset&&d.dataset.tf){S.tOpen=Object.assign({},S.tOpen,{[d.dataset.tf]:d.open});save();return;}if(!d.dataset||!d.dataset.mail)return;const k=decodeURIComponent(d.dataset.mail);
+ S.mailOpen[k]=d.open; if(d.open&&!S.mailRead[k]){S.mailRead[k]=true;d.classList.replace("unread","read");const u=d.querySelector(".udot");if(u)u.remove();}},true);
+document.addEventListener("input",e=>{if(e.target.id==="cf"){S.text=e.target.value;wc();}});
+document.addEventListener("click",e=>{
+ const sw=e.target.closest("[data-hlc]"); if(sw&&palFor){const N=S.notes[R()],k=palFor.dataset.k;
+   if(sw.dataset.hlc==="none"){delete N.hl[k];N.pins=N.pins.filter(x=>x!==k);} else N.hl[k]={c:sw.dataset.hlc,t:palFor.textContent,src:palFor.dataset.src,q:palFor.dataset.q};
+   closePal(); render(); return;}
+ const sn=e.target.closest(".sn"); if(sn){openPal(sn);return;}
+ if(!e.target.closest("#hlpal"))closePal();
+ const b=e.target.closest("[data-act]");if(!b||b.disabled)return;act(b.dataset.act,b.dataset);});
+document.addEventListener("change",e=>{const v=e.target.dataset&&e.target.dataset.sort; if(!v)return; const [n,i,j]=v.split("_"); const Z=S.pz[n]; Z.sort=Z.sort||{}; Z.sort[i]=Z.sort[i]||{}; if(e.target.value)Z.sort[i][j]=e.target.value; else delete Z.sort[i][j];});
+document.addEventListener("input",e=>{if(e.target.dataset&&e.target.dataset.cc){S.notes[R()].cc[e.target.dataset.cc]=e.target.value;}});
+function act(a,d){
+ switch(a){
+  case "role":if(!(S.fork&&S.role))S.role=d.v;break;
+  case "undec":if(!S.handed){S.decided=false;S.sub=null;S.issues=[];}break;
+  case "tab":if(tabOpen(d.v)){S.tab=d.v;window.scrollTo({top:0});}break;
+  case "fork":if(!S.fork)S.fork=d.v;break;
+  case "expert":if(!S.expert)S.expert=d.v;break;
+  case "ask":if(S.picks[d.w]===null)S.picks[d.w]=+d.v;break;
+  case "mv":{const L=S[d.l],i=+d.v,j=i+(+d.d);if(j<0||j>=L.length)return;flip(d.l,()=>{[L[i],L[j]]=[L[j],L[i]];});return;}
+  case "sendrank":S.ev=evScore();S.ranked=true;break;
+  case "pin":{const N=S.notes[R()],i=N.pins.indexOf(d.v); if(i>=0)N.pins.splice(i,1); else if(N.pins.length<3)N.pins.push(d.v); break;}
+  case "nbopen":S.nbOpen=true;break;
+  case "endcode":{const c=((document.getElementById("endcode")||{}).value||"").trim();if(fnv(c)===ENDING_HASH){S.endOpen=true;S.endMsg="";}else S.endMsg=c?"That isn't the code. Check it with your teacher.":"";break;}
+  case "nbclose":S.nbOpen=false;break;
+  case "hlrm":{const N=S.notes[R()];delete N.hl[d.v];N.pins=N.pins.filter(x=>x!==d.v);break;}
+  case "noteadd":{const t=(document.getElementById("nbnew")||{}).value||""; if(t.trim())S.notes[R()].free.push(t.trim()); break;}
+  case "noterm":S.notes[R()].free.splice(+d.v,1);break;
+  case "pzsel":S.pz[d.n].sel[d.i]=d.v;break;
+  case "pzhint":S.pz[d.v].hint=true;break;
+  case "pzcheck":{const n=+d.n,i=+d.i,Z=S.pz[n],q=PZ[n].qs[i];
+    let right;
+    if(q.type==="sort"){const got=(Z.sort&&Z.sort[i])||{}; if(Object.keys(got).length<q.items.length){Z.sortMsg={...(Z.sortMsg||{}),[i]:"Sort every item first."};break;}
+      const n2=q.items.filter(([,c],j)=>got[j]===c).length; right=n2===q.items.length; Z.sortMsg={...(Z.sortMsg||{}),[i]:right?"":`${n2} of ${q.items.length} are right.`};}
+    else{const a=Z.sel[i]; if(!a)return; right=a===q.ans;}
+    if(right)Z.ok[i]=1; else {Z.tries[i]++; if(Z.tries[i]>=2){Z.ok[i]=1;Z.failq=true;Z.qfail=Object.assign({},Z.qfail,{[i]:1});}}
+    if(Z.ok.slice(0,PZ[n].qs.length).every(Boolean)) Z.tier=Z.failq?"fail":(Z.hint||Z.tries.some(t=>t>0))?"help":"first";
+    break;}
+  case "pznext":S.gate[R()][d.v]=S.pz[d.v].tier;S.gateMsg="";break;
+  case "gate":{const n=+d.v,c=((document.getElementById("gatecode")||{}).value||"").replace(/[\uFF10-\uFF19]/g,x=>String.fromCharCode(x.charCodeAt(0)-0xFEE0)).replace(/\D/g,""),t=Object.keys(CODES[n]).find(k=>CODES[n][k]===c);
+    if(t){S.pz[n].tier=t;S.gate[R()][n]=t;S.gateMsg="";} else {const m=[1,2,3].find(x=>x!==n&&Object.values(CODES[x]).includes(c));if(m&&PZ[m].owner!==R()){const tm=Object.keys(CODES[m]).find(k=>CODES[m][k]===c);S.pz[m].tier=tm;S.gate[R()][m]=tm;}S.gateMsg=m?`That's the code for puzzle ${m}${m>n?" (saved)":""}. This box needs the code for puzzle ${n} (“${PZ[n].title}”).`:"That code doesn't work. Check it with your teammate.";} break;}
+  case "dec":S[d.q]=d.v;break;
+  case "lock":if(S.d1&&S.d2&&S.d3)S.decided=true;break;
+  case "hand":makeSub();render();{const bl=document.getElementById("block")||document.getElementById("issues");if(bl&&bl.scrollIntoView)bl.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"center"});}return;
+  case "pdf":downloadPdf();return;
+  case "copy":copyBlock();return;
+ }
+ render();
+}
+const LIST_ID={rank:"rk"};
+function flip(key,mutate){
+ const sel=`#${LIST_ID[key]} .tc`, before={};
+ document.querySelectorAll(sel).forEach(c=>before[c.dataset.id]=c.getBoundingClientRect().top);
+ mutate();render();
+ if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+ document.querySelectorAll(sel).forEach(c=>{const dy=before[c.dataset.id]-c.getBoundingClientRect().top;
+  if(dy){c.style.transition="none";c.style.transform=`translateY(${dy}px)`;requestAnimationFrame(()=>{c.style.transition="transform .22s ease";c.style.transform="";});}});
+}
+let drag=null;
+function bindDrag(key){
+ const L=S[key];
+ document.querySelectorAll(`#${LIST_ID[key]} .tc[draggable="true"]`).forEach(c=>{
+  c.addEventListener("dragstart",e=>{drag=c.dataset.id;c.classList.add("dragging");try{e.dataTransfer.setData("text/plain",drag);}catch(_){}});
+  c.addEventListener("dragend",()=>{c.classList.remove("dragging");drag=null;});
+  c.addEventListener("dragover",e=>{e.preventDefault();if(c.dataset.id!==drag)c.classList.add("over");});
+  c.addEventListener("dragleave",()=>c.classList.remove("over"));
+  c.addEventListener("drop",e=>{e.preventDefault();const to=c.dataset.id;if(!drag||to===drag||!L.includes(drag))return;
+   flip(key,()=>{const from=L.indexOf(drag);L.splice(from,1);const ti=L.indexOf(to);L.splice(from<=ti?ti+1:ti,0,drag);});});
+ });
+}
+
+/* ---------- hand-in: Lite's submission block and PDF (GUIDE 2n). Everything below up to "Pro hand-in" is copied
+   verbatim from studio/template.html by cartridges/authoring/_pro_common.py, so the check code matches blocks.py.
+   Nothing is sent anywhere: the block and the PDF are made here in the browser. ---------- */
+const LITE={"id": "kindliepro", "version": 1, "title": "The Kindest Lie (Pro)", "writing": {"label": "position paper", "addressee": "", "by_role": {"A": {"label": "position paper section on why the stories worked", "words": 200, "task": "Write your section of the commission's position paper: why the invented stories changed behaviour when the factual campaigns had not. Open with one sentence that gives your team's overall position. Then state your thesis on this question and support it with evidence from your own sources, cited author–date, e.g. (Rosendahl, 2035). Give the strongest counter-argument fairly, with its source, and answer it: concede what is true, then show why your thesis still holds. Mention the other two questions only in passing: your teammates write those sections.", "decision": "D1"}, "B": {"label": "position paper section on the ethics of the deception", "words": 200, "task": "Write your section of the commission's position paper: whether deceiving the public can be justified when it saves lives. Open with one sentence that gives your team's overall position. Then state your thesis on this question and support it with evidence from your own sources, cited author–date, e.g. (Rosendahl, 2035). Give the strongest counter-argument fairly, with its source, and answer it: concede what is true, then show why your thesis still holds. Mention the other two questions only in passing: your teammates write those sections.", "decision": "D2"}, "C": {"label": "position paper section on the unit's future", "words": 200, "task": "Write your section of the commission's position paper: what should happen to the Public Safety Communications Unit. Open with one sentence that gives your team's overall position. Then state your thesis on this question and support it with evidence from your own sources, cited author–date, e.g. (Rosendahl, 2035). Give the strongest counter-argument fairly, with its source, and answer it: concede what is true, then show why your thesis still holds. Mention the other two questions only in passing: your teammates write those sections.", "decision": "D3"}}}, "roles": {"A": {"dept": "Evidence Analyst", "chars": {"expert": "expert_a", "laird": "laird_a", "hext": "hext_a"}}, "B": {"dept": "Ethics Adviser", "chars": {"expert": "expert_b", "laird": "laird_b", "hext": "hext_b"}}, "C": {"dept": "Policy Adviser", "chars": {"expert": "expert_c", "laird": "laird_c", "hext": "hext_c"}}}, "decisions": {"d1": "D1", "d2": "D2", "d3": "D3"}};
+function fnv(str){ let h = 0x811c9dc5; for (const ch of new TextEncoder().encode(str)) { h ^= ch; h = Math.imul(h, 0x01000193) >>> 0; } return h >>> 0; }
+function checkCode(parts){
+  const A = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
+  const s = parts.join("|");
+  const four = h => { let n = h % 923521, o = ""; for (let i = 0; i < 4; i++) { o += A[n % 31]; n = Math.floor(n / 31); } return o; };
+  return four(fnv(s)) + "-" + four(fnv(s + "#"));
+}
+const norm = t => t.replace(/\s+/g, " ").trim();
+function words(t){ return (t.trim().match(/\S+/g) || []).length; }
+function taskName(W){ return W.addressee ? `${W.label} to ${W.addressee}` : W.label; }
+const PDFW = {"R":[278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584,761,556,0,222,556,333,1000,556,556,333,1000,667,333,1000,0,611,0,0,222,222,333,333,350,556,1000,333,1000,500,333,944,0,500,667,278,333,556,556,556,556,260,556,333,737,370,556,584,333,737,333,400,584,333,333,333,556,537,278,333,333,365,556,834,834,834,611,667,667,667,667,667,667,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,500,556,556,556,556,278,278,278,278,556,556,556,556,556,556,556,584,611,556,556,556,556,500,556,500],"B":[278,333,474,556,556,889,722,238,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,333,333,584,584,584,611,975,722,722,722,722,667,611,778,722,278,556,722,611,833,722,778,667,778,722,667,611,722,667,944,667,667,611,333,278,333,584,556,333,556,611,556,611,556,333,611,611,278,278,556,278,889,611,611,611,611,389,556,333,611,556,778,556,556,500,389,280,389,584,761,556,0,278,556,500,1000,556,556,333,1000,667,333,1000,0,611,0,0,278,278,500,500,350,556,1000,333,1000,556,333,944,0,500,667,278,333,556,556,556,556,280,556,333,737,370,556,584,333,737,333,400,584,333,333,333,611,556,278,333,333,365,556,834,834,834,611,722,722,722,722,722,722,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,556,556,556,556,556,278,278,278,278,611,611,611,611,611,611,611,584,611,611,611,611,611,556,611,556]};
+const PDF_WIN = {"8364":128,"8218":130,"402":131,"8222":132,"8230":133,"8224":134,"8225":135,"710":136,"8240":137,"352":138,"8249":139,"338":140,"381":142,"8216":145,"8217":146,"8220":147,"8221":148,"8226":149,"8211":150,"8212":151,"732":152,"8482":153,"353":154,"8250":155,"339":156,"382":158,"376":159};   // Unicode -> WinAnsi byte, for 0x80-0x9F
+const PDF_ALT = {"Ł":"L","ł":"l","Đ":"D","đ":"d","ı":"i","ħ":"h","‐":"-","‑":"-","−":"-","′":"'","″":"\"","\u2009":" ","\u202f":" ","→":"->","←":"<-","≈":"~","≤":"<=","≥":">="};
+function pdfByte(ch){
+  const u = ch.codePointAt(0);
+  if (u >= 32 && u <= 126) return u;
+  if (u >= 160 && u <= 255) return u;
+  if (PDF_WIN[u] !== undefined) return PDF_WIN[u];
+  if (u === 9) return 32;
+  const base = ch.normalize("NFKD").replace(/[̀-ͯ]/g, "");   // ł, ő, ş… fall back to the plain letter
+  if (base && base !== ch && base.length === 1) return pdfByte(base);
+  return 63;   // ?
+}
+// Letters the PDF font can't show: a few by hand, then compatibility forms (ﬁ -> fi, ² -> 2), else "?".
+const pdfClean = s => [...String(s).replace(/[ŁłĐđıħ‐‑−′″\u2009\u202f→←≈≤≥]/g, c => PDF_ALT[c])].map(c => {
+  if (c === "\n" || pdfByte(c) !== 63 || c === "?") return c;
+  const k = c.normalize("NFKD").replace(/[\u0300-\u036f]/g, "");
+  return k && [...k].every(x => pdfByte(x) !== 63) ? k : c;
+}).join("");
+function pdfWidth(text, font, size){
+  let w = 0; for (const ch of text) { const b = pdfByte(ch); w += PDFW[font][b - 32] || 556; } return w * size / 1000;
+}
+function pdfStr(text){   // a PDF literal string in WinAnsi, with octal escapes
+  let out = "(";
+  for (const ch of text) {
+    const b = pdfByte(ch);
+    if (b === 40 || b === 41 || b === 92) out += "\\" + String.fromCharCode(b);
+    else if (b > 126) out += "\\" + b.toString(8).padStart(3, "0");
+    else out += String.fromCharCode(b);
+  }
+  return out + ")";
+}
+function pdfWrap(text, font, size, width){
+  const lines = [];
+  text.split("\n").forEach(par => {
+    if (!par.trim()) { lines.push(""); return; }
+    let line = "";
+    par.split(/\s+/).filter(Boolean).forEach(word => {
+      const tryLine = line ? line + " " + word : word;
+      if (pdfWidth(tryLine, font, size) <= width) { line = tryLine; return; }
+      if (line) lines.push(line);
+      while (pdfWidth(word, font, size) > width) {          // a very long word: break it (one pass per line)
+        const chars = [...word]; let n = 0, w = 0;
+        while (n < chars.length) { const cw = pdfWidth(chars[n], font, size); if (n > 0 && w + cw > width) break; w += cw; n++; }
+        lines.push(chars.slice(0, n).join("")); word = chars.slice(n).join("");
+      }
+      line = word;
+    });
+    lines.push(line);
+  });
+  return lines;
+}
+function utf16Hex(text){
+  let h = "FEFF";
+  for (let i = 0; i < text.length; i++) h += text.charCodeAt(i).toString(16).padStart(4, "0").toUpperCase();
+  return "<" + h + ">";
+}
+function makePdf({title, subtitle, body, note, footer, block, fileName}){
+  [title, subtitle, body, note, footer] = [title, subtitle, body, note, footer].map(pdfClean);
+  const W = 595.28, H = 841.89, M = 64, TW = W - 2 * M;
+  const pages = []; let ops = [], y = H - M;
+  const newPage = () => { if (ops.length) pages.push(ops); ops = []; y = H - M; };
+  const text = (s, font, size, x, yy, grey) => ops.push(`BT /${font} ${size} Tf ${grey ? "0.4 0.45 0.5 rg" : "0.11 0.15 0.2 rg"} ${x.toFixed(2)} ${yy.toFixed(2)} Td ${pdfStr(s)} Tj ET`);
+  const para = (s, font, size, lead, grey) => pdfWrap(s, font, size, TW).forEach(l => {
+    if (y - lead < M + 20) newPage();
+    y -= lead; if (l) text(l, font, size, M, y, grey);
+  });
+  para(title, "B", 16, 21);
+  para(subtitle, "R", 9.5, 13, true);
+  y -= 14;
+  para(body, "R", 11, 15.5);
+  y -= 18;
+  para(note, "R", 8, 11, true);
+  newPage();
+  // objects: 1 catalog, 2 pages, 3 font R, 4 font B, 5 embedded file, 6 filespec, 7 info, then page/content pairs
+  const objs = [];
+  const enc = new TextEncoder(), blockBytes = enc.encode(block);
+  const kids = pages.map((_, i) => `${8 + i * 2} 0 R`).join(" ");
+  objs[1] = `<< /Type /Catalog /Pages 2 0 R /Names << /EmbeddedFiles << /Names [${pdfStr(fileName)} 6 0 R] >> >> /PageMode /UseNone >>`;
+  objs[2] = `<< /Type /Pages /Kids [${kids}] /Count ${pages.length} >>`;
+  objs[3] = `<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>`;
+  objs[4] = `<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>`;
+  objs[5] = {dict: `<< /Type /EmbeddedFile /Subtype /text#2Fplain /Length ${blockBytes.length} >>`, data: blockBytes};
+  objs[6] = `<< /Type /Filespec /F ${pdfStr(fileName)} /UF ${utf16Hex(fileName)} /EF << /F 5 0 R >> /Desc ${pdfStr("SimLearn answers for the teacher tool")} >>`;
+  objs[7] = `<< /Title ${utf16Hex(title)} /Creator (SimLearn) /Producer (SimLearn) /SimLearnSubmission ${utf16Hex(block)} >>`;
+  pages.forEach((p, i) => {
+    const foot = `BT /R 7.5 Tf 0.4 0.45 0.5 rg ${M} 36 Td ${pdfStr(footer + (pages.length > 1 ? ` · page ${i + 1} of ${pages.length}` : ""))} Tj ET`;
+    const content = enc.encode([...p, foot].join("\n").split("").map(c => c.charCodeAt(0) < 256 ? c : "?").join(""));
+    objs[8 + i * 2] = `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${W} ${H}] /Resources << /Font << /R 3 0 R /B 4 0 R >> >> /Contents ${9 + i * 2} 0 R >>`;
+    objs[9 + i * 2] = {dict: `<< /Length ${content.length} >>`, data: content};
+  });
+  // assemble with byte offsets (all strings here are ASCII)
+  const parts = [], offs = []; let len = 0;
+  const add = b => { parts.push(b); len += b.length; };
+  add(enc.encode("%PDF-1.7\n")); add(new Uint8Array([0x25, 0xE2, 0xE3, 0xCF, 0xD3, 0x0A]));   // marks the file as binary
+  for (let n = 1; n < objs.length; n++) {
+    offs[n] = len;
+    const o = objs[n];
+    if (typeof o === "string") add(enc.encode(`${n} 0 obj\n${o}\nendobj\n`));
+    else { add(enc.encode(`${n} 0 obj\n${o.dict}\nstream\n`)); add(o.data); add(enc.encode(`\nendstream\nendobj\n`)); }
+  }
+  const xref = len;
+  let x = `xref\n0 ${objs.length}\n0000000000 65535 f \n`;
+  for (let n = 1; n < objs.length; n++) x += String(offs[n]).padStart(10, "0") + " 00000 n \n";
+  add(enc.encode(x + `trailer\n<< /Size ${objs.length} /Root 1 0 R /Info 7 0 R >>\nstartxref\n${xref}\n%%EOF\n`));
+  return new Blob(parts, {type: "application/pdf"});
+}
+
+/* ---------- Pro hand-in ---------- */
+function proChoices(r){
+ const c=LITE.roles[r].chars, sl=SHORTLIST[r]||[], out=[];
+ out.push(`${c.expert}=${S.expert&&sl.includes(S.expert)?"o"+(sl.indexOf(S.expert)+1):"-"}`);
+ Object.keys(WIT).forEach(w=>{const p=S.picks[w]; out.push(`${c[w]}=${p===null||p===undefined?"-":"o"+(p+1)}`);});
+ return out.join(", ");
+}
+// The Pro line: the team's fork, interim briefing (Morven/Moira acts on the first), evidence verdict and puzzle tiers.
+// Not part of the check code (blocks.py reads it into sub["pro"]).
+function proLine(){
+ return `Pro: fork=${S.fork||"none"}, briefing=${S.ranked?S.rank.join(">"):"none"}, evidence=${S.ranked&&S.ev?S.ev:"none"}, puzzles=${[1,2,3].map(n=>`${n}:${S.pz[n].tier||"none"}`).join(",")}`;
+}
+// writing.by_role (GUIDE 3c): the student's role writes its own section of the group's report
+function roleW(r){const W=LITE.writing, t=W.by_role&&W.by_role[r];
+ return t?Object.assign({},W,{label:t.label||W.label,words:t.words,section:t}):W;}
+function makeSub(){
+ const r=S.role, W=roleW(r), missing=[];
+ S.sub=null;
+ if(!r||!LITE.roles[r]){S.issues=["Choose your role first (Context)."];return;}
+ const memoText=(S.text||"").trim();
+ const open=Object.entries(WIT).filter(([k])=>S.picks[k]===null||S.picks[k]===undefined).map(([,w])=>w.name);
+ if(open.length) missing.push(`You haven't chosen what to ask ${open.join(", ")} yet (Investigate).`);
+ const openDec=LITE.budget?(S.decided?[]:["budget"]):Object.keys(LITE.decisions).filter(k=>!S[k]);
+ if(openDec.length) missing.push(LITE.budget?"Your group's budget isn't confirmed yet (Decide).":`Your group's answer is missing for ${openDec.map(k=>LITE.decisions[k]).join(", ")} (Decide).`);
+ if(words(memoText)<50) missing.push("Your text is very short — write your "+W.label+" first.");
+ S.issues=missing;
+ if(openDec.length||words(memoText)<50) return;
+ const ai=S.consent?"yes":"no";
+ const choices=proChoices(r);
+ const decisions=LITE.budget?LITE.budget.map(id=>`${id}=${+((S.budget||{})[id])||0}`).join(", ")   // Lite's budget format
+                           :Object.entries(LITE.decisions).map(([k,id])=>`${id}=${S[k]}`).join(", ");
+ const parts=[LITE.id, LITE.version, r, choices, decisions, ai, ai==="yes"?norm(memoText):""];
+ const code=checkCode(parts);
+ const head=[
+  "=== SIMLEARN SUBMISSION ===",
+  ai==="yes"?"AI check: ALLOWED":"AI check: NOT ALLOWED - grade by hand",
+  `Scenario: ${LITE.id} v${LITE.version} (${LITE.title})`,
+  `Role: ${r} (${LITE.roles[r].dept})`,
+  `Info choices: ${choices}`,
+  `Group decisions: ${decisions}`,
+  proLine(),
+  `Check: ${code}`,
+ ];
+ const block=ai==="yes"?[...head,`--- ${taskName(W)} (${words(memoText)} words) ---`,memoText,"=== END ==="].join("\n")
+                       :[...head,"=== END ===","",`My ${taskName(W)} (${words(memoText)} words):`,"",memoText].join("\n");
+ S.sub={block, blockOnly: ai==="yes"?block:[...head,"=== END ==="].join("\n"), code, ai, r, n:words(memoText), memo:memoText};
+ S.handed=true;
+}
+function subHTML(){const x=S.sub; if(!x) return "";
+ return `
+    <h2>Your submission</h2>
+    <p>Hand it in the way your <b>Moodle assignment</b> asks for:</p>
+    <p><b>A file upload?</b> Download your PDF and upload it to the assignment.</p>
+    <p><button type="button" class="btn" id="pdf" data-act="pdf">Download my submission (PDF)</button> <span id="pdfmsg" class="ok" aria-live="polite"></span></p>
+    <p><b>A text box?</b> Copy everything in the box below and paste it in. ${x.ai==="yes" ? "" : "Your text sits below the SimLearn part, so your teacher can mark it by hand."}</p>
+    <textarea class="block" id="block" readonly>${esc(x.block)}</textarea>
+    <p><button type="button" class="btn" id="copy" data-act="copy">Copy to clipboard</button> <span id="copied" class="ok" aria-live="polite"></span></p>
+    <p class="muted small">If you change your text or your answers later, create your submission again before you hand it in.</p>`;}
+function handinHTML(){
+ return `<div class="consent">
+      <b>Can your teacher check your text with AI?</b>
+      <p class="small">Your teacher may use the SimLearn teacher tool, which can ask an AI system (Claude, by Anthropic) to suggest feedback on your writing. Only your text and your group's choices would be sent — not your name. Your teacher always makes the final decision about your grade. If you say no, your teacher marks your text by hand. Saying no has no effect on your grade.</p>
+      <label><input type="checkbox" id="consent" ${S.consent?"checked":""}> Yes, my teacher may check my text with AI.</label>
+    </div>
+    <div id="issues" class="issues">${(S.issues||[]).map(m=>`<p>${esc(m)}</p>`).join("")}</div>
+    <button type="button" class="btn" data-act="hand">Create my submission</button>
+    <div id="out">${subHTML()}</div>`;
+}
+function downloadPdf(){
+ const x=S.sub; if(!x) return;
+ const W=roleW(x.r), rr=LITE.roles[x.r];
+ const cap=taskName(W).charAt(0).toUpperCase()+taskName(W).slice(1);
+ const today=new Date().toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"});
+ const blob=makePdf({
+  title: cap,
+  subtitle: `${LITE.title} · Role ${x.r}${rr.dept?" ("+rr.dept+")":""} · ${x.n} words · ${today}`,
+  body: x.memo,
+  note: (x.ai==="yes"
+   ? "This file also carries your SimLearn answers for your teacher's SimLearn tool: your information choices, your group's decisions and a copy of your text. You agreed that your teacher may check your text with AI."
+   : "This file also carries your SimLearn answers for your teacher's SimLearn tool: your information choices and your group's decisions, but not your text. You did not agree to an AI check, so your teacher will mark your text by hand.")
+   + ` Check code: ${x.code}.`,
+  footer: `SimLearn · ${LITE.title}`,
+  block: x.blockOnly, fileName: "simlearn-submission.txt"});
+ const a=document.createElement("a");
+ a.href=URL.createObjectURL(blob); a.download=`simlearn-${LITE.id}-role-${x.r}.pdf`;
+ document.body.appendChild(a); a.click(); a.remove();
+ setTimeout(()=>URL.revokeObjectURL(a.href),120000);
+ const m=document.getElementById("pdfmsg"); if(m) m.textContent="Look in your Downloads, then upload the file to Moodle. If nothing downloaded, open this page in Safari, Chrome or Firefox (not inside an app), or use the text box below.";
+}
+async function copyBlock(){
+ const ta=document.getElementById("block"), msg=document.getElementById("copied"); if(!ta) return;
+ const done=()=>{msg.textContent="Copied — now paste it into Moodle.";};
+ try{await navigator.clipboard.writeText(ta.value); return done();}catch(e){}
+ // older method: still works in many embedded frames where the modern one is blocked
+ ta.focus(); ta.select(); ta.setSelectionRange(0,ta.value.length);
+ let ok=false; try{ok=document.execCommand("copy");}catch(e){}
+ if(ok) return done();
+ msg.textContent="Your browser blocked copying. The text is selected — press Ctrl+C (or ⌘C) to copy it.";
+}
+
+// a recorded clip's text appears once the student has listened to the end (GUIDE 2h); media events don't bubble
+document.addEventListener("ended",e=>{const a=e.target; if(!a||a.tagName!=="AUDIO"||!a.dataset.f)return;
+ S.heard=Object.assign({},S.heard,{[a.dataset.f]:1}); const box=a.closest(".audio"), dt=box&&box.querySelector("details"); if(dt)dt.hidden=false; save();},true);
+
+document.addEventListener("change",e=>{if(e.target.id==="consent"){S.consent=e.target.checked;S.sub=null;S.issues=[];render();}});
+document.addEventListener("input",e=>{if(e.target.id!=="cf")return; if(S.sub){S.sub=null;const o=document.getElementById("out");if(o)o.innerHTML="";} save();});
+
+render();
+</script>
+</body>
+</html>
