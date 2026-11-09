@@ -609,7 +609,7 @@ function renderExamStart(){
       <li><b>Listening</b>${m.listening ? ` (about ${m.listening} minutes)` : ""}: ${LISTEN_HOW}</li>
       <li><b>Writing</b>${m.writing ? ` (about ${m.writing} minutes)` : ""}: make the decisions and write your ${esc(S.writing.label)}.</li>`}
     </ul>
-    ${EX.points ? `<p><b>Points:</b> listening ${pts(EX.points.listening)} · reading ${pts(EX.points.reading)} · writing ${pts(EX.points.writing)} · <b>${pts(EX.points.listening + EX.points.reading + EX.points.writing)} in all</b>. Every listening and reading question is worth one point.</p>` : ""}
+    ${EX.points ? `<p><b>How it is graded:</b> listening ${pts(EX.points.listening)} and reading ${pts(EX.points.reading)} (every question is worth one point), each turned into a grade; your ${esc(S.writing.label)} gets <b>one overall grade</b> (no points, and the word count isn't marked). ${shareLine(EX.points)}</p>` : ""}
     <p>You can move between the tabs at any time and change your answers until you create your submission. You can highlight sentences as in the simulations.</p>
     ${S.ack_disclaimer ? `<div class="ack"><b>Before you start</b><p>${esc(S.disclaimer)}</p>
       <label><input type="checkbox" id="ack" ${st.ack ? "checked" : ""}> I understand</label></div>` : `<p class="muted small">${esc(S.disclaimer)}</p>`}
@@ -1288,6 +1288,14 @@ numberQuestions();
 const answered = it => String((st.ans || {})[it.id] || "").trim() !== "";
 function qCount(sec){ const a = qItems(sec); return `${a.filter(answered).length} of ${a.length} answered`; }
 const pts = n => `${n} point${n === 1 ? "" : "s"}`;
+// "Your exam grade combines the three: listening a third, …" (the weights in exam.points; writing and speaking are graded holistically)
+function shareLine(P){
+  const parts = Object.entries(P).filter(([, w]) => w), tot = parts.reduce((a, [, w]) => a + w, 0);
+  if (!tot) return "";
+  const same = parts.every(([, w]) => w === parts[0][1]);
+  return same ? `The ${parts.length === 2 ? "two" : "three"} grades count equally.`
+    : `The grades are weighted: ${parts.map(([k, w]) => `${k} ${Math.round(100 * w / tot)} %`).join(", ")}.`;
+}
 // "3 of 15 answered on this tab · reading: 25 points in all" (one point per question)
 function tabCount(parts, sec){
   const a = parts.flatMap(p => p.items), all = qItems(sec).length;
@@ -1409,8 +1417,8 @@ function renderSpeakStart(){
       <li><b>Deal sheet</b>: the points ${SPEAK_SOLO ? "you discuss in the exam room" : "your group has to agree on"}.</li>
       ${SPEAK_LISTEN ? `<li><b>Hand in</b> your listening answers before the speaking part.</li>` : `<li>Nothing to hand in: the ${SPEAK_SOLO ? "examiners mark" : "examiner marks"} how you speak in the exam room.</li>`}
     </ul>
-    ${!P.listening && P.speaking ? `<p><b>Points:</b> speaking ${pts(P.speaking)}, marked in the exam room on the five points under "What the ${SPEAK_SOLO ? "examiners listen" : "examiner listens"} for".</p>` : ""}
-    ${P.listening ? `<p><b>Points:</b> listening ${pts(P.listening)} (one per question, here) · speaking ${pts(P.speaking)} (in the exam room) · <b>${pts(P.listening + P.speaking)} in all</b>.</p>` : ""}
+    ${!P.listening && P.speaking ? `<p><b>How it is graded:</b> your speaking gets <b>one overall grade</b> in the exam room. The five criteria under "What the ${SPEAK_SOLO ? "examiners listen" : "examiner listens"} for" show what counts; they are not points.</p>` : ""}
+    ${P.listening ? `<p><b>How it is graded:</b> listening ${pts(P.listening)} (one per question, here), turned into a grade · speaking: <b>one overall grade</b> (in the exam room). ${shareLine({listening: P.listening, speaking: P.speaking})}</p>` : ""}
     ${S.ack_disclaimer ? `<div class="ack"><b>Before you start</b><p>${esc(S.disclaimer)}</p>
       <label><input type="checkbox" id="ack" ${st.ack ? "checked" : ""}> I understand</label></div>` : `<p class="muted small">${esc(S.disclaimer)}</p>`}
     <form id="startForm">${SPEAK_SOLO ? `<p><b>Your role:</b> ${esc(roleName(S.roles.find(r => r.id === st.pick)))}</p><input type="radio" name="role" value="${st.pick}" checked hidden>` : `
@@ -1782,10 +1790,10 @@ function roleWriting(){
 function tabSubmit(){
   const W = roleWriting();
   $("#main").innerHTML = `
-    <h2 style="margin-top:0">Your ${esc(W.label)}${W.addressee ? ` to ${esc(W.addressee)}` : ""}${EXAM && EX.points ? ` <span class="ptsbadge">${pts(EX.points.writing)}</span>` : ""}</h2>
-    ${EXAM && EX.points ? (S.rubric ? `<p class="small muted">Marked on the five points under "What makes a strong ${esc(W.label)}", equally.</p>`
-      : `<p class="small muted">Marked on five points, equally: the task, how you use the sources, the argument, organisation and language.</p>`) : ""}
-    ${W.exam_practice ? `<p class="small muted">Exam practice: this is the written exam's task. Your teacher marks it on the exam's five criteria (the task, how you use the sources, the argument, organisation and language) and gives you a provisional grade.</p>` : ""}
+    <h2 style="margin-top:0">Your ${esc(W.label)}${W.addressee ? ` to ${esc(W.addressee)}` : ""}${EXAM && EX.points ? ` <span class="ptsbadge">one overall grade</span>` : ""}</h2>
+    ${EXAM && EX.points ? (S.rubric ? `<p class="small muted">Graded as a whole, with one grade. The five criteria under "What makes a strong ${esc(W.label)}" show what the examiner looks for; they are not points, and the word count isn't marked. Any choice you state and justify reasonably gets credit.</p>`
+      : `<p class="small muted">Graded as a whole, with one grade. The examiner looks at the task, how you use the sources, the argument, organisation and language; these are not points, and the word count isn't marked. Any choice you state and justify reasonably gets credit.</p>`) : ""}
+    ${W.exam_practice ? `<p class="small muted">Exam practice: this is the written exam's task. Your teacher gives you one provisional grade, with the exam's five criteria (the task, how you use the sources, the argument, organisation and language) as labels that show what to work on.</p>` : ""}
     ${W.question ? `<p><b>${esc(W.question)}</b></p>` : ""}
     ${W.section ? `<p>About ${W.words} words. ${esc(W.section.task)}</p>`
       : `<p>About ${W.words} words. Your ${esc(W.label)} should:</p>
@@ -1794,7 +1802,7 @@ function tabSubmit(){
     ${W.genre ? genreHTML(W) : ""}
     ${S.rubric ? `<details class="rubric" id="rubric" ${st.rubricOpen ? "open" : ""}><summary>What makes a strong ${esc(W.label)}</summary>
       ${S.rubric.map(c => `<h3>${esc(c.name)}</h3><p class="aim small">${esc(c.aim)}</p><ul class="small">${c.look_for.map(x => `<li>${esc(x)}</li>`).join("")}</ul>`).join("")}
-      <p class="small muted">Your teacher uses these same points for feedback and for exams.</p></details>` : ""}
+      <p class="small muted">Your teacher uses these same criteria for feedback and for exams. They show what to work on; they are not points, and the grade is one overall judgement of your text.</p></details>` : ""}
     <div class="writegrid"><div>
       <textarea class="memo" id="memo" placeholder="Write here. Your text is kept in this tab until you close it.">${esc(st.memo)}</textarea>
       <div class="count" id="count"></div></div>
