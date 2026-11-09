@@ -174,7 +174,7 @@ textarea{width:100%;min-height:200px;resize:vertical;font:inherit;line-height:1.
 .nbhead h2{font-size:18px}
 .lnk{background:none;border:0;color:var(--blue);text-decoration:underline;padding:0;font-size:14px;cursor:pointer}
 .cc summary{cursor:pointer;display:flex;gap:4px;align-items:center;font-weight:600;font-size:14px}
-.cc i,.nbgroup i,.pin i{display:inline-block;width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.15);flex:none}
+.cc i,.nbgroup i{display:inline-block;width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.15);flex:none}
 .ccgrid{display:grid;gap:6px;margin-top:8px}
 .ccgrid label{display:flex;gap:8px;align-items:center}
 .ccgrid input{flex:1;font:inherit;font-size:14px;padding:4px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
@@ -185,11 +185,6 @@ textarea{width:100%;min-height:200px;resize:vertical;font:inherit;line-height:1.
 .nbcard{background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--line);border-radius:8px;padding:8px 10px}
 .nbcard p{font-family:var(--serif);font-size:15px;line-height:1.5}
 .nbcard .src{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-between;gap:8px;margin-top:4px}
-.pins{display:flex;flex-direction:column;gap:6px}
-.pin{display:flex;gap:8px;align-items:flex-start;text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:8px;padding:8px 10px}
-.pin[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft)}
-.pin span{font-family:var(--serif);font-size:15px}
-.pin small{display:block;font-family:var(--ui);font-size:12.5px;color:var(--muted)}
 .gate{border:2px dashed var(--amber)}
 .coderow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .coderow input,.numin{font-family:var(--mono);font-size:18px;padding:6px 10px;border:1.5px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);width:12ch}
@@ -476,7 +471,7 @@ function reply(){
  const first=S.rank[0], p=S.rank.indexOf("r1");
  let extra="";
  if(first!=="r1"&&p===1) extra="<p>You've put Kaveri's recovery second, so I've asked Lakshmi to keep pressing them for a firm date as well.</p>";
- return {from:"Alasdair Reid, Managing Director",subj:"Re: Interim briefing",rel:"medium",body:REPLIES[first]()+extra+(S.ev?EV_REPLY[S.ev]:"")+`<p class="sig">Alasdair</p>`};
+ return {from:"Alasdair Reid, Managing Director",subj:"Re: Interim briefing",rel:"medium",body:REPLIES[first]()+extra+`<p class="sig">Alasdair</p>`};
 }
 const CONSEQ={
  r1:{from:"Arjun Mehta, Key Account Director, Kaveri Precision",subj:"Our restart schedule, in writing",rel:"high",body:`<p>Your managing director asked for our schedule in writing, so here it is. I should have been clearer on the phone: six weeks is when Line 1 restarts. We expect full capacity between weeks ten and twelve.</p>
@@ -493,10 +488,6 @@ const STANDING={r1:()=>"Alasdair has told the board to plan on twelve weeks. Kav
  r3:()=>"Alasdair has spent £4,000 of the fund on a weekly freight-rate forecast.",
  r4:()=>"Alasdair has spent £3,000 of the fund on an insurer's survey of all nine contracts.",
  r5:()=>"Alasdair has spent £6,200 of the fund on a nearshoring site study in Poland."};
-function pinsHTML(){const N=S.notes[R()], items=Object.entries(N.hl);
- return `<h3>Your evidence</h3><p>Pin up to three of your highlights as evidence for the risk you've put first. Alasdair will show them to the board.</p>`+
- (items.length?`<div class="pins">${items.map(([k,h])=>`<button class="pin" data-act="pin" data-v="${k}" aria-pressed="${N.pins.includes(k)}"><i style="background:${HLC[h.c]}"></i><span>${esc(h.t)}<small>${esc(h.src)}</small></span></button>`).join("")}</div>`
-   :`<p class="muted small">You haven't highlighted anything yet. Tap sentences in your emails, reports or recordings' text to highlight them, then come back.</p>`);}
 function inboxList(){const list=[...INBOX[R()]]; if(S.fork) list.unshift(BRANCH[S.fork]); list.push(VIRAL); if(S.ranked) list.unshift(CONSEQ[S.rank[0]]); return list;}
 
 /* ---------- team puzzles ---------- */
@@ -545,16 +536,6 @@ const allPz=r=>[1,2,3].every(n=>pzDone(r,n));
 const ok=n=>!!S.pz[n].tier&&S.pz[n].tier!=="fail";
 const failed=n=>S.pz[n].tier==="fail";
 
-/* evidence pinned to the briefing: reliable AND about the risk ranked first */
-const REL_KW={r1:/week|recover|capacity|restart|schedule|Kaveri|six|twelve/i,r2:/Dornbach|visib|real time|real-time|clause|licen|portal|terminat|every order/i,r3:/rate|freight|hedge|increase|carrier/i,r4:/Falkirk|Bergman|penalt|insur|force/i,r5:/nearshor|Europe|rival|competitor|site stud/i};
-function evScore(){const N=S.notes[R()], pins=N.pins.map(k=>N.hl[k]).filter(Boolean), kw=REL_KW[S.rank[0]];
- if(!pins.length)return "trust";
- if(pins.some(h=>h.q==="low"))return "pushback";
- return pins.filter(h=>h.q==="high"&&kw.test(h.t)).length>=2?"backed":"unsure";}
-const EV_REPLY={trust:"<p>You didn't pin any evidence, so the board will take your view on trust this time.</p>",backed:"<p>The evidence you pinned was solid: data and documents that speak directly to the risk you put first. I showed it to the board, and they accepted it.</p>",
- unsure:"<p>Your evidence was thin, or it didn't speak directly to the risk you put first. The board took your view on trust, but they'll want more next time.</p>",
- pushback:"<p>You pinned a weak source, and the board noticed. They want an outside consultant to check the plan before the fund is committed: £5,000 from the operations budget, not from the fund.</p>"};
-const EV_STANDING={trust:"The board took your briefing on trust.",backed:"The board accepted the evidence behind your briefing.",unsure:"The board took your briefing on trust.",pushback:"The board has paid £5,000 from the operations budget for an outside consultant to check the plan."};
 
 /* ---------- notes: highlights, colour code, free notes ---------- */
 const HL=[["yellow","#FFF176"],["green","#B9F6CA"],["pink","#F8BBD0"],["blue","#B3E5FC"],["orange","#FFE0B2"],["purple","#E1BEE7"]];
@@ -590,7 +571,7 @@ function notesHTML(){
 }
 
 /* ---------- state ---------- */
-const fresh=()=>({role:null,tab:"context",unlock:false,fork:null,expert:null,picks:{arjun:null,farah:null},checks:{},budget:{},decided:false,text:"",handed:false,rank:[...RANK_START],ranked:false,mailOpen:{},mailRead:{},notes:{A:{hl:{},cc:{},free:[],pins:[]},B:{hl:{},cc:{},free:[],pins:[]},C:{hl:{},cc:{},free:[],pins:[]}},nbOpen:false,pz:{1:{failAt:null,tier:null,tries:[0,0,0],ok:[0,0,0],hint:false,sel:{}},2:{tier:null,tries:[0,0,0],ok:[0,0,0],hint:false,sel:{}},3:{tier:null,tries:[0,0,0],ok:[0,0,0],hint:false,sel:{}}},gate:{A:{},B:{},C:{}},gateMsg:"",ev:null});
+const fresh=()=>({role:null,tab:"context",unlock:false,fork:null,expert:null,picks:{arjun:null,farah:null},checks:{},budget:{},decided:false,text:"",handed:false,rank:[...RANK_START],ranked:false,mailOpen:{},mailRead:{},notes:{A:{hl:{},cc:{},free:[]},B:{hl:{},cc:{},free:[]},C:{hl:{},cc:{},free:[]}},nbOpen:false,pz:{1:{failAt:null,tier:null,tries:[0,0,0],ok:[0,0,0],hint:false,sel:{}},2:{tier:null,tries:[0,0,0],ok:[0,0,0],hint:false,sel:{}},3:{tier:null,tries:[0,0,0],ok:[0,0,0],hint:false,sel:{}}},gate:{A:{},B:{},C:{}},gateMsg:"",ev:null});
 let S=fresh();
 const STORE_KEY="simlearn-pro-halsteadpro";
 try{const x=JSON.parse(sessionStorage.getItem(STORE_KEY)||"null"); if(x&&typeof x==="object"&&!Array.isArray(x)) S=Object.assign(fresh(),x);}catch(e){}
@@ -673,7 +654,7 @@ const V={
  },
  investigate(){
   const sl=SHORTLIST[R()], e=S.expert;
-  return task("Question the two witnesses, then agree your interim briefing as a team: everyone sends Alasdair the same order. Agree which highlights to pin, and all pin the same (none is fine: the board takes it on trust). If you have time, hire one outside expert first.")
+  return task("Question the two witnesses, then agree your interim briefing as a team: everyone sends Alasdair the same order. If you have time, hire one outside expert first.")
   +`<section class="card"><h2>Hire an expert (if you have time)</h2><p>This step is optional. Alasdair has set aside money for outside help, enough for each of you to bring in one expert. Experts are expensive and only answer the question you hire them for, so think about what your team most needs to know. Each role has a different shortlist, and some experts appear on more than one list.</p>
     <div class="choices">${sl.map(k=>`<button class="choice" data-act="expert" data-v="${k}" aria-pressed="${e===k}" ${e?"disabled":""}><b>${EXPERTS[k].name}</b><small><em>${EXPERTS[k].who}</em><br>${EXPERTS[k].what}</small></button>`).join("")}</div>
     ${e?`<div class="attach" data-src="${EXPERTS[e].who.split(",")[0]}" data-q="high"><div class="an">📎 Report from ${EXPERTS[e].who}</div>${EXPERTS[e].rep}</div>`:""}</section>`
@@ -688,13 +669,13 @@ const V={
     <p class="note-strong"><strong>Alasdair will act on whatever you put first, straight away.</strong></p>
     <ol class="tl" id="rk">${S.rank.map((id,i)=>{const t=RANK.find(x=>x[0]===id);
       return `<li class="tc" data-id="${id}" draggable="${!S.ranked}"><span class="n">${i+1}</span><span>${t[1]}</span><span class="arr">${S.ranked?"":`<button data-act="mv" data-l="rank" data-v="${i}" data-d="-1" aria-label="Move up" ${i?"":"disabled"}>↑</button><button data-act="mv" data-l="rank" data-v="${i}" data-d="1" aria-label="Move down" ${i<RANK.length-1?"":"disabled"}>↓</button>`}</span></li>`;}).join("")}</ol>
-    ${S.ranked?`<p class="done">Sent to Alasdair. His reply is below, and there's a new email in your inbox.</p>${mail(reply())}`:pinsHTML()+`<button class="btn" data-act="sendrank">Send to Alasdair</button>`}</section>`;
+    ${S.ranked?`<p class="done">Sent to Alasdair. His reply is below, and there's a new email in your inbox.</p>${mail(reply())}`:`<button class="btn" data-act="sendrank">Send to Alasdair</button>`}</section>`;
  },
  decide(){
   const dis=S.decided?"disabled":"";
   let h=task("Check what you've worked out, then agree the split as a team: everyone enters the same numbers. Then write a short budget memo. After you hand in, you'll hear what happened next.");
   const forkLine=S.fork==="tell"?"Chiara called Dornbach on day one. Henrike Vogt thanked her: two of Dornbach's ten urgent shipments can come by sea, and Dornbach has put a second supplier on standby for one valve line.":S.fork==="wait"?"Halstead hasn't called Dornbach yet. Henrike Vogt has asked why two orders show “delayed at origin”, and wants the recovery plan by Friday.":"";
-  h+=`<section class="card"><h2>Where things stand</h2><p>${forkLine} ${S.ranked?STANDING[S.rank[0]]():"Alasdair is still waiting for your interim briefing."} ${S.ev?EV_STANDING[S.ev]:""}</p>${[1,2,3].filter(n=>S.pz[n].tier).map(n=>`<p><b>${PZ[n].title}:</b> ${ok(n)?PZ[n].out.ok:PZ[n].out.fail}</p>`).join("")}
+  h+=`<section class="card"><h2>Where things stand</h2><p>${forkLine} ${S.ranked?STANDING[S.rank[0]]():"Alasdair is still waiting for your interim briefing."}</p>${[1,2,3].filter(n=>S.pz[n].tier).map(n=>`<p><b>${PZ[n].title}:</b> ${ok(n)?PZ[n].out.ok:PZ[n].out.fail}</p>`).join("")}
    <div class="facts"><div class="fact"><div class="l">Fund to split</div><div class="v">${fmt(FUND())}</div></div><div class="fact"><div class="l">Time to commit it</div><div class="v">Two weeks</div></div></div></section>`;
   h+=`<section class="card"><h2>What have you worked out?</h2>${CHECKS.map((c,qi)=>{const a=S.checks[qi];
      return `<div style="display:flex;flex-direction:column;gap:6px"><h3>${qi+1}. ${c.q}</h3>${c.opts.map((o,oi)=>`<button class="opt ${a===undefined?"":oi===c.right?"right":oi===a?"wrong":""}" data-act="chk" data-q="${qi}" data-v="${oi}" ${a!==undefined?"disabled":""}>${o}</button>`).join("")}${a!==undefined?`<p class="fb">${a===c.right?"<strong>Yes.</strong> ":"<strong>Not quite.</strong> "}${c.why}</p>`:""}</div>`;}).join("")}</section>`;
@@ -748,7 +729,6 @@ function ledger(){const L=[],add=(l,w,v)=>L.push([l,w,v]);
  const ex=[["air",URG(),cost("air"),"Air freight beyond the urgent shipments"],["dual",2,cost("dual"),"A third backup product line"],["buffer",170,210,"Buffer stock beyond twelve weeks"],["ins",5,3200,"Insurance on contracts that couldn't claim"],["hedge",4,cost("hedge"),"Hedge months after the recovery"],["near",1,6200,"Extra nearshoring site studies"],["audit",1,5300,"A second audit visit"],["ot",7,1400,"Overtime on accounts with little exposure"]];
  ex.forEach(([id,lim,c,l])=>{const v=over(id,lim,c); if(v)add(l,"inside",v);});
  if(S.ranked&&(S.rank[0]==="r3"||S.rank[0]==="r4"))add(MISSTEP[S.rank[0]][0],"inside",MISSTEP[S.rank[0]][1]);
- if(S.ev==="pushback")add("The board's outside consultant (operations budget)","beyond",5000);
  return L;}
 const EPI={
  air:{low:()=>"Halstead booked fewer air slots than Dornbach's urgent shipments needed. Several of Dornbach's shipments went by sea instead and arrived late, and each delay was logged by its supplier-quality team.",
@@ -796,8 +776,6 @@ function epilogue(beyond,inside){
  extra.push(ok(3)?"Because the board approved fast-track bookings, Halstead booked its air freight and hedge before the carriers' increase.":"The board's week-long freeze on bookings meant Halstead paid the carriers' higher prices for air freight and its hedge.");
  if(failed(1)&&bval("dual")>0) extra.push("The lapsed discount at Straits cost £1,600 for every product line qualified.");
  if(S.ranked&&MISSTEP[S.rank[0]]) extra.push(`${MISSTEP[S.rank[0]][0]}, Alasdair's first move, cost ${fmt(MISSTEP[S.rank[0]][1])} from the fund.`);
- if(S.ev==="pushback") extra.push("The board's outside consultant cost £5,000 from the operations budget.");
- if(S.ev==="backed") extra.push("The board later praised the team's evidence.");
  p.push(extra.join(" "));
  if(band("vis")==="low"||band("ins")==="high") p.push("The board's review asked one question of every line: what has Halstead actually signed? The answer showed that some lines had been judged by how they sounded, optional or prudent, rather than by what the contracts said.");
  p.push(beyond?`Beyond the fund, the disruption cost Halstead about ${fmt(beyond)} in penalties, extra costs and lost business.`:"Halstead came through the twelve weeks without a single cost beyond the fund.");
@@ -817,7 +795,7 @@ document.addEventListener("input",e=>{
  S.budget[id]=v; const sub=document.getElementById("bs_"+id); if(sub)sub.textContent=v?fmt(v*cost(id)):""; patchTotal();});
 document.addEventListener("click",e=>{
  const sw=e.target.closest("[data-hlc]"); if(sw&&palFor){const N=S.notes[R()],k=palFor.dataset.k;
-   if(sw.dataset.hlc==="none"){delete N.hl[k];N.pins=N.pins.filter(x=>x!==k);} else N.hl[k]={c:sw.dataset.hlc,t:palFor.textContent,src:palFor.dataset.src,q:palFor.dataset.q};
+   if(sw.dataset.hlc==="none"){delete N.hl[k];} else N.hl[k]={c:sw.dataset.hlc,t:palFor.textContent,src:palFor.dataset.src,q:palFor.dataset.q};
    closePal(); render(); return;}
  const sn=e.target.closest(".sn"); if(sn){openPal(sn);return;}
  if(!e.target.closest("#hlpal"))closePal();
@@ -833,12 +811,11 @@ function act(a,d){
   case "expert":if(!S.expert)S.expert=d.v;break;
   case "ask":if(S.picks[d.w]===null)S.picks[d.w]=+d.v;break;
   case "mv":{const L=S[d.l],i=+d.v,j=i+(+d.d);if(j<0||j>=L.length)return;flip(d.l,()=>{[L[i],L[j]]=[L[j],L[i]];});return;}
-  case "sendrank":if(!S.ranked){S.ev=evScore();S.ranked=true;}break;
-  case "pin":{const N=S.notes[R()],i=N.pins.indexOf(d.v); if(i>=0)N.pins.splice(i,1); else if(N.pins.length<3)N.pins.push(d.v); break;}
+  case "sendrank":if(!S.ranked){S.ranked=true;}break;
   case "nbopen":S.nbOpen=true;break;
   case "endcode":{const c=((document.getElementById("endcode")||{}).value||"").trim();if(fnv(c)===ENDING_HASH){S.endOpen=true;S.endMsg="";}else S.endMsg=c?"That isn't the code. Check it with your teacher.":"";break;}
   case "nbclose":S.nbOpen=false;break;
-  case "hlrm":{const N=S.notes[R()];delete N.hl[d.v];N.pins=N.pins.filter(x=>x!==d.v);break;}
+  case "hlrm":{const N=S.notes[R()];delete N.hl[d.v];break;}
   case "noteadd":{const t=(document.getElementById("nbnew")||{}).value||""; if(t.trim())S.notes[R()].free.push(t.trim()); break;}
   case "noterm":S.notes[R()].free.splice(+d.v,1);break;
   case "pzsel":S.pz[d.n].sel[d.i]=d.v;break;
@@ -1014,10 +991,10 @@ function proChoices(r){
  Object.keys(WIT).forEach(w=>{const p=S.picks[w]; out.push(`${c[w]}=${p===null||p===undefined?"-":"o"+(p+1)}`);});
  return out.join(", ");
 }
-// The Pro line: the team's fork, interim briefing (Morven/Moira acts on the first), evidence verdict and puzzle tiers.
-// Not part of the check code (blocks.py reads it into sub["pro"]).
+// The Pro line: the team's fork, interim briefing (Morven/Moira acts on the first) and puzzle tiers (no evidence= since
+// the evidence step was removed, 9 Nov 2026). Not part of the check code (blocks.py reads it into sub["pro"]).
 function proLine(){
- return `Pro: fork=${S.fork||"none"}, briefing=${S.ranked?S.rank.join(">"):"none"}, evidence=${S.ranked&&S.ev?S.ev:"none"}, puzzles=${[1,2,3].map(n=>`${n}:${S.pz[n].tier||"none"}`).join(",")}`;
+ return `Pro: fork=${S.fork||"none"}, briefing=${S.ranked?S.rank.join(">"):"none"}, puzzles=${[1,2,3].map(n=>`${n}:${S.pz[n].tier||"none"}`).join(",")}`;
 }
 // writing.by_role (GUIDE 3c): the student's role writes its own section of the group's report
 function roleW(r){const W=LITE.writing, t=W.by_role&&W.by_role[r];

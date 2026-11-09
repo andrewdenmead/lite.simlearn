@@ -174,7 +174,7 @@ textarea{width:100%;min-height:200px;resize:vertical;font:inherit;line-height:1.
 .nbhead h2{font-size:18px}
 .lnk{background:none;border:0;color:var(--blue);text-decoration:underline;padding:0;font-size:14px;cursor:pointer}
 .cc summary{cursor:pointer;display:flex;gap:4px;align-items:center;font-weight:600;font-size:14px}
-.cc i,.nbgroup i,.pin i{display:inline-block;width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.15);flex:none}
+.cc i,.nbgroup i{display:inline-block;width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.15);flex:none}
 .ccgrid{display:grid;gap:6px;margin-top:8px}
 .ccgrid label{display:flex;gap:8px;align-items:center}
 .ccgrid input{flex:1;font:inherit;font-size:14px;padding:4px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
@@ -185,11 +185,6 @@ textarea{width:100%;min-height:200px;resize:vertical;font:inherit;line-height:1.
 .nbcard{background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--line);border-radius:8px;padding:8px 10px}
 .nbcard p{font-family:var(--serif);font-size:15px;line-height:1.5}
 .nbcard .src{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-between;gap:8px;margin-top:4px}
-.pins{display:flex;flex-direction:column;gap:6px}
-.pin{display:flex;gap:8px;align-items:flex-start;text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:8px;padding:8px 10px}
-.pin[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft)}
-.pin span{font-family:var(--serif);font-size:15px}
-.pin small{display:block;font-family:var(--ui);font-size:12.5px;color:var(--muted)}
 .gate{border:2px dashed var(--amber)}
 .coderow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .coderow input,.numin{font-family:var(--mono);font-size:18px;padding:6px 10px;border:1.5px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);width:12ch}
@@ -392,7 +387,7 @@ function reply(){
  const first=S.rank[0], p=S.rank.indexOf("r1");
  let extra="";
  if(first!=="r1") extra = p===1?"<p>You put the controlled tests second, so I've asked for their results by group as well.</p>":"";
- return {from:"Ishbel Rennie, Chair of the Commission",subj:"Re: Interim briefing",rel:"medium",body:REPLIES[first]()+extra+(S.ev?EV_REPLY[S.ev]:"")+`<p class="sig">Ishbel</p>`};
+ return {from:"Ishbel Rennie, Chair of the Commission",subj:"Re: Interim briefing",rel:"medium",body:REPLIES[first]()+extra+`<p class="sig">Ishbel</p>`};
 }
 const CONSEQ={
  r1:{from:"Kwaku Appiah, Thameside University, London",subj:"The committee hearing",rel:"high",body:`<p>I watched Thursday's session. Leading with the controlled tests was wise: they are the one piece of evidence that holds delivery constant, and no member challenged them.</p><p>I should say what the tests cannot show. They measure intention rather than behaviour, and a stated intention is usually larger than what people go on to do.</p><p class="sig">Kwaku</p>`},
@@ -406,10 +401,6 @@ const STANDING={r1:()=>"Ishbel led her evidence to the committee with the contro
  r3:()=>"Ishbel led with the survey; the committee said it showed opinion, not effect.",
  r4:()=>"Ishbel led with Peter Hext's account; the committee asked why the commission was taking the unit's word for it.",
  r5:()=>"Ishbel led with online posts, most of which turned out to come from a handful of accounts."};
-function pinsHTML(){const N=S.notes[R()], items=Object.entries(N.hl);
- return `<h3>Your evidence</h3><p>Pin up to three of your highlights that show why the item you've put first is the strongest. Ishbel will show them to the committee.</p>`+
- (items.length?`<div class="pins">${items.map(([k,h])=>`<button class="pin" data-act="pin" data-v="${k}" aria-pressed="${N.pins.includes(k)}"><i style="background:${HLC[h.c]}"></i><span>${esc(h.t)}<small>${esc(h.src)}</small></span></button>`).join("")}</div>`
-   :`<p class="muted small">You haven't highlighted anything yet. Tap sentences in your emails, reports or recordings' text to highlight them, then come back.</p>`);}
 function inboxList(){const list=[...INBOX[R()]]; if(R()==="C"&&S.fork) list.splice(1,0,BRANCH[S.fork]); list.push(FWD); if(S.ranked) list.unshift(CONSEQ[S.rank[0]]); return list;}
 const EPI_RANK={r2:"The Forum's study, which Ishbel had led with, was quietly dropped from the final report.",r3:"Ishbel's early reliance on a single survey was mentioned in two newspaper columns.",r4:"The committee's report noted that the commission had at first taken the unit's account of itself on trust.",r5:"The online posts Ishbel had quoted turned out to come from fewer than 200 accounts."};
 
@@ -459,7 +450,8 @@ const pzDone=(r,n)=>!!S.pz[n].tier&&!!S.gate[r][n];
 const allPz=r=>[1,2,3].every(n=>pzDone(r,n));
 const ok=n=>S.pz[n].tier&&S.pz[n].tier!=="fail";
 const failed=n=>S.pz[n].tier==="fail";
-/* what the committee picked apart at the hearing: it follows how the evidence was handled, never which side was taken */
+/* what the committee picked apart at the hearing: it follows how the evidence was handled (Q1, the puzzles, the briefing's
+   first item), never which side was taken on Q2 or the recommendation */
 function hearing(){const out=[];
  if(S.d1==="B") out.push(failed(1)?"The finding on why the stories worked rested on delivery, and on a study by the Forum, whose funders hadn't been declared: the committee showed that budgets, reach and the platform had been the same for both kinds of campaign.":"The finding on why the stories worked rested on delivery, though budgets, reach and the platform had been the same for both kinds of campaign.");
  else if(failed(1)) out.push("The Forum's undeclared study sat in the commission's core evidence. The committee asked why, though the commission's own finding didn't rest on it.");
@@ -467,18 +459,9 @@ function hearing(){const out=[];
  if(failed(3)) out.push("The summary's figures on trust and on the cost per life had to be corrected in writing.");
  if(S.ranked&&S.rank[0]==="r2") out.push("Ishbel's first statement had led with the Forum's study.");
  else if(S.ranked&&["r4","r5"].includes(S.rank[0])) out.push("Ishbel's first statement had led with weak evidence.");
- if(S.ev==="pushback") out.push("The evidence pinned to the interim briefing included a weak source.");
  return out;}
 function standing(){return (S.d1==="A"?1:0)+(failed(2)?0:1)+(failed(3)?0:1);}
 
-/* evidence pinned to the briefing */
-function evScore(){const N=S.notes[R()], pins=N.pins.map(k=>N.hl[k]).filter(Boolean);
- const strong=pins.filter(h=>h.q==="high").length, weak=pins.filter(h=>h.q==="low").length;
- return weak?"pushback":strong>=2?"backed":"unsure";}
-const EV_REPLY={backed:"<p>The evidence you pinned was solid: peer-reviewed and independent work, not opinions. I showed it to the committee, and it was accepted.</p>",
- unsure:"<p>Your evidence was thin. The committee took it on trust this time, but it will want more.</p>",
- pushback:"<p>One of the sources you pinned was weak, and a committee member picked it out at once. I've had to promise a written note on our sources: another week's work.</p>"};
-const EV_STANDING={backed:"The committee accepted the evidence behind your briefing.",unsure:"The committee took your briefing on trust.",pushback:"A committee member picked out a weak source in your briefing, and Ishbel has promised a written note on the commission's sources."};
 
 /* ---------- notes: highlights, colour code, free notes ---------- */
 const HL=[["yellow","#FFF176"],["green","#B9F6CA"],["pink","#F8BBD0"],["blue","#B3E5FC"],["orange","#FFE0B2"],["purple","#E1BEE7"]];
@@ -514,7 +497,7 @@ function notesHTML(){
 }
 
 /* ---------- state ---------- */
-const fresh=()=>({role:null,tab:"context",unlock:false,fork:null,expert:null,picks:{laird:null,hext:null},d1:null,d2:null,d3:null,decided:false,text:"",handed:false,rank:[...RANK_START],ranked:false,mailOpen:{},mailRead:{},notes:{A:{hl:{},cc:{},free:[],pins:[]},B:{hl:{},cc:{},free:[],pins:[]},C:{hl:{},cc:{},free:[],pins:[]}},nbOpen:false,pz:{1:{tier:null,tries:[0,0,0],ok:[0,0,0],hint:false,sel:{}},2:{tier:null,tries:[0,0,0],ok:[0,0,0],hint:false,sel:{}},3:{tier:null,tries:[0,0,0],ok:[0,0,0],hint:false,sel:{}}},gate:{A:{},B:{},C:{}},gateMsg:"",ev:null});
+const fresh=()=>({role:null,tab:"context",unlock:false,fork:null,expert:null,picks:{laird:null,hext:null},d1:null,d2:null,d3:null,decided:false,text:"",handed:false,rank:[...RANK_START],ranked:false,mailOpen:{},mailRead:{},notes:{A:{hl:{},cc:{},free:[]},B:{hl:{},cc:{},free:[]},C:{hl:{},cc:{},free:[]}},nbOpen:false,pz:{1:{tier:null,tries:[0,0,0],ok:[0,0,0],hint:false,sel:{}},2:{tier:null,tries:[0,0,0],ok:[0,0,0],hint:false,sel:{}},3:{tier:null,tries:[0,0,0],ok:[0,0,0],hint:false,sel:{}}},gate:{A:{},B:{},C:{}},gateMsg:"",ev:null});
 let S=fresh();
 const STORE_KEY="simlearn-pro-kindliepro";
 try{const x=JSON.parse(sessionStorage.getItem(STORE_KEY)||"null"); if(x&&typeof x==="object"&&!Array.isArray(x)) S=Object.assign(fresh(),x);}catch(e){}
@@ -604,7 +587,7 @@ const V={
  },
  investigate(){
   const sl=SHORTLIST[R()], e=S.expert;
-  return task("Commission one outside expert (agree as a team so you don't all choose the same one), question the two witnesses, then agree your interim briefing as a team. Everyone enters the same ranking on their own screen and pins their own best evidence.")
+  return task("Commission one outside expert (agree as a team so you don't all choose the same one), question the two witnesses, then agree your interim briefing as a team. Everyone enters the same ranking on their own screen.")
   +`<section class="card"><h2>Commission an expert</h2><p>The commission can pay for one expert report from each of you. An expert answers only the question you commission, so think about what your team most needs to know. Each role has a different shortlist, and some experts appear on more than one list.</p>
     <div class="choices">${sl.map(k=>`<button class="choice" data-act="expert" data-v="${k}" aria-pressed="${e===k}" ${e?"disabled":""}><b>${EXPERTS[k].name}</b><small><em>${EXPERTS[k].who}</em><br>${EXPERTS[k].what}</small></button>`).join("")}</div>
     ${e?`<div class="attach" data-src="${EXPERTS[e].who.split(",")[0]}" data-q="${EXPERTS[e].q}"><div class="an">📎 Report from ${EXPERTS[e].who}</div>${EXPERTS[e].rep}</div>`:""}</section>`
@@ -619,12 +602,12 @@ const V={
     <p class="note-strong"><strong>Ishbel will lead with whatever you put first.</strong></p>
     <ol class="tl" id="rk">${S.rank.map((id,i)=>{const t=RANK.find(x=>x[0]===id);
       return `<li class="tc" data-id="${id}" draggable="${!S.ranked}"><span class="n">${i+1}</span><span>${t[1]}</span><span class="arr">${S.ranked?"":`<button data-act="mv" data-l="rank" data-v="${i}" data-d="-1" aria-label="Move up" ${i?"":"disabled"}>↑</button><button data-act="mv" data-l="rank" data-v="${i}" data-d="1" aria-label="Move down" ${i<RANK.length-1?"":"disabled"}>↓</button>`}</span></li>`;}).join("")}</ol>
-    ${S.ranked?`<p class="done">Sent to Ishbel. Her reply is below, and there's a new email in your inbox.</p>${mail(reply())}`:pinsHTML()+`<button class="btn" data-act="sendrank">Send to Ishbel</button>`}</section>`;
+    ${S.ranked?`<p class="done">Sent to Ishbel. Her reply is below, and there's a new email in your inbox.</p>${mail(reply())}`:`<button class="btn" data-act="sendrank">Send to Ishbel</button>`}</section>`;
  },
  decide(){
   const dis=S.decided?"disabled":"";
   let h=task("Agree your answers to the two questions and your recommendation as a team, then everyone enters the same choices on their own screen. Then each of you writes your section of the commission's position paper. After you hand in, you'll hear what happened next.");
-  h+=`<section class="card"><h2>Where things stand</h2><p>${S.fork==="legal"?"The commission is working to narrow terms: whether the unit was lawful and properly governed.":"The commission is working to broad terms: the unit's effects on public health and on society."} ${S.ranked?STANDING[S.rank[0]]():"Ishbel is still waiting for your interim briefing."} ${S.ev?EV_STANDING[S.ev]:""}</p>${[1,2,3].filter(n=>S.pz[n].tier).map(n=>`<p><b>${PZ[n].title}:</b> ${ok(n)?PZ[n].out.ok:PZ[n].out.fail}</p>`).join("")}</section>`;
+  h+=`<section class="card"><h2>Where things stand</h2><p>${S.fork==="legal"?"The commission is working to narrow terms: whether the unit was lawful and properly governed.":"The commission is working to broad terms: the unit's effects on public health and on society."} ${S.ranked?STANDING[S.rank[0]]():"Ishbel is still waiting for your interim briefing."}</p>${[1,2,3].filter(n=>S.pz[n].tier).map(n=>`<p><b>${PZ[n].title}:</b> ${ok(n)?PZ[n].out.ok:PZ[n].out.fail}</p>`).join("")}</section>`;
   h+=["d1","d2","d3"].map(k=>{const D=DEC[k];return `<section class="card"><h2>${D[0]}</h2><div class="choices">${[1,2].map(i=>{const v=i===1?"A":"B";
     return `<button class="choice" data-act="dec" data-q="${k}" data-v="${v}" aria-pressed="${S[k]===v}" ${dis}><span class="k">OPTION ${v}</span><b>${D[i][0]}</b><small>${D[i][1]}</small></button>`;}).join("")}</div></section>`;}).join("");
   if(!S.decided) return h+`<button class="btn" data-act="lock" ${S.d1&&S.d2&&S.d3?"":"disabled"}>Confirm our answers</button>`;
@@ -636,7 +619,7 @@ const V={
   if(!S.handed) return h;
   if(!S.endOpen){h+=endLockHTML();return h;}
   const fk=S.fork||"public", H=hearing(), st=standing();
-  h+=`<section class="card"><h2>One year later</h2>${audio("News report: Westminster Week","newsreader, light music bed under",`<p class="sd">[News jingle, music bed under]</p><p>${EPI_FORK[fk]} ${EPI_D1[S.d1]}</p><p>${EPI_D2[S.d2]}</p><p>${EPI_D3[S.d3]}</p><p>${H.length?"At the committee hearing, MPs picked apart the parts of the report that rested on weak or misused evidence. "+H.join(" "):"At the committee hearing, MPs tested every finding, and the evidence behind each one held, whatever members thought of the conclusions."}${S.ev==="backed"?" The committee's report later praised the commission's use of sources.":""}</p>${S.ranked&&EPI_RANK[S.rank[0]]?`<p>${EPI_RANK[S.rank[0]]}</p>`:""}<p>One exchange made the evening news. The committee's chair asked how many members remembered the 2032 report about Jamie Dixon, the Barnsley boy burned in a substation. Most hands went up. It was item 207 in the unit's catalogue: there was no Jamie, no Donna and no engineer, only actors in a studio in Leeds.</p>`)}
+  h+=`<section class="card"><h2>One year later</h2>${audio("News report: Westminster Week","newsreader, light music bed under",`<p class="sd">[News jingle, music bed under]</p><p>${EPI_FORK[fk]} ${EPI_D1[S.d1]}</p><p>${EPI_D2[S.d2]}</p><p>${EPI_D3[S.d3]}</p><p>${H.length?"At the committee hearing, MPs picked apart the parts of the report that rested on weak or misused evidence. "+H.join(" "):"At the committee hearing, MPs tested every finding, and the evidence behind each one held, whatever members thought of the conclusions."}</p>${S.ranked&&EPI_RANK[S.rank[0]]?`<p>${EPI_RANK[S.rank[0]]}</p>`:""}<p>One exchange made the evening news. The committee's chair asked how many members remembered the 2032 report about Jamie Dixon, the Barnsley boy burned in a substation. Most hands went up. It was item 207 in the unit's catalogue: there was no Jamie, no Donna and no engineer, only actors in a studio in Leeds.</p>`)}
    <div class="board"><div class="tile"><div class="l">Findings that came through the hearing unchanged</div><div class="v" id="total">${st} of 3</div></div><div class="tile"><div class="l">Points the committee picked apart</div><div class="v" id="sales">${H.length}</div></div></div>
    <p>Neither number depends on which side you took on the second question or the recommendation: only on how the evidence was handled.</p>
    <p>Now find a group that chose the other terms of reference at the start, and ask them what happened to them.</p></section>`;
@@ -652,7 +635,7 @@ document.addEventListener("toggle",e=>{const d=e.target;if(d.dataset&&d.dataset.
 document.addEventListener("input",e=>{if(e.target.id==="cf"){S.text=e.target.value;wc();}});
 document.addEventListener("click",e=>{
  const sw=e.target.closest("[data-hlc]"); if(sw&&palFor){const N=S.notes[R()],k=palFor.dataset.k;
-   if(sw.dataset.hlc==="none"){delete N.hl[k];N.pins=N.pins.filter(x=>x!==k);} else N.hl[k]={c:sw.dataset.hlc,t:palFor.textContent,src:palFor.dataset.src,q:palFor.dataset.q};
+   if(sw.dataset.hlc==="none"){delete N.hl[k];} else N.hl[k]={c:sw.dataset.hlc,t:palFor.textContent,src:palFor.dataset.src,q:palFor.dataset.q};
    closePal(); render(); return;}
  const sn=e.target.closest(".sn"); if(sn){openPal(sn);return;}
  if(!e.target.closest("#hlpal"))closePal();
@@ -668,12 +651,11 @@ function act(a,d){
   case "expert":if(!S.expert)S.expert=d.v;break;
   case "ask":if(S.picks[d.w]===null)S.picks[d.w]=+d.v;break;
   case "mv":{const L=S[d.l],i=+d.v,j=i+(+d.d);if(j<0||j>=L.length)return;flip(d.l,()=>{[L[i],L[j]]=[L[j],L[i]];});return;}
-  case "sendrank":S.ev=evScore();S.ranked=true;break;
-  case "pin":{const N=S.notes[R()],i=N.pins.indexOf(d.v); if(i>=0)N.pins.splice(i,1); else if(N.pins.length<3)N.pins.push(d.v); break;}
+  case "sendrank":S.ranked=true;break;
   case "nbopen":S.nbOpen=true;break;
   case "endcode":{const c=((document.getElementById("endcode")||{}).value||"").trim();if(fnv(c)===ENDING_HASH){S.endOpen=true;S.endMsg="";}else S.endMsg=c?"That isn't the code. Check it with your teacher.":"";break;}
   case "nbclose":S.nbOpen=false;break;
-  case "hlrm":{const N=S.notes[R()];delete N.hl[d.v];N.pins=N.pins.filter(x=>x!==d.v);break;}
+  case "hlrm":{const N=S.notes[R()];delete N.hl[d.v];break;}
   case "noteadd":{const t=(document.getElementById("nbnew")||{}).value||""; if(t.trim())S.notes[R()].free.push(t.trim()); break;}
   case "noterm":S.notes[R()].free.splice(+d.v,1);break;
   case "pzsel":S.pz[d.n].sel[d.i]=d.v;break;
@@ -848,10 +830,10 @@ function proChoices(r){
  Object.keys(WIT).forEach(w=>{const p=S.picks[w]; out.push(`${c[w]}=${p===null||p===undefined?"-":"o"+(p+1)}`);});
  return out.join(", ");
 }
-// The Pro line: the team's fork, interim briefing (Morven/Moira acts on the first), evidence verdict and puzzle tiers.
-// Not part of the check code (blocks.py reads it into sub["pro"]).
+// The Pro line: the team's fork, interim briefing (Morven/Moira acts on the first) and puzzle tiers (no evidence= since
+// the evidence step was removed, 9 Nov 2026). Not part of the check code (blocks.py reads it into sub["pro"]).
 function proLine(){
- return `Pro: fork=${S.fork||"none"}, briefing=${S.ranked?S.rank.join(">"):"none"}, evidence=${S.ranked&&S.ev?S.ev:"none"}, puzzles=${[1,2,3].map(n=>`${n}:${S.pz[n].tier||"none"}`).join(",")}`;
+ return `Pro: fork=${S.fork||"none"}, briefing=${S.ranked?S.rank.join(">"):"none"}, puzzles=${[1,2,3].map(n=>`${n}:${S.pz[n].tier||"none"}`).join(",")}`;
 }
 // writing.by_role (GUIDE 3c): the student's role writes its own section of the group's report
 function roleW(r){const W=LITE.writing, t=W.by_role&&W.by_role[r];
