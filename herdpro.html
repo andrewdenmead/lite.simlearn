@@ -279,12 +279,12 @@ const INBOX={
   {from:"Gavin Treloar, Operations & Filling Line Manager",subj:"One changeover, and before Declan calls you",rel:"high",body:`
    <p>Quick heads-up before anything is locked. Our filling line can take one changeover before the Bellamy's deadline. Each one stops the line for two full days: new parts, a food-safety clean and a test run. A new material and a new format at the same time would be two changeovers in a slot planned for one.</p>
    <p>Declan at Halden will tell you the new carton is ready. As far as I know, it has only run on their pilot line, slowly, with their best people watching every pack. The first full-speed trial on a line like ours is six weeks away, three weeks before the print deadline. Nerys tells me the recyclability certificate won't be through before the deadline either.</p>
-   <p>One more thing: a screw cap would need its own applicator, which we don't have. Renting one takes about three weeks to arrive.</p>
+   <p>One more thing: shoppers do like caps, I know, but a screw cap would need its own applicator, which we don't have. Renting one takes about three weeks to arrive.</p>
    ${att("Halden's pilot samples, cut open on the bench",`<p><b>Standard carton</b> (code HP-210 printed on the inside seam): paperboard with a thin foil lining.</p><p><b>New carton</b> (code HP-M1 on the inside seam): paper all the way through, with a clear coating and no foil.</p>`)}
    <p class="sig">Gavin</p>`},
   {from:"Sanjay Thackray, Retail Logistics Planner",subj:"What Bellamy's DC will and won't take",rel:"high",body:`
    <p>I've been through the specifications of Bellamy's distribution centre with their inbound team. Three things.</p>
-   <p>First, their pallets are built around the standard one-litre brick. A slim, tall carton needs a new pallet pattern that nobody has costed, and tall cartons tip over in a lorry. Expect two or three per cent damage in the first months, and one damaged carton gets the whole case rejected.</p>
+   <p>First, their pallets are built around the standard one-litre brick. A slim, tall carton needs a new pallet pattern that nobody has costed, and tall cartons tip over in a lorry. Expect two or three per cent damage in the first months, and one damaged carton gets the whole case rejected. A slim carton on a pallet built for bricks also leaves gaps, so every lorry carries fewer packs.</p>
    <p>Second, the DC won't accept ambient drinks with less than six months of shelf life left. I hear the new carton is only proven for four months so far.</p>
    <p>Third, Bellamy's rule for a reset is that the whole range arrives at the DC in the same week, the week before the reset. They don't take a range in instalments. That's four new codes for their system to learn at once, just like the Bloom Line. I've dug out Bellamy's problem log from the Bloom Line's first month for the team.</p>
    ${att("Product sheet for the DC: four new codes",`<div class="tw"><table><thead><tr><th>Code</th><th>Product</th><th>What's in the carton</th></tr></thead><tbody>
@@ -303,7 +303,7 @@ const INBOX={
    ${att("Range brief: how each product should feel",`<p><b>Herd Oat:</b> creamy and mild, the one people already know. <b>Barista Blend:</b> thicker, foams when heated in a coffee machine, for café people. <b>Almond:</b> unsweetened, light and nutty. <b>Cultured:</b> sharp and lightly sparkling, with live cultures for gut health.</p>`)}
    <p class="sig">Clio</p>`},
   {from:"Mika Nakamura, Brand Insights Manager",subj:"Concept test: the results are split",rel:"high",body:`
-   <p>Here are the concept-test results. They don't point one way. The custom system, with each product in its own colour and illustration, scored about twenty points higher with younger coffee-shop shoppers on the Barista Blend. The unified system, one layout and colour framework with a small accent colour each, won with our loyal Herd Oat buyers. As one of them put it: “obviously from the people who make the oat drink I already trust”. Those loyal buyers bring in about three-quarters of our sales.</p>
+   <p>Here are the concept-test results. They don't point one way. The custom system, with each product in its own colour and illustration, scored about twenty points higher with younger coffee-shop shoppers on the Barista Blend. The unified system, one layout and colour framework with a small accent colour each, won with our loyal Herd Oat buyers. As one of them put it: “obviously from the people who make the oat drink I already trust”. Those loyal buyers bring in about three-quarters of our sales. When we put the four custom packs side by side, several of them couldn't find Herd Oat at first.</p>
    <p>One more thing: almost nobody mentioned the carton's shape or material. What shoppers reacted to was the front of the pack: the colours, the name and the illustration.</p>
    ${att("Which system shoppers preferred",splitBars([{l:"Loyal Herd Oat buyers",a:33},{l:"New coffee-shop shoppers",a:61}],"Custom","Unified"))}
    ${att("What shoppers mentioned without being asked",shareBars([{l:"Front of the pack",v:81},{l:"Price",v:11},{l:"Shape",v:5},{l:"Material",v:3}]))}
@@ -689,7 +689,7 @@ const V={
     return `<button class="choice" data-act="dec" data-q="${k}" data-v="${v}" aria-pressed="${S[k]===v}" ${dis}><span class="k">OPTION ${v}</span><b>${D[i][0]}</b><small>${o.desc}</small></button>`;}).join("")}</div></section>`;}).join("");
   if(!S.decided) return h+`<button class="btn" data-act="lock" ${canLock()?"":"disabled"}>Confirm our decisions</button>`;
   if(!S.handed)h+=`<p><button class="btn small" data-act="undec">Change our decisions</button> <span class="muted small">Until you hand in, your team can still change its decisions.</span></p>`;
-  h+=`<section class="card"><h2>Design rationale</h2><p>Write 120–180 words for Morven: your recommendation for each decision and how they fit together, the evidence that convinced you (name the person or document), and the strongest objection to your plan, with your answer to it.</p>
+  h+=`<section class="card"><h2>${roleW(S.role).section?"Your section: "+esc(roleW(S.role).section.label):"Design rationale"}</h2>${roleW(S.role).section?`<p>About ${roleW(S.role).words} words. ${esc(roleW(S.role).section.task)}</p>`:`<p>Write 120–180 words for Morven: your recommendation for each decision and how they fit together, the evidence that convinced you (name the person or document), and the strongest objection to your plan, with your answer to it.</p>`}
    <p class="muted small">Useful language: <em>We recommend…</em> · <em>According to…</em> · <em>Although the custom look…, …</em> · <em>If we…, we would…</em></p>
    <textarea id="cf" aria-label="Design rationale"></textarea>
    <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><span class="wc" id="wc">0 words</span></div>${handinHTML()}</section>`;
@@ -804,7 +804,7 @@ function bindDrag(key){
 /* ---------- hand-in: Lite's submission block and PDF (GUIDE 2n). Everything below up to "Pro hand-in" is copied
    verbatim from studio/template.html by cartridges/authoring/_pro_common.py, so the check code matches blocks.py.
    Nothing is sent anywhere: the block and the PDF are made here in the browser. ---------- */
-const LITE={"id": "herdpro", "version": 1, "title": "Herd: The Range Reset (Pro)", "writing": {"label": "design rationale", "addressee": "Morven Laidlaw"}, "roles": {"A": {"dept": "Structural Packaging Designer", "chars": {"expert": "expert_a", "declan": "declan_a", "clio": "clio_a"}}, "B": {"dept": "Brand & Packaging Designer", "chars": {"expert": "expert_b", "declan": "declan_b", "clio": "clio_b"}}, "C": {"dept": "Sustainable Packaging Designer", "chars": {"expert": "expert_c", "declan": "declan_c", "clio": "clio_c"}}}, "decisions": {"d1": "D1", "d2": "D2", "d3": "D3"}};
+const LITE={"id": "herdpro", "version": 1, "title": "Herd: The Range Reset (Pro)", "writing": {"label": "design rationale", "addressee": "Morven Laidlaw", "by_role": {"A": {"label": "design rationale section on the carton format", "words": 150, "task": "Write your section of the team's design rationale for Morven: the decision on the carton format. Open with one sentence that gives your team's overall recommendation. Then argue your team's choice on the carton format with the evidence from your own inbox (who said it, the numbers, the deadlines), give the strongest objection to that choice and answer it. Mention the other two decisions only in passing: your teammates write those sections.", "decision": "D2"}, "B": {"label": "design rationale section on the visual system", "words": 150, "task": "Write your section of the team's design rationale for Morven: the decision on the visual system. Open with one sentence that gives your team's overall recommendation. Then argue your team's choice on the visual system with the evidence from your own inbox (who said it, the numbers, the deadlines), give the strongest objection to that choice and answer it. Mention the other two decisions only in passing: your teammates write those sections.", "decision": "D3"}, "C": {"label": "design rationale section on the carton material", "words": 150, "task": "Write your section of the team's design rationale for Morven: the decision on the carton material. Open with one sentence that gives your team's overall recommendation. Then argue your team's choice on the carton material with the evidence from your own inbox (who said it, the numbers, the deadlines), give the strongest objection to that choice and answer it. Mention the other two decisions only in passing: your teammates write those sections.", "decision": "D1"}}}, "roles": {"A": {"dept": "Structural Packaging Designer", "chars": {"expert": "expert_a", "declan": "declan_a", "clio": "clio_a"}}, "B": {"dept": "Brand & Packaging Designer", "chars": {"expert": "expert_b", "declan": "declan_b", "clio": "clio_b"}}, "C": {"dept": "Sustainable Packaging Designer", "chars": {"expert": "expert_c", "declan": "declan_c", "clio": "clio_c"}}}, "decisions": {"d1": "D1", "d2": "D2", "d3": "D3"}};
 function fnv(str){ let h = 0x811c9dc5; for (const ch of new TextEncoder().encode(str)) { h ^= ch; h = Math.imul(h, 0x01000193) >>> 0; } return h >>> 0; }
 function checkCode(parts){
   const A = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
@@ -935,8 +935,11 @@ function proChoices(r){
 function proLine(){
  return `Pro: fork=${S.fork||"none"}, briefing=${S.ranked?S.rank.join(">"):"none"}, evidence=${S.ranked&&S.ev?S.ev:"none"}, puzzles=${[1,2,3].map(n=>`${n}:${S.pz[n].tier||"none"}`).join(",")}`;
 }
+// writing.by_role (GUIDE 3c): the student's role writes its own section of the group's report
+function roleW(r){const W=LITE.writing, t=W.by_role&&W.by_role[r];
+ return t?Object.assign({},W,{label:t.label||W.label,words:t.words,section:t}):W;}
 function makeSub(){
- const r=S.role, W=LITE.writing, missing=[];
+ const r=S.role, W=roleW(r), missing=[];
  S.sub=null;
  if(!r||!LITE.roles[r]){S.issues=["Choose your role first (Context)."];return;}
  const memoText=(S.text||"").trim();
@@ -990,7 +993,7 @@ function handinHTML(){
 }
 function downloadPdf(){
  const x=S.sub; if(!x) return;
- const W=LITE.writing, rr=LITE.roles[x.r];
+ const W=roleW(x.r), rr=LITE.roles[x.r];
  const cap=taskName(W).charAt(0).toUpperCase()+taskName(W).slice(1);
  const today=new Date().toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"});
  const blob=makePdf({

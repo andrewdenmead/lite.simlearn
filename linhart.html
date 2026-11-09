@@ -1772,16 +1772,24 @@ function genreHTML(W){
     ${G.strong ? `<h3>What a strong one does</h3>${list(G.strong)}` : ""}<p></p></details>`;
 }
 
+// writing.by_role (GUIDE 3c): outside exam-practice weeks and exams, each student writes their role's section of the
+// group's report (one decision), with its own label, word guide and task; otherwise the whole-report task.
+function roleWriting(){
+  const W = S.writing, r = role(), t = W.by_role && !W.exam_practice && !EXAM && r && W.by_role[r.id];
+  return t ? Object.assign({}, W, {label: t.label || W.label, words: t.words || W.words, instructions: [t.task], section: t}) : W;
+}
+
 function tabSubmit(){
-  const W = S.writing;
+  const W = roleWriting();
   $("#main").innerHTML = `
     <h2 style="margin-top:0">Your ${esc(W.label)}${W.addressee ? ` to ${esc(W.addressee)}` : ""}${EXAM && EX.points ? ` <span class="ptsbadge">${pts(EX.points.writing)}</span>` : ""}</h2>
     ${EXAM && EX.points ? (S.rubric ? `<p class="small muted">Marked on the five points under "What makes a strong ${esc(W.label)}", equally.</p>`
       : `<p class="small muted">Marked on five points, equally: the task, how you use the sources, the argument, organisation and language.</p>`) : ""}
     ${W.exam_practice ? `<p class="small muted">Exam practice: this is the written exam's task. Your teacher marks it on the exam's five criteria (the task, how you use the sources, the argument, organisation and language) and gives you a provisional grade.</p>` : ""}
     ${W.question ? `<p><b>${esc(W.question)}</b></p>` : ""}
-    <p>About ${W.words} words. Your ${esc(W.label)} should:</p>
-    <ul>${W.instructions.map(i => `<li>${esc(i)}</li>`).join("")}</ul>
+    ${W.section ? `<p>About ${W.words} words. ${esc(W.section.task)}</p>`
+      : `<p>About ${W.words} words. Your ${esc(W.label)} should:</p>
+    <ul>${W.instructions.map(i => `<li>${esc(i)}</li>`).join("")}</ul>`}
     ${W.reader ? `<p><b>Your reader:</b> ${esc(W.reader)}</p>` : ""}
     ${W.genre ? genreHTML(W) : ""}
     ${S.rubric ? `<details class="rubric" id="rubric" ${st.rubricOpen ? "open" : ""}><summary>What makes a strong ${esc(W.label)}</summary>
@@ -1928,7 +1936,7 @@ function makePdf({title, subtitle, body, note, footer, block, fileName}){
 }
 
 function makeSubmission(){
-  const r = role(), W = S.writing;
+  const r = role(), W = roleWriting();
   const missing = [];
   const openChars = AE2 || EXAM ? [] : r.characters.filter(c => !st.choices[c.id]);
   if (EXAM) {   // unanswered questions: a reminder, not a stop
