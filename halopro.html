@@ -702,9 +702,9 @@ const V={
     return `<button class="choice" data-act="dec" data-q="${k}" data-v="${v}" aria-pressed="${S[k]===v}" ${dis}><span class="k">OPTION ${v}</span><b>${D[i][0]}</b><small>${o.desc}</small></button>`;}).join("")}</div></section>`;}).join("");
   if(!S.decided) return h+`<button class="btn" data-act="lock" ${canLock()?"":"disabled"}>Confirm our decisions</button>`;
   if(!S.handed)h+=`<p><button class="btn small" data-act="undec">Change our decisions</button> <span class="muted small">Until you hand in, your team can still change its decisions.</span></p>`;
-  h+=`<section class="card"><h2>Market entry recommendation</h2><p>Write 120–180 words for Imogen and the launch committee: your recommendation for each decision and how the three fit together, the evidence that convinced you (name the person or document), and the strongest objection to your plan, with your answer to it.</p>
+  h+=`<section class="card"><h2>${roleW(S.role).section?"Your section: "+esc(roleW(S.role).section.label):"Market entry recommendation"}</h2>${roleW(S.role).section?`<p>About ${roleW(S.role).words} words. ${esc(roleW(S.role).section.task)}</p>`:`<p>Write 120–180 words for Imogen and the launch committee: your recommendation for each decision and how the three fit together, the evidence that convinced you (name the person or document), and the strongest objection to your plan, with your answer to it.</p>`}
    <p class="muted small">Useful language: <em>On balance, we would advise…</em> · <em>This only works if…</em> · <em>According to…</em> · <em>Admittedly, …; however, …</em></p>
-   <textarea id="cf" aria-label="Market entry recommendation"></textarea>
+   <textarea id="cf" aria-label="${roleW(S.role).label}"></textarea>
    <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><span class="wc" id="wc">0 words</span></div>${handinHTML()}</section>`;
   if(!S.handed) return h;
   if(!S.endOpen){h+=endLockHTML();return h;}
@@ -819,7 +819,7 @@ function bindDrag(key){
 /* ---------- hand-in: Lite's submission block and PDF (GUIDE 2n). Everything below up to "Pro hand-in" is copied
    verbatim from studio/template.html by cartridges/authoring/_pro_common.py, so the check code matches blocks.py.
    Nothing is sent anywhere: the block and the PDF are made here in the browser. ---------- */
-const LITE={"id": "halopro", "version": 1, "title": "Halo Cosmetics: The Market Entry Decision (Pro)", "writing": {"label": "market entry recommendation", "addressee": "Imogen Hale and the launch committee"}, "roles": {"A": {"dept": "Supplier & Manufacturing Relations", "chars": {"expert": "expert_a", "adrian": "adrian_a", "wren": "wren_a"}}, "B": {"dept": "Commercial Partnerships", "chars": {"expert": "expert_b", "adrian": "adrian_b", "wren": "wren_b"}}, "C": {"dept": "Brand & Talent Relations", "chars": {"expert": "expert_c", "adrian": "adrian_c", "wren": "wren_c"}}}, "decisions": {"d1": "D1", "d2": "D2", "d3": "D3"}};
+const LITE={"id": "halopro", "version": 1, "title": "Halo Cosmetics: The Market Entry Decision (Pro)", "writing": {"label": "market entry recommendation", "addressee": "Imogen Hale and the launch committee", "by_role": {"A": {"label": "recommendation section on the manufacturing partner", "words": 150, "task": "Write your section of the team's market entry recommendation for Imogen and the launch committee: the decision on the manufacturing partner. Open with one sentence that gives your team's overall plan. Then argue your team's choice on the manufacturing partner with the evidence from your own inbox (who said it, the numbers, the dates), give the strongest objection to that choice and answer it. Mention the other two decisions only in passing (if your choice depends on one of them, say how in a sentence): your teammates write those sections.", "decision": "D1"}, "B": {"label": "recommendation section on the route into the shops", "words": 150, "task": "Write your section of the team's market entry recommendation for Imogen and the launch committee: the decision on the route into the shops. Open with one sentence that gives your team's overall plan. Then argue your team's choice on the route into the shops with the evidence from your own inbox (who said it, the numbers, the dates), give the strongest objection to that choice and answer it. Mention the other two decisions only in passing (if your choice depends on one of them, say how in a sentence): your teammates write those sections.", "decision": "D2"}, "C": {"label": "recommendation section on the launch timing", "words": 150, "task": "Write your section of the team's market entry recommendation for Imogen and the launch committee: the decision on the launch timing. Open with one sentence that gives your team's overall plan. Then argue your team's choice on the launch timing with the evidence from your own inbox (who said it, the numbers, the dates), give the strongest objection to that choice and answer it. Mention the other two decisions only in passing (if your choice depends on one of them, say how in a sentence): your teammates write those sections.", "decision": "D3"}}}, "roles": {"A": {"dept": "Supplier & Manufacturing Relations", "chars": {"expert": "expert_a", "adrian": "adrian_a", "wren": "wren_a"}}, "B": {"dept": "Commercial Partnerships", "chars": {"expert": "expert_b", "adrian": "adrian_b", "wren": "wren_b"}}, "C": {"dept": "Brand & Talent Relations", "chars": {"expert": "expert_c", "adrian": "adrian_c", "wren": "wren_c"}}}, "decisions": {"d1": "D1", "d2": "D2", "d3": "D3"}};
 function fnv(str){ let h = 0x811c9dc5; for (const ch of new TextEncoder().encode(str)) { h ^= ch; h = Math.imul(h, 0x01000193) >>> 0; } return h >>> 0; }
 function checkCode(parts){
   const A = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
@@ -950,8 +950,11 @@ function proChoices(r){
 function proLine(){
  return `Pro: fork=${S.fork||"none"}, briefing=${S.ranked?S.rank.join(">"):"none"}, evidence=${S.ranked&&S.ev?S.ev:"none"}, puzzles=${[1,2,3].map(n=>`${n}:${S.pz[n].tier||"none"}`).join(",")}`;
 }
+// writing.by_role (GUIDE 3c): the student's role writes its own section of the group's report
+function roleW(r){const W=LITE.writing, t=W.by_role&&W.by_role[r];
+ return t?Object.assign({},W,{label:t.label||W.label,words:t.words,section:t}):W;}
 function makeSub(){
- const r=S.role, W=LITE.writing, missing=[];
+ const r=S.role, W=roleW(r), missing=[];
  S.sub=null;
  if(!r||!LITE.roles[r]){S.issues=["Choose your role first (Context)."];return;}
  const memoText=(S.text||"").trim();
@@ -1005,7 +1008,7 @@ function handinHTML(){
 }
 function downloadPdf(){
  const x=S.sub; if(!x) return;
- const W=LITE.writing, rr=LITE.roles[x.r];
+ const W=roleW(x.r), rr=LITE.roles[x.r];
  const cap=taskName(W).charAt(0).toUpperCase()+taskName(W).slice(1);
  const today=new Date().toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"});
  const blob=makePdf({

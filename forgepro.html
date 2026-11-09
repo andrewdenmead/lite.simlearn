@@ -279,7 +279,7 @@ const INBOX={
     <tr><td>Forge</td><td class="num">5.6</td><td class="num">8.3</td></tr>
     <tr><td>Fuel Up</td><td class="num">5.2</td><td class="num">5.9</td></tr></tbody></table></div>`)}
    <p>For what it's worth, the two bars that beat us on taste, Brawn and Peakform, are also the two most expensive bars on the shelf. People seem happy to pay for a bar they enjoy.</p>
-   <p>I hear the Leeds pilot struggled and that first-time buyers weren't coming back. I don't know whether that's connected to our results, but I'd like someone to ask.</p>
+   <p>I hear the Leeds pilot struggled and that only about one first-time buyer in seven came back for a second bar. I don't know whether that's connected to our results, but I'd like someone to ask.</p>
    <p class="sig">Mateusz</p>`}
  ],
  B:[
@@ -301,10 +301,10 @@ const INBOX={
    <p>Hi, happy to explain. The research came back strong: nearly 80% positive interest, and the focus groups loved the branding. High-protein was the fastest-growing category we track, and the board wanted us in it before a competitor got there first. Given what we knew at the time, launching when we did was the right call. I stand by it.</p>
    <p>Since then, Vital Bar has come in 40p cheaper on the same shelf. In my experience, shoppers in this category follow price, whatever a survey says.</p>
    ${att("Forge launch brief (extract)",`<p><b>Target shopper:</b> 18–34s who already buy protein bars but have never bought Harrow & Vane.</p><p><b>Goal:</b> bring a new, younger customer to the brand, not just sell another bar.</p><p><b>Shelf price:</b> £1.99.</p>`)}
-   <p>I've drafted a short paper for the board on Thursday and sent it to Celia.</p>
+   <p>Whatever the board decides to change, please don't let it slow every launch down: in this category, being first matters. I've drafted a short paper for the board on Thursday and sent it to Celia.</p>
    <p class="sig">Rupert</p>`},
   {from:"Celia Whitcombe, Finance Director",subj:"The timeline, the money and the shelf",rel:"high",body:`
-   <p>Hi, some context. In January the board set a hard deadline: Forge on national shelves before the financial year ends on 30 June, to meet the snacking division's growth target. That's why research and testing were squeezed into three weeks instead of the usual two to three months. Forge's launch budget was £1.8 million, the division's biggest this year, and most of it was spent before the first sales data came in.</p>
+   <p>Hi, some context. In January the board set a hard deadline: Forge on national shelves before the financial year ends on 30 June, to meet the snacking division's growth target. That's why research and testing were squeezed into three weeks instead of the usual two to three months. Forge's launch budget was £1.8 million, the division's biggest this year, and most of it was spent before the first sales data came in. By the time any shop could show us how Forge was selling, most of the money had gone and the national date was booked.</p>
    ${att("Forge timeline",`<div class="tw"><table><thead><tr><th>Date</th><th>Event</th></tr></thead><tbody>
     <tr><td class="mono">January</td><td>Board fixes the launch deadline</td></tr>
     <tr><td class="mono">2–20 Feb</td><td>Survey, focus groups and blind taste test</td></tr>
@@ -658,9 +658,9 @@ const V={
     return `<button class="choice" data-act="dec" data-q="${k}" data-v="${v}" aria-pressed="${S[k]===v}" ${dis||(off?"disabled":"")}><span class="k">OPTION ${v}</span><b>${D[i][0]}</b><small>${desc}</small></button>`;}).join("")}</div></section>`;}).join("");
   if(!S.decided) return h+`<button class="btn" data-act="lock" ${S.d1&&S.d2&&S.d3?"":"disabled"}>Confirm our findings</button>`;
   if(!S.handed)h+=`<p><button class="btn small" data-act="undec">Change our decisions</button> <span class="muted small">Until you hand in, your team can still change its decisions.</span></p>`;
-  h+=`<section class="card"><h2>Root cause report</h2><p>Write 120–180 words for the board: the main cause and what made it worse, the evidence that convinced you (name the person or document, and use the numbers), why the rival explanation is weaker, and what Harrow & Vane should change.</p>
+  h+=`<section class="card"><h2>${roleW(S.role).section?"Your section: "+esc(roleW(S.role).section.label):"Root cause report"}</h2>${roleW(S.role).section?`<p>About ${roleW(S.role).words} words. ${esc(roleW(S.role).section.task)}</p>`:`<p>Write 120–180 words for the board: the main cause and what made it worse, the evidence that convinced you (name the person or document, and use the numbers), why the rival explanation is weaker, and what Harrow & Vane should change.</p>`}
    <p class="muted small">Useful language: <em>The main cause was…</em> · <em>This was made worse by…</em> · <em>At the time, the data showed…</em> · <em>Although Rupert argued that…, the dates show…</em> · <em>Future launches should…</em></p>
-   <textarea id="cf" aria-label="Root cause report"></textarea>
+   <textarea id="cf" aria-label="${roleW(S.role).label}"></textarea>
    <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><span class="wc" id="wc">0 words</span></div>${handinHTML()}</section>`;
   if(!S.handed) return h;
   if(!S.endOpen){h+=endLockHTML();return h;}
@@ -751,7 +751,7 @@ function bindDrag(key){
 /* ---------- hand-in: Lite's submission block and PDF (GUIDE 2n). Everything below up to "Pro hand-in" is copied
    verbatim from studio/template.html by cartridges/authoring/_pro_common.py, so the check code matches blocks.py.
    Nothing is sent anywhere: the block and the PDF are made here in the browser. ---------- */
-const LITE={"id": "forgepro", "version": 1, "title": "Harrow & Vane: The Forge Inquiry (Pro)", "writing": {"label": "root cause report", "addressee": "the Harrow & Vane board"}, "roles": {"A": {"dept": "Insights Manager", "chars": {"expert": "expert_a", "rupert": "rupert_a", "deja": "deja_a"}}, "B": {"dept": "Retail Account Manager", "chars": {"expert": "expert_b", "rupert": "rupert_b", "deja": "deja_b"}}, "C": {"dept": "Strategy & Finance Manager", "chars": {"expert": "expert_c", "rupert": "rupert_c", "deja": "deja_c"}}}, "decisions": {"d1": "D1", "d2": "D2", "d3": "D3"}};
+const LITE={"id": "forgepro", "version": 1, "title": "Harrow & Vane: The Forge Inquiry (Pro)", "writing": {"label": "root cause report", "addressee": "the Harrow & Vane board", "by_role": {"A": {"label": "root cause report section on the main cause", "words": 150, "task": "Write your section of the team's root cause report for the board: the main cause of Forge's weak sales. Open with one sentence that gives your team's overall finding. Then argue your team's view with the evidence from your own inbox (who said it, the numbers, the dates), give the strongest rival explanation or objection and answer it. Mention the other two findings only in passing: your teammates write those sections.", "decision": "D1"}, "B": {"label": "root cause report section on the Leeds pilot", "words": 150, "task": "Write your section of the team's root cause report for the board: what the Leeds pilot figures meant for the national rollout. Open with one sentence that gives your team's overall finding. Then argue your team's view with the evidence from your own inbox (who said it, the numbers, the dates), give the strongest rival explanation or objection and answer it. Mention the other two findings only in passing: your teammates write those sections.", "decision": "D2"}, "C": {"label": "root cause report section on future launches", "words": 150, "task": "Write your section of the team's root cause report for the board: what Harrow & Vane should change for future launches. Open with one sentence that gives your team's overall finding. Then argue your team's view with the evidence from your own inbox (who said it, the numbers, the dates), give the strongest rival explanation or objection and answer it. Mention the other two findings only in passing: your teammates write those sections.", "decision": "D3"}}}, "roles": {"A": {"dept": "Insights Manager", "chars": {"expert": "expert_a", "rupert": "rupert_a", "deja": "deja_a"}}, "B": {"dept": "Retail Account Manager", "chars": {"expert": "expert_b", "rupert": "rupert_b", "deja": "deja_b"}}, "C": {"dept": "Strategy & Finance Manager", "chars": {"expert": "expert_c", "rupert": "rupert_c", "deja": "deja_c"}}}, "decisions": {"d1": "D1", "d2": "D2", "d3": "D3"}};
 function fnv(str){ let h = 0x811c9dc5; for (const ch of new TextEncoder().encode(str)) { h ^= ch; h = Math.imul(h, 0x01000193) >>> 0; } return h >>> 0; }
 function checkCode(parts){
   const A = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
@@ -882,8 +882,11 @@ function proChoices(r){
 function proLine(){
  return `Pro: fork=${S.fork||"none"}, briefing=${S.ranked?S.rank.join(">"):"none"}, evidence=${S.ranked&&S.ev?S.ev:"none"}, puzzles=${[1,2,3].map(n=>`${n}:${S.pz[n].tier||"none"}`).join(",")}`;
 }
+// writing.by_role (GUIDE 3c): the student's role writes its own section of the group's report
+function roleW(r){const W=LITE.writing, t=W.by_role&&W.by_role[r];
+ return t?Object.assign({},W,{label:t.label||W.label,words:t.words,section:t}):W;}
 function makeSub(){
- const r=S.role, W=LITE.writing, missing=[];
+ const r=S.role, W=roleW(r), missing=[];
  S.sub=null;
  if(!r||!LITE.roles[r]){S.issues=["Choose your role first (Context)."];return;}
  const memoText=(S.text||"").trim();
@@ -937,7 +940,7 @@ function handinHTML(){
 }
 function downloadPdf(){
  const x=S.sub; if(!x) return;
- const W=LITE.writing, rr=LITE.roles[x.r];
+ const W=roleW(x.r), rr=LITE.roles[x.r];
  const cap=taskName(W).charAt(0).toUpperCase()+taskName(W).slice(1);
  const today=new Date().toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"});
  const blob=makePdf({

@@ -691,7 +691,7 @@ const V={
   if(!S.handed)h+=`<p><button class="btn small" data-act="undec">Change our decisions</button> <span class="muted small">Until you hand in, your team can still change its decisions.</span></p>`;
   h+=`<section class="card"><h2>${roleW(S.role).section?"Your section: "+esc(roleW(S.role).section.label):"Design rationale"}</h2>${roleW(S.role).section?`<p>About ${roleW(S.role).words} words. ${esc(roleW(S.role).section.task)}</p>`:`<p>Write 120–180 words for Morven: your recommendation for each decision and how they fit together, the evidence that convinced you (name the person or document), and the strongest objection to your plan, with your answer to it.</p>`}
    <p class="muted small">Useful language: <em>We recommend…</em> · <em>According to…</em> · <em>Although the custom look…, …</em> · <em>If we…, we would…</em></p>
-   <textarea id="cf" aria-label="Design rationale"></textarea>
+   <textarea id="cf" aria-label="${roleW(S.role).label}"></textarea>
    <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><span class="wc" id="wc">0 words</span></div>${handinHTML()}</section>`;
   if(!S.handed) return h;
   if(!S.endOpen){h+=endLockHTML();return h;}

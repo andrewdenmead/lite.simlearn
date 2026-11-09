@@ -706,9 +706,9 @@ const V={
    ${S.decided?`<p class="done">Budget confirmed.</p>`:`<button class="btn" id="lockb" data-act="lock" ${canLock()?"":"disabled"}>Confirm our budget</button>`}</section>`;
   if(!S.decided) return h;
   if(!S.handed)h+=`<p><button class="btn small" data-act="undec">Change our budget</button> <span class="muted small">Until you hand in, your team can still change its budget.</span></p>`;
-  h+=`<section class="card"><h2>Budget memo</h2><p>Write 120–180 words for the board: your split and the reasons for your largest lines (name the person or document, and use the numbers), what you cut and why that risk is acceptable, and the biggest risk that remains, with how Halstead should manage it.</p>
+  h+=`<section class="card"><h2>${roleW(S.role).section?"Your section: "+esc(roleW(S.role).section.label):"Budget memo"}</h2>${roleW(S.role).section?`<p>About ${roleW(S.role).words} words. ${esc(roleW(S.role).section.task)}</p>`:`<p>Write 120–180 words for the board: your split and the reasons for your largest lines (name the person or document, and use the numbers), what you cut and why that risk is acceptable, and the biggest risk that remains, with how Halstead should manage it.</p>`}
    <p class="muted small">Useful language: <em>We have allocated £… to … because…</em> · <em>Our first priority is…</em> · <em>If the recovery takes twelve weeks rather than six, …</em> · <em>We accept the risk that…, because…</em></p>
-   <textarea id="cf" aria-label="Budget memo"></textarea>
+   <textarea id="cf" aria-label="${roleW(S.role).label}"></textarea>
    <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><span class="wc" id="wc">0 words</span></div>${handinHTML()}</section>`;
   if(!S.handed) return h;
   if(!S.endOpen){h+=endLockHTML();return h;}
@@ -888,7 +888,7 @@ function bindDrag(key){
 /* ---------- hand-in: Lite's submission block and PDF (GUIDE 2n). Everything below up to "Pro hand-in" is copied
    verbatim from studio/template.html by cartridges/authoring/_pro_common.py, so the check code matches blocks.py.
    Nothing is sent anywhere: the block and the PDF are made here in the browser. ---------- */
-const LITE={"id": "halsteadpro", "version": 1, "title": "Halstead Componentry: The Resilience Fund (Pro)", "writing": {"label": "budget memo", "addressee": "the Halstead board"}, "roles": {"A": {"dept": "Asia-Pacific Sourcing Planner", "chars": {"expert": "expert_a", "arjun": "arjun_a", "farah": "farah_a"}}, "B": {"dept": "European Hub Planner", "chars": {"expert": "expert_b", "arjun": "arjun_b", "farah": "farah_b"}}, "C": {"dept": "Finance & Risk Analyst", "chars": {"expert": "expert_c", "arjun": "arjun_c", "farah": "farah_c"}}}, "decisions": {}, "budget": ["air", "dual", "buffer", "vis", "ins", "temp", "hedge", "near", "audit", "ot"]};
+const LITE={"id": "halsteadpro", "version": 1, "title": "Halstead Componentry: The Resilience Fund (Pro)", "writing": {"label": "budget memo", "addressee": "the Halstead board", "by_role": {"A": {"label": "budget memo section on freight and suppliers", "words": 150, "task": "Write your section of the team's budget memo to the board: the lines for freight and suppliers (emergency air freight, the backup supplier, the freight-rate hedge and the main-supplier audit visits). Open with one sentence that gives your team's overall approach to the fund. Then give your team's figure for each of these lines and justify it with the evidence from your own inbox (who said it, the numbers, the deadlines), say what you cut on these lines, if anything, and why that risk is acceptable, and answer the strongest objection. Mention the other lines only in passing: your teammates write those sections.", "items": ["air", "dual", "hedge", "audit"]}, "B": {"label": "budget memo section on the hub and client deliveries", "words": 150, "task": "Write your section of the team's budget memo to the board: the lines for the hub and client deliveries (buffer stock, temporary logistics and customs staff, and account-management overtime). Open with one sentence that gives your team's overall approach to the fund. Then give your team's figure for each of these lines and justify it with the evidence from your own inbox (who said it, the numbers, the deadlines), say what you cut on these lines, if anything, and why that risk is acceptable, and answer the strongest objection. Mention the other lines only in passing: your teammates write those sections.", "items": ["buffer", "temp", "ot"]}, "C": {"label": "budget memo section on contracts, insurance and studies", "words": 150, "task": "Write your section of the team's budget memo to the board: the lines for contracts, insurance and studies (the tracking licences, contract-penalty insurance and the nearshoring studies). Open with one sentence that gives your team's overall approach to the fund. Then give your team's figure for each of these lines and justify it with the evidence from your own inbox (who said it, the numbers, the deadlines), say what you cut on these lines, if anything, and why that risk is acceptable, and answer the strongest objection. Mention the other lines only in passing: your teammates write those sections.", "items": ["vis", "ins", "near"]}}}, "roles": {"A": {"dept": "Asia-Pacific Sourcing Planner", "chars": {"expert": "expert_a", "arjun": "arjun_a", "farah": "farah_a"}}, "B": {"dept": "European Hub Planner", "chars": {"expert": "expert_b", "arjun": "arjun_b", "farah": "farah_b"}}, "C": {"dept": "Finance & Risk Analyst", "chars": {"expert": "expert_c", "arjun": "arjun_c", "farah": "farah_c"}}}, "decisions": {}, "budget": ["air", "dual", "buffer", "vis", "ins", "temp", "hedge", "near", "audit", "ot"]};
 function fnv(str){ let h = 0x811c9dc5; for (const ch of new TextEncoder().encode(str)) { h ^= ch; h = Math.imul(h, 0x01000193) >>> 0; } return h >>> 0; }
 function checkCode(parts){
   const A = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
@@ -1019,8 +1019,11 @@ function proChoices(r){
 function proLine(){
  return `Pro: fork=${S.fork||"none"}, briefing=${S.ranked?S.rank.join(">"):"none"}, evidence=${S.ranked&&S.ev?S.ev:"none"}, puzzles=${[1,2,3].map(n=>`${n}:${S.pz[n].tier||"none"}`).join(",")}`;
 }
+// writing.by_role (GUIDE 3c): the student's role writes its own section of the group's report
+function roleW(r){const W=LITE.writing, t=W.by_role&&W.by_role[r];
+ return t?Object.assign({},W,{label:t.label||W.label,words:t.words,section:t}):W;}
 function makeSub(){
- const r=S.role, W=LITE.writing, missing=[];
+ const r=S.role, W=roleW(r), missing=[];
  S.sub=null;
  if(!r||!LITE.roles[r]){S.issues=["Choose your role first (Context)."];return;}
  const memoText=(S.text||"").trim();
@@ -1074,7 +1077,7 @@ function handinHTML(){
 }
 function downloadPdf(){
  const x=S.sub; if(!x) return;
- const W=LITE.writing, rr=LITE.roles[x.r];
+ const W=roleW(x.r), rr=LITE.roles[x.r];
  const cap=taskName(W).charAt(0).toUpperCase()+taskName(W).slice(1);
  const today=new Date().toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"});
  const blob=makePdf({
