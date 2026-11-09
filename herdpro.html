@@ -638,7 +638,7 @@ const V={
  puzzles(){
   const r=R(); let h=task("Each of you has one puzzle, and nobody can solve theirs alone. When a puzzle appears on someone's screen, everyone gathers round that screen until it's solved. Each result changes what happens next.");
   const done=[1,2,3].filter(n=>pzDone(r,n));
-  if(done.length) h+=`<section class="card"><h2>Results so far</h2>${done.map(n=>`<p><b>${PZ[n].title}</b> (${ROLES[PZ[n].owner].name}): ${TIER_LABEL[S.pz[n].tier]}. ${ok(n)?PZ[n].out.ok:PZ[n].out.fail}</p>`).join("")}</section>`;
+  if(done.length) h+=`<section class="card"><h2>Results so far</h2>${done.map(n=>`<p><b>${PZ[n].title}</b> (${ROLES[PZ[n].owner].name}): ${TIER_LABEL[S.pz[n].tier]}. ${ok(n)?PZ[n].out.ok:PZ[n].out.fail}${PZ[n].owner===r&&S.pz[n].tier?` <span class="note-strong">Code for your teammates: <b class="mono">${CODES[n][S.pz[n].tier]}</b></span>`:""}</p>`).join("")}</section>`;
   const n=[1,2,3].find(x=>!pzDone(r,x));
   if(!n) return h+`<p class="done">All three puzzles are done.</p><button class="btn" data-act="tab" data-v="investigate">Go to Investigate</button>`;
   const P=PZ[n];
