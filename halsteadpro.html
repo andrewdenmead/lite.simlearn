@@ -428,7 +428,7 @@ const ITEMS=[
  {id:"near",label:"Nearshoring feasibility study",unit:"site",max:3,src:"Naomi Price"},
  {id:"audit",label:"Main-supplier audit and renegotiation visit",unit:"visit",max:2,src:"Lakshmi Chandrasekaran"},
  {id:"ot",label:"Client account-management overtime",unit:"account",max:9,src:"Chiara Ricci"}];
-const TOL=250;
+const TOL=1000;
 function cost(id){switch(id){
  case "air":return failed(3)?5000:4500; case "dual":return failed(1)?10600:9000; case "buffer":return 210;
  case "vis":return failed(2)?700:640; case "ins":return 3200; case "temp":return 4300; case "hedge":return failed(3)?2400:2100;
@@ -704,7 +704,7 @@ const V={
 };
 const canLock=()=>!!S.ranked&&onTarget();
 function totalHTML(){const t=total(),d=t-FUND(),k=Math.abs(d)<=TOL;
- return `<span>Total: ${fmt(t)}</span><span class="${k?"on":"off"}">${k?"✓ on target":(d>0?fmt(d)+" over":fmt(-d)+" under")} (fund ${fmt(FUND())})</span>`;}
+ const it=ITEMS.reduce((a,b)=>cost(b.id)<cost(a.id)?b:a),n=Math.round(-d/cost(it.id)),to=bval(it.id)+n;const hint=(!k&&n&&to>=0&&to<=it.max)?`<span class="muted small" style="flex-basis:100%">About ${Math.abs(n)} ${n>0?"more":"fewer"} ${it.unit}${Math.abs(n)===1?"":"s"} of ${it.label.charAt(0).toLowerCase()+it.label.slice(1)} would close the gap.</span>`:"";return `<span>Total: ${fmt(t)}</span><span class="${k?"on":"off"}">${k?"✓ on target":(d>0?fmt(d)+" over":fmt(-d)+" under")} (fund ${fmt(FUND())})</span>${hint}`;}
 function patchTotal(){const b=document.getElementById("btotal"); if(b)b.innerHTML=totalHTML(); const l=document.getElementById("lockb"); if(l)l.disabled=!canLock();}
 
 /* ---------- the epilogue ---------- */

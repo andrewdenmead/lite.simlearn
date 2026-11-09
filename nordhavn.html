@@ -1693,7 +1693,11 @@ function tabBudget(){
        <p class="small" style="margin-bottom:0">Does this change anything? You can still adjust your numbers above — keep the total within ${money(B.tolerance)} of ${money(B.target)}.</p></div>`
     : `<p class="muted small">When your total is within ${money(B.tolerance)} of ${money(B.target)}, some breaking news will appear here.</p>`;
   const totalHTML = () => { const tot = budgetTotal(), d = tot - B.target, ok = Math.abs(d) <= B.tolerance;
-    return `<span>Total: ${money(tot)}</span><span class="${ok ? "on" : "off"}">${ok ? "✓ on target" : (d > 0 ? money(d) + " over" : money(-d) + " under")} (target ${money(B.target)})</span>`; };
+    // the fine-tuning step (9 Nov 2026): the cheapest line, and how many units would close the gap
+    const it = B.items.reduce((a, b) => b.unit_cost < a.unit_cost ? b : a), n = Math.round(-d / it.unit_cost), to = budgetVal(it.id) + n;
+    const hint = (!ok && n && to >= 0 && to <= it.max)
+      ? `<span class="muted small" style="flex-basis:100%">About ${Math.abs(n)} ${n > 0 ? "more" : "fewer"} ${it.unit}${Math.abs(n) === 1 ? "" : "s"} of ${it.label.charAt(0).toLowerCase() + it.label.slice(1)} would close the gap.</span>` : "";
+    return `<span>Total: ${money(tot)}</span><span class="${ok ? "on" : "off"}">${ok ? "✓ on target" : (d > 0 ? money(d) + " over" : money(-d) + " under")} (target ${money(B.target)})</span>${hint}`; };
   $("#main").innerHTML = `
     <div class="writegrid"><div>
     <p>Agree how to split the <b>${money(B.target)}</b> ${pair() ? "together" : "as a group"}, then ${pair() ? "both of you enter" : "everyone enters"} the same numbers here. The total has to land within ${money(B.tolerance)} of the target.</p>
