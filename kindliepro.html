@@ -92,6 +92,16 @@ main .wrap{padding-block:22px 64px;display:flex;flex-direction:column;gap:18px}
 .mail .tag{grid-row:1/3;grid-column:2;align-self:center}
 .mail[open] summary{border-bottom:1px solid var(--line);background:var(--bg)}
 .mail .body p,.card>p,.attach>p{font-family:var(--serif);font-size:1.02rem;line-height:1.62}
+/* AE sources: research extracts with a full reference, not emails (Andrew, 10 Nov 2026) */
+.sech{font-size:12.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700;margin:4px 0 -2px}
+.src summary{display:flex;flex-direction:column;gap:2px}
+.src .stitle{font-family:var(--serif);font-size:1.08rem;line-height:1.35;color:var(--ink);font-weight:600}
+.src.unread .stitle{font-weight:700}
+.src .sauth{font-size:14.5px;color:var(--ink)}
+.src .saff{font-size:13px;color:var(--muted)}
+.mail .body .cite{font-family:var(--ui);font-size:14px;line-height:1.5;color:var(--muted);border-left:3px solid var(--line);padding:4px 0 4px 10px}
+.cite .ref{color:var(--ink);user-select:all;-webkit-user-select:all}
+.cite .lnk{margin-left:8px}
 .mail .body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:10px}
 .sig{color:var(--muted)}
 .attach{border:1px solid var(--line);border-radius:6px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
@@ -226,9 +236,9 @@ textarea{width:100%;min-height:200px;resize:vertical;font:inherit;line-height:1.
 
 <script>
 const ROLES={
- A:{name:"Evidence Analyst",line:"The campaigns",detail:"You weigh the evidence on what the campaigns achieved and why. Your inbox holds the independent evaluation and research on how messages change behaviour."},
- B:{name:"Ethics Adviser",line:"The ethics",detail:"You advise the commission on the moral question. Your inbox holds the two most cited papers on whether deceiving the public can ever be justified."},
- C:{name:"Policy Adviser",line:"The unit's future",detail:"You draft the commission's recommendation on the unit. Your inbox holds the research on trust in the news and on how such a unit could be governed."}
+ A:{name:"Evidence Analyst",line:"The campaigns",detail:"You weigh the evidence on what the campaigns achieved and why. Your sources are the independent evaluation and research on how messages change behaviour."},
+ B:{name:"Ethics Adviser",line:"The ethics",detail:"You advise the commission on the moral question. Your sources are the two most cited papers on whether deceiving the public can ever be justified."},
+ C:{name:"Policy Adviser",line:"The unit's future",detail:"You draft the commission's recommendation on the unit. Your sources are the research on trust in the news and on how such a unit could be governed."}
 };
 const REL={high:"Peer-reviewed or independent",medium:"Survey, estimate or personal view",low:"Weak evidence"};
 const fmt=n=>"£"+n.toLocaleString("en-GB");
@@ -249,10 +259,15 @@ function audio(t,voice,script,file){if(file&&PRO_AUDIO.includes(file))return `<d
  return `<div class="audio"><button class="play" disabled aria-label="Play (recording to come)">▶</button><div><div class="t">${t}</div><div class="s">Recording to come: read the text</div></div><details open><summary>The text</summary><div class="script" data-src="${esc(t)}" data-q="medium">${script}</div></details></div>`;}
 function mail(m){const k=m.from+"|"+m.subj, o=!!S.mailOpen[k], r=!!S.mailRead[k];
  return `<details class="mail ${r?"read":"unread"}" data-mail="${encodeURIComponent(k)}"${o?" open":""}><summary><span class="from">${r?"":`<span class="udot" aria-label="Unread"></span>`}<span class="lbl">From:</span> ${m.from}</span><span class="subj">${m.subj}</span></summary><div class="body" data-src="${m.from.split(",")[0]}" data-q="${m.rel}">${m.body}</div></details>`;}
-function att(name,html){return `<div class="attach"><div class="an">📎 ${name}</div>${html}</div>`;}
-const ref=t=>`<p class="fine">Reference: ${t}</p>`;
+/* a research source (AE, 10 Nov 2026): title, author (year), affiliation, the extract and its full reference. `from`
+   and `subj` stay as the author and title, so read state and the cartridge (make_kindliepro.py) work as for emails. */
+const yearOf=m=>((m.cite||"").match(/\((\d{4}[a-z]?)\)/)||[])[1]||"";
+const srcName=m=>{const n=m.from.split(", ")[0];return `${n.split(" ").pop()} (${yearOf(m)})`;};
+function source(m){const k=m.from+"|"+m.subj, o=!!S.mailOpen[k], r=!!S.mailRead[k], [name,...aff]=m.from.split(", ");
+ return `<details class="mail src ${r?"read":"unread"}" data-mail="${encodeURIComponent(k)}"${o?" open":""}><summary><span class="stitle">${r?"":`<span class="udot" aria-label="Unread"></span>`}${m.subj}</span><span class="sauth">${name} (${yearOf(m)})</span><span class="saff">${aff.join(", ")} · ${m.kind}</span></summary><div class="body" data-src="${srcName(m)}" data-q="${m.rel}">${m.body}<p class="cite"><b>Reference:</b> <span class="ref">${m.cite}</span><button class="lnk" data-act="copyref" data-v="${encodeURIComponent(k)}">Copy reference</button></p></div></details>`;}
+function tableA(name,html){return `<div class="attach"><div class="an">${name}</div>${html}</div>`;}
 
-/* ---------- inboxes: briefing notes from the commission's sources (each role owns one question) ---------- */
+/* ---------- sources: research extracts for each role (each role owns one question) ---------- */
 const FWD={from:"Ishbel Rennie, Chair of the Commission",subj:"Fwd: “Nobody was fooled”",rel:"low",body:`
  <p>This is being shared widely. I doubt it helps us, but you should know what people are reading.</p>
  <p class="muted"><em>“Let's be honest, NOBODY was fooled by these 'stories'. Everyone could tell they were fake. The whole inquiry is a waste of money.”</em> (post by a political commentator with 900,000 followers, 2 June 2035)</p>
@@ -260,53 +275,56 @@ const FWD={from:"Ishbel Rennie, Chair of the Commission",subj:"Fwd: “Nobody wa
 
 const INBOX={
  A:[
-  {from:"Laura Pendlebury, Centre for Policy Evaluation, Leeds",subj:"Briefing note: did the stories work?",rel:"high",body:`
-   <p>Our evaluation compares 2032–2034 with 2028–2030, allowing for trends already under way. Road deaths fell by 14 per cent, fly-tipping by 22 per cent and household electricity use by 7 per cent, while blood pressure checks rose by 31 per cent. Children injured at substations and on railway lines fell from 38 a year to 17. The effects appeared in the weeks after each campaign and were strongest where the stories were most widely shared.</p>
-   ${att("Campaign costs and reach (technical appendix)",`<div class="tw"><table><thead><tr><th>Campaigns</th><th class="num">Budget a year</th><th class="num">Adults reached</th><th class="num">Change in behaviour</th></tr></thead><tbody>
+  {from:"Laura Pendlebury, Centre for Policy Evaluation, Leeds",subj:"Did the Stories Work? An Independent Evaluation of the Public Safety Communications Unit",kind:"Evaluation report",rel:"high",
+   cite:"Pendlebury, L. (2035) <i>Did the Stories Work? An Independent Evaluation of the Public Safety Communications Unit</i>. Leeds: Centre for Policy Evaluation.",body:`
+   <p>The evaluation compares the campaign years 2032–2034 with 2028–2030, allowing for trends already under way. Over that period road deaths fell by 14 per cent, fly-tipping by 22 per cent and household electricity use by 7 per cent, while blood pressure checks rose by 31 per cent. Children injured at substations and on railway lines fell from 38 a year to 17. The effects appeared in the weeks after each campaign and were strongest where the stories were most widely shared.</p>
+   ${tableA("Table A1 · Campaign costs and reach (technical appendix)",`<div class="tw"><table><thead><tr><th>Campaigns</th><th class="num">Budget a year</th><th class="num">Adults reached</th><th class="num">Change in behaviour</th></tr></thead><tbody>
     <tr><td>Factual, 2028–2030</td><td class="num">£39m</td><td class="num">71%</td><td class="num">0–2%</td></tr>
     <tr><td>Invented stories, 2032–2034</td><td class="num">£41m</td><td class="num">74%</td><td class="num">7–31%</td></tr></tbody></table></div><p class="small">Both used the same online targeting platform from 2029.</p>`)}
-   <p>Two caveats. The figure of about 1,900 lives saved comes from a statistical model rather than a count, and its plausible range is wide: 1,100 to 2,700. Moreover, Pryor (2035) estimates that safer cars explain between a quarter and a half of the fall in road deaths, although no comparable explanation exists for the other measures.</p>
-   ${ref("Pendlebury, L. (2035) <i>Did the Stories Work?</i> Leeds: Centre for Policy Evaluation.")}`},
-  {from:"Kwaku Appiah, Thameside University, London",subj:"Briefing note: why statistics are about nobody",rel:"high",body:`
-   <p>Why did invented stories succeed where factual campaigns had failed? The difference, I argue, lay in the message rather than the money. Where the factual campaigns spoke of “one in ten” or “a 30 per cent higher risk”, the stories offered a named father, a nurse, a boy in a hospital bed. We respond far more strongly to one person we can picture than to numbers we cannot; a statistic, being about nobody, moves nobody.</p>
+   <p>The report notes two limitations. The figure of about 1,900 lives saved comes from a statistical model rather than a count, and its plausible range is wide: 1,100 to 2,700. Moreover, Pryor (2035) estimates that safer cars explain between a quarter and a half of the fall in road deaths, although no comparable explanation exists for the other measures.</p>`},
+  {from:"Kwaku Appiah, Thameside University, London",subj:"Why statistics are about nobody",kind:"Journal article",rel:"high",
+   cite:"Appiah, K. (2035) 'Why statistics are about nobody', <i>Journal of Communication Research</i>, 61(1), pp. 1–20.",body:`
+   <p>Why did invented stories succeed where factual campaigns had failed? This article argues that the difference lay in the message rather than the money. Where the factual campaigns spoke of “one in ten” or “a 30 per cent higher risk”, the stories offered a named father, a nurse, a boy in a hospital bed. We respond far more strongly to one person we can picture than to numbers we cannot; a statistic, being about nobody, moves nobody.</p>
    <p>Controlled tests with 6,000 adults bear this out: a message built around one named person raised stated intention to act by 23 per cent, against 4 per cent for the same risk given as a statistic (Communications Evaluation Unit, 2035).</p>
-   <p>The most serious rival account is Laird's (2035): the later campaigns were better timed and placed through trusted local outlets, and delivery multiplies almost any message. Timing surely helped. It cannot, however, explain a gap that persists when delivery is held constant. The uncomfortable corollary is that true stories might work as well, but they are harder to find and to control.</p>
-   ${ref("Appiah, K. (2035) 'Why statistics are about nobody', <i>Journal of Communication Research</i>, 61(1), pp. 1–20.")}`}
+   <p>The most serious rival account is Laird's (2035): the later campaigns were better timed and placed through trusted local outlets, and delivery multiplies almost any message. Timing surely helped. It cannot, however, explain a gap that persists when delivery is held constant. The uncomfortable corollary is that true stories might work as well, but they are harder to find and to control.</p>`}
  ],
  B:[
-  {from:"Eva Rosendahl, Winchester Institute of Philosophy",subj:"Briefing note: the right not to be deceived",rel:"high",body:`
-   <p>My argument is that the unit acted wrongly even though its campaigns saved lives. Persuasion offers reasons and leaves the decision to the citizen; deception plants a false belief and decides for her. Nor can anyone consent to being deceived, since a lie works only if its target is unaware of it.</p>
+  {from:"Eva Rosendahl, Winchester Institute of Philosophy",subj:"The right not to be deceived",kind:"Journal article",rel:"high",
+   cite:"Rosendahl, E. (2035) 'The right not to be deceived', <i>Philosophy and Public Affairs Review</i>, 44(2), pp. 101–118.",body:`
+   <p>This article argues that the unit acted wrongly even though its campaigns saved lives. Persuasion offers reasons and leaves the decision to the citizen; deception plants a false belief and decides for her. Nor can anyone consent to being deceived, since a lie works only if its target is unaware of it.</p>
    <p>The second problem is trust. Public safety depends on people believing what they are told in an emergency, such as a flood warning, and every invented story spends some of that trust. Sissela Bok's test of publicity asks whether a deceiver could defend the lie openly to those deceived; practices that fail it tend to expand quietly.</p>
-   <p>It may be objected that the unit told only kind lies. Yet a government that lies kindly has still decided that its citizens cannot handle the truth. Good results cannot make deception right.</p>
-   ${ref("Rosendahl, E. (2035) 'The right not to be deceived', <i>Philosophy and Public Affairs Review</i>, 44(2), pp. 101–118.")}`},
-  {from:"Simon Carver, University of the West Midlands",subj:"Briefing note: fiction has always kept us safe",rel:"high",body:`
+   <p>It may be objected that the unit told only kind lies. Yet a government that lies kindly has still decided that its citizens cannot handle the truth. Good results cannot make deception right.</p>`},
+  {from:"Simon Carver, University of the West Midlands",subj:"Fiction has always kept us safe",kind:"Journal article",rel:"high",
+   cite:"Carver, S. (2035) 'Fiction has always kept us safe', <i>Public Health Ethics Today</i>, 19(2), pp. 66–82.",body:`
    <p>Britain has used fiction to keep people safe for decades. The public information films of the last century were invented stories performed by actors, many deliberately frightening, yet nobody thought the children who watched them had been wronged.</p>
    <p>Admittedly, the unit went further, since its stories looked real. Its aims, however, were narrow and the harm close to zero: nobody was sold anything or told how to vote. The stories asked people to drive more slowly, to see a doctor and to keep children away from danger, and most people, asked in advance, would surely agree to be frightened into a health check.</p>
-   <p>Set against this is the evaluation's estimate of 1,900 lives, at about £65,000 per life saved (Health Economics Unit, 2035), roughly a quarter of the cost per life of speed cameras. Critics such as Adebisi (2035) reply that the films were openly government films, and that the wrong lies in the disguise. That objection deserves an answer; it does not, in my view, outweigh the lives.</p>
-   ${ref("Carver, S. (2035) 'Fiction has always kept us safe', <i>Public Health Ethics Today</i>, 19(2), pp. 66–82.")}`}
+   <p>Set against this is the evaluation's estimate of 1,900 lives, at about £65,000 per life saved (Health Economics Unit, 2035), roughly a quarter of the cost per life of speed cameras. Critics such as Adebisi (2035) reply that the films were openly government films, and that the wrong lies in the disguise. The article grants that this objection deserves an answer, but concludes that it does not outweigh the lives.</p>`}
  ],
  C:[
-  {from:"Matthew Brook, Northern School of Media, Newcastle",subj:"Briefing note: the cost to local news",rel:"high",body:`
+  {from:"Matthew Brook, Northern School of Media, Newcastle",subj:"The cost to local news",kind:"Journal article",rel:"high",
+   cite:"Brook, M. (2035) 'The cost to local news', <i>Journalism Studies Today</i>, 26(2), pp. 55–74.",body:`
    <p>The local papers and radio stations that ran the unit's reports did so in good faith; even experienced editors could not tell them from real ones. When the leak came, readers did not simply stop believing the invented stories: they began to doubt the real ones. Trust in local news fell from 54 to 41 per cent and has not recovered, and families who had suffered real accidents were accused online of being actors.</p>
-   <p>Supporters argue that the unit could continue under strict rules. A lie that is later disclosed, however, still damages the truth around it, and remits grow: a 2034 internal memo proposed extending the unit's work to “public order” (Achterberg, 2035). I conclude that the unit should be closed and invented content banned from government communication.</p>
-   <p class="small">A note for the record: the reports reached local outlets through Castlegate Media, which also ran the targeting platform for both the factual campaigns and the stories from 2029. Castlegate's chair sits on the board of the Campaign Effectiveness Forum.</p>
-   ${ref("Brook, M. (2035) 'The cost to local news', <i>Journalism Studies Today</i>, 26(2), pp. 55–74.")}`},
-  {from:"Henrietta Quirke, School of Government, Birmingham Midlands University",subj:"Briefing note: rules, not bans",rel:"high",body:`
-   <p>A ban would forbid the government from doing what advertisers and foreign states will go on doing, while removing the one actor whose aims are public and accountable. I propose instead that invented safety content be permitted only with prior approval from an independent board, restricted to a published list of safety goals, and disclosed in full within two years. Lies certain to be revealed on a known timetable are a different instrument from secret ones.</p>
+   <p>Supporters argue that the unit could continue under strict rules. A lie that is later disclosed, however, still damages the truth around it, and remits grow: a 2034 internal memo proposed extending the unit's work to “public order” (Achterberg, 2035). The article therefore concludes that the unit should be closed and invented content banned from government communication.</p>
+   <p>The article also traces how the reports were distributed. They reached local outlets through Castlegate Media, which also ran the targeting platform for both the factual campaigns and the stories from 2029. Castlegate's chair sits on the board of the Campaign Effectiveness Forum.</p>`},
+  {from:"Henrietta Quirke, School of Government, Birmingham Midlands University",subj:"Rules, not bans",kind:"Journal article",rel:"high",
+   cite:"Quirke, H. (2035) 'Rules, not bans', <i>Public Policy Review</i>, 40(3), pp. 210–228.",body:`
+   <p>A ban, this article argues, would forbid the government from doing what advertisers and foreign states will go on doing, while removing the one actor whose aims are public and accountable. It proposes instead that invented safety content be permitted only with prior approval from an independent board, restricted to a published list of safety goals, and disclosed in full within two years. Lies certain to be revealed on a known timetable are a different instrument from secret ones.</p>
    <p>Public opinion is more divided than the headlines suggest. The National Opinion Panel (2035) found that 63 per cent thought the unit wrong to deceive the public, yet 55 per cent wanted the campaigns to continue in some form. Trust in public health information, which fell from 61 to 52 per cent after the leak, had recovered to 57 per cent by June.</p>
-   <p>The obvious objection is that rules can be bent. My answer is that a ban can be broken too, and in secret; disclosure at least makes a breach visible.</p>
-   ${ref("Quirke, H. (2035) 'Rules, not bans', <i>Public Policy Review</i>, 40(3), pp. 210–228.")}`}
+   <p>The obvious objection is that rules can be bent. To this the article replies that a ban can be broken too, and in secret; disclosure at least makes a breach visible.</p>`}
  ]
 };
+/* the first decision brings Role C a third source: counsel's advice note or the public health adviser's briefing paper */
 const BRANCH={
- legal:{from:"Aled Pryce, Counsel to the Commission",subj:"The narrow remit: what it puts first",rel:"high",body:`
-  <p>Under the narrow terms, the committee will ask two things: was the unit lawful, and was it properly governed?</p>
-  <p>On the first, the unit acted under a ministerial direction signed in late 2031 that was never published. On the second, I can find no record that anyone outside the unit reviewed a single item before it went out. The 2034 “public order” memo was rejected, but only because the unit's head said no.</p>
-  <p>None of this decides whether the unit should exist. It does mean that any recommendation will be judged first on who would check the unit, and how.</p><p class="sig">Aled</p>`},
- public:{from:"Nisha Raman, Public Health Adviser to the Commission",subj:"The broad remit: what it puts first",rel:"high",body:`
-  <p>Under the broad terms, the committee will weigh harm against benefit, so it will want the figures and their limits.</p>
-  <p>On benefit: the gains were largest in the most deprived areas, where screening uptake had lagged for years; the gap with the richest areas roughly halved. On harm: the damage to trust in local news has not recovered, and it falls on the same areas, where the local paper is often the only one left.</p>
-  <p>So whichever way you recommend, the committee will ask what you would do about the other column.</p><p class="sig">Nisha</p>`}
+ legal:{from:"Aled Pryce, Counsel to the Commission",subj:"The Narrow Terms of Reference: Lawfulness and Governance",kind:"Advice note",rel:"high",
+  cite:"Pryce, A. (2035) <i>The Narrow Terms of Reference: Lawfulness and Governance</i>. Advice note to the Independent Commission on Government Communications. London.",body:`
+  <p>Under narrow terms of reference, this note advises, the committee will ask two things: was the unit lawful, and was it properly governed?</p>
+  <p>On the first, the unit acted under a ministerial direction signed in late 2031 that was never published. On the second, counsel found no record that anyone outside the unit reviewed a single item before it went out. The 2034 “public order” memo was rejected, but only because the unit's head said no.</p>
+  <p>None of this decides whether the unit should exist. It does mean, the note concludes, that any recommendation will be judged first on who would check the unit, and how.</p>`},
+ public:{from:"Nisha Raman, Public Health Adviser to the Commission",subj:"The Broad Terms of Reference: Health Benefits and Social Costs",kind:"Briefing paper",rel:"high",
+  cite:"Raman, N. (2035) <i>The Broad Terms of Reference: Health Benefits and Social Costs</i>. Briefing paper for the Independent Commission on Government Communications. London.",body:`
+  <p>Under broad terms of reference, this paper explains, the committee will weigh harm against benefit, so it will want the figures and their limits.</p>
+  <p>On benefit, the gains were largest in the most deprived areas, where screening uptake had lagged for years; the gap with the richest areas roughly halved. On harm, the damage to trust in local news has not recovered, and it falls on the same areas, where the local paper is often the only one left.</p>
+  <p>Whichever way the commission recommends, the paper concludes, the committee will ask what it would do about the other column.</p>`}
 };
 
 /* ---------- experts: one per role, from a shortlist ---------- */
@@ -401,7 +419,11 @@ const STANDING={r1:()=>"Ishbel led her evidence to the committee with the contro
  r3:()=>"Ishbel led with the survey; the committee said it showed opinion, not effect.",
  r4:()=>"Ishbel led with Peter Hext's account; the committee asked why the commission was taking the unit's word for it.",
  r5:()=>"Ishbel led with online posts, most of which turned out to come from a handful of accounts."};
-function inboxList(){const list=[...INBOX[R()]]; if(R()==="C"&&S.fork) list.splice(1,0,BRANCH[S.fork]); list.push(FWD); if(S.ranked) list.unshift(CONSEQ[S.rank[0]]); return list;}
+/* the Sources tab: the role's research sources (Role C's third depends on the first decision), then the genuine
+   messages to the team (the chair's forward, and after the briefing a source's note on the hearing) */
+function srcList(){const list=[...INBOX[R()]]; if(R()==="C"&&S.fork) list.push(BRANCH[S.fork]); return list;}
+function msgList(){const list=[FWD]; if(S.ranked) list.unshift(CONSEQ[S.rank[0]]); return list;}
+function inboxList(){return [...srcList(),...msgList()];}
 const EPI_RANK={r2:"The Forum's study, which Ishbel had led with, was quietly dropped from the final report.",r3:"Ishbel's early reliance on a single survey was mentioned in two newspaper columns.",r4:"The committee's report noted that the commission had at first taken the unit's account of itself on trust.",r5:"The online posts Ishbel had quoted turned out to come from fewer than 200 accounts."};
 
 /* ---------- team puzzles: research skills ---------- */
@@ -493,7 +515,7 @@ function notesHTML(){
  const free=N.free.map((t,i)=>`<div class="nbcard mine"><p>${esc(t)}</p><div class="src">Your note <button class="lnk" data-act="noterm" data-v="${i}">Delete</button></div></div>`).join("");
  const groups=HL.map(([k,c])=>{const g=items.filter(([,h])=>h.c===k); if(!g.length)return "";
    return `<div class="nbgroup"><i style="background:${c}"></i>${esc(N.cc[k]||k[0].toUpperCase()+k.slice(1))}</div>`+g.map(([key,h])=>`<div class="nbcard" style="border-left-color:${c}"><p>${esc(h.t)}</p><div class="src">${esc(h.src)} <button class="lnk" data-act="hlrm" data-v="${key}">Remove</button></div></div>`).join("");}).join("");
- return `<div class="nbhead"><h2>Your highlights and notes</h2><button class="lnk" data-act="nbclose" aria-label="Close notes">Close ✕</button></div>${cc}${add}${free}${items.length?groups:`<p class="muted small">Tap any sentence in the Context, your emails, a report or a recording's text to highlight it. Your highlights collect here.</p>`}`;
+ return `<div class="nbhead"><h2>Your highlights and notes</h2><button class="lnk" data-act="nbclose" aria-label="Close notes">Close ✕</button></div>${cc}${add}${free}${items.length?groups:`<p class="muted small">Tap any sentence in the Context, your sources, a report or a recording's text to highlight it. Your highlights collect here.</p>`}`;
 }
 
 /* ---------- state ---------- */
@@ -502,7 +524,7 @@ let S=fresh();
 const STORE_KEY="simlearn-pro-kindliepro";
 try{const x=JSON.parse(sessionStorage.getItem(STORE_KEY)||"null"); if(x&&typeof x==="object"&&!Array.isArray(x)) S=Object.assign(fresh(),x);}catch(e){}
 function save(){try{sessionStorage.setItem(STORE_KEY,JSON.stringify(S));}catch(e){}}
-const TABS=[["context","Context"],["inbox","Inbox"],["puzzles","Team puzzles"],["investigate","Investigate"],["decide","Decide"]];
+const TABS=[["context","Context"],["inbox","Sources"],["puzzles","Team puzzles"],["investigate","Investigate"],["decide","Decide"]];
 const ready=()=>S.unlock||(S.role&&S.fork);
 const tabOpen=t=>t==="context"||(ready()&&(["inbox","puzzles"].includes(t)||S.unlock||allPz(R())));
 
@@ -511,7 +533,7 @@ function endLockHTML(){return `<section class="card"><h2>What happened next</h2>
 function render(){
   save();
   document.getElementById("who").textContent=S.role?`You are the ${ROLES[S.role].name}${S.fork?` · Terms: ${S.fork==="legal"?"narrow, legal":"broad, public health"}`:""}`:"Read the context, then choose your role.";
-  document.getElementById("tabs").innerHTML=TABS.map(([k,l])=>`<button data-act="tab" data-v="${k}" aria-current="${S.tab===k}" ${tabOpen(k)?"":"disabled"}>${l}${k==="inbox"&&tabOpen(k)&&inboxList().some(m=>!S.mailRead[m.from+"|"+m.subj])?`<span class="tdot" aria-label="unread emails"></span>`:""}</button>`).join("");
+  document.getElementById("tabs").innerHTML=TABS.map(([k,l])=>`<button data-act="tab" data-v="${k}" aria-current="${S.tab===k}" ${tabOpen(k)?"":"disabled"}>${l}${k==="inbox"&&tabOpen(k)&&inboxList().some(m=>!S.mailRead[m.from+"|"+m.subj])?`<span class="tdot" aria-label="unread items"></span>`:""}</button>`).join("");
   document.getElementById("main").innerHTML=V[S.tab]();
   wrapSentences(document.getElementById("main"));
   if(S.tab==="context"&&!S.role){const cs=[...document.querySelectorAll("#main section.card")],i=cs.findIndex(c=>/^\s*3 ·/.test((c.querySelector(".step")||{}).textContent||""));if(i>0){cs.slice(i).forEach(c=>{c.hidden=true;c.style.display="none";});cs[i-1].insertAdjacentHTML("afterend",`<section class="card" id="rolegate"><p class="note-strong" style="margin:0"><strong>Choose your role above to read on.</strong> Each of you takes a different role: agree who is who in your team first.</p></section>`);}}
@@ -555,12 +577,12 @@ const V={
     <p>The Cabinet Office needs the commission's terms of reference by Friday. Aled Pryce, counsel to the commission, wants narrow terms: “Was it lawful, and was it properly governed?” Nisha Raman, its public health adviser, wants broad ones: “What did it do to people's health, and to their trust?” You haven't seen the evidence yet. Agree as a team, then everyone enters the same choice.</p>
     <div class="choices">${[["legal","A","Narrow terms: was the unit lawful and properly governed?","The paper trail comes first: who authorised the unit, and who checked its work. The effects still count, but the committee starts with the rules."],["public","B","Broad terms: the unit's effects on public health and society","The figures come first: lives, costs and trust. The rules still count, but the committee starts with harm and benefit."]].map(([v,k,t,c])=>`<button class="choice" data-act="fork" data-v="${v}" aria-pressed="${S.fork===v}" ${S.fork?"disabled":""}><span class="k">OPTION ${k}</span><b>${t}</b><small>${c}</small></button>`).join("")}</div>
     ${S.fork?audio("Message from Ishbel Rennie","female, Scottish (Edinburgh) accent, precise and warm",REMIT[S.fork],"kindliepro_remit_"+S.fork):""}
-    ${S.fork?(S.role?`<p class="done">Decision made. Some of the evidence you see depends on this choice. Go to your inbox.</p><button class="btn" data-act="tab" data-v="inbox">Open your inbox</button>`:`<p class="done">Decision made. Now choose your role above.</p>`):""}</section>`;
+    ${S.fork?(S.role?`<p class="done">Decision made. Some of the evidence you see depends on this choice. Go to your sources.</p><button class="btn" data-act="tab" data-v="inbox">Open your sources</button>`:`<p class="done">Decision made. Now choose your role above.</p>`):""}</section>`;
  },
  inbox(){
-  const list=inboxList();
-  return task("Read your briefing notes and tell your team what you've found, in your own words. Your teammates have different sources. Not every source is equally reliable.")
-  +`<div style="display:flex;flex-direction:column;gap:10px">${list.map(m=>mail(m)).join("")}</div>`;
+  return task("Read your sources and tell your team what you've found, in your own words. Your teammates hold different sources. Not every source is equally reliable. Cite each one author–date in your writing: the full reference is under each extract.")
+  +`<h2 class="sech">Your sources</h2><div style="display:flex;flex-direction:column;gap:10px">${srcList().map(m=>source(m)).join("")}</div>`
+  +`<h2 class="sech">Messages to the team</h2><div style="display:flex;flex-direction:column;gap:10px">${msgList().map(m=>mail(m)).join("")}</div>`;
  },
  puzzles(){
   const r=R(); let h=task("Each of you has one puzzle, and nobody can solve theirs alone. When a puzzle appears on someone's screen, everyone gathers round that screen until it's solved. Each result changes what happens next.");
@@ -602,7 +624,7 @@ const V={
     <p class="note-strong"><strong>Ishbel will lead with whatever you put first.</strong></p>
     <ol class="tl" id="rk">${S.rank.map((id,i)=>{const t=RANK.find(x=>x[0]===id);
       return `<li class="tc" data-id="${id}" draggable="${!S.ranked}"><span class="n">${i+1}</span><span>${t[1]}</span><span class="arr">${S.ranked?"":`<button data-act="mv" data-l="rank" data-v="${i}" data-d="-1" aria-label="Move up" ${i?"":"disabled"}>↑</button><button data-act="mv" data-l="rank" data-v="${i}" data-d="1" aria-label="Move down" ${i<RANK.length-1?"":"disabled"}>↓</button>`}</span></li>`;}).join("")}</ol>
-    ${S.ranked?`<p class="done">Sent to Ishbel. Her reply is below, and there's a new email in your inbox.</p>${mail(reply())}`:`<button class="btn" data-act="sendrank">Send to Ishbel</button>`}</section>`;
+    ${S.ranked?`<p class="done">Sent to Ishbel. Her reply is below, and there's a new message on your Sources tab.</p>${mail(reply())}`:`<button class="btn" data-act="sendrank">Send to Ishbel</button>`}</section>`;
  },
  decide(){
   const dis=S.decided?"disabled":"";
@@ -655,6 +677,10 @@ function act(a,d){
   case "nbopen":S.nbOpen=true;break;
   case "endcode":{const c=((document.getElementById("endcode")||{}).value||"").trim();if(fnv(c)===ENDING_HASH){S.endOpen=true;S.endMsg="";}else S.endMsg=c?"That isn't the code. Check it with your teacher.":"";break;}
   case "nbclose":S.nbOpen=false;break;
+  case "copyref":{const k=decodeURIComponent(d.v), m=inboxList().find(x=>x.from+"|"+x.subj===k); if(!m)return;
+    const t=m.cite.replace(/<[^>]+>/g,""), b=[...document.querySelectorAll('[data-act="copyref"]')].find(x=>x.dataset.v===d.v),
+     done=()=>{if(b)b.textContent="Copied";}, sel=()=>{const r=b&&b.parentNode.querySelector(".ref");if(r){const g=document.createRange();g.selectNodeContents(r);const s=getSelection();s.removeAllRanges();s.addRange(g);}if(b)b.textContent="Selected: press Ctrl+C (⌘C)";};
+    try{navigator.clipboard.writeText(t).then(done,sel);}catch(_){sel();} return;}
   case "hlrm":{const N=S.notes[R()];delete N.hl[d.v];break;}
   case "noteadd":{const t=(document.getElementById("nbnew")||{}).value||""; if(t.trim())S.notes[R()].free.push(t.trim()); break;}
   case "noterm":S.notes[R()].free.splice(+d.v,1);break;

@@ -1205,7 +1205,11 @@ function tabListening(){
   const L = S.listening, key = listeningAnswers(), done = !!(st.mcqDone && key);
   const n = L.questions.length, right = done ? L.questions.filter((q,i) => st.mcq[i] === key[i]).length : 0;
   $("#main").innerHTML = `
-    <p>Your teacher will play <b>${esc(L.name)}</b>. Answer while you listen${key ? ", then press <b>Check my answers</b>" : " — your teacher will go through the answers afterwards"}.</p>
+    ${L.src
+      ? `<p>Listen to <b>${esc(L.name)}</b> (you can play it twice) and answer while you listen${key ? ", then press <b>Check my answers</b>" : ""}.</p>
+         <audio controls preload="none" src="${esc(L.src)}" style="width:100%"></audio>
+         <p class="muted small">If the player doesn't work: <a href="${esc(L.src)}" target="_blank" rel="noopener">open the MP3</a>.</p>`
+      : `<p>Your teacher will play <b>${esc(L.name)}</b>. Answer while you listen${key ? ", then press <b>Check my answers</b>" : " — your teacher will go through the answers afterwards"}.</p>`}
     ${L.questions.map((q,i) => `${q.part && q.part !== (L.questions[i-1] || {}).part ? `<h3 class="lpart">${esc(q.part)}</h3>` : ""}<div class="mcq"><b>${i+1}. ${esc(q.q)}</b>
       ${Object.entries(q.options).map(([k,v]) => {
         const cls = !done ? "" : (k === key[i] ? "right" : (st.mcq[i] === k ? "wrong" : ""));
