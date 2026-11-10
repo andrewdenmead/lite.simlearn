@@ -162,6 +162,8 @@ legend{font-weight:600;margin-bottom:.5rem}
 .drawer[open]>summary::after{content:"Close"}
 .drawer .dbody{background:#fff;border-top:1px solid #E6D3A6;border-radius:0 0 10px 10px;padding:4px 14px 12px}
 .drawer .dbody .prose{white-space:pre-line;margin-top:10px}
+.paper h3.ptext{font-size:.95rem;margin:18px 0 4px;padding-top:12px;border-top:1px solid #E6D3A6}
+.paper .body>.prose,.paper h3.ptext+.prose{white-space:pre-line}
 .kind{display:inline-block;font:600 .72rem/1 var(--sans);letter-spacing:.02em;border-radius:999px;padding:4px 9px;margin-left:6px;vertical-align:2px}
 .kind.bw{background:#1D2733;color:#fff}.kind.grey{background:#D4D9E1;color:#1D2733}
 .decgroup{font:600 .8rem/1 var(--sans);text-transform:uppercase;letter-spacing:.06em;color:var(--ink-2);margin:26px 0 -4px}
@@ -429,6 +431,7 @@ const S = JSON.parse(document.getElementById("scenario").textContent);
 // AE written papers (30 Oct 2026) give two briefing notes, not emails: name them as the paper and the students' guide do.
 const DOCS = S.course === "AE" ? "briefing notes" : "emails";
 const STORE = "simlearn:" + S.id + ":v" + S.version;
+const PRINTED_AS = {"Show me the data": "The data behind it", "Give me a counter text": "A counter text", "Give me another one of these": "Another text like it"};   // a practice paper's drawer texts, as printed
 const AE2 = S.format === "ae2";   // new AE format: drawers, tags, "which is the better argument?"
 const EXAM = S.format === "exam", EX = S.exam || null;   // written exam: one candidate, questions, no answers in the page
 const SPEAK = S.format === "speaking", SP = S.speaking || null;
@@ -764,7 +767,7 @@ function hlSources(){
     parts.push({cid:ch.id, part:"email", text:ch.email, src});
     if (AE2) {   // every drawer can be opened, so every drawer can hold highlights
       ch.offers.forEach(o => parts.push({cid:ch.id, part:"d" + o.id, text:unscramble(o.text, `${S.salt}|${ch.id}|${o.id}`),
-                                         src:{name:o.author, citation:o.citation, cid:ch.id, option:o.title}}));
+                                         src:{name:o.author, citation:o.citation, cid:ch.id, option:(S.practice && PRINTED_AS[o.title]) || o.title}}));
       return;
     }
     const o = st.choices[ch.id] && ch.offers.find(x => x.id === st.choices[ch.id]);
@@ -1062,7 +1065,8 @@ document.addEventListener("input", e => {
 });
 
 /* ---------- main shell ---------- */
-const ALL_TABS = [["context","Context"], ...(AE2 ? [["listening","Listening"],["firstlook","First look"]] : [["firstlook","First look"],["listening","Listening"],["article","Reading"]]),["inbox", AE2 ? "Research" : "Inbox"],["decisions", B ? "Budget" : "Decisions"],["submit","Write & submit"], ...(S.model ? [["model","Model answer"]] : [])];
+const PRACTICE = !!S.practice;   // a practice paper (Andrew, 10 Nov 2026): no First look, no drawers; it works like the paper exam
+const ALL_TABS = [["context","Context"], ...(AE2 ? [["listening","Listening"], ...(PRACTICE ? [] : [["firstlook","First look"]])] : [...(PRACTICE ? [] : [["firstlook","First look"]]),["listening","Listening"],["article","Reading"]]),["inbox", AE2 ? "Research" : "Inbox"],["decisions", B ? "Budget" : "Decisions"],["submit","Write & submit"], ...(S.model ? [["model","Model answer"]] : [])];
 const partTab = p => p.tab || "emails";
 const EXAM_TABS = EXAM ? (EX.article
   ? [["context","Situation"], ...(EX.listening ? [["listening","Listening"]] : []), ["article","Article"], ["reading", DOCS === "emails" ? "Emails" : "Briefing notes"], ["decisions","Decisions"], ["submit","Write & submit"]]
@@ -1151,10 +1155,16 @@ function tabContext(){
     ${c.scar ? `<div class="note scar"><b>${esc(c.scar.label)}</b><p class="prose">${hlHTML(c.scar.text, "ctx", "scar")}</p></div>` : ""}
     ${c.proof ? `<div class="note proof"><b>${esc(c.proof.label)}</b><p class="prose">${hlHTML(c.proof.text, "ctx", "proof")}</p></div>` : ""}
     ${c.constraint ? `<div class="note clock"><b>The clock</b><p class="prose">${hlHTML(c.constraint, "ctx", "clock")}</p></div>` : ""}
+    ${PRACTICE ? decisionsBoxHTML() : ""}
     ${SOLO ? `<h2>${AE2 ? "Your papers" : "Your contacts"}</h2><p class="muted">${role().characters.map(ch => `${esc(ch.name)}, ${esc(ch.title)}`).join(" · ")}</p>` : EXAM ? `<h2>Your documents</h2><p class="muted">${EX.article ? `The article "${esc(EX.article.title)}" and ${DOCS} from: ` : "On the Reading tab, from: "}${role0().characters.map(ch => `${esc(ch.name)}, ${esc(ch.title)}`).join(" · ")}.</p>` : `
     <h2>${AE2 ? "Who's who" : "Who knows what"}</h2>
     <p class="muted">You only see your own ${AE2 ? "papers" : "contacts"}. What the others know reaches you by talking to ${st.mode === "2" ? "your partner" : "your group"}.</p>
     <div class="contacts">${roles().map(r => `<div><b>${esc(roleName(r))}</b>${r.id===st.role?" (you)":""}<br><span class="muted">${r.characters.map(ch => `${esc(ch.name)}, ${esc(ch.title)}`).join(" · ")}</span></div>`).join("")}</div>`}`;
+}
+
+function decisionsBoxHTML(){   // a practice paper: what the student will decide, as the exam's Situation says it
+  return `<div class="note"><b>These are the decisions you will make</b>
+    <ol>${S.decisions.map(d => `<li><b>${esc(d.title)}</b>${d.A && d.B ? `<br><span class="muted">A. ${esc(d.A)} · B. ${esc(d.B)}</span>` : ""}</li>`).join("")}</ol></div>`;
 }
 
 function tabFirstLook(){
@@ -1596,7 +1606,7 @@ function tabInbox(){
   if (AE2) {
     $("#main").innerHTML = `
       ${colourCodeHTML()}${decStripHTML()}
-      <p>Read your ${num(r.characters.length)} papers. Each one has <b>three drawers</b>: the data behind it, a counter text and another text like it. Open and close them whenever you like. As you read, <b>tap sentences</b> to highlight them and tag the part of the argument and the decision they matter for. ${SOLO ? "Your highlights are collected in the notes below and next to the questions on the Decisions page." : `Then tell ${pair() ? "your partner" : "your group"} what you found: they can't see your papers.`}</p>
+      <p>Read your ${num(r.characters.length)} papers. ${PRACTICE ? "Each one comes with three shorter texts: the data behind it, a counter text and another text like it." : "Each one has <b>three drawers</b>: the data behind it, a counter text and another text like it. Open and close them whenever you like."} As you read, <b>tap sentences</b> to highlight them and tag the part of the argument and the decision they matter for. ${SOLO ? "Your highlights are collected in the notes below and next to the questions on the Decisions page." : `Then tell ${pair() ? "your partner" : "your group"} what you found: they can't see your papers.`}</p>
       ${r.characters.map(c => sourceHTML(c)).join("")}
       <section class="nb"><h2 id="nbhead" tabindex="-1">${NB_TITLE}<span id="nbcount"></span></h2><p id="nblive" class="small muted" aria-live="polite"></p><div data-nb="inbox"></div></section>`;
     document.querySelectorAll("details.drawer").forEach(d => d.addEventListener("toggle", () => {
@@ -1617,6 +1627,12 @@ function tabInbox(){
   refreshNotebook();
 }
 function sourceHTML(c){   // ae2: a primary text with three drawers the student opens and closes freely
+  if (PRACTICE) return `<details class="mail paper" id="m_${c.id}" open>
+    <summary><span><span class="ptitle">${esc(c.subject)}</span><br><span class="pauth">${esc(c.name)}</span> <span class="muted small">· ${esc(c.title)}</span></span></summary>
+    <div class="body"><div class="prose">${hlHTML(c.email, c.id, "email")}</div>${c.citation ? `<p class="cite"><b>Reference:</b> ${esc(c.citation)}</p>` : ""}
+      ${c.offers.map(o => `<h3 class="ptext">${esc(PRINTED_AS[o.title] || o.title)}</h3>
+        <div class="prose">${hlHTML(unscramble(o.text, `${S.salt}|${c.id}|${o.id}`), c.id, "d" + o.id)}</div>
+        <p class="cite"><b>Reference:</b> ${esc(o.citation)}</p>`).join("")}</div></details>`;
   const isOpen = o => !!(st.drawOpen || {})[c.id + "|" + o.id];
   return `<details class="mail paper" id="m_${c.id}" open>
     <summary><span><span class="ptitle">${esc(c.subject)}</span><br><span class="pauth">${esc(c.name)}</span> <span class="muted small">· ${esc(c.title)}</span></span></summary>
@@ -1968,7 +1984,7 @@ function makeSubmission(){
   if (openDec.length || words(st.memo) < 50) { $("#out").innerHTML = ""; return; }
 
   const ai = st.consent ? "yes" : "no";
-  const choices = r.characters.map(c => `${c.id}=${(AE2 ? (st.opened || {})[c.id] : st.choices[c.id]) || "-"}`).join(", ");   // ae2: the drawers opened, e.g. "ac"
+  const choices = r.characters.map(c => `${c.id}=${(AE2 ? (PRACTICE ? c.offers.map(o => o.id).join("") : (st.opened || {})[c.id]) : st.choices[c.id]) || "-"}`).join(", ");   // ae2: the drawers opened, e.g. "ac"
   const decisions = B ? B.items.map(it => `${it.id}=${budgetVal(it.id)}`).join(", ")
                       : S.decisions.map(d => `${d.id}=${st.decisions[d.id]}`).join(", ");
   const memoText = st.memo.trim();
