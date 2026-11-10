@@ -76,6 +76,13 @@ legend{font-weight:600;margin-bottom:.5rem}
 .note.scar{border-color:var(--warn)}
 .note.proof{border-color:var(--pine)}
 .note.clock{border-color:var(--amber)}
+/* AE: the background as a citable news article (Andrew, 10 Nov 2026) */
+.news{border:1px solid var(--line);border-radius:12px;background:#fff;padding:16px 18px;margin:0 0 1rem}
+.news .paper{font-family:var(--sans);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin:0;border-bottom:1px solid var(--line);padding-bottom:6px}
+.news h2.headline{margin:10px 0 4px;font-size:1.35rem;line-height:1.25}
+.news .stand{font-weight:600;margin:4px 0 6px}
+.news .byline{font-family:var(--sans);font-size:.85rem;color:var(--ink-2);margin:0 0 6px}
+.news .cite .lnk{margin-left:8px}
 .contacts{border:1px solid var(--line);border-radius:10px;padding:4px 14px;background:#fff}
 .contacts div{padding:8px 0;border-top:1px solid var(--line)}
 .contacts div:first-child{border-top:0}
@@ -752,8 +759,9 @@ function splitSentences(text){
 const isSentence = s => words(s) >= 3 && (/[.!?\u201D"')\]]\s*$/.test(s.trim()) || words(s) >= 5);
 // Sentence registry for everything this student can highlight: context + own contacts' emails + the opened option.
 function hlSources(){
-  const parts = [], c = S.context;
-  c.text.split("\n\n").forEach((p, i) => parts.push({cid:"ctx", part:"p" + i, text:p, src:{name:"Context"}}));
+  const parts = [], c = S.context, N = c.article;
+  if (N) [N.standfirst, ...N.text.split("\n\n")].forEach((p, i) => { if (p) parts.push({cid:"news", part:"p" + i, text:p, src:{name:N.author, title:N.paper, citation:N.citation}}); });
+  c.text.split("\n\n").forEach((p, i) => parts.push({cid:"ctx", part:"p" + i, text:p, src:{name:N ? "Your task" : "Context"}}));
   if (c.scar) parts.push({cid:"ctx", part:"scar", text:c.scar.text, src:{name:c.scar.label}});
   if (c.proof) parts.push({cid:"ctx", part:"proof", text:c.proof.text, src:{name:c.proof.label}});
   if (c.constraint) parts.push({cid:"ctx", part:"clock", text:c.constraint, src:{name:"The clock"}});
@@ -1151,7 +1159,8 @@ function tabContext(){
   const c = S.context;
   $("#main").innerHTML = `
     ${S.image ? `<figure class="hero"><img src="${S.image.src}" alt="${esc(S.image.alt)}"></figure>` : ""}
-    <div class="prose">${c.text.split("\n\n").map((p, i) => `<p>${hlHTML(p, "ctx", "p" + i)}</p>`).join("")}</div>
+    ${c.article ? newsHTML(c.article) + `<div class="note"><b>Your task</b><div class="prose">${c.text.split("\n\n").map((p, i) => `<p>${hlHTML(p, "ctx", "p" + i)}</p>`).join("")}</div></div>`
+      : `<div class="prose">${c.text.split("\n\n").map((p, i) => `<p>${hlHTML(p, "ctx", "p" + i)}</p>`).join("")}</div>`}
     ${c.scar ? `<div class="note scar"><b>${esc(c.scar.label)}</b><p class="prose">${hlHTML(c.scar.text, "ctx", "scar")}</p></div>` : ""}
     ${c.proof ? `<div class="note proof"><b>${esc(c.proof.label)}</b><p class="prose">${hlHTML(c.proof.text, "ctx", "proof")}</p></div>` : ""}
     ${c.constraint ? `<div class="note clock"><b>The clock</b><p class="prose">${hlHTML(c.constraint, "ctx", "clock")}</p></div>` : ""}
@@ -1161,6 +1170,19 @@ function tabContext(){
     <p class="muted">You only see your own ${AE2 ? "papers" : "contacts"}. What the others know reaches you by talking to ${st.mode === "2" ? "your partner" : "your group"}.</p>
     <div class="contacts">${roles().map(r => `<div><b>${esc(roleName(r))}</b>${r.id===st.role?" (you)":""}<br><span class="muted">${r.characters.map(ch => `${esc(ch.name)}, ${esc(ch.title)}`).join(" · ")}</span></div>`).join("")}</div>`}`;
 }
+
+function newsHTML(N){   // AE: the background as a dated news article, cited like any source
+  return `<article class="news"><p class="paper">${esc(N.paper)} · ${esc(N.date)}</p><h2 class="headline">${esc(N.headline)}</h2>
+    ${N.standfirst ? `<p class="stand">${hlHTML(N.standfirst, "news", "p0")}</p>` : ""}<p class="byline">By ${esc(N.author)}</p>
+    <div class="prose">${N.text.split("\n\n").map((p, i) => `<p>${hlHTML(p, "news", "p" + (i + 1))}</p>`).join("")}</div>
+    <p class="cite"><b>Reference:</b> <span>${esc(N.citation)}</span><button type="button" class="linkish lnk" data-copyref="1">Copy reference</button> <span class="ok small" aria-live="polite"></span></p></article>`;
+}
+document.addEventListener("click", async e => {
+  const b = e.target.closest && e.target.closest("[data-copyref]"); if (!b) return;
+  const ref = b.previousElementSibling.textContent, out = b.nextElementSibling;
+  try { await navigator.clipboard.writeText(ref); out.textContent = "Copied"; }
+  catch(err) { const r = document.createRange(); r.selectNodeContents(b.previousElementSibling); const s = getSelection(); s.removeAllRanges(); s.addRange(r); out.textContent = "Selected: press Ctrl+C (Cmd+C)"; }
+});
 
 function decisionsBoxHTML(){   // a practice paper: what the student will decide, as the exam's Situation says it
   return `<div class="note"><b>These are the decisions you will make</b>

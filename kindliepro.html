@@ -99,11 +99,18 @@ main .wrap{padding-block:22px 64px;display:flex;flex-direction:column;gap:18px}
 .src.unread .stitle{font-weight:700}
 .src .sauth{font-size:14.5px;color:var(--ink)}
 .src .saff{font-size:13px;color:var(--muted)}
-.mail .body .cite{font-family:var(--ui);font-size:14px;line-height:1.5;color:var(--muted);border-left:3px solid var(--line);padding:4px 0 4px 10px}
+.card>.cite,.mail .body .cite{font-family:var(--ui);font-size:14px;line-height:1.5;color:var(--muted);border-left:3px solid var(--line);padding:4px 0 4px 10px}
 .cite .ref{color:var(--ink);user-select:all;-webkit-user-select:all}
 .cite .lnk{margin-left:8px}
 .mail .body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:10px}
 .sig{color:var(--muted)}
+.news{border:1px solid var(--line);border-radius:6px;padding:12px 14px;margin:6px 0 4px}
+.news .paper{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700;border-bottom:1px solid var(--line);padding-bottom:6px;margin:0}
+.news .headline{font-family:var(--serif);font-size:1.25rem;margin:10px 0 4px}
+.news .stand{font-weight:600;margin:4px 0}
+.news .byline{font-size:13px;color:var(--muted);margin:0 0 6px}
+.news>p:not(.paper):not(.byline){font-family:var(--serif);font-size:1.02rem;line-height:1.62}
+.news>p{margin:0 0 10px}
 .attach{border:1px solid var(--line);border-radius:6px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
 .attach .an{font-size:12.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
 .fine{font-size:13px;color:var(--muted);border-top:1px dotted var(--line);padding-top:6px}
@@ -235,6 +242,13 @@ textarea{width:100%;min-height:200px;resize:vertical;font:inherit;line-height:1.
 <aside id="nb" hidden aria-label="Your highlights and notes"></aside>
 
 <script>
+// The leak as a citable news article (Andrew, 10 Nov 2026): students cite it like any source (make_kindliepro reads it)
+const NEWS={paper:"The Northern Ledger",date:"21 May 2035",author:"Alasdair Moffat",headline:"Inside the unit that lied to keep us safe",
+ standfirst:"For three years a government unit placed invented stories in the media. A commission must now decide what it did, and what happens next.",
+ paras:["In January 2035 a civil servant leaked the files of a unit almost nobody had heard of. From 2032 to 2034 the Public Safety Communications Unit, 23 staff with a budget of about £41 million a year, had placed 412 invented items in the media: posts by people who did not exist, short videos of neighbours and nurses played by actors, and local news reports written in an office.",
+  "Every item had one aim: to keep people safe. The stories warned about speeding, encouraged blood pressure checks and cancer screening, discouraged fly-tipping and wasted energy, and kept children away from substations and railway lines. Nothing touched politics. An independent evaluation has since found that road deaths, fly-tipping and children's injuries fell, and health checks rose. The factual campaigns that came before had achieved almost nothing.",
+  "The unit's work is suspended. The government has set up an independent commission, chaired by Professor Ishbel Rennie, to answer three questions: why the stories worked, whether the deception was justified, and what should happen to the unit. It must report before the autumn Spending Review, and it will defend its findings before MPs."],
+ cite:"Moffat, A. (2035) 'Inside the unit that lied to keep us safe', The Northern Ledger, 21 May, p. 3."};
 const ROLES={
  A:{name:"Evidence Analyst",line:"The campaigns",detail:"You weigh the evidence on what the campaigns achieved and why. Your sources are the independent evaluation and research on how messages change behaviour."},
  B:{name:"Ethics Adviser",line:"The ethics",detail:"You advise the commission on the moral question. Your sources are the two most cited papers on whether deceiving the public can ever be justified."},
@@ -566,10 +580,10 @@ const V={
     ${r?`<p><strong>You are the ${ROLES[r].name}.</strong> ${ROLES[r].detail}</p>`:""}
     <h3 style="margin-top:6px">Other people you'll hear from</h3>
     <div class="people"><div class="person"><b>Ishbel Rennie</b><span class="muted small">Chair of the commission, your boss. Professor of Public Law at the Edinburgh Stuart University.</span></div><div class="person"><b>Fiona Laird</b><span class="muted small">Research Director of the Campaign Effectiveness Forum. Giving evidence.</span></div><div class="person"><b>Peter Hext</b><span class="muted small">Former head of the unit. Giving evidence.</span></div><div class="person"><b>The Commons Public Administration Committee</b><span class="muted small">MPs who will question the commission on its findings.</span></div></div></section>`
-  +`<section class="card" data-src="Context" data-q="medium"><span class="step">3 · The situation</span><h2>The leak</h2>
-    <p>In January 2035 a civil servant leaked the files of a unit almost nobody had heard of. From 2032 to 2034 the Public Safety Communications Unit, 23 staff with a budget of about £41 million a year, had placed 412 invented items in the media: posts by people who did not exist, short videos of neighbours and nurses played by actors, and local news reports written in an office.</p>
-    <p>Every item had one aim: to keep people safe. The stories warned about speeding, encouraged blood pressure checks and cancer screening, discouraged fly-tipping and wasted energy, and kept children away from substations and railway lines. Nothing touched politics. An independent evaluation has since found that road deaths, fly-tipping and children's injuries fell, and health checks rose. The factual campaigns that came before had achieved almost nothing.</p>
-    <p>The unit's work is suspended. The government has set up an independent commission, chaired by Ishbel Rennie, to answer three questions: why the stories worked, whether the deception was justified, and what should happen to the unit. It must report before the autumn Spending Review, and it will defend its findings before MPs.</p>
+  +`<section class="card"><span class="step">3 · The situation</span><h2>The leak</h2>
+    <article class="news" data-src="Moffat (2035)" data-q="high"><p class="paper">${NEWS.paper} · ${NEWS.date}</p><h3 class="headline">${NEWS.headline}</h3><p class="stand">${NEWS.standfirst}</p><p class="byline">By ${NEWS.author}</p>
+    ${NEWS.paras.map(x=>`<p>${x}</p>`).join("")}</article>
+    <p class="cite"><b>Reference:</b> <span class="ref">${NEWS.cite}</span><button class="lnk" data-act="copyref" data-v="news">Copy reference</button></p>
     <div class="facts"><div class="fact"><div class="l">Invented items</div><div class="v">412</div></div><div class="fact"><div class="l">Years of campaigns</div><div class="v">2032–34</div></div><div class="fact"><div class="l">Budget a year</div><div class="v">£41m</div></div><div class="fact"><div class="l">Report due</div><div class="v">Autumn</div></div></div></section>`
   +`<section class="card" data-src="Context" data-q="medium"><span class="step">4 · It starts</span><h2>A voicemail from Ishbel</h2>
     ${audio("Voicemail from Ishbel Rennie","female, Scottish (Edinburgh) accent, precise and warm",`<p class="sd">[Phone line. Rain on a window.]</p><p>Hello, it's Ishbel. I've just left the Cabinet Office. They want our terms of reference by Friday. Everyone I met today already knew the answer. Half of them called it a scandal. The other half asked why we'd ever stop something that saves lives.</p><p>I don't want either speech. I want the evidence: what worked, why, and what it cost us, in trust as well as money. Check every source. If we lean on a weak one, the committee will take us apart, whichever side we come down on.</p>`,"kindliepro_voicemail")}</section>`
@@ -677,7 +691,7 @@ function act(a,d){
   case "nbopen":S.nbOpen=true;break;
   case "endcode":{const c=((document.getElementById("endcode")||{}).value||"").trim();if(fnv(c)===ENDING_HASH){S.endOpen=true;S.endMsg="";}else S.endMsg=c?"That isn't the code. Check it with your teacher.":"";break;}
   case "nbclose":S.nbOpen=false;break;
-  case "copyref":{const k=decodeURIComponent(d.v), m=inboxList().find(x=>x.from+"|"+x.subj===k); if(!m)return;
+  case "copyref":{const k=decodeURIComponent(d.v), m=k==="news"?{cite:NEWS.cite}:inboxList().find(x=>x.from+"|"+x.subj===k); if(!m)return;
     const t=m.cite.replace(/<[^>]+>/g,""), b=[...document.querySelectorAll('[data-act="copyref"]')].find(x=>x.dataset.v===d.v),
      done=()=>{if(b)b.textContent="Copied";}, sel=()=>{const r=b&&b.parentNode.querySelector(".ref");if(r){const g=document.createRange();g.selectNodeContents(r);const s=getSelection();s.removeAllRanges();s.addRange(g);}if(b)b.textContent="Selected: press Ctrl+C (⌘C)";};
     try{navigator.clipboard.writeText(t).then(done,sel);}catch(_){sel();} return;}
