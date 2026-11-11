@@ -337,6 +337,12 @@ footer{border-top:1px solid var(--line);padding:18px 0 40px;font-size:.85rem;col
 .model .mcrit{display:inline-block;font-size:.75rem;font-weight:600;padding:1px 8px;border-radius:999px;background:#fff;border:1px solid var(--line);margin-top:4px}
 .model .mkey{display:flex;flex-wrap:wrap;gap:6px;margin:.5em 0}
 .model .mkey span{font-size:.78rem;padding:2px 9px;border-radius:999px}
+.whoorg{margin:18px 0}.whoorg h3{margin:0 0 8px;font-size:1.05rem}
+.whogrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.whop{display:flex;gap:12px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.whop.other{opacity:.62}
+.whoav{flex:none;width:56px;height:56px;border-radius:50%;object-fit:cover;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1.05rem}
+.whotag{display:inline-block;font-size:.78rem;padding:1px 8px;border-radius:99px;background:var(--panel);color:var(--ink-2);font-weight:600}
 </style>
 </head>
 <body>
@@ -1103,7 +1109,7 @@ document.addEventListener("input", e => {
 
 /* ---------- main shell ---------- */
 const PRACTICE = !!S.practice;   // a practice paper (Andrew, 10 Nov 2026): no First look, no drawers; it works like the paper exam
-const ALL_TABS = [["context","Context"], ...(AE2 ? [["listening","Listening"], ...(PRACTICE ? [] : [["firstlook","First look"]])] : [...(PRACTICE ? [] : [["firstlook","First look"]]),["listening","Listening"],["article","Reading"]]),["inbox", AE2 ? "Research" : "Inbox"],["decisions", B ? "Budget" : "Decisions"],["submit","Write & submit"], ...(S.model ? [["model","Model answer"]] : [])];
+const ALL_TABS = [["context","Context"], ...(S.who ? [["who","Who's who"]] : []), ...(AE2 ? [["listening","Listening"], ...(PRACTICE ? [] : [["firstlook","First look"]])] : [...(PRACTICE ? [] : [["firstlook","First look"]]),["listening","Listening"],["article","Reading"]]),["inbox", AE2 ? "Research" : "Inbox"],["decisions", B ? "Budget" : "Decisions"],["submit","Write & submit"], ...(S.model ? [["model","Model answer"]] : [])];
 const partTab = p => p.tab || "emails";
 const EXAM_TABS = EXAM ? (EX.article
   ? [["context","Situation"], ...(EX.listening ? [["listening","Listening"]] : []), ["article","Article"], ["reading", DOCS === "emails" ? "Emails" : "Briefing notes"], ["decisions","Decisions"], ["submit","Write & submit"]]
@@ -1180,7 +1186,7 @@ function render(){
     pendingPick = {}; render(); window.scrollTo(0,0);
   };
   (SPEAK ? {context:tabSpeakBrief, reading:tabSpeakEmails, listening:tabSpeakListening, deal:tabDeal, submit:tabSpeakSubmit}
-   : {context:tabContext, firstlook:tabFirstLook, listening:EXAM ? tabExamListening : tabListening, inbox:tabInbox, reading:tabReading, article:EXAM ? tabArticle : tabSimReading, decisions:tabDecisions, submit:tabSubmit, model:tabModel})[st.tab]();
+   : {context:tabContext, firstlook:tabFirstLook, listening:EXAM ? tabExamListening : tabListening, inbox:tabInbox, who:tabWho, reading:tabReading, article:EXAM ? tabArticle : tabSimReading, decisions:tabDecisions, submit:tabSubmit, model:tabModel})[st.tab]();
 }
 
 /* ---------- tabs ---------- */
@@ -1906,6 +1912,27 @@ function tabSubmit(){
   $("#consent").onchange = e => { st.consent = e.target.checked; save(); $("#out").innerHTML = ""; };
   $("#make").onclick = makeSubmission;
   showEnding();
+}
+
+/* ---------- Who's who (11 Nov 2026): everyone who writes to the team, grouped by organisation; a photo from the
+   shared face library when there is one, else initials. Your own contacts first, the others' greyed. ---------- */
+function tabWho(){
+  const W = S.who, mine = st.role, roleOf = id => (S.roles.find(r => r.id === id) || {});
+  const myNames = new Set(((role() || {}).characters || []).map(c => c && c.name)), isMine = p => myNames.has(p.name);   // also two-player
+  const orgs = W.groups.map(g => ({...g, people: [...g.people].sort((a, b) => isMine(b) - isMine(a))}));
+  if (W.party) orgs.sort((a, b) => b.people.some(isMine) - a.people.some(isMine));   // your own side first
+  const ini = n => n.replace(/^(Dr|Prof|Professor|Sir|Dame)\.? /, "").split(/\s+/).map(w => w[0]).filter(Boolean).slice(0, 2).join("").toUpperCase();
+  const hue = id => [...id].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 360, 7);
+  $("#main").innerHTML = `<h2>Who's who</h2>
+    <p class="small muted">${AE2 ? "Every source your team can read." : "Everyone who writes to your team, by " + (W.party ? "side." : "organisation.")} ${SOLO ? "" : (AE2 ? "Yours come first; " : "Your own contacts come first; ") + (pair() ? "your partner " + (AE2 ? "reads" : "hears from") : "your teammates " + (AE2 ? "read" : "hear from")) + " the others."}</p>
+    ${orgs.map(g => `<section class="whoorg"><h3>${esc(g.name)}${AE2 ? "" : g.team ? ` <span class="whotag">your team</span>` : W.party && g.people.some(isMine) ? ` <span class="whotag">your side</span>` : ""}</h3>
+      <div class="whogrid">${g.people.map(p => {
+        const own = isMine(p), others = p.roles.filter(x => x !== mine).map(roleOf);
+        return `<div class="whop${own || SOLO ? "" : " other"}">
+          ${p.photo ? `<img class="whoav" src="${p.photo}" alt="">` : `<span class="whoav" style="background:hsl(${hue(p.id)} 45% 42%)">${esc(ini(p.name))}</span>`}
+          <div><b>${esc(p.name)}</b><br><span class="small">${esc(p.title)}</span>
+          ${SOLO ? "" : `<br><span class="small ${own ? "whotag" : "muted"}">${own ? (AE2 ? "In your research" : "In your inbox") : (pair() ? (AE2 ? "Your partner's research" : "Your partner's inbox") : esc(others.map(r => r.dept && !W.party ? r.label + " · " + r.dept : r.label || "").join("; ")))}</span>`}</div></div>`;
+      }).join("")}</div></section>`).join("")}`;
 }
 
 /* ---------- What happened next (11 Nov 2026: moved here from the teacher's feedback, so students read the story
