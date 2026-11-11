@@ -1,0 +1,1108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<title>Kestermoor Energy: The Listing Decision (Pro) — SimLearn</title>
+<link rel="icon" href="/favicon.ico" sizes="any"><link rel="icon" type="image/png" href="/favicon-32.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: Lite-style single column. Plain header, five tabs, a task line on every tab, content as cards and emails. */
+:root{
+  /* Lite's palette and fonts (studio/template.html), with Pro marked by Lite's amber on tabs and badge. Light only, like Lite. */
+  --bg:#FBFBF8; --surface:#ffffff; --sunk:#ECEFF3; --ink:#1D2733; --muted:#4A5562; --line:#D4D9E1;
+  --blue:#2C5282; --blue-soft:#EEF3F9; --amber:#C98A1B; --amber-soft:#FBF1DC;
+  --good:#2F6B47; --good-soft:#E3F0E7; --bad:#9B2C2C; --bad-soft:#F7E4E4; --warn:#7A5A0E; --warn-soft:#FBF1DC; --proto:#FBF1DC;
+  --ui:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --serif:Charter,"Bitstream Charter","Sitka Text",Cambria,Georgia,serif;
+  --mono:ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+body{background:var(--bg);color:var(--ink);font-family:var(--ui);font-size:16px;line-height:1.55}
+.wrap{max-width:860px;margin:0 auto;padding-left:max(16px, env(safe-area-inset-left,0px));padding-right:max(16px, env(safe-area-inset-right,0px))}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+h1,h2,h3{text-wrap:balance;margin:0;line-height:1.2}
+p{margin:0}
+
+.proto{background:var(--proto);border-bottom:1px dashed var(--line);font-size:13px}
+.proto .wrap{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;padding-block:7px}
+.proto b{color:var(--amber);letter-spacing:.08em;text-transform:uppercase;font-size:11px}
+.ghost{background:transparent;border:1px solid var(--line);border-radius:6px;padding:3px 10px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{background:transparent;border:0;padding:3px 10px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+
+header{background:var(--surface);border-bottom:1px solid var(--line);border-top:4px solid var(--blue)}
+header .wrap{padding-block:18px 0}
+.brand{font-weight:800;color:var(--blue);font-size:14px;letter-spacing:.02em}
+.brand span{background:var(--amber);color:#fff;border-radius:4px;padding:0 6px;margin-left:4px;font-size:12px}
+h1{font-size:clamp(26px,4.5vw,34px);font-weight:800;margin-top:4px}
+.whoami{color:var(--muted);font-size:14.5px;margin-top:2px}
+.tabs{display:flex;gap:2px;overflow-x:auto;margin-top:14px}
+.tabs button{background:transparent;border:0;border-bottom:3px solid transparent;padding:8px 12px;font-weight:700;color:var(--muted);white-space:nowrap}
+.tabs button[aria-current="true"]{color:var(--ink);border-bottom-color:var(--amber)}
+.tabs button:disabled{opacity:.4;cursor:default}
+.tdot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--amber);margin-left:6px;vertical-align:middle}
+
+main .wrap{padding-block:22px 64px;display:flex;flex-direction:column;gap:18px}
+.task{background:var(--blue-soft);border-radius:8px;padding:12px 16px;display:flex;gap:10px;align-items:baseline}
+.task b{color:var(--blue);white-space:nowrap}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card h2{font-size:21px;font-weight:800}
+.card h3{font-size:17px;font-weight:700}
+.step{font-family:var(--mono);font-size:12px;color:var(--blue)}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+.pic{aspect-ratio:16/7;max-width:100%;border-radius:6px;background:repeating-linear-gradient(135deg,var(--sunk) 0 12px,transparent 12px 24px);border:1px dashed var(--line);display:grid;place-items:center;color:var(--muted);font-size:14px;text-align:center;padding:12px}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.fact{background:var(--bg);border-radius:6px;padding:8px 12px}
+.fact .l{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+.fact .v{font-weight:700}
+.roles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}
+.role{text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.role[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft)}
+.role b{font-size:16.5px}
+.role span{font-size:14px;color:var(--muted)}
+.people{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}
+.person{border-left:3px solid var(--line);padding:2px 12px}
+.person b{display:block}
+.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:10px}
+.choice{text-align:left;background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.choice:hover:not(:disabled){border-color:var(--ink)}
+.choice[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft)}
+.choice:disabled{cursor:default}
+.choice:disabled:not([aria-pressed="true"]){opacity:.5}
+.choice .k{font-family:var(--mono);font-size:12px;color:var(--blue)}
+.choice small{color:var(--muted);font-size:14px}
+.btn{background:var(--blue);color:#fff;border:0;border-radius:8px;padding:9px 18px;font-weight:700;align-self:flex-start}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.done{background:var(--good-soft);color:var(--good);border-radius:6px;padding:8px 12px;font-weight:600}
+
+/* emails */
+.mail{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.mail summary{list-style:none;cursor:pointer;padding:12px 16px;display:grid;grid-template-columns:1fr auto;gap:2px 12px}
+.mail summary::-webkit-details-marker{display:none}
+.mail .from{font-weight:400}
+.mail .lbl{color:var(--muted);font-weight:400;margin-right:2px}
+.mail.unread .from,.mail.unread .subj{font-weight:700;color:var(--ink)}
+.udot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--blue);margin-right:8px;vertical-align:1px}
+.mail .subj{grid-column:1/2;color:var(--muted);font-size:14.5px}
+.mail .tag{grid-row:1/3;grid-column:2;align-self:center}
+.mail[open] summary{border-bottom:1px solid var(--line);background:var(--bg)}
+.mail .body p,.card>p,.attach>p{font-family:var(--serif);font-size:1.02rem;line-height:1.62}
+.mail .body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:10px}
+.sig{color:var(--muted)}
+.attach{border:1px solid var(--line);border-radius:6px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.attach .an{font-size:12.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.fine{font-size:13px;color:var(--muted);border-top:1px dotted var(--line);padding-top:6px}
+.rel{font-size:11.5px;font-weight:700;padding:1px 8px;border-radius:99px;white-space:nowrap}
+.rel-high{background:var(--good-soft);color:var(--good)}
+.rel-medium{background:var(--warn-soft);color:var(--warn)}
+.rel-low{background:var(--bad-soft);color:var(--bad)}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+td.num,th.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.mono{font-family:var(--mono);font-size:.9em}
+svg text{fill:var(--muted);font-family:var(--ui);font-size:12px}
+svg .lab{fill:var(--ink);font-size:13px}
+svg .val{fill:var(--ink);font-family:var(--mono);font-size:12px}
+svg .axis{stroke:var(--line)} svg .zero{stroke:var(--muted)}
+svg .neg{fill:var(--bad)} svg .pos{fill:var(--good)}
+svg .ring-bg{stroke:var(--sunk);fill:none} svg .ring{stroke:var(--amber);fill:none}
+.donuts{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:6px}
+.donuts figure{margin:0;text-align:center;font-size:13.5px}
+
+/* audio placeholder */
+.audio{background:var(--blue-soft);border-radius:8px;padding:10px 14px;display:grid;grid-template-columns:auto 1fr;gap:2px 12px;align-items:center}
+.audio .play{width:36px;height:36px;border-radius:50%;border:1.5px dashed var(--blue);background:transparent;color:var(--blue);cursor:not-allowed}
+.audio .t{font-weight:700}
+.audio .s{font-size:13px;color:var(--muted)}
+.audio details{grid-column:1/-1;font-size:14px}
+.audio summary{cursor:pointer;color:var(--blue);font-weight:600}
+.script{display:flex;flex-direction:column;gap:8px;padding-top:6px}
+.sd{font-style:italic;color:var(--muted);font-size:13.5px}
+
+/* investigate */
+.qs{display:flex;flex-direction:column;gap:8px}
+.q{text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:6px;padding:9px 12px}
+.q[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft)}
+.q:disabled:not([aria-pressed="true"]){opacity:.45;cursor:default}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:14px}
+.two>*{min-width:0}
+
+/* timeline */
+.tl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.tc{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;user-select:none}
+.tc[draggable="true"]{cursor:grab}
+.tc.dragging{opacity:.4}
+.tc.over{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-soft)}
+.tc .n{font-family:var(--mono);color:var(--muted);text-align:center}
+.tc .d{display:block;font-family:var(--mono);font-size:12.5px;color:var(--good)}
+.tc .arr{display:flex;gap:4px}
+.tc .arr button{width:34px;height:34px;border-radius:6px;border:1px solid var(--line);background:var(--bg)}
+.tc .arr button:disabled{opacity:.3;cursor:default}
+.tl.ok .tc{border-color:var(--good)}
+.note-strong{background:var(--amber-soft);border-radius:8px;padding:8px 12px}
+.hint{background:var(--warn-soft);border-radius:6px;padding:9px 12px}
+.opt{text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:6px;padding:8px 12px}
+.opt.right{border-color:var(--good);background:var(--good-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.opt:disabled{cursor:default}
+.fb{font-size:14.5px}
+
+textarea{width:100%;min-height:200px;resize:vertical;font:inherit;line-height:1.6;padding:10px 12px;border:1.5px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);box-sizing:border-box}
+.wc{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.board{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:10px}
+.tile{background:var(--bg);border-radius:6px;padding:10px 12px}
+.tile .l{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+.tile .v{font-weight:700}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+.sn{cursor:pointer;border-radius:3px;transition:background .15s}
+.sn:hover{box-shadow:inset 0 -2px 0 var(--amber)}
+#hlpal{position:absolute;z-index:30;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px;display:flex;gap:6px;box-shadow:0 4px 14px rgba(0,0,0,.15)}
+#hlpal[hidden]{display:none}
+#hlpal button{width:28px;height:28px;border-radius:50%;border:1px solid rgba(0,0,0,.15);cursor:pointer}
+#hlpal .none{background:var(--surface);color:var(--muted)}
+#fab{position:fixed;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:20;background:var(--blue);color:#fff;border:0;border-radius:999px;padding:10px 18px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+#fab[hidden],#nb[hidden]{display:none}
+#nb{position:fixed;top:0;right:0;bottom:0;width:min(380px,100vw);z-index:25;background:var(--bg);border-left:1px solid var(--line);overflow-y:auto;padding:calc(14px + env(safe-area-inset-top,0px)) 16px 24px;box-shadow:-6px 0 20px rgba(0,0,0,.12);display:flex;flex-direction:column;gap:10px;box-sizing:border-box}
+.nbhead{display:flex;justify-content:space-between;align-items:center}
+.nbhead h2{font-size:18px}
+.lnk{background:none;border:0;color:var(--blue);text-decoration:underline;padding:0;font-size:14px;cursor:pointer}
+.cc summary{cursor:pointer;display:flex;gap:4px;align-items:center;font-weight:600;font-size:14px}
+.cc i,.nbgroup i{display:inline-block;width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.15);flex:none}
+.ccgrid{display:grid;gap:6px;margin-top:8px}
+.ccgrid label{display:flex;gap:8px;align-items:center}
+.ccgrid input{flex:1;font:inherit;font-size:14px;padding:4px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
+.nbadd{display:flex;flex-direction:column;gap:6px}
+.nbadd textarea{min-height:60px;font-size:14px}
+.btn.small{padding:6px 12px;font-size:14px}
+.nbgroup{display:flex;gap:6px;align-items:center;font-weight:700;font-size:14px;margin-top:6px}
+.nbcard{background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--line);border-radius:8px;padding:8px 10px}
+.nbcard p{font-family:var(--serif);font-size:15px;line-height:1.5}
+.nbcard .src{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-between;gap:8px;margin-top:4px}
+.gate{border:2px dashed var(--amber)}
+.coderow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.coderow input,.numin{font-family:var(--mono);font-size:18px;padding:6px 10px;border:1.5px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);width:12ch}
+.bigcode{font-family:var(--mono);font-size:34px;letter-spacing:.2em;color:var(--good);border:2px solid var(--good);border-radius:8px;padding:6px 18px;align-self:flex-start}
+.pzq{display:flex;flex-direction:column;gap:6px;border-top:1px dotted var(--line);padding-top:10px}
+.opts2{display:flex;flex-wrap:wrap;gap:6px}
+.opts2 .opt[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft)}
+.msg{color:var(--bad);font-size:14px}
+.sortq{display:flex;flex-direction:column;gap:8px}
+.sortrow{display:grid;grid-template-columns:1fr minmax(170px,auto);gap:10px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--bg)}
+.sortrow p{font-family:var(--serif);font-size:15px}
+.sortrow select{font:inherit;font-size:14px;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
+@media (max-width:560px){.sortrow{grid-template-columns:1fr}}
+.opts2 .opt{text-align:left}
+svg .sa{fill:var(--blue)} svg .sb{fill:var(--amber)}
+.legend{display:flex;gap:14px;font-size:13px;color:var(--muted);flex-wrap:wrap}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.sums{width:100%;font-size:14px}
+.sums td.num{white-space:nowrap}
+.sums tr.tot td{font-weight:800;border-top:2px solid var(--ink)}
+
+/* Lite's hand-in (studio/template.html), added for the Pro hand-in */
+.consent{border:1px solid var(--line);background:#fff;border-radius:12px;padding:14px 16px;margin:6px 0}
+.consent label{display:flex;gap:10px;align-items:flex-start;font-weight:600;margin-top:8px}
+.consent input{margin-top:5px;width:18px;height:18px}
+.issues{color:var(--warn);font-size:.92rem}
+.block{width:100%;min-height:260px;font:13px/1.45 ui-monospace,Menlo,Consolas,monospace;border:2px solid var(--blue);border-radius:10px;padding:10px 12px;background:#fff;white-space:pre-wrap;box-sizing:border-box}
+.ok{color:var(--good);font-weight:600}
+#out{display:flex;flex-direction:column;gap:10px}
+
+/* the stop after the role choice and the Who's who tab (_pro_common, 11 Nov 2026) */
+.stopc{border:2px solid var(--bad);background:var(--bad-soft)}
+.stophead{display:flex;gap:12px;align-items:center}
+.stophead h2{margin:0;font-size:1.1rem;line-height:1.35}
+.stopsign{flex:none;display:grid;place-items:center;width:58px;height:58px;background:var(--bad);color:#fff;font-weight:800;font-size:13px;letter-spacing:.06em;clip-path:polygon(30% 0,70% 0,100% 30%,100% 70%,70% 100%,30% 100%,0 70%,0 30%)}
+.ov{display:flex;flex-direction:column}
+.ovteam{border:2px solid var(--blue);background:var(--blue-soft);border-radius:10px;padding:10px 12px}
+.ovteam>b{display:block;font-size:16px}
+.ovteam>small,.ovout>small{color:var(--muted);font-size:13px}
+.ovdepts,.ovorgs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,160px),1fr));gap:6px;margin-top:8px}
+.ovdept,.ovorg{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:14px;line-height:1.3}
+.ovdept.you{border:2px solid var(--amber);background:var(--amber-soft)}
+.ovdept small,.ovorg small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.ovstem{width:2px;height:20px;background:var(--muted);margin:0 auto}
+.ovout{border:1.5px dashed var(--muted);border-radius:10px;padding:8px 12px 12px}
+.ovout>b{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-right:6px}
+.worghead{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
+.worghead h2{margin:0}
+.wrel{font-size:12.5px;font-weight:700;color:var(--blue);background:var(--blue-soft);border-radius:999px;padding:1px 9px}
+.wteam{border-color:var(--blue)}
+.wppl{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:14px}
+.wp{display:flex;gap:10px;align-items:flex-start;min-width:0}
+.wp.dim{opacity:.55}
+.av{position:relative;flex:none;width:44px;height:44px;border-radius:50%;color:#fff;font-weight:700;font-size:15px;display:grid;place-items:center;overflow:hidden}
+.av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.wpt{display:flex;flex-direction:column;min-width:0;line-height:1.35}
+.wjob{font-size:13.5px;color:var(--muted)}
+.wline{font-size:14.5px;margin-top:2px}
+.wtags{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.wtag{font-size:12px;font-weight:700;border-radius:999px;padding:1px 8px;background:var(--sunk);color:var(--muted)}
+.wtag.mine{background:var(--amber-soft);color:var(--warn)}
+.wtag.boss{background:var(--blue-soft);color:var(--blue)}
+.wtag.wit{background:var(--good-soft);color:var(--good)}
+.walso{margin:0;padding-left:1.1rem}
+.walso li{margin:3px 0}
+</style>
+</head>
+<body>
+
+
+<header><div class="wrap">
+  <div class="brand">SimLearn<span>PRO</span></div>
+  <h1>Kestermoor Energy: The Listing Decision</h1>
+  <p class="whoami" id="who"></p>
+  <nav class="tabs" id="tabs" aria-label="Sections"></nav>
+</div></header>
+<main><div class="wrap" id="main"></div></main>
+<div id="hlpal" hidden role="dialog" aria-label="Highlight colour"><button data-hlc="yellow" style="background:#FFF176" aria-label="Yellow"></button><button data-hlc="green" style="background:#B9F6CA" aria-label="Green"></button><button data-hlc="pink" style="background:#F8BBD0" aria-label="Pink"></button><button data-hlc="blue" style="background:#B3E5FC" aria-label="Blue"></button><button data-hlc="orange" style="background:#FFE0B2" aria-label="Orange"></button><button data-hlc="purple" style="background:#E1BEE7" aria-label="Purple"></button><button data-hlc="none" class="none" aria-label="Remove highlight">✕</button></div>
+<button id="fab" data-act="nbopen" hidden>Notes (0)</button>
+<aside id="nb" hidden aria-label="Your highlights and notes"></aside>
+
+<script>
+const ROLES={
+ A:{name:"Finance & Capital Markets",line:"The money the listing must raise, and the investors' orders",detail:"You look after the money the listing has to raise and the large investors who would buy the shares. Your inbox holds messages from the CFO, Investor Relations and Treasury."},
+ B:{name:"Founder's Office & Strategy",line:"Who controls Kestermoor after it lists, and its next sites",detail:"You work with the founder and the board on Kestermoor's direction and on who controls the company once it is listed. Your inbox holds messages from the founder, the strategy team and the board chair."},
+ C:{name:"Legal, Governance & Communications",line:"The prospectus, the public and who gets the shares",detail:"You make sure the offer is legal, explain it to the public and plan who gets the shares. Your inbox holds messages from the general counsel, communications and the retail offer team."}
+};
+const REL={high:"Reliable",medium:"Personal view",low:"Weak evidence"};
+const fmt=n=>(n<0?"−":"")+"€"+Math.abs(n).toLocaleString("en-GB");
+
+/* charts: horizontal bars and a simple line chart */
+function hbars(rows,label){
+  const W=500,left=200,right=80,rowH=30,top=4,H=top+rows.length*rowH+4,w=W-left-right,max=Math.max(...rows.map(r=>r.v));
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${label}">`;
+  rows.forEach((r,i)=>{const y=top+i*rowH,bw=Math.max(2,w*r.v/max);
+    s+=`<text class="lab" x="${left-10}" y="${y+18}" text-anchor="end">${r.l}</text><rect class="sa" x="${left}" y="${y+6}" width="${bw}" height="${rowH-12}" rx="2"/><text class="val" x="${left+bw+6}" y="${y+18}">${r.t}</text>`;});
+  return s+"</svg>";
+}
+function lineChart(pts,label,ylo,yhi,marks,xl){
+  const W=500,H=190,l=40,r=12,t=12,b=34,w=W-l-r,h=H-t-b,x0=pts[0][0],x1=pts[pts.length-1][0];
+  const X=x=>l+w*(x-x0)/(x1-x0), Y=y=>t+h*(yhi-y)/(yhi-ylo);
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${label}">`;
+  [ylo,(ylo+yhi)/2,yhi].forEach(v=>{s+=`<line class="axis" x1="${l}" x2="${W-r}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${l-6}" y="${Y(v)+4}" text-anchor="end">${v}</text>`;});
+  pts.forEach(([x])=>{if(x%2===0)s+=`<text x="${X(x)}" y="${H-16}" text-anchor="middle">${x}</text>`;});
+  s+=`<text x="${l+w/2}" y="${H-2}" text-anchor="middle">${xl}</text>`;
+  (marks||[]).forEach(([x,txt])=>{s+=`<line class="zero" stroke-dasharray="3 3" x1="${X(x)}" x2="${X(x)}" y1="${t}" y2="${t+h}"/><text class="lab" x="${X(x)+4}" y="${t+12}">${txt}</text>`;});
+  s+=`<polyline fill="none" stroke="var(--blue)" stroke-width="2.5" points="${pts.map(([x,y])=>X(x)+","+Y(y)).join(" ")}"/>`;
+  return s+"</svg>";
+}
+const PRO_COVER="";   // the cover picture (build.py fills this in)
+const PRO_AUDIO=[];   // the recordings published next to the page (build.py fills this in)
+function audio(t,voice,script,file){if(file&&PRO_AUDIO.includes(file))return `<div class="audio rec"><div style="flex:1;min-width:0"><div class="t">${t}</div><audio controls preload="none" data-f="${file}" src="audio/${file}.mp3" style="width:100%;margin-top:6px"></audio></div><details data-tf="${file}" ${(S.heard||{})[file]?"":"hidden"} ${(S.tOpen||{})[file]?"open":""}><summary>Show the text</summary><div class="script" data-src="${esc(t)}" data-q="medium">${script}</div></details></div>`;
+ return `<div class="audio"><button class="play" disabled aria-label="Play (recording to come)">▶</button><div><div class="t">${t}</div><div class="s">Recording to come: read the text</div></div><details open><summary>The text</summary><div class="script" data-src="${esc(t)}" data-q="medium">${script}</div></details></div>`;}
+function mail(m){const k=m.from+"|"+m.subj, o=!!S.mailOpen[k], r=!!S.mailRead[k];
+ return `<details class="mail ${r?"read":"unread"}" data-mail="${encodeURIComponent(k)}"${o?" open":""}><summary><span class="from">${r?"":`<span class="udot" aria-label="Unread"></span>`}<span class="lbl">From:</span> ${m.from}</span><span class="subj">${m.subj}</span></summary><div class="body" data-src="${m.from.split(",")[0]}" data-q="${m.rel}">${m.body}</div></details>`;}
+function att(name,html){return `<div class="attach"><div class="an">📎 ${name}</div>${html}</div>`;}
+
+/* ---------- inboxes (every key clue appears in at least two places) ---------- */
+const GOSSIP={from:"Mireille Dupont, Chief Financial Officer",subj:"Fwd: “Kestermoor's anchors have ALL walked”",rel:"low",body:`
+ <p>This is doing the rounds on an investor forum today. Is there anything in it?</p>
+ <p class="muted"><em>“Hearing Kestermoor's big anchors have ALL walked. The IPO is dead before it starts. Sell your sign-ups lol”</em> (anonymous post on an investor forum)</p>
+ <p class="fine">The post names no source and no fund. A pre-registration can't be sold: it isn't a share.</p>`};
+
+const INBOX={
+ A:[
+  {from:"Mireille Dupont, Chief Financial Officer",subj:"Numbers you'll need before Thursday",rel:"high",body:`
+   <p>Before the team finalises anything, you should have the real numbers in front of you. The €85 million bridge loan we used to buy the land and permits matures in nine weeks. Today it costs us about 7%. Refinanced privately, we'd pay close to 13%: roughly €5 million a year in extra interest, which would eat most of next year's project margins on its own. Nothing on the finance side is flexible.</p>
+   <p>The range is €21 to €23 a share, for ten million new shares. My table shows what that means. At the lower end, after the banks' fees, we just cover the bridge loan and the €120 million the next phase needs to build, with almost nothing to spare.</p>
+   ${att("What the listing raises, before and after fees",`<div class="tw"><table><thead><tr><th>Price per share</th><th class="num">€21 (lower end)</th><th class="num">€22</th><th class="num">€23 (top)</th></tr></thead><tbody>
+    <tr><td>Raised (10 million shares)</td><td class="num">€210m</td><td class="num">€220m</td><td class="num">€230m</td></tr>
+    <tr><td>Banks' fees (about 2.25%)</td><td class="num">€4.7m</td><td class="num">€5.0m</td><td class="num">€5.2m</td></tr>
+    <tr><td>Left after fees</td><td class="num">€205.3m</td><td class="num">€215.0m</td><td class="num">€224.8m</td></tr></tbody></table></div>`)}
+   <p>So be honest about the other direction too. If we price at the lower end and also carve out a large retail tranche, we're relying on sign-ups that aren't firm orders, with no headroom. If that tranche comes in short, the raise still clears the bridge loan but leaves the next phase short, and going back to the market within a year would cost us dearly.</p>
+   <p>What I can't judge from Finance is how binding the grid contracts really are. Daan knows that better than anyone.</p>
+   <p class="sig">Mireille</p>`},
+  {from:"Tomasz Wysocki, Head of Investor Relations",subj:"What the early soundings actually showed",rel:"high",body:`
+   <p>A quick summary of the testing-the-waters meetings before you draft anything. Three of the five biggest funds we spoke to said they'd anchor the deal: a Dutch pension fund, a Nordic infrastructure investor and a French insurer's sustainable-equity fund, all long-term holders. Two of the three, the pension fund and the insurer, flagged real discomfort with a dual-class structure if we also price at the top of the range. They were fine with one or the other, not both at once. Their voting policies count unequal voting rights against a company.</p>
+   <p>I went back to them last week. At the lower end of the range, all three would sign cornerstone agreements before launch: binding orders for about half the offer, whatever the share structure. At the top, they'd only give soft indications and wait to see the book.</p>
+   <p>Soft indications can disappear. Verrastad Energy priced at the top of its range in Stockholm last spring. Two of its anchors withdrew days before trading, and the shares fell 12% in the first week.</p>
+   ${att("Verrastad Energy: share price as a % of its offer price",lineChart([[0,100],[1,88],[2,87],[3,89],[4,90],[5,89],[6,91],[7,90],[8,92]],"Verrastad's shares fell twelve per cent in their first week and stayed below the offer price for eight weeks",84,104,[[0,"listing day"]],"Weeks after Verrastad's listing"))}
+   <p>What I can't tell you is how much of the retail interest would turn into real orders. That's Camille's area.</p>
+   <p class="sig">Tomasz</p>`},
+  {from:"Ana Beleza, Treasury & Corporate Finance Manager",subj:"Why the Ferrand Note actually worked",rel:"high",body:`
+   <p>Worth having this in front of you before the pricing debate goes any further. Last year's €40 million convertible note with Ferrand Capital was oversubscribed nearly three times over, and it wasn't the growth story that did it. Investors told us afterwards, in plain terms, that it was how conservative we'd been about our own assumptions.</p>
+   <p>Here's what that meant in practice. We published a downside case next to the base case, showed the Halsdorf penalties line by line, and assumed every grid connection would run six months late. Ferrand's team later told me what they did with our forecasts anyway: they cut them by a fifth for delays, and our numbers still held.</p>
+   <p>That's the part that worries me now. The bank's model for the top of the range assumes all four new sites connect on time. Investors will apply the same discount Ferrand did, and if our price doesn't, the first month's trading will do it for us.</p>
+   <p>What I don't know is how our grid connections have actually gone since Halsdorf. Ingrid has the record.</p>
+   <p class="sig">Ana</p>`}
+ ],
+ B:[
+  {from:"Daan Verhoeven, Founder & CEO",subj:"Why there is no plan B here",rel:"medium",body:`
+   <p>I want you to understand what's riding on this before anyone drafts a recommendation. The next battery-storage phase, four sites across the Netherlands and Portugal, needs €120 million to build. Each signed grid-connection contract has a financing milestone. If we can't show committed funding by then, we pay a penalty of between €400,000 and €700,000 per site, and the operator can give our connection slot to someone else. Losing a slot is the end of that site. That capital has to come from this listing. There is no fallback.</p>
+   <p>I built this company to make our own long-term calls, not to have every strategic decision second-guessed by a shifting shareholder base. That's why I want to keep real control after we list. I'm told some investors and journalists won't like that. Marek is tracking it.</p>
+   <p>To be clear about what I'm protecting, though: it's the build plan. Four sites, on this timetable, with this money. Extra votes are one way to protect it. If someone can show me a better way, I'll listen.</p>
+   <p class="sig">Daan</p>`},
+  {from:"Ingrid Dahlgren, Chief Strategy Officer",subj:"What actually happened at Halsdorf",rel:"high",body:`
+   <p>You'll hear the short version of Halsdorf from other people, so you should have the real one. The project stalled for fourteen months in 2023 after our original funding partner pulled out mid-construction. The project itself had no problem: their own balance sheet turned out to be shakier than anyone realised. We paid the grid operator €2.1 million in penalty fees for missing the connection date.</p>
+   <p>The lesson I took from it: check who stands behind a promise, get it in writing, and never give a partner a reason to walk. Since Halsdorf, the board's rule has been that no site starts on a funding promise that isn't signed. For this listing, that means not asking long-term investors to accept a price and a share structure they dislike at the same time.</p>
+   <p>And one record you should see before anyone puts a growth forecast in the prospectus. Of the six grid connections we've completed since Halsdorf, only one came in on time.</p>
+   ${att("Grid connections since Halsdorf: how late each one was",hbars([{l:"Moerdijk (NL)",v:0,t:"on time"},{l:"Almere (NL)",v:4,t:"4 months"},{l:"Beja (PT)",v:7,t:"7 months"},{l:"Tilburg (NL)",v:3,t:"3 months"},{l:"Setúbal (PT)",v:9,t:"9 months"},{l:"Emmen (NL)",v:5,t:"5 months"}],"Six grid connections since Halsdorf: one on time, the others between three and nine months late"))}
+   <p>What I can't tell you is how the Ferrand investors actually read our numbers. Ana has that detail.</p>
+   <p class="sig">Ingrid</p>`},
+  {from:"Lucien Bertrand, Board Chair",subj:"What the index fund actually told us",rel:"high",body:`
+   <p>Something the board discussed that you should hear directly. One of the largest passive index funds told us that under the rules of the major sustainability index it tracks, a dual-class structure with no sunset clause would make us ineligible for at least five years, and the fund can only buy what the index includes. That matters well beyond listing day: it reduces long-term demand for the stock however the first week goes.</p>
+   <p>Once the board had made a sunset clause a condition for any dual-class structure, I went back to the fund and asked whether a sunset would fix it. They were very polite. The index excludes any company with unequal voting rights until the sunset has actually expired. Not agreed: expired.</p>
+   <p>The board itself is split. Three members back Daan on control, three want one share, one vote, and I hold the deciding vote. Whatever you recommend, I shall have to sell it to at least three people who disagree.</p>
+   <p>I haven't taken a position on pricing yet, because I don't have the exact cost of a late or failed deal in front of me. Mireille has those numbers.</p>
+   <p class="sig">Lucien</p>`}
+ ],
+ C:[
+  {from:"Kavya Chandran, General Counsel",subj:"The framework you'll be working inside",rel:"high",body:`
+   <p>Before anyone drafts a recommendation, here's the framework. After hearing the index fund's concerns, the board resolved that a dual-class structure is only on the table with a sunset clause of no more than seven years, written into the articles. An indefinite dual-class structure is not an option.</p>
+   <p>Now the timetable, which is tighter than people think. Approval of the prospectus is three weeks away. The offer, pricing and settlement take three more. Any material change after that, including a book that is short on pricing day, means a prospectus supplement and a reopened offer period: two to three weeks, plus settlement. At best we'd finish days before the bridge loan matures. It has to work first time.</p>
+   ${att("The offer timetable, from today",`<div class="tw"><table><thead><tr><th>When</th><th>What happens</th></tr></thead><tbody>
+    <tr><td>Week 3</td><td>The regulator approves the prospectus</td></tr>
+    <tr><td>Weeks 4–5</td><td>The offer period: investors place their orders</td></tr>
+    <tr><td>End of week 5</td><td>Pricing day: the final price is set and the shares are allocated</td></tr>
+    <tr><td>Week 6</td><td>Settlement: the money arrives</td></tr>
+    <tr><td>Week 9</td><td>The bridge loan matures</td></tr></tbody></table></div>`)}
+   <p>What I can't tell you is how strong investor demand really is. Tomasz has the numbers from the early soundings.</p>
+   <p class="sig">Kavya</p>`},
+  {from:"Marek Nowicki, Head of Communications",subj:"What happened to the last company that tried this",rel:"medium",body:`
+   <p>You should see this before we finalise any messaging. A comparable European tech company listed last year with a dual-class structure and no sunset clause, and the press hammered it: the founders were “having it both ways”, raising public money while refusing public accountability. The stock stayed depressed for weeks, and the story kept coming back.</p>
+   <p>On Halsdorf: it's already public. The €2.1 million penalty was in our annual report, and any journalist will find it in ten minutes. If we tell it first, plainly and with the numbers, it's a paragraph in the coverage. If they find it during the roadshow, it's the story of the week.</p>
+   <p>And a word about the small investors. Whatever we decide, 30,000 people who signed up will read about it in the papers before they hear it from us. If they get nothing, they'll say so loudly. If they buy and the price falls, they'll say so even more loudly, and they'll have a point.</p>
+   <p>What I don't know is the full internal story of Halsdorf. Ingrid has that.</p>
+   <p class="sig">Marek</p>`},
+  {from:"Camille Rousseau, Head of Retail & Public Offer",subj:"What we'd be leaving on the table",rel:"medium",body:`
+   <p>I wanted you to see this before the allocation split is decided. Our retail pre-registration page already has over 30,000 sign-ups, mostly first-time Dutch and Portuguese investors: teachers, farmers, retired engineers, many living near our sites. The top reason they gave: “I want to own a piece of the energy transition near me.” That's real public goodwill, and it's sitting on the table if we give the offer almost entirely to institutional anchors.</p>
+   <p>Now the less exciting part. Pre-registrations aren't orders. In the last three Dutch retail offers I worked on, about one sign-up in three became an order, averaging roughly €2,500. For us, that means around €25 million of firm retail demand. And it arrives last: people subscribe through their bank's app in the final days of the offer, not before launch. Shares the public doesn't take can be offered to institutions on pricing day, if they want more.</p>
+   ${att("From sign-ups to orders: the last three Dutch retail offers",`<div class="tw"><table><thead><tr><th>Offer</th><th class="num">Sign-ups</th><th class="num">Orders</th><th class="num">Average order</th></tr></thead><tbody>
+    <tr><td>Offer 1</td><td class="num">18,000</td><td class="num">6,100 (34%)</td><td class="num">€2,300</td></tr>
+    <tr><td>Offer 2</td><td class="num">42,000</td><td class="num">13,400 (32%)</td><td class="num">€2,700</td></tr>
+    <tr><td>Offer 3</td><td class="num">25,000</td><td class="num">8,800 (35%)</td><td class="num">€2,400</td></tr>
+    <tr><td>Kestermoor, if similar</td><td class="num">30,000+</td><td class="num">about 10,000</td><td class="num">about €2,500</td></tr></tbody></table></div>`)}
+   <p>What I can't judge is how much room the company has on the money it must raise. That's Finance.</p>
+   <p class="sig">Camille</p>`}
+ ]
+};
+const BRANCH={
+ talk:{from:"Euan Gillespie, Head of Data, Brightline Investor Services (Glasgow)",subj:"Pre-registrations after Daan's interview",rel:"medium",body:`
+  <p>Brightline runs your retail pre-registration page, so here are the numbers after Daan's interview. Sign-ups went from just over 30,000 to 41,000 in 72 hours, and the page had 180,000 visits on Saturday alone.</p>
+  <p>To be honest about the number: a sign-up costs nothing and commits nobody. In the offers we've run, people who sign up after a newspaper story place an order about half as often as the early sign-ups. So the 11,000 new names might add a few million euros of orders, not tens of millions.</p>
+  <p>One more thing you should see. The most-shared line from the interview isn't about solar. It's Daan's answer to a question about control: “I didn't build this company to be second-guessed by the market.” Two investor forums are already arguing about it.</p><p class="sig">Euan</p>`},
+ quiet:{from:"Sanne de Wit, Markets Editor, Beursblad",subj:"An offer, for prospectus day",rel:"medium",body:`
+  <p>We noticed that Kestermoor said no to an interview this week, and we respect that. Here's my offer: if Daan talks to Beursblad first, on the day the prospectus is published, we'll give the listing the front page of our weekend markets section.</p>
+  <p>Something from our reader panel that might help you. We asked 2,400 readers who plan to buy shares in a new listing this year what matters most to them. 64% said they want to see a company's downside case before they buy. Only 18% said a well-known founder matters. Our readers aren't all small investors, of course, but they're the people who place the orders.</p><p class="sig">Sanne</p>`}
+};
+
+/* ---------- experts: one per role, from a shortlist ---------- */
+const EXPERTS={
+ ecm:{name:"Independent IPO adviser",who:"Annelies Brouwer, Brouwer IPO Advisory",what:"Advises companies, not banks, on pricing and order books. Can tell you how an order book really behaves in the final week.",
+  rep:`<p>Banks are paid a share of what is raised, so their first instinct is the top of the range. My job is to tell you what the book will look like on the last day. Soft indications are exactly that: in a nervous market they shrink in the final week, and the gap is filled by short-term funds that sell in the first days of trading.</p>
+   <p>Nearly a third of European renewable-energy listings in the last two years traded below their offer price within a month. The ones that held up were covered by binding orders before launch, usually at a price a little below what the company had hoped for.</p>
+   <p>A listing that trades up after day one is remembered by every investor you'll need for your next raise. One that trades down is remembered for longer.</p>`},
+ infra:{name:"Grid and infrastructure analyst",who:"Dr Marta Esteves, Ibérica Energy Research (Lisbon)",what:"Tracks grid connections and project delays across the Benelux and Iberia. Can tell you how much delay investors build into a developer's forecasts.",
+  rep:`<p>Grid connections in the Benelux and Iberia are slower than at any time in the last decade. In our data, about six in ten battery-storage connections since 2023 came in late, on average by about seven months. Developers blame the operators; the operators blame the queue. Both are partly right.</p>
+   <p>Infrastructure investors know this. Most now cut a developer's revenue forecasts by 15–25% for delays before they value it, whatever the prospectus says.</p>
+   <p>A developer whose own forecasts already assume delays tends to be believed. One whose forecasts assume that everything connects on time tends to be marked down, often in the first month of trading.</p>`},
+ lender:{name:"Debt and refinancing adviser",who:"Jonas Lindqvist, Nordvik Debt Advisory",what:"Arranges loans for energy developers. Can tell you what happens to a bridge loan when a listing runs late.",
+  rep:`<p>Bridge lenders can extend a loan, but not for free and not on trust. An extension usually needs signed equity commitments, and it costs a fee of 1–2% plus a higher interest margin. Without a listing that has actually priced, most lenders won't discuss an extension at all.</p>
+   <p>A full private refinancing takes six to eight weeks to arrange. So if a listing fails in week six, it's already too late to refinance cheaply before week nine.</p>
+   <p>Lenders also read the order book. If a listing is covered by signed orders before launch, an extension is usually a formality. If it rests on soft indications, the lender will ask for security over the projects themselves, and that can hold up construction for months.</p>
+   <p>The developers who get through a listing calmly have most of their money committed before the offer even opens.</p>`},
+ gov:{name:"Governance and stewardship adviser",who:"Dr Eilidh Murray, Murray Stewardship Advisory (Edinburgh)",what:"Advises pension funds and insurers on how they vote. Can tell you how long-term investors see founder control.",
+  rep:`<p>Only about one European listing in eight last year used dual-class shares, and almost all of those were technology companies. In infrastructure, where investors hold for decades, it's rare: pension funds and insurers usually vote against it, or ask for a lower price to make up for it.</p>
+   <p>A sunset clause helps with some investors, but not with index providers: most exclude a company until the extra votes have actually ended.</p>
+   <p>Founders who give up extra votes usually protect what matters to them in other ways: the build plan and the use of the money written into the prospectus, a strategy committee they chair, and a board that has publicly backed the plan. Investors read that as confidence, not weakness.</p>`},
+ retail:{name:"Retail offer specialist",who:"Hugo Mertens, formerly head of retail offers at a Benelux bank",what:"Ran retail tranches in Dutch and Belgian listings for twelve years. Can tell you how big a retail tranche can safely be.",
+  rep:`<p>Retail tranches work best when they are sized to firm demand, not to sign-ups. In recent Dutch listings the retail share was usually 5–15% of the offer. Unsold retail shares can go to institutions on pricing day, but only if they want more, and in a nervous week they often don't.</p>
+   <p>Retail orders come in last, in the final two or three days. If the price must be low to cover the deal, a big retail tranche is the part of the book you can least rely on.</p>
+   <p>Companies that want small shareholders but can't risk the money often give pre-registered investors priority in a later offer, or a small guaranteed allocation, rather than a large tranche now.</p>`},
+ pr:{name:"Financial communications consultant",who:"Femke Jansen, Jansen Financial PR",what:"Handles the press for companies during listings. Can tell you which stories follow a company after listing day.",
+  rep:`<p>Three stories follow a new listing: the founder, the first-week share price, and anything the company didn't say first. A founder who keeps extra votes will be asked about them in every interview, and the answer becomes the headline, whatever it is.</p>
+   <p>A share price that falls in the first week is a story for a day among professionals, and a story for months among the small investors who bought in.</p>
+   <p>Bad news you publish yourself, with the numbers, is usually a paragraph. Bad news a journalist finds is a week.</p>`}
+};
+const SHORTLIST={A:["infra","ecm","lender"],B:["infra","ecm","gov"],C:["retail","pr","gov"]};
+
+const WIT={
+ henrik:{name:"Henrik Vos",role:"Head of Equity Capital Markets, Van Rijn & Co. (the lead bank)",voice:"male, Dutch accent, smooth, confident and upbeat",
+  account:`<p class="sd">[A trading floor. Phones and voices in the background.]</p><p>Look, I've led seven listings this year. I know a strong book when I see one, and this is a strong book. The anchors love the story, the retail interest is extraordinary, and the market wants renewable infrastructure.</p><p>My advice is simple: price at the top of the range. Kestermoor needs the money, and leaving it on the table would be a mistake. People worry about dual-class shares, but investors see them every week now. Honestly, this deal will be fine.</p>`,
+  qs:[["Will the anchors sign firm orders at the top?","[pause] At the top? They'll give us indications. Firm orders come when they see the rest of the book. That's quite normal."],
+      ["How is the bank paid for this deal?","A percentage of what's raised: two and a quarter per cent, plus a bonus of half a per cent if we price at the top. [pause] But our advice has nothing to do with our fee."],
+      ["Which other listings has the bank led so far this year?","Seven in Europe, three of them in energy. Two in Amsterdam, one in Oslo, and the rest in Frankfurt and Paris. Every one of them was fully covered."]]},
+ rui:{name:"Rui Carvalho",role:"Chair, Monte Novo Solar Cooperative (near Évora)",voice:"male, Portuguese accent, warm and plain-spoken",
+  account:`<p class="sd">[Outdoors. Wind, and a dog barking in the distance.]</p><p>Our cooperative is two kilometres from your Évora site. We have four hundred members: farmers, teachers, a few retired people like me. Most of them have signed up for your shares. They are not rich. Two or three thousand euros each, maybe.</p><p>We want to own a small part of what is being built next to our village. That is all. But we have also seen companies come here, make promises and leave. So we will look carefully at the price, and at who is really in charge.</p>`,
+  qs:[["Why did your members sign up?","Because the site is ours too, in a way. We see it from our kitchens, and our grandchildren will grow up next to it. If someone makes money from our sun, we would like a small share of it."],
+      ["What would your members do if they got no shares in the offer?","They would be disappointed, of course. But most would buy on the market later, if the price was fair. What they would never forgive is buying high and watching it fall. My cousin did that with a wind company. He lost a third, and he still talks about it."],
+      ["When would your members decide whether to buy any shares in the offer?","In the last days of the offer, after we have talked it over at the café. Nobody here signs anything in a hurry. First we read the newspapers, then my neighbour's son, who works at a bank, explains the prospectus, and then we argue about it for a whole week."]]}
+};
+
+const CHECKS=[
+ {q:"What would a private refinancing of the bridge loan cost?",right:0,opts:["Close to 13% instead of about 7%: roughly €5 million a year more","About the same as today, if the listing is only a month late","Nothing extra: the grid operators would pay the interest until the sites connect"],
+  why:"Mireille's email: about 7% today, close to 13% if refinanced privately, roughly €5 million a year more on €85 million."},
+ {q:"What has the board decided about a dual-class structure?",right:1,opts:["It has ruled out a dual-class structure completely, whatever Daan thinks","It's only possible with a sunset clause of seven years at most","It's allowed without any limit, as long as the anchors agree to it"],
+  why:"Kavya's email: only with a sunset clause of no more than seven years, written into the articles. Lucien mentions the board's condition too."},
+ {q:"Who left important facts out of their story?",right:2,opts:["Rui","Mireille","Henrik"],
+  why:"Henrik called the book strong but left out that the anchors would only give soft indications at the top of the range, and that his bank earns a bonus if the shares are priced there."}
+];
+
+const DEC={
+ d1:["How should Kestermoor price its shares?",
+   ["Price at the top of the range (€23 a share)","Raises about €230 million before fees, the most the range allows (Mireille). At this price the anchors would give soft indications rather than binding orders (Tomasz)."],
+   ["Price at the lower end of the range (€21 a share)","Raises about €210 million before fees: after fees, just enough for the bridge loan and the next phase (Mireille). At this price all three anchors would sign cornerstone agreements before launch (Tomasz)."]],
+ d2:["Which share structure should Kestermoor list with?",
+   ["A dual-class structure with a seven-year sunset","Daan and senior leadership keep voting control for up to seven years, as the board allows (Kavya). The sustainability index excludes unequal voting rights until the sunset has expired (Lucien)."],
+   ["One share, one vote","Every share carries one vote from listing day, and Daan gives up the extra control he wants (Daan). Kestermoor can be considered for the sustainability index (Lucien)."]],
+ d3:["How should the offer be split between investors?",
+   ["Build the offer around the institutional anchors","Most shares go to a small number of large, long-term investors, with orders signed before launch where the price allows (Tomasz). The 30,000 pre-registered small investors would get few or no shares (Camille)."],
+   ["Reserve a 30% retail tranche for the public","€63–69 million of shares set aside for small investors next to the institutional book, for the 30,000 who signed up (Camille). Retail orders arrive in the final days, and unsold shares go to institutions only if they want more (Camille)."]]
+};
+
+const RANK=[["r1","The anchors might not commit in writing before pricing day"],["r2","Journalists could dig up Halsdorf in the middle of the roadshow"],["r3","Small investors could feel shut out of the offer and complain"],["r4","The price could be too low, leaving money on the table"],["r5","Daan might refuse to sign off the share structure"]];
+const RANK_START=["r4","r2","r5","r1","r3"];
+const REPLIES={
+ r1:()=>`<p>You've put the anchors first, and I think you're right: an order that isn't signed isn't an order. I've asked Tomasz to get all three anchors' positions in writing before Thursday.</p><p>His answer is in your inbox.</p>`,
+ r2:()=>`<p>Halsdorf worries me too. I've hired a crisis PR agency for the offer period, just in case. It's €40,000 from the listing budget, but we won't be caught out.</p>`,
+ r3:()=>`<p>Good point. I've commissioned a survey of the pre-registered investors, so we know how they would react: €25,000 from the listing budget.</p>`,
+ r4:()=>`<p>Agreed: we mustn't sell ourselves short. I've asked the bank for an extra valuation report to support the top of the range: €60,000 from the listing budget.</p>`,
+ r5:()=>`<p>Daan can be stubborn, I know. I've hired a governance mediator to work with him and the board this week: €30,000 from the listing budget.</p>`
+};
+function reply(){
+ const first=S.rank[0], p=S.rank.indexOf("r1");
+ let extra="";
+ if(first!=="r1"&&p===1) extra="<p>You've put the anchors second, so I've asked Tomasz to keep a close eye on their orders as well.</p>";
+ return {from:"Mireille Dupont, Chief Financial Officer",subj:"Re: Interim briefing",rel:"medium",body:REPLIES[first]()+extra+`<p class="sig">Mireille</p>`};
+}
+const CONSEQ={
+ r1:{from:"Tomasz Wysocki, Head of Investor Relations",subj:"The anchors' positions, in writing",rel:"high",body:`<p>Mireille asked for the anchors' positions in writing, so here they are. At the lower end of the range, all three will sign cornerstone agreements before launch, and all three will accept a six-month lock-up: no selling in the first six months.</p><p>At the top of the range, the pension fund and the insurer now say in writing what they told me in the meetings: they would cut their orders if the shares also carried unequal votes. The Nordic investor would give an indication at the top, nothing more.</p><p class="sig">Tomasz</p>`},
+ r2:{from:"Marek Nowicki, Head of Communications",subj:"The crisis agency's first note",rel:"high",body:`<p>The agency Mireille hired has sent its first note. Its advice: publish the Halsdorf penalties in the prospectus, plainly and with the numbers, before anyone asks.</p><p>That's what I said a fortnight ago, for nothing. The figure has been in our annual report since last year.</p><p class="sig">Marek</p>`},
+ r3:{from:"Camille Rousseau, Head of Retail & Public Offer",subj:"The survey of our sign-ups",rel:"high",body:`<p>The survey is in. Most of our pre-registered investors would be disappointed to get no shares, but most say they would buy on the market later if the price was fair. What they fear most is buying high and watching the price fall.</p><p>€25,000 to learn what my team hears on the phone every day.</p><p class="sig">Camille</p>`},
+ r4:{from:"Ana Beleza, Treasury & Corporate Finance Manager",subj:"The extra valuation report",rel:"high",body:`<p>The bank's report is in. It says the range is fair. It also assumes, like the bank's first model, that all four new sites connect on time. So it supports the top of the range by assuming away the risk investors care about most.</p><p>€60,000, and nothing we can put in front of an investor.</p><p class="sig">Ana</p>`},
+ r5:{from:"Ingrid Dahlgren, Chief Strategy Officer",subj:"The mediator's report",rel:"high",body:`<p>The mediator has spent two days with Daan. Her report: he isn't attached to the extra votes for their own sake. What he wants protected is the build plan: the four sites, the timetable and the €120 million.</p><p>Anyone who had sat in a strategy meeting with him could have told her that.</p><p class="sig">Ingrid</p>`}
+};
+const STANDING={r1:()=>"Mireille asked for the anchors' positions in writing. At the lower end all three will sign cornerstones with a six-month lock-up; at the top, two would cut their orders if the shares also carried unequal votes.",
+ r2:()=>"Mireille has spent €40,000 of the listing budget on a crisis PR agency. Its advice was what Marek had already said.",
+ r3:()=>"Mireille has spent €25,000 of the listing budget on a survey of the pre-registered investors.",
+ r4:()=>"Mireille has spent €60,000 of the listing budget on an extra valuation report that assumes every site connects on time.",
+ r5:()=>"Mireille has spent €30,000 of the listing budget on a governance mediator for Daan and the board."};
+const MISSTEP={r2:["Crisis PR agency for the offer period","Listing budget",-40000],r3:["Survey of the pre-registered investors","Listing budget",-25000],r4:["Extra valuation report from the bank","Listing budget",-60000],r5:["Governance mediator for Daan and the board","Listing budget",-30000]};
+const EPI_RANK={r2:"The crisis PR agency was never needed: Halsdorf was in the prospectus from the start.",r3:"The survey of the pre-registered investors told Kestermoor what Camille's team already knew.",r4:"Nobody outside the bank ever read the extra valuation report.",r5:"The mediator's report on Daan was filed and forgotten."};
+function inboxList(){const list=[...INBOX[R()]]; if(R()==="C"&&S.fork) list.splice(1,0,BRANCH[S.fork]); list.push(GOSSIP); if(S.ranked) list.unshift(CONSEQ[S.rank[0]]); return list;}
+
+/* ---------- team puzzles ---------- */
+const PZ={
+ 1:{owner:"C",title:"The size of the offer",
+   intro:"Kavya's draft offer structure goes to the banks on Thursday. Before it does, she wants three numbers in it checked against what the whole team knows. Her draft alone won't give you them.",
+   screen:`<div class="attach"><div class="an">Draft offer structure (K. Chandran), for the banks</div>
+     <p><b>New shares:</b> 10 million, in an indicative range of €21 to €23 a share.</p>
+     <p><b>Use of the money:</b> repay the bridge loan; build the next battery-storage phase.</p>
+     <p><b>Institutional book:</b> 70% of the offer. Cornerstone orders, if any, signed before launch.</p>
+     <p><b>Retail tranche:</b> 30% of the offer, as Camille proposed: €63 million at €21 a share, €69 million at €23.</p></div>`,
+   qs:[{q:"After the banks' fees, how much must the listing raise at the very least?",type:"choice",opts:["About €85 million: the bridge loan alone","About €205 million: the bridge loan plus the next phase","About €230 million: only the very top of the range is enough"],ans:"About €205 million: the bridge loan plus the next phase"},
+       {q:"At the lower end of the range, how much of the offer would binding cornerstone orders cover?",type:"choice",opts:["About €105 million: half the offer, signed before launch","Nothing: the anchors would only sign cornerstones at the top","All of the €210 million: the anchors would take every share"],ans:"About €105 million: half the offer, signed before launch"},
+       {q:"At the lower end, how much of the 30% retail tranche could firm retail orders fill?",type:"choice",opts:["All of it: 30,000 sign-ups at €2,500 each come to €75 million","About €50 million: two sign-ups in every three become orders","About €25 million of the €63 million: well under half the tranche"],ans:"About €25 million of the €63 million: well under half the tranche"}],
+   hint:"What Kestermoor must pay for is in Finance & Capital Markets' emails (the Founder's Office knows what the next phase costs too). What the anchors would sign at each price is in Finance's emails as well. How many sign-ups become orders is in your own inbox.",
+   out:{ok:"Kavya corrected the draft before it went to the banks. Any retail shares the public doesn't take will now be offered to the anchors first, and the anchors have agreed to take up to €10 million of them at the offer price.",
+        fail:"Nobody could check the numbers in time, so the draft went to the banks with mistakes in it. Correcting it later cost €90,000 in the banks' legal fees, from the listing budget."}},
+ 2:{owner:"B",title:"The bank's pitch",
+   intro:"Henrik Vos has sent Lucien a one-page pitch for Thursday's board meeting, and Lucien wants to forward it to the board tonight. Each line makes one claim. Using what your whole team knows, decide whether each claim is true, misleading or false, and why.",
+   screen:`<div class="attach"><div class="an">Van Rijn & Co. · “Why the top of the range?” (H. Vos)</div>
+     <p><b>Claim 1:</b> All three anchors are behind this deal at any price in the range.</p>
+     <p><b>Claim 2:</b> 30,000 retail investors are ready to fill any tranche you give them.</p>
+     <p><b>Claim 3:</b> Unequal voting rights won't cost Kestermoor a single buyer.</p></div>`,
+   qs:[{q:"Claim 1",type:"choice",opts:["True: all three would sign binding orders at every price in the range","Misleading: at the top they'd only give soft indications","False: none of the three funds has agreed to anchor the deal at all"],ans:"Misleading: at the top they'd only give soft indications"},
+       {q:"Claim 2",type:"choice",opts:["Misleading: about one sign-up in three becomes an order, around €25 million","True: every sign-up is a binding order for at least €2,500","False: the pre-registration page hasn't even opened yet"],ans:"Misleading: about one sign-up in three becomes an order, around €25 million"},
+       {q:"Claim 3",type:"choice",opts:["True: the index and the anchors treat every share structure the same","Misleading: only small retail investors object to unequal voting rights","False: two anchors' voting policies count unequal votes against a company"],ans:"False: two anchors' voting policies count unequal votes against a company"}],
+   hint:"Claims 1 and 3: Finance & Capital Markets has the results of the anchor meetings. Claim 2: Legal, Governance & Communications knows how many sign-ups become orders.",
+   out:{ok:"Lucien sent the corrections to the bank instead of forwarding the pitch to the board. Van Rijn & Co. withdrew it and dropped its half-per-cent bonus for pricing at the top of the range.",
+        fail:"Lucien forwarded the pitch to the board. When the errors came out, two board members asked for an independent pricing review before Thursday: €80,000 from the listing budget. The bank's half-per-cent bonus for a top price stays in its contract."}},
+ 3:{owner:"A",title:"The four sites",
+   intro:"Daan's office has sent Mireille the financing milestones in the four grid contracts. Mireille wants to know what would happen to the next phase if the book were short on pricing day and the offer had to be reopened. The table alone won't tell you.",
+   screen:`<div class="attach"><div class="an">Next phase: financing milestones in the grid contracts</div>
+     <div class="tw"><table><thead><tr><th>Site</th><th>Milestone</th><th class="num">Penalty if missed</th></tr></thead><tbody>
+      <tr><td>Zeewolde (NL)</td><td>Week 7</td><td class="num">€600,000</td></tr>
+      <tr><td>Évora (PT)</td><td>Week 7</td><td class="num">€700,000</td></tr>
+      <tr><td>Delfzijl (NL)</td><td>Week 11</td><td class="num">€400,000</td></tr>
+      <tr><td>Sines (PT)</td><td>Week 12</td><td class="num">€500,000</td></tr></tbody></table></div>
+     <p class="fine">Weeks from today. Kestermoor must show committed funding for each site by its milestone.</p></div>`,
+   qs:[{q:"If the book were short on pricing day, when could a reopened offer settle at the earliest?",type:"choice",opts:["Week 6, as planned: nothing changes","About week 8: two to three weeks more, plus settlement","About week 14: the whole offer would have to start again"],ans:"About week 8: two to three weeks more, plus settlement"},
+       {q:"Which sites' milestones would then be missed?",type:"choice",opts:["Delfzijl and Sines: the two sites with the latest milestones","None of them: every milestone falls after the loan matures","Zeewolde and Évora: both their milestones fall in week 7"],ans:"Zeewolde and Évora: both their milestones fall in week 7"},
+       {q:"What would be at stake at those two sites?",type:"choice",opts:["€1.3 million in penalties, and both connection slots","€1.3 million in penalties, but the slots stay safe","€2.2 million in penalties across all four sites"],ans:"€1.3 million in penalties, and both connection slots"}],
+   hint:"When a reopened offer could settle is in Legal, Governance & Communications' emails. What a missed milestone means for a connection slot is in the Founder's Office's emails.",
+   out:{ok:"Mireille took the timetable to the two grid operators. Both have agreed that signed cornerstone agreements count as committed funding for Zeewolde and Évora, so those milestones are met the day the anchors sign.",
+        fail:"Nobody could tell the grid operators which milestones were at risk, so Zeewolde's operator asked for a €250,000 fee to hold its connection slot: from the listing budget, and non-refundable."}}
+};
+const CODES={1:{first:"1846",help:"1473",fail:"1609"},2:{first:"6915",help:"6358",fail:"6027"},3:{first:"2781",help:"2094",fail:"2536"}};
+const TIER_LABEL={first:"Solved first time",help:"Solved with help",fail:"Not solved"};
+const pzDone=(r,n)=>!!S.pz[n].tier&&!!S.gate[r][n];
+const allPz=r=>[1,2,3].every(n=>pzDone(r,n));
+const ok=n=>S.pz[n].tier&&S.pz[n].tier!=="fail";
+const failed=n=>S.pz[n].tier==="fail";
+const r1First=()=>S.ranked&&S.rank[0]==="r1";
+
+/* ---------- option texts after consequences, and the first-year ledger ---------- */
+function optInfo(k,v){
+ let desc=DEC[k][v==="A"?1:2][1];
+ if(k==="d1"&&v==="A"&&r1First()) desc+=" In writing, two anchors say they would cut their orders at this price if the shares also carried unequal votes (Tomasz).";
+ if(k==="d1"&&v==="A"&&S.pz[2].tier) desc+=ok(2)?" The bank has dropped its bonus for a top price (Lucien).":" The bank's contract adds a half-per-cent bonus at this price, about €1.15 million (Lucien).";
+ if(k==="d1"&&v==="B"&&r1First()) desc+=" All three anchors have confirmed this in writing, with a six-month lock-up (Tomasz).";
+ if(k==="d1"&&v==="B"&&ok(3)) desc+=" Signed cornerstones also count as committed funding for Zeewolde and Évora (Mireille).";
+ if(k==="d2"&&v==="A"&&S.fork==="talk") desc+=" Daan's “second-guessed” line from the interview is still being shared (Euan).";
+ if(k==="d3"&&v==="B"&&ok(1)) desc+=" If the public doesn't take its tranche, the anchors will take up to €10 million of the unsold shares (Kavya).";
+ return {desc};
+}
+function ledger(){const L=[],add=(l,s,v)=>L.push([l,s,v]);
+ if(S.fork==="talk"){add("Outside lawyers checked Daan's interview","Listing budget",-20000);
+  if(S.d3==="B")add("Extra retail orders after Daan's interview","Money raised",1000000);
+  if(S.d2==="A")add("Daan's “second-guessed” line, back in every story about control","Investor demand",-500000);}
+ if(S.fork==="quiet"){add("Beursblad's front page on prospectus day","Investor demand",500000); if(S.d3==="B")add("Beursblad readers who joined the retail tranche","Money raised",500000);}
+ if(S.ranked&&MISSTEP[S.rank[0]])add(...MISSTEP[S.rank[0]]);
+ if(failed(1))add("Banks' legal fees to correct the draft offer","Listing budget",-90000);
+ if(failed(2))add("Independent pricing review for the board","Listing budget",-80000);
+ if(failed(3))add("Fee to hold Zeewolde's connection slot","Listing budget",-250000);
+ if(S.d1==="A"){add("€1 a share above the middle of the range","Money raised",10000000);
+  add("Shares below the offer price for most of the year: the next raise will cost more","Share price",-13000000);
+  if(failed(2))add("The bank's half-per-cent bonus for a top price","Banks' fees",-1150000);}
+ if(S.d1==="B"){add("€1 a share below the middle of the range","Money raised",-10000000);
+  add("Cornerstones signed before launch, shares above the offer price: the next raise will cost less","Share price",8000000);
+  if(r1First())add("The anchors' six-month lock-up steadied the shares","Share price",500000);}
+ if(S.d2==="A"){add("Kept out of the sustainability index until the sunset expires","Investor demand",-1500000);add("“Having it both ways” coverage","Investor demand",-500000);
+  if(S.d1==="A")add(S.d3==="A"?"Two anchors cut their orders; short-term funds filled the gap and sold":"Two anchors cut their orders; retail orders softened the fall","Share price",S.d3==="A"?-12500000:-7000000);}
+ if(S.d2==="B")add("Considered for the sustainability index: index funds bought in","Investor demand",2000000);
+ if(S.d3==="A")add("30,000 pre-registered investors offered almost nothing: complaints and thin trading","Investor demand",-500000);
+ if(S.d3==="B"){
+  if(S.d1==="A"){add("Retail tranche short; the top price's margin absorbed the gap","Money raised",-1000000);add("Small investors who bought at the top saw the shares fall below what they paid","Investor demand",-5000000);}
+  else{add(ok(1)?"Retail tranche short, even after the anchors took €10 million: an early second raise for the next phase":"Retail tranche short: an early second raise for the next phase","Money raised",ok(1)?-8000000:-10000000);
+   if(!ok(3))add("Zeewolde and Évora missed their financing milestones","Penalties",-1300000);
+   add("Small investors who bought have hardly sold a share","Investor demand",1000000);}}
+ return L;}
+const net=()=>ledger().reduce((a,r)=>a+r[2],0);
+const netWords=()=>{const n=net(); return n>0?`${fmt(n)} ahead of its listing plan`:n<0?`${fmt(-n)} behind its listing plan`:"exactly on its listing plan";};
+const spentSoFar=()=>(S.fork==="talk"?20000:0)+(S.ranked&&MISSTEP[S.rank[0]]?-MISSTEP[S.rank[0]][2]:0)+(failed(1)?90000:0)+(failed(2)?80000:0)+(failed(3)?250000:0);
+
+/* ---------- notes: highlights, colour code, free notes ---------- */
+const HL=[["yellow","#FFF176"],["green","#B9F6CA"],["pink","#F8BBD0"],["blue","#B3E5FC"],["orange","#FFE0B2"],["purple","#E1BEE7"]];
+const HLC=Object.fromEntries(HL);
+const HL_HINT=["Key fact","Evidence","Doubt","Number","Ask the team","Use in writing"];
+function hsh(t){let h=5381;for(const c of t)h=((h<<5)+h+c.charCodeAt(0))>>>0;return h.toString(36);}
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function wrapSentences(root){
+ root.querySelectorAll("[data-src]").forEach(box=>{
+  const src=box.dataset.src, q=box.dataset.q||"medium";
+  box.querySelectorAll("p").forEach(p=>{
+   if(p.dataset.w||p.closest("[data-src]")!==box||p.classList.contains("sd")||p.classList.contains("sig")||p.querySelector("button,input,svg"))return;
+   const t=p.textContent.replace(/\s+/g," ").trim(); if(!t)return;
+   const parts=t.match(/(?:[^.!?]|[.!?](?=\d))+[.!?]+["”’)]*|(?:[^.!?]|[.!?](?=\d))+$/g)||[t];   // "€2.1 million" stays one sentence
+   const N=S.notes[R()];
+   p.innerHTML=parts.map(x=>{x=x.trim(); const k=hsh(src+"|"+x), h=N.hl[k];
+     return `<span class="sn" data-k="${k}" data-src="${esc(src)}" data-q="${q}"${h?` style="background:${HLC[h.c]}"`:""}>${esc(x)}</span>`;}).join(" ");
+   p.dataset.w="1";});
+ });
+}
+let palFor=null;
+function openPal(el){palFor=el;const pal=document.getElementById("hlpal");const r=el.getBoundingClientRect();
+ pal.hidden=false; pal.style.top=(window.scrollY+r.bottom+6)+"px"; pal.style.left=Math.max(8,Math.min(window.scrollX+r.left,window.scrollX+document.documentElement.clientWidth-pal.offsetWidth-8))+"px";}
+function closePal(){document.getElementById("hlpal").hidden=true;palFor=null;}
+function notesHTML(){
+ const N=S.notes[R()], items=Object.entries(N.hl);
+ const cc=`<details class="cc"><summary>${HL.map(([,c])=>`<i style="background:${c}"></i>`).join("")}<span>My colour code</span></summary><div class="ccgrid">${HL.map(([k,c],i)=>`<label><i style="background:${c}"></i><input data-cc="${k}" maxlength="24" value="${esc(N.cc[k]||"")}" placeholder="${HL_HINT[i]}" aria-label="${k} means"></label>`).join("")}</div></details>`;
+ const add=`<div class="nbadd"><textarea id="nbnew" maxlength="400" placeholder="A note of your own…" aria-label="A note of your own"></textarea><button class="btn small" data-act="noteadd">Add note</button></div>`;
+ const free=N.free.map((t,i)=>`<div class="nbcard mine"><p>${esc(t)}</p><div class="src">Your note <button class="lnk" data-act="noterm" data-v="${i}">Delete</button></div></div>`).join("");
+ const groups=HL.map(([k,c])=>{const g=items.filter(([,h])=>h.c===k); if(!g.length)return "";
+   return `<div class="nbgroup"><i style="background:${c}"></i>${esc(N.cc[k]||k[0].toUpperCase()+k.slice(1))}</div>`+g.map(([key,h])=>`<div class="nbcard" style="border-left-color:${c}"><p>${esc(h.t)}</p><div class="src">${esc(h.src)} <button class="lnk" data-act="hlrm" data-v="${key}">Remove</button></div></div>`).join("");}).join("");
+ return `<div class="nbhead"><h2>Your highlights and notes</h2><button class="lnk" data-act="nbclose" aria-label="Close notes">Close ✕</button></div>${cc}${add}${free}${items.length?groups:`<p class="muted small">Tap any sentence in the Context, your emails, a report or a recording's text to highlight it. Your highlights collect here.</p>`}`;
+}
+
+/* ---------- state ---------- */
+const fresh=()=>({role:null,tab:"context",unlock:false,fork:null,expert:null,picks:{henrik:null,rui:null},checks:{},d1:null,d2:null,d3:null,decided:false,text:"",handed:false,rank:[...RANK_START],ranked:false,mailOpen:{},mailRead:{},notes:{A:{hl:{},cc:{},free:[]},B:{hl:{},cc:{},free:[]},C:{hl:{},cc:{},free:[]}},nbOpen:false,pz:{1:{tier:null,tries:[0,0,0],ok:[0,0,0],hint:false,sel:{}},2:{tier:null,tries:[0,0,0],ok:[0,0,0],hint:false,sel:{}},3:{tier:null,tries:[0,0,0],ok:[0,0,0],hint:false,sel:{}}},gate:{A:{},B:{},C:{}},gateMsg:""});
+let S=fresh();
+const STORE_KEY="simlearn-pro-kestermoorpro";
+try{const x=JSON.parse(sessionStorage.getItem(STORE_KEY)||"null"); if(x&&typeof x==="object"&&!Array.isArray(x)) S=Object.assign(fresh(),x);}catch(e){}
+function save(){try{sessionStorage.setItem(STORE_KEY,JSON.stringify(S));}catch(e){}}
+const TABS=[["context","Context"],["who","Who's who"],["inbox","Inbox"],["puzzles","Team puzzles"],["investigate","Investigate"],["decide","Decide"]];
+const ready=()=>S.unlock||(S.role&&S.fork);
+const tabOpen=t=>t==="context"||(t==="who"&&!!S.role&&!!(S.go||S.fork))||(ready()&&(["inbox","puzzles"].includes(t)||S.unlock||allPz(R())));
+const PATH={talk:"Daan gave the interview",quiet:"kept quiet"};
+
+const ENDING_HASH=200245639;
+function endLockHTML(){return `<section class="card"><h2>What happened next</h2><p>When <b>everyone in your team</b> has created their submission, ask your teacher for the code to find out what happened.</p><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input id="endcode" inputmode="numeric" autocomplete="off" maxlength="4" aria-label="Code from your teacher" style="width:7em;font:inherit;padding:6px 10px;border:1px solid var(--line);border-radius:8px"><button class="btn" data-act="endcode">Open</button> <span class="msg" aria-live="polite">${S.endMsg||""}</span></div></section>`;}
+function render(){
+  save();
+  document.getElementById("who").textContent=S.role?`Your role: ${ROLES[S.role].name}${S.fork?` · Path: ${PATH[S.fork]}`:""}`:"Read the context, then choose your role.";
+  document.getElementById("tabs").innerHTML=TABS.map(([k,l])=>`<button data-act="tab" data-v="${k}" aria-current="${S.tab===k}" ${tabOpen(k)?"":"disabled"}>${l}${k==="inbox"&&tabOpen(k)&&inboxList().some(m=>!S.mailRead[m.from+"|"+m.subj])?`<span class="tdot" aria-label="unread emails"></span>`:""}</button>`).join("");
+  document.getElementById("main").innerHTML=V[S.tab]();
+  wrapSentences(document.getElementById("main"));
+  if(S.tab==="context"&&(!S.role||!(S.go||S.fork))){const cs=[...document.querySelectorAll("#main section.card")],i=cs.findIndex(c=>/^\s*3 ·/.test((c.querySelector(".step")||{}).textContent||""));if(i>0){cs.slice(i).forEach(c=>{c.hidden=true;c.style.display="none";});cs[i-1].insertAdjacentHTML("afterend",S.role?`<section class="card stopc" id="stopgate" role="status"><div class="stophead"><span class="stopsign" aria-hidden="true">STOP</span><h2>Stop. Wait until everyone in your team has chosen a role and your teacher says go.</h2></div><p>Your role: <b>${esc(ROLES[S.role].name)}</b>. Check that each of you has a different role.</p><button class="btn" data-act="go">Go on</button></section>`:`<section class="card" id="rolegate"><p class="note-strong" style="margin:0"><strong>Choose your role above to read on.</strong> Each of you takes a different role: agree who is who in your team first.</p></section>`);}}
+  const nb=document.getElementById("nb"); nb.hidden=!S.nbOpen; if(S.nbOpen) nb.innerHTML=notesHTML();
+  const fab=document.getElementById("fab"); fab.hidden=!S.role; fab.textContent=`Notes (${Object.keys(S.notes[R()].hl).length+S.notes[R()].free.length})`;
+  if(S.tab==="investigate"&&!S.ranked) bindDrag("rank");
+  if(S.tab==="decide"){const ta=document.getElementById("cf"); if(ta){ta.value=S.text; wc();}}
+}
+const task=t=>`<div class="task"><b>Your task</b><span>${t}</span></div>`;
+const R=()=>S.role||"A";
+
+const V={
+ context(){
+  const r=S.role;
+  return task("Read from top to bottom. Choose your role, then make your first decision: agree as a team, then everyone enters the same choice.")
+  +`<section class="card" data-src="Context" data-q="medium"><span class="step">1 · Where you work</span><h2>Kestermoor Energy, solar and battery storage</h2>
+    ${PRO_COVER?`<img src="${PRO_COVER}" alt="" style="display:block;width:100%;height:auto;border-radius:10px">`:""}
+    <p>Kestermoor Energy develops large solar and battery-storage projects across the Benelux and Iberia, from a small head office in Rotterdam. Over eight years it has built a pipeline of projects with a mix of equity, government grants and a large bridge loan, taken out to buy land and secure grid-connection permits ahead of construction. The board has approved a plan to list on Euronext Amsterdam, both to repay that bridge loan and to fund the next phase of battery-storage sites, already under contract with grid operators. Early investor soundings suggest real appetite for the listing.</p>
+    <p>A listing works roughly like this. The company and its banks set an indicative price range. Large institutions can sign cornerstone orders before the offer opens, and those orders are binding; others place orders during the offer period, and small “retail” investors subscribe through their banks. On pricing day the final price is set and the shares are allocated. Some companies give their founders shares with extra votes, a dual-class structure, sometimes with a sunset clause that ends the extra votes after a fixed number of years.</p>
+    <p>Two stories come up in every Kestermoor meeting. In 2023 the largest battery-storage project, in Halsdorf, stalled for fourteen months after a funding partner withdrew mid-construction, and Kestermoor paid the grid operator €2.1 million in penalties for the missed connection date. And last year's €40 million convertible note, placed privately with the renewables investor Ferrand Capital, was oversubscribed nearly three times over. Ferrand's investors said the company's conservative, transparent assumptions had made its numbers easy to trust.</p>
+    <div class="facts"><div class="fact"><div class="l">Head office</div><div class="v">Rotterdam</div></div><div class="fact"><div class="l">Listing on</div><div class="v">Euronext Amsterdam</div></div><div class="fact"><div class="l">Bridge loan</div><div class="v">€85 million</div></div></div></section>`
+  +`<section class="card" data-src="Context" data-q="medium"><span class="step">2 · Who you are</span><h2>The listing team</h2>
+    <p>You are three members of Kestermoor's listing team. Each of you sees different information. Choose your role.</p>
+    <div class="roles">${Object.entries(ROLES).map(([k,v])=>`<button class="role" data-act="role" data-v="${k}" aria-pressed="${r===k}" ${S.fork&&S.role?"disabled":""}><b>${v.name}</b><span>${v.line}</span></button>`).join("")}</div>${S.fork&&S.role?`<p class="muted small">Your role is fixed now that your team has made its first decision.</p>`:""}
+    ${r?`<p><strong>Your role: ${ROLES[r].name}.</strong> ${ROLES[r].detail}</p>`:""}
+    <h3 style="margin-top:6px">Other people you'll hear from</h3>
+    <div class="people"><div class="person"><b>Mireille Dupont</b><span class="muted small">Chief Financial Officer. She runs the listing: your boss.</span></div><div class="person"><b>Daan Verhoeven</b><span class="muted small">Founder and CEO.</span></div><div class="person"><b>Henrik Vos</b><span class="muted small">Van Rijn & Co., the lead bank.</span></div><div class="person"><b>Rui Carvalho</b><span class="muted small">A solar cooperative near the Évora site, Portugal.</span></div></div></section>`
+  +`<section class="card" data-src="Context" data-q="medium"><span class="step">3 · The situation</span><h2>Three decisions, nine weeks</h2>
+    <p>The prospectus has to be finalised within days, and three decisions are still open. Each one changes how the market is likely to read the other two. How should the shares be priced within the indicative range of €21 to €23? Should a dual-class structure protect the founder's control, or should every share carry one vote? And how should the offer be split between large institutional investors and the public? The €85 million bridge loan matures in nine weeks, and refinancing it privately at this stage would cost nearly double the rate. The board meets on Thursday to approve the terms.</p></section>`
+  +`<section class="card" data-src="Context" data-q="medium"><span class="step">4 · It starts</span><h2>A voicemail from Mireille</h2>
+    ${audio("Voicemail from Mireille Dupont","female, light French accent, precise and dry",`<p class="sd">[On a train. An announcement in Dutch in the background.]</p><p>Hello, it's Mireille. I'm on the train back from Amsterdam. The banks want our terms by Thursday, and everyone in the building has a different idea of what the safe deal looks like.</p><p>Finance, the founder's office, legal and communications: each of you holds one piece of this. So talk to each other. Properly.</p><p>And one more thing. Beursblad wants a long interview with Daan for this weekend's paper. I need your answer by five: does he do it, or do we keep quiet until the prospectus is out?</p>`,"kestermoorpro_voicemail")}</section>`
+  +`<section class="card" data-src="Context" data-q="medium"><span class="step">5 · Your first decision</span><h2>Daan's interview: yes, or keep quiet?</h2>
+    <p>Beursblad, the country's biggest financial daily, wants a long interview with Daan for its weekend edition. It would reach thousands of possible investors before the offer opens, and Daan tells Kestermoor's story well. But anything said before the prospectus is published has to match it, and the journalist will ask the questions Kestermoor hasn't answered yet. Or Kestermoor says nothing until the prospectus is public: the message stays under control, but for now the paper writes about the listing without Kestermoor's voice. You haven't seen the evidence yet. Agree as a team, then everyone enters the same choice.</p>
+    <div class="choices">${[["talk","A","Yes: Daan gives the interview this week","Costs €20,000 for outside lawyers to check every quote against the draft prospectus (Kavya's figure). Reaches thousands of possible investors before the offer opens."],["quiet","B","Keep quiet until the prospectus is out","No cost. The story stays under Kestermoor's control, but for now the paper tells it without Daan."]].map(([v,k,t,c])=>`<button class="choice" data-act="fork" data-v="${v}" aria-pressed="${S.fork===v}" ${S.fork?"disabled":""}><span class="k">OPTION ${k}</span><b>${t}</b><small>${c}</small></button>`).join("")}</div>
+    ${S.fork?(S.role?`<p class="done">Decision made. Some of the evidence you see depends on this choice. Go to your inbox.</p><button class="btn" data-act="tab" data-v="inbox">Open your inbox</button>`:`<p class="done">Decision made. Now choose your role above.</p>`):""}</section>`;
+ },
+ inbox(){
+  const list=inboxList();
+  return task("Read your emails and tell your team what you've found, in your own words. Your teammates have different emails. Not every source is equally reliable.")
+  +`<div style="display:flex;flex-direction:column;gap:10px">${list.map(m=>mail(m)).join("")}</div>`;
+ },
+ puzzles(){
+  const r=R(); let h=task("Each of you has one puzzle, and nobody can solve theirs alone. When a puzzle appears on someone's screen, everyone gathers round that screen until it's solved. Each result changes what happens next.");
+  const done=[1,2,3].filter(n=>pzDone(r,n));
+  if(done.length) h+=`<section class="card"><h2>Results so far</h2>${done.map(n=>`<p><b>${PZ[n].title}</b> (${ROLES[PZ[n].owner].name}): ${TIER_LABEL[S.pz[n].tier]}. ${ok(n)?PZ[n].out.ok:PZ[n].out.fail}${PZ[n].owner===r&&S.pz[n].tier?` <span class="note-strong">Code for your teammates: <b class="mono">${CODES[n][S.pz[n].tier]}</b></span>`:""}</p>`).join("")}</section>`;
+  const n=[1,2,3].find(x=>!pzDone(r,x));
+  if(!n) return h+`<p class="done">All three puzzles are done.</p><button class="btn" data-act="tab" data-v="investigate">Go to Investigate</button>`;
+  const P=PZ[n];
+  if(P.owner!==r) return h+`<section class="card gate"><span class="step">Puzzle ${n} of 3</span><h2>${ROLES[P.owner].name} needs your help</h2>
+     <p>Go and look at their screen. They have a puzzle called <b>${P.title}</b>, and they need facts from your emails to solve it. When it's done, their screen shows a four-digit code. Type it here to carry on.</p>
+     <div class="coderow"><input id="gatecode" inputmode="numeric" maxlength="4" placeholder="0000" aria-label="Code from ${ROLES[P.owner].name}"><button class="btn" data-act="gate" data-v="${n}">Carry on</button></div>${S.gateMsg?`<p class="msg">${S.gateMsg}</p>`:""}</section>`;
+  const Z=S.pz[n];
+  if(Z.tier) return h+`<section class="card"><span class="step">Puzzle ${n} of 3 · ${P.title}</span><h2>${TIER_LABEL[Z.tier]}</h2><p>${ok(n)?P.out.ok:P.out.fail}</p>
+     <p>Show this code to your teammates. They need it to carry on.</p><div class="bigcode">${CODES[n][Z.tier]}</div>
+     <button class="btn" data-act="pznext" data-v="${n}">I've shared the code</button></section>`;
+  return h+`<section class="card"><span class="step">Puzzle ${n} of 3 · your puzzle</span><h2>${P.title}</h2><p>${P.intro}</p>
+    <p class="note-strong"><strong>Call your teammates over.</strong> You can't solve this from your own emails alone.</p>${P.screen}
+    ${P.qs.map((q,i)=>{const done=Z.ok[i], missed=Z.tries[i]>=2;
+      return `<div class="pzq"><h3>${i+1}. ${q.q}</h3>${done?(missed?`<p class="hint">Not solved. The answer was: ${q.ans}</p>`:`<p class="done">${q.ans} ✓</p>`):
+        `<div class="opts2">${q.opts.map(o=>`<button class="opt" data-act="pzsel" data-n="${n}" data-i="${i}" data-v="${esc(o)}" aria-pressed="${Z.sel[i]===o}">${o}</button>`).join("")}</div>`+
+       `<div class="coderow"><button class="btn" data-act="pzcheck" data-n="${n}" data-i="${i}">Check</button>${Z.tries[i]?`<span class="msg">Not yet. One more try: a second wrong answer means this puzzle isn't solved.</span>`:""}</div>`}</div>`;}).join("")}
+    ${Z.hint?`<p class="hint">${P.hint}</p>`:`<button class="lnk" data-act="pzhint" data-v="${n}">Show a hint (counts as help)</button>`}</section>`;
+ },
+ investigate(){
+  const sl=SHORTLIST[R()], e=S.expert;
+  return task("Question the two witnesses, then agree your interim briefing as a team: everyone sends Mireille the same order. If you have time, hire one outside expert first.")
+  +`<section class="card"><h2>Hire an expert (if you have time)</h2><p>This step is optional. Mireille has set aside money for outside advice, enough for each of you to bring in one expert. Experts are expensive and only answer the question you hire them for, so think about what your team most needs to know. Each role has a different shortlist, and some experts appear on more than one list.</p>
+    <div class="choices">${sl.map(k=>`<button class="choice" data-act="expert" data-v="${k}" aria-pressed="${e===k}" ${e?"disabled":""}><b>${EXPERTS[k].name}</b><small><em>${EXPERTS[k].who}</em><br>${EXPERTS[k].what}</small></button>`).join("")}</div>
+    ${e?`<div class="attach" data-src="${EXPERTS[e].who.split(",")[0]}" data-q="high"><div class="an">📎 Report from ${EXPERTS[e].who}</div>${EXPERTS[e].rep}</div>`:""}</section>`
+  +`<section class="card"><h2>The witnesses</h2><p>Henrik and Rui both want something from this listing. <strong>One of them is leaving things out.</strong> Listen for what's missing, then choose your one question for each.</p>
+    <div class="two">${Object.entries(WIT).map(([k,w])=>{const p=S.picks[k];
+      return `<div style="display:flex;flex-direction:column;gap:10px"><h3>${w.name} <span class="muted small">· ${w.role}</span></h3>
+       ${audio(`${w.name}'s account`,w.voice,w.account,"kestermoorpro_"+k)}
+       <div class="qs">${w.qs.map((q,i)=>`<button class="q" data-act="ask" data-w="${k}" data-v="${i}" aria-pressed="${p===i}" ${p!==null?"disabled":""}>${q[0]}</button>`).join("")}</div>
+       ${p!==null?audio(`${w.name} answers`,w.voice,`<p>${w.qs[p][1]}</p>`,"kestermoorpro_"+k+"_"+(p+1)):""}</div>`;}).join("")}</div></section>`
+  +`<section class="card"><h2>Interim briefing for Mireille</h2>
+    <p>Mireille sees the board chair on Wednesday, the day before the board meets, and needs your view now, before your final decisions. Below is her list of worries, in the order the office has been talking about them. Put them in order, from the biggest risk to the listing to the smallest.</p>
+    <p class="note-strong"><strong>Mireille will act on whatever you put first, straight away.</strong></p>
+    <ol class="tl" id="rk">${S.rank.map((id,i)=>{const t=RANK.find(x=>x[0]===id);
+      return `<li class="tc" data-id="${id}" draggable="${!S.ranked}"><span class="n">${i+1}</span><span>${t[1]}</span><span class="arr">${S.ranked?"":`<button data-act="mv" data-l="rank" data-v="${i}" data-d="-1" aria-label="Move up" ${i?"":"disabled"}>↑</button><button data-act="mv" data-l="rank" data-v="${i}" data-d="1" aria-label="Move down" ${i<RANK.length-1?"":"disabled"}>↓</button>`}</span></li>`;}).join("")}</ol>
+    ${S.ranked?`<p class="done">Sent to Mireille. Her reply is below, and there's a new email in your inbox.</p>${mail(reply())}`:`<button class="btn" data-act="sendrank">Send to Mireille</button>`}</section>`;
+ },
+ decide(){
+  const dis=S.decided?"disabled":"";
+  let h=task("Check what you've worked out, then agree three decisions as a team: everyone enters the same choices. Then write your part of the recommendation. After you hand in, you'll hear what happened next.");
+  const forkLine=S.fork==="talk"?"Daan gave the interview: pre-registrations rose to 41,000 in 72 hours. The lawyers' check cost €20,000.":S.fork==="quiet"?"Kestermoor has kept quiet, and Beursblad has offered its weekend front page if Daan talks to it first on prospectus day.":"";
+  h+=`<section class="card"><h2>Where things stand</h2><p>${forkLine} ${S.ranked?STANDING[S.rank[0]]():"Mireille is still waiting for your interim briefing."}</p>${[1,2,3].filter(n=>S.pz[n].tier).map(n=>`<p><b>${PZ[n].title}:</b> ${ok(n)?PZ[n].out.ok:PZ[n].out.fail}</p>`).join("")}
+   <div class="facts"><div class="fact"><div class="l">Weeks until the bridge loan matures</div><div class="v">9</div></div><div class="fact"><div class="l">Unplanned listing-budget spending</div><div class="v">${fmt(spentSoFar())}</div></div></div></section>`;
+  h+=`<section class="card"><h2>What have you worked out?</h2>${CHECKS.map((c,qi)=>{const a=S.checks[qi];
+     return `<div style="display:flex;flex-direction:column;gap:6px"><h3>${qi+1}. ${c.q}</h3>${c.opts.map((o,oi)=>`<button class="opt ${a===undefined?"":oi===c.right?"right":oi===a?"wrong":""}" data-act="chk" data-q="${qi}" data-v="${oi}" ${a!==undefined?"disabled":""}>${o}</button>`).join("")}${a!==undefined?`<p class="fb">${a===c.right?"<strong>Yes.</strong> ":"<strong>Not quite.</strong> "}${c.why}</p>`:""}</div>`;}).join("")}</section>`;
+  h+=["d1","d2","d3"].map(k=>{const D=DEC[k];return `<section class="card"><h2>${D[0]}</h2><div class="choices">${[1,2].map(i=>{const v=i===1?"A":"B", o=optInfo(k,v);
+    return `<button class="choice" data-act="dec" data-q="${k}" data-v="${v}" aria-pressed="${S[k]===v}" ${dis}><span class="k">OPTION ${v}</span><b>${D[i][0]}</b><small>${o.desc}</small></button>`;}).join("")}</div></section>`;}).join("");
+  if(!S.decided) return h+`<button class="btn" data-act="lock" ${canLock()?"":"disabled"}>Confirm our decisions</button>`;
+  if(!S.handed)h+=`<p><button class="btn small" data-act="undec">Change our decisions</button> <span class="muted small">Until you hand in, your team can still change its decisions.</span></p>`;
+  h+=`<section class="card"><h2>${roleW(S.role).section?"Your section: "+esc(roleW(S.role).section.label):"Listing recommendation"}</h2>${roleW(S.role).section?`<p>About ${roleW(S.role).words} words. ${esc(roleW(S.role).section.task)}</p>`:`<p>Write 120–180 words for Mireille and the board: your recommendation for each decision and how the three fit together, the evidence that convinced you (name the person or document), and the strongest objection to your plan, with your answer to it.</p>`}
+   <p class="muted small">Useful language: <em>On balance, we recommend…</em> · <em>This only works if…</em> · <em>According to…</em> · <em>Admittedly, …; however, …</em></p>
+   <textarea id="cf" aria-label="${roleW(S.role).label}"></textarea>
+   <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><span class="wc" id="wc">0 words</span></div>${handinHTML()}</section>`;
+  if(!S.handed) return h;
+  if(!S.endOpen){h+=endLockHTML();return h;}
+  h+=`<section class="card"><h2>A year after listing</h2>${audio("Markets news: Beursblad","newsreader, light music bed under",epilogue())}
+   <p><strong>A year after listing, Kestermoor is ${netWords()}.</strong></p>
+   <details><summary class="small" style="cursor:pointer;color:var(--blue);font-weight:600">How that adds up</summary><div class="tw"><table class="sums"><thead><tr><th>What happened</th><th>Paid from / effect</th><th class="num">Amount</th></tr></thead><tbody>${ledger().map(([l,src,v])=>`<tr><td>${l}</td><td class="muted">${src}</td><td class="num">${v>0?"+":""}${fmt(v)}</td></tr>`).join("")}<tr class="tot"><td>Against Mireille's listing plan (the middle of the range)</td><td></td><td class="num">${net()>0?"+":""}${fmt(net())}</td></tr></tbody></table></div><p class="small muted">“The next raise”: the money Kestermoor plans to raise next year for the sites after these four. A higher share price makes it cheaper.</p></details>
+   <p>Now find a group that made the other choice at the start, and ask them what happened to them.</p></section>`;
+  return h;
+ }
+};
+const canLock=()=>!!(S.d1&&S.d2&&S.d3);
+
+function epilogue(){
+ const p=[`<p class="sd">[News jingle, then a light music bed under]</p>`];
+ if(S.fork==="talk") p.push(S.d2==="B"?"Daan Verhoeven's weekend interview brought thousands of new sign-ups before the offer opened, and one line about control that he spent the roadshow explaining, until the share structure answered it.":"Daan Verhoeven's weekend interview brought thousands of new sign-ups before the offer opened, and one line about control that followed him all year.");
+ else p.push("Kestermoor said nothing until its prospectus was published. Daan Verhoeven's first interview, in Beursblad on prospectus day, led the weekend markets section.");
+ if(S.d1==="A"){let t="Kestermoor priced at the top of its range, €23 a share. The anchors gave indications, not binding orders, and the banks only finished building the book after a nervous final week.";
+  t+=S.d2==="A"?" In that week two of the three anchors cut their orders, citing the top price together with the unequal votes. The banks filled the gap at the last minute with short-term funds, several of which sold in the first days of trading, and the shares fell well below the offer price.":" The shares slipped below the offer price within a fortnight and stayed there for most of the year.";
+  t+=" The higher price brought in more per share, and the bridge loan was repaid in full before it matured."+(failed(2)?" Van Rijn & Co. collected its half-per-cent bonus for the top price.":"");
+  p.push(t);}
+ else p.push(`Kestermoor priced at the lower end of its range, €21 a share. All three anchors had signed cornerstone agreements before launch${r1First()?", with a six-month lock-up":""}, and the shares opened slightly above the offer price and stayed above it for most of the year. The bridge loan was repaid in full before it matured, though the lower price left little to spare.`);
+ if(S.d2==="A") p.push("Kestermoor listed with two classes of shares and the seven-year sunset the board required. Within a fortnight the index provider confirmed that Kestermoor would not be eligible until the extra votes expire. Two Dutch financial papers ran the “having it both ways” line, and the question of control came up at almost every investor meeting that year.");
+ else p.push("Kestermoor listed with one share, one vote, and the build plan for the four new sites was set out in the prospectus. Daan Verhoeven called it “the hardest yes I've given”. The index provider considered Kestermoor at its next review, index funds bought in, and the share structure barely featured in the coverage.");
+ if(S.d3==="A") p.push("Most of the offer went to a small number of large institutions. The 30,000 pre-registered investors were offered almost nothing: Camille Rousseau's team spent a week answering angry emails, and a Portuguese consumer website ran the headline “Green energy, but not for you”. With so few holders, trading in the shares was thin, and the board asked Camille to plan a retail offer for the next raise.");
+ else {let t="Kestermoor set aside 30% of the offer for retail investors. Orders came to about €25 million, well short of the tranche, and the banks could pass only part of the rest to institutions on pricing day.";
+  if(S.d1==="A") t+=" The top price's extra margin absorbed the gap. But the small investors who had bought at €23 watched the shares fall below what they had paid, and they said so, loudly.";
+  else t+=(ok(1)?" The anchors took €10 million of the unsold shares, as agreed, but the offer still closed short.":" The offer closed smaller than planned.")+" The next phase was left short, and Mireille Dupont began planning a second raise at today's financing costs."+(ok(3)?" Because the signed cornerstones counted as committed funding, Zeewolde and Évora kept their connection slots.":" Zeewolde and Évora missed their financing milestones, and Kestermoor paid €1.3 million in penalties.")+" The small investors who did buy have hardly sold a share.";
+  p.push(t);}
+ const extra=[];
+ if(S.ranked&&EPI_RANK[S.rank[0]]) extra.push(EPI_RANK[S.rank[0]]);
+ if(failed(1)) extra.push("Correcting the draft offer cost €90,000 in the banks' legal fees.");
+ if(failed(2)) extra.push("The board's independent pricing review cost €80,000.");
+ if(failed(3)) extra.push("Zeewolde's operator kept its €250,000 slot fee.");
+ if(extra.length) p.push(extra.join(" "));
+ p.push(`A year after listing, Kestermoor is ${netWords()}.`);
+ return p.map((x,i)=>i?`<p>${x}</p>`:x).join("");
+}
+/* ---------- actions ---------- */
+function wc(){const ta=document.getElementById("cf");document.getElementById("wc").textContent=`${(ta.value.trim().match(/\S+/g)||[]).length} words`;}
+document.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.id==="gatecode"){const bt=document.querySelector("[data-act=gate]");if(bt){e.preventDefault();bt.click();}}});
+document.addEventListener("toggle",e=>{const d=e.target;if(d.dataset&&d.dataset.tf){S.tOpen=Object.assign({},S.tOpen,{[d.dataset.tf]:d.open});save();return;}if(!d.dataset||!d.dataset.mail)return;const k=decodeURIComponent(d.dataset.mail);
+ S.mailOpen[k]=d.open; if(d.open&&!S.mailRead[k]){S.mailRead[k]=true;d.classList.replace("unread","read");const u=d.querySelector(".udot");if(u)u.remove();}},true);
+document.addEventListener("input",e=>{if(e.target.id==="cf"){S.text=e.target.value;wc();}});
+document.addEventListener("click",e=>{
+ const sw=e.target.closest("[data-hlc]"); if(sw&&palFor){const N=S.notes[R()],k=palFor.dataset.k;
+   if(sw.dataset.hlc==="none"){delete N.hl[k];} else N.hl[k]={c:sw.dataset.hlc,t:palFor.textContent,src:palFor.dataset.src,q:palFor.dataset.q};
+   closePal(); render(); return;}
+ const sn=e.target.closest(".sn"); if(sn){openPal(sn);return;}
+ if(!e.target.closest("#hlpal"))closePal();
+ const b=e.target.closest("[data-act]");if(!b||b.disabled)return;act(b.dataset.act,b.dataset);});
+document.addEventListener("change",e=>{const v=e.target.dataset&&e.target.dataset.sort; if(!v)return; const [n,i,j]=v.split("_"); const Z=S.pz[n]; Z.sort=Z.sort||{}; Z.sort[i]=Z.sort[i]||{}; if(e.target.value)Z.sort[i][j]=e.target.value; else delete Z.sort[i][j];});
+document.addEventListener("input",e=>{if(e.target.dataset&&e.target.dataset.cc){S.notes[R()].cc[e.target.dataset.cc]=e.target.value;}});
+function act(a,d){
+ switch(a){
+  case "role":if(!(S.fork&&S.role))S.role=d.v;break;
+  case "undec":if(!S.handed){S.decided=false;S.sub=null;S.issues=[];}break;
+  case "tab":if(tabOpen(d.v)){S.tab=d.v;window.scrollTo({top:0});}break;
+  case "fork":if(!S.fork)S.fork=d.v;break;
+  case "expert":if(!S.expert)S.expert=d.v;break;
+  case "ask":if(S.picks[d.w]===null)S.picks[d.w]=+d.v;break;
+  case "mv":{const L=S[d.l],i=+d.v,j=i+(+d.d);if(j<0||j>=L.length)return;flip(d.l,()=>{[L[i],L[j]]=[L[j],L[i]];});return;}
+  case "sendrank":S.ranked=true;break;
+  case "nbopen":S.nbOpen=true;break;
+  case "go":if(S.role)S.go=true;break;
+  case "endcode":{const c=((document.getElementById("endcode")||{}).value||"").trim();if(fnv(c)===ENDING_HASH){S.endOpen=true;S.endMsg="";}else S.endMsg=c?"That isn't the code. Check it with your teacher.":"";break;}
+  case "nbclose":S.nbOpen=false;break;
+  case "hlrm":{const N=S.notes[R()];delete N.hl[d.v];break;}
+  case "noteadd":{const t=(document.getElementById("nbnew")||{}).value||""; if(t.trim())S.notes[R()].free.push(t.trim()); break;}
+  case "noterm":S.notes[R()].free.splice(+d.v,1);break;
+  case "pzsel":S.pz[d.n].sel[d.i]=d.v;break;
+  case "pzhint":S.pz[d.v].hint=true;break;
+  case "pzcheck":{const n=+d.n,i=+d.i,Z=S.pz[n],q=PZ[n].qs[i];
+    let right;
+    if(q.type==="sort"){const got=(Z.sort&&Z.sort[i])||{}; if(Object.keys(got).length<q.items.length){Z.sortMsg={...(Z.sortMsg||{}),[i]:"Sort every entry first."};break;}
+      const n2=q.items.filter(([,c],j)=>got[j]===c).length; right=n2===q.items.length; Z.sortMsg={...(Z.sortMsg||{}),[i]:right?"":`${n2} of ${q.items.length} are right.`};}
+    else{const a=Z.sel[i]; if(!a)return; right=a===q.ans;}
+    if(right)Z.ok[i]=1; else {Z.tries[i]++; if(Z.tries[i]>=2){Z.ok[i]=1;Z.failq=true;}}
+    if(Z.ok.slice(0,PZ[n].qs.length).every(Boolean)) Z.tier=Z.failq?"fail":(Z.hint||Z.tries.some(t=>t>0))?"help":"first";
+    break;}
+  case "pznext":S.gate[R()][d.v]=S.pz[d.v].tier;S.gateMsg="";break;
+  case "gate":{const n=+d.v,c=((document.getElementById("gatecode")||{}).value||"").replace(/[\uFF10-\uFF19]/g,x=>String.fromCharCode(x.charCodeAt(0)-0xFEE0)).replace(/\D/g,""),t=Object.keys(CODES[n]).find(k=>CODES[n][k]===c);
+    if(t){S.pz[n].tier=t;S.gate[R()][n]=t;S.gateMsg="";} else {const m=[1,2,3].find(x=>x!==n&&Object.values(CODES[x]).includes(c));if(m&&PZ[m].owner!==R()){const tm=Object.keys(CODES[m]).find(k=>CODES[m][k]===c);S.pz[m].tier=tm;S.gate[R()][m]=tm;}S.gateMsg=m?`That's the code for puzzle ${m}${m>n?" (saved)":""}. This box needs the code for puzzle ${n} (“${PZ[n].title}”).`:"That code doesn't work. Check it with your teammate.";} break;}
+  case "chk":if(S.checks[d.q]===undefined)S.checks[d.q]=+d.v;break;
+  case "dec":if(!S.decided)S[d.q]=d.v;break;
+  case "lock":if(canLock())S.decided=true;break;
+  case "hand":makeSub();render();{const bl=document.getElementById("block")||document.getElementById("issues");if(bl&&bl.scrollIntoView)bl.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"center"});}return;
+  case "pdf":downloadPdf();return;
+  case "copy":copyBlock();return;
+ }
+ render();
+}
+const LIST_ID={rank:"rk"};
+function flip(key,mutate){
+ const sel=`#${LIST_ID[key]} .tc`, before={};
+ document.querySelectorAll(sel).forEach(c=>before[c.dataset.id]=c.getBoundingClientRect().top);
+ mutate();render();
+ if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+ document.querySelectorAll(sel).forEach(c=>{const dy=before[c.dataset.id]-c.getBoundingClientRect().top;
+  if(dy){c.style.transition="none";c.style.transform=`translateY(${dy}px)`;requestAnimationFrame(()=>{c.style.transition="transform .22s ease";c.style.transform="";});}});
+}
+let drag=null;
+function bindDrag(key){
+ const L=S[key];
+ document.querySelectorAll(`#${LIST_ID[key]} .tc[draggable="true"]`).forEach(c=>{
+  c.addEventListener("dragstart",e=>{drag=c.dataset.id;c.classList.add("dragging");try{e.dataTransfer.setData("text/plain",drag);}catch(_){}});
+  c.addEventListener("dragend",()=>{c.classList.remove("dragging");drag=null;});
+  c.addEventListener("dragover",e=>{e.preventDefault();if(c.dataset.id!==drag)c.classList.add("over");});
+  c.addEventListener("dragleave",()=>c.classList.remove("over"));
+  c.addEventListener("drop",e=>{e.preventDefault();const to=c.dataset.id;if(!drag||to===drag||!L.includes(drag))return;
+   flip(key,()=>{const from=L.indexOf(drag);L.splice(from,1);const ti=L.indexOf(to);L.splice(from<=ti?ti+1:ti,0,drag);});});
+ });
+}
+
+/* ---------- hand-in: Lite's submission block and PDF (GUIDE 2n). Everything below up to "Pro hand-in" is copied
+   verbatim from studio/template.html by cartridges/authoring/_pro_common.py, so the check code matches blocks.py.
+   Nothing is sent anywhere: the block and the PDF are made here in the browser. ---------- */
+const LITE={"id": "kestermoorpro", "version": 1, "title": "Kestermoor Energy: The Listing Decision (Pro)", "writing": {"label": "listing recommendation", "addressee": "Mireille Dupont and the Kestermoor board", "by_role": {"A": {"label": "recommendation section on the share price", "words": 150, "task": "Write your section of the team's listing recommendation for Mireille and the board: the decision on the share price. Open with one sentence that gives your team's overall plan. Then argue your team's choice on the share price with the evidence from your own inbox (who said it, the numbers, the dates), give the strongest objection to that choice and answer it. Mention the other two decisions only in passing (if your choice depends on one of them, say how in a sentence): your teammates write those sections.", "decision": "D1"}, "B": {"label": "recommendation section on the share structure", "words": 150, "task": "Write your section of the team's listing recommendation for Mireille and the board: the decision on the share structure. Open with one sentence that gives your team's overall plan. Then argue your team's choice on the share structure with the evidence from your own inbox (who said it, the numbers, the dates), give the strongest objection to that choice and answer it. Mention the other two decisions only in passing (if your choice depends on one of them, say how in a sentence): your teammates write those sections.", "decision": "D2"}, "C": {"label": "recommendation section on the investor allocation", "words": 150, "task": "Write your section of the team's listing recommendation for Mireille and the board: the decision on how the offer is split between investors. Open with one sentence that gives your team's overall plan. Then argue your team's choice on how the offer is split between investors with the evidence from your own inbox (who said it, the numbers, the dates), give the strongest objection to that choice and answer it. Mention the other two decisions only in passing (if your choice depends on one of them, say how in a sentence): your teammates write those sections.", "decision": "D3"}}}, "roles": {"A": {"dept": "Finance & Capital Markets", "chars": {"expert": "expert_a", "henrik": "henrik_a", "rui": "rui_a"}}, "B": {"dept": "Founder's Office & Strategy", "chars": {"expert": "expert_b", "henrik": "henrik_b", "rui": "rui_b"}}, "C": {"dept": "Legal, Governance & Communications", "chars": {"expert": "expert_c", "henrik": "henrik_c", "rui": "rui_c"}}}, "decisions": {"d1": "D1", "d2": "D2", "d3": "D3"}};
+function fnv(str){ let h = 0x811c9dc5; for (const ch of new TextEncoder().encode(str)) { h ^= ch; h = Math.imul(h, 0x01000193) >>> 0; } return h >>> 0; }
+function checkCode(parts){
+  const A = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
+  const s = parts.join("|");
+  const four = h => { let n = h % 923521, o = ""; for (let i = 0; i < 4; i++) { o += A[n % 31]; n = Math.floor(n / 31); } return o; };
+  return four(fnv(s)) + "-" + four(fnv(s + "#"));
+}
+const norm = t => t.replace(/\s+/g, " ").trim();
+function words(t){ return (t.trim().match(/\S+/g) || []).length; }
+function taskName(W){ return W.addressee ? `${W.label} to ${W.addressee}` : W.label; }
+const PDFW = {"R":[278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584,761,556,0,222,556,333,1000,556,556,333,1000,667,333,1000,0,611,0,0,222,222,333,333,350,556,1000,333,1000,500,333,944,0,500,667,278,333,556,556,556,556,260,556,333,737,370,556,584,333,737,333,400,584,333,333,333,556,537,278,333,333,365,556,834,834,834,611,667,667,667,667,667,667,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,500,556,556,556,556,278,278,278,278,556,556,556,556,556,556,556,584,611,556,556,556,556,500,556,500],"B":[278,333,474,556,556,889,722,238,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,333,333,584,584,584,611,975,722,722,722,722,667,611,778,722,278,556,722,611,833,722,778,667,778,722,667,611,722,667,944,667,667,611,333,278,333,584,556,333,556,611,556,611,556,333,611,611,278,278,556,278,889,611,611,611,611,389,556,333,611,556,778,556,556,500,389,280,389,584,761,556,0,278,556,500,1000,556,556,333,1000,667,333,1000,0,611,0,0,278,278,500,500,350,556,1000,333,1000,556,333,944,0,500,667,278,333,556,556,556,556,280,556,333,737,370,556,584,333,737,333,400,584,333,333,333,611,556,278,333,333,365,556,834,834,834,611,722,722,722,722,722,722,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,556,556,556,556,556,278,278,278,278,611,611,611,611,611,611,611,584,611,611,611,611,611,556,611,556]};
+const PDF_WIN = {"8364":128,"8218":130,"402":131,"8222":132,"8230":133,"8224":134,"8225":135,"710":136,"8240":137,"352":138,"8249":139,"338":140,"381":142,"8216":145,"8217":146,"8220":147,"8221":148,"8226":149,"8211":150,"8212":151,"732":152,"8482":153,"353":154,"8250":155,"339":156,"382":158,"376":159};   // Unicode -> WinAnsi byte, for 0x80-0x9F
+const PDF_ALT = {"Ł":"L","ł":"l","Đ":"D","đ":"d","ı":"i","ħ":"h","‐":"-","‑":"-","−":"-","′":"'","″":"\"","\u2009":" ","\u202f":" ","→":"->","←":"<-","≈":"~","≤":"<=","≥":">="};
+function pdfByte(ch){
+  const u = ch.codePointAt(0);
+  if (u >= 32 && u <= 126) return u;
+  if (u >= 160 && u <= 255) return u;
+  if (PDF_WIN[u] !== undefined) return PDF_WIN[u];
+  if (u === 9) return 32;
+  const base = ch.normalize("NFKD").replace(/[̀-ͯ]/g, "");   // ł, ő, ş… fall back to the plain letter
+  if (base && base !== ch && base.length === 1) return pdfByte(base);
+  return 63;   // ?
+}
+// Letters the PDF font can't show: a few by hand, then compatibility forms (ﬁ -> fi, ² -> 2), else "?".
+const pdfClean = s => [...String(s).replace(/[ŁłĐđıħ‐‑−′″\u2009\u202f→←≈≤≥]/g, c => PDF_ALT[c])].map(c => {
+  if (c === "\n" || pdfByte(c) !== 63 || c === "?") return c;
+  const k = c.normalize("NFKD").replace(/[\u0300-\u036f]/g, "");
+  return k && [...k].every(x => pdfByte(x) !== 63) ? k : c;
+}).join("");
+function pdfWidth(text, font, size){
+  let w = 0; for (const ch of text) { const b = pdfByte(ch); w += PDFW[font][b - 32] || 556; } return w * size / 1000;
+}
+function pdfStr(text){   // a PDF literal string in WinAnsi, with octal escapes
+  let out = "(";
+  for (const ch of text) {
+    const b = pdfByte(ch);
+    if (b === 40 || b === 41 || b === 92) out += "\\" + String.fromCharCode(b);
+    else if (b > 126) out += "\\" + b.toString(8).padStart(3, "0");
+    else out += String.fromCharCode(b);
+  }
+  return out + ")";
+}
+function pdfWrap(text, font, size, width){
+  const lines = [];
+  text.split("\n").forEach(par => {
+    if (!par.trim()) { lines.push(""); return; }
+    let line = "";
+    par.split(/\s+/).filter(Boolean).forEach(word => {
+      const tryLine = line ? line + " " + word : word;
+      if (pdfWidth(tryLine, font, size) <= width) { line = tryLine; return; }
+      if (line) lines.push(line);
+      while (pdfWidth(word, font, size) > width) {          // a very long word: break it (one pass per line)
+        const chars = [...word]; let n = 0, w = 0;
+        while (n < chars.length) { const cw = pdfWidth(chars[n], font, size); if (n > 0 && w + cw > width) break; w += cw; n++; }
+        lines.push(chars.slice(0, n).join("")); word = chars.slice(n).join("");
+      }
+      line = word;
+    });
+    lines.push(line);
+  });
+  return lines;
+}
+function utf16Hex(text){
+  let h = "FEFF";
+  for (let i = 0; i < text.length; i++) h += text.charCodeAt(i).toString(16).padStart(4, "0").toUpperCase();
+  return "<" + h + ">";
+}
+function makePdf({title, subtitle, body, note, footer, block, fileName}){
+  [title, subtitle, body, note, footer] = [title, subtitle, body, note, footer].map(pdfClean);
+  const W = 595.28, H = 841.89, M = 64, TW = W - 2 * M;
+  const pages = []; let ops = [], y = H - M;
+  const newPage = () => { if (ops.length) pages.push(ops); ops = []; y = H - M; };
+  const text = (s, font, size, x, yy, grey) => ops.push(`BT /${font} ${size} Tf ${grey ? "0.4 0.45 0.5 rg" : "0.11 0.15 0.2 rg"} ${x.toFixed(2)} ${yy.toFixed(2)} Td ${pdfStr(s)} Tj ET`);
+  const para = (s, font, size, lead, grey) => pdfWrap(s, font, size, TW).forEach(l => {
+    if (y - lead < M + 20) newPage();
+    y -= lead; if (l) text(l, font, size, M, y, grey);
+  });
+  para(title, "B", 16, 21);
+  para(subtitle, "R", 9.5, 13, true);
+  y -= 14;
+  para(body, "R", 11, 15.5);
+  y -= 18;
+  para(note, "R", 8, 11, true);
+  newPage();
+  // objects: 1 catalog, 2 pages, 3 font R, 4 font B, 5 embedded file, 6 filespec, 7 info, then page/content pairs
+  const objs = [];
+  const enc = new TextEncoder(), blockBytes = enc.encode(block);
+  const kids = pages.map((_, i) => `${8 + i * 2} 0 R`).join(" ");
+  objs[1] = `<< /Type /Catalog /Pages 2 0 R /Names << /EmbeddedFiles << /Names [${pdfStr(fileName)} 6 0 R] >> >> /PageMode /UseNone >>`;
+  objs[2] = `<< /Type /Pages /Kids [${kids}] /Count ${pages.length} >>`;
+  objs[3] = `<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>`;
+  objs[4] = `<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>`;
+  objs[5] = {dict: `<< /Type /EmbeddedFile /Subtype /text#2Fplain /Length ${blockBytes.length} >>`, data: blockBytes};
+  objs[6] = `<< /Type /Filespec /F ${pdfStr(fileName)} /UF ${utf16Hex(fileName)} /EF << /F 5 0 R >> /Desc ${pdfStr("SimLearn answers for the teacher tool")} >>`;
+  objs[7] = `<< /Title ${utf16Hex(title)} /Creator (SimLearn) /Producer (SimLearn) /SimLearnSubmission ${utf16Hex(block)} >>`;
+  pages.forEach((p, i) => {
+    const foot = `BT /R 7.5 Tf 0.4 0.45 0.5 rg ${M} 36 Td ${pdfStr(footer + (pages.length > 1 ? ` · page ${i + 1} of ${pages.length}` : ""))} Tj ET`;
+    const content = enc.encode([...p, foot].join("\n").split("").map(c => c.charCodeAt(0) < 256 ? c : "?").join(""));
+    objs[8 + i * 2] = `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${W} ${H}] /Resources << /Font << /R 3 0 R /B 4 0 R >> >> /Contents ${9 + i * 2} 0 R >>`;
+    objs[9 + i * 2] = {dict: `<< /Length ${content.length} >>`, data: content};
+  });
+  // assemble with byte offsets (all strings here are ASCII)
+  const parts = [], offs = []; let len = 0;
+  const add = b => { parts.push(b); len += b.length; };
+  add(enc.encode("%PDF-1.7\n")); add(new Uint8Array([0x25, 0xE2, 0xE3, 0xCF, 0xD3, 0x0A]));   // marks the file as binary
+  for (let n = 1; n < objs.length; n++) {
+    offs[n] = len;
+    const o = objs[n];
+    if (typeof o === "string") add(enc.encode(`${n} 0 obj\n${o}\nendobj\n`));
+    else { add(enc.encode(`${n} 0 obj\n${o.dict}\nstream\n`)); add(o.data); add(enc.encode(`\nendstream\nendobj\n`)); }
+  }
+  const xref = len;
+  let x = `xref\n0 ${objs.length}\n0000000000 65535 f \n`;
+  for (let n = 1; n < objs.length; n++) x += String(offs[n]).padStart(10, "0") + " 00000 n \n";
+  add(enc.encode(x + `trailer\n<< /Size ${objs.length} /Root 1 0 R /Info 7 0 R >>\nstartxref\n${xref}\n%%EOF\n`));
+  return new Blob(parts, {type: "application/pdf"});
+}
+
+/* ---------- Pro hand-in ---------- */
+function proChoices(r){
+ const c=LITE.roles[r].chars, sl=SHORTLIST[r]||[], out=[];
+ out.push(`${c.expert}=${S.expert&&sl.includes(S.expert)?"o"+(sl.indexOf(S.expert)+1):"-"}`);
+ Object.keys(WIT).forEach(w=>{const p=S.picks[w]; out.push(`${c[w]}=${p===null||p===undefined?"-":"o"+(p+1)}`);});
+ return out.join(", ");
+}
+// The Pro line: the team's fork, interim briefing (Morven/Moira acts on the first) and puzzle tiers (no evidence= since
+// the evidence step was removed, 9 Nov 2026). Not part of the check code (blocks.py reads it into sub["pro"]).
+function proLine(){
+ return `Pro: fork=${S.fork||"none"}, briefing=${S.ranked?S.rank.join(">"):"none"}, puzzles=${[1,2,3].map(n=>`${n}:${S.pz[n].tier||"none"}`).join(",")}`;
+}
+// writing.by_role (GUIDE 3c): the student's role writes its own section of the group's report
+function roleW(r){const W=LITE.writing, t=W.by_role&&W.by_role[r];
+ return t?Object.assign({},W,{label:t.label||W.label,words:t.words,section:t}):W;}
+function makeSub(){
+ const r=S.role, W=roleW(r), missing=[];
+ S.sub=null;
+ if(!r||!LITE.roles[r]){S.issues=["Choose your role first (Context)."];return;}
+ const memoText=(S.text||"").trim();
+ const open=Object.entries(WIT).filter(([k])=>S.picks[k]===null||S.picks[k]===undefined).map(([,w])=>w.name);
+ if(open.length) missing.push(`You haven't chosen what to ask ${open.join(", ")} yet (Investigate).`);
+ const openDec=LITE.budget?(S.decided?[]:["budget"]):Object.keys(LITE.decisions).filter(k=>!S[k]);
+ if(openDec.length) missing.push(LITE.budget?"Your group's budget isn't confirmed yet (Decide).":`Your group's answer is missing for ${openDec.map(k=>LITE.decisions[k]).join(", ")} (Decide).`);
+ if(words(memoText)<50) missing.push("Your text is very short — write your "+W.label+" first.");
+ S.issues=missing;
+ if(openDec.length||words(memoText)<50) return;
+ const ai=S.consent?"yes":"no";
+ const choices=proChoices(r);
+ const decisions=LITE.budget?LITE.budget.map(id=>`${id}=${+((S.budget||{})[id])||0}`).join(", ")   // Lite's budget format
+                           :Object.entries(LITE.decisions).map(([k,id])=>`${id}=${S[k]}`).join(", ");
+ const parts=[LITE.id, LITE.version, r, choices, decisions, ai, ai==="yes"?norm(memoText):""];
+ const code=checkCode(parts);
+ const head=[
+  "=== SIMLEARN SUBMISSION ===",
+  ai==="yes"?"AI check: ALLOWED":"AI check: NOT ALLOWED - grade by hand",
+  `Scenario: ${LITE.id} v${LITE.version} (${LITE.title})`,
+  `Role: ${r} (${LITE.roles[r].dept})`,
+  `Info choices: ${choices}`,
+  `Group decisions: ${decisions}`,
+  proLine(),
+  `Check: ${code}`,
+ ];
+ const block=ai==="yes"?[...head,`--- ${taskName(W)} (${words(memoText)} words) ---`,memoText,"=== END ==="].join("\n")
+                       :[...head,"=== END ===","",`My ${taskName(W)} (${words(memoText)} words):`,"",memoText].join("\n");
+ S.sub={block, blockOnly: ai==="yes"?block:[...head,"=== END ==="].join("\n"), code, ai, r, n:words(memoText), memo:memoText};
+ S.handed=true;
+}
+function subHTML(){const x=S.sub; if(!x) return "";
+ return `
+    <h2>Your submission</h2>
+    <p>Hand it in the way your <b>Moodle assignment</b> asks for:</p>
+    <p><b>A file upload?</b> Download your PDF and upload it to the assignment.</p>
+    <p><button type="button" class="btn" id="pdf" data-act="pdf">Download my submission (PDF)</button> <span id="pdfmsg" class="ok" aria-live="polite"></span></p>
+    <p><b>A text box?</b> Copy everything in the box below and paste it in. ${x.ai==="yes" ? "" : "Your text sits below the SimLearn part, so your teacher can mark it by hand."}</p>
+    <textarea class="block" id="block" readonly>${esc(x.block)}</textarea>
+    <p><button type="button" class="btn" id="copy" data-act="copy">Copy to clipboard</button> <span id="copied" class="ok" aria-live="polite"></span></p>
+    <p class="muted small">If you change your text or your answers later, create your submission again before you hand it in.</p>`;}
+function handinHTML(){
+ return `<div class="consent">
+      <b>Can your teacher check your text with AI?</b>
+      <p class="small">Your teacher may use the SimLearn teacher tool, which can ask an AI system (Claude, by Anthropic) to suggest feedback on your writing. Only your text and your group's choices would be sent — not your name. Your teacher always makes the final decision about your grade. If you say no, your teacher marks your text by hand. Saying no has no effect on your grade.</p>
+      <label><input type="checkbox" id="consent" ${S.consent?"checked":""}> Yes, my teacher may check my text with AI.</label>
+    </div>
+    <div id="issues" class="issues">${(S.issues||[]).map(m=>`<p>${esc(m)}</p>`).join("")}</div>
+    <button type="button" class="btn" data-act="hand">Create my submission</button>
+    <div id="out">${subHTML()}</div>`;
+}
+function downloadPdf(){
+ const x=S.sub; if(!x) return;
+ const W=roleW(x.r), rr=LITE.roles[x.r];
+ const cap=taskName(W).charAt(0).toUpperCase()+taskName(W).slice(1);
+ const today=new Date().toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"});
+ const blob=makePdf({
+  title: cap,
+  subtitle: `${LITE.title} · Role ${x.r}${rr.dept?" ("+rr.dept+")":""} · ${x.n} words · ${today}`,
+  body: x.memo,
+  note: (x.ai==="yes"
+   ? "This file also carries your SimLearn answers for your teacher's SimLearn tool: your information choices, your group's decisions and a copy of your text. You agreed that your teacher may check your text with AI."
+   : "This file also carries your SimLearn answers for your teacher's SimLearn tool: your information choices and your group's decisions, but not your text. You did not agree to an AI check, so your teacher will mark your text by hand.")
+   + ` Check code: ${x.code}.`,
+  footer: `SimLearn · ${LITE.title}`,
+  block: x.blockOnly, fileName: "simlearn-submission.txt"});
+ const a=document.createElement("a");
+ a.href=URL.createObjectURL(blob); a.download=`simlearn-${LITE.id}-role-${x.r}.pdf`;
+ document.body.appendChild(a); a.click(); a.remove();
+ setTimeout(()=>URL.revokeObjectURL(a.href),120000);
+ const m=document.getElementById("pdfmsg"); if(m) m.textContent="Look in your Downloads, then upload the file to Moodle. If nothing downloaded, open this page in Safari, Chrome or Firefox (not inside an app), or use the text box below.";
+}
+async function copyBlock(){
+ const ta=document.getElementById("block"), msg=document.getElementById("copied"); if(!ta) return;
+ const done=()=>{msg.textContent="Copied — now paste it into Moodle.";};
+ try{await navigator.clipboard.writeText(ta.value); return done();}catch(e){}
+ // older method: still works in many embedded frames where the modern one is blocked
+ ta.focus(); ta.select(); ta.setSelectionRange(0,ta.value.length);
+ let ok=false; try{ok=document.execCommand("copy");}catch(e){}
+ if(ok) return done();
+ msg.textContent="Your browser blocked copying. The text is selected — press Ctrl+C (or ⌘C) to copy it.";
+}
+
+// a recorded clip's text appears once the student has listened to the end (GUIDE 2h); media events don't bubble
+document.addEventListener("ended",e=>{const a=e.target; if(!a||a.tagName!=="AUDIO"||!a.dataset.f)return;
+ S.heard=Object.assign({},S.heard,{[a.dataset.f]:1}); const box=a.closest(".audio"), dt=box&&box.querySelector("details"); if(dt)dt.hidden=false; save();},true);
+
+document.addEventListener("change",e=>{if(e.target.id==="consent"){S.consent=e.target.checked;S.sub=null;S.issues=[];render();}});
+document.addEventListener("input",e=>{if(e.target.id!=="cf")return; if(S.sub){S.sub=null;const o=document.getElementById("out");if(o)o.innerHTML="";} save();});
+
+
+/* ---------- Who's who (_pro_common, 11 Nov 2026): the data is WHO in make_<code>.py ---------- */
+const WHO={"outside": "Outside Kestermoor", "orgs": [{"id": "kestermoor", "name": "Kestermoor Energy", "short": "Kestermoor", "rel": "Your company", "what": "Develops large solar and battery-storage projects across the Benelux and Iberia, from a head office in Rotterdam. It plans to list on Euronext Amsterdam.", "people": [{"id": "mireille", "name": "Mireille Dupont", "title": "Chief Financial Officer", "tag": "boss", "roles": "A", "line": "Runs the listing. She left the voicemail."}, {"id": "tomasz", "name": "Tomasz Wysocki", "title": "Head of Investor Relations", "roles": "A", "line": "Talks to the large investors."}, {"id": "ana", "name": "Ana Beleza", "title": "Treasury & Corporate Finance Manager", "roles": "A", "line": "Looks after Kestermoor's loans and funding."}, {"id": "daan", "name": "Daan Verhoeven", "title": "Founder & CEO", "roles": "B", "line": "Founded Kestermoor and runs it."}, {"id": "ingrid", "name": "Ingrid Dahlgren", "title": "Chief Strategy Officer", "roles": "B", "line": "Plans Kestermoor's projects and next sites."}, {"id": "lucien", "name": "Lucien Bertrand", "title": "Board Chair", "roles": "B", "line": "Chairs the board, which approves the terms on Thursday."}, {"id": "kavya", "name": "Kavya Chandran", "title": "General Counsel", "roles": "C", "line": "Leads the legal work on the prospectus."}, {"id": "marek", "name": "Marek Nowicki", "title": "Head of Communications", "roles": "C", "line": "Handles what Kestermoor says in public."}, {"id": "camille", "name": "Camille Rousseau", "title": "Head of Retail & Public Offer", "roles": "C", "line": "Runs the offer to small investors."}]}, {"id": "vanrijn", "name": "Van Rijn & Co.", "rel": "Lead bank", "what": "The lead bank for the listing.", "people": [{"id": "henrik", "name": "Henrik Vos", "title": "Head of Equity Capital Markets, Van Rijn & Co.", "tag": "witness", "line": "Leads the bank's work on the listing."}]}, {"id": "montenovo", "name": "Monte Novo Solar Cooperative", "short": "Monte Novo", "rel": "Neighbours of the Évora site", "what": "A solar cooperative in Portugal, near Kestermoor's Évora site.", "people": [{"id": "rui", "name": "Rui Carvalho", "title": "Chair, Monte Novo Solar Cooperative", "tag": "witness", "line": "Chairs the cooperative."}]}, {"id": "beursblad", "name": "Beursblad", "rel": "The press", "what": "The country's biggest financial daily. It wants a long interview with Daan.", "people": []}], "also": [["Ferrand Capital", "the renewables investor that took last year's €40 million convertible note."], ["Halsdorf", "Kestermoor's largest battery-storage project; it stalled for fourteen months in 2023."]]};
+const PRO_PHOTOS={};   // people's photos (build.py fills this in from cartridges/images/<code>_<person id>.jpg)
+const WHO_AVC=["#2C5282","#2F6B47","#9B2C2C","#7A5A0E","#5B3F8C","#1F6F78","#8C3F63","#4A5562"];
+const WHO_SRC=TABS.some(t=>t[0]==="inbox"&&t[1]==="Sources");
+function whoAvatar(p){
+ const n=p.name.replace(/^(Dr|Prof|Professor|Sir|Dame)\.?\s+/,"").split(/\s+/), ini=(n[0][0]+(n.length>1?n[n.length-1][0]:"")).toUpperCase();
+ let h=7; for(const ch of p.id) h=(h*31+ch.charCodeAt(0))>>>0;
+ return `<span class="av" style="background:${WHO_AVC[h%WHO_AVC.length]}" aria-hidden="true">${esc(ini)}${PRO_PHOTOS[p.id]?`<img src="${PRO_PHOTOS[p.id]}" alt="" onerror="this.remove()">`:""}</span>`;}
+function whoPerson(p,r){
+ const roles=p.roles||"", mine=roles.includes(r), other=roles&&!mine&&!p.tag, t=[];
+ if(p.tag==="boss") t.push(`<span class="wtag boss">${esc(p.badge||"Your boss")}</span>`);
+ if(p.tag==="witness") t.push(`<span class="wtag wit">Everyone hears from them (Investigate)</span>`);
+ if(mine) t.push(`<span class="wtag mine">${WHO_SRC?"In your sources":"In your inbox"}</span>`);
+ else if(roles) t.push(`<span class="wtag">${WHO_SRC?"Sources of":"Inbox of"}: ${roles.split("").map(x=>esc(ROLES[x].name)).join(", ")}</span>`);
+ return `<div class="wp${other?" dim":""}" data-person="${esc(p.id)}">${whoAvatar(p)}<div class="wpt"><b>${esc(p.name)}</b><span class="wjob">${esc(p.title)}</span><span class="wline">${esc(p.line)}</span>${t.length?`<span class="wtags">${t.join("")}</span>`:""}</div></div>`;}
+function whoHTML(){
+ const r=R(), team=WHO.orgs[0], out=WHO.orgs.slice(1);
+ const rank=p=>p.tag==="boss"?0:(p.roles||"").includes(r)?1:p.tag==="witness"?2:!p.roles?3:4;
+ const ov=`<section class="card"><h2>How it fits together</h2><div class="ov">
+   <div class="ovteam"><b>${esc(team.name)}</b><small>${esc(team.rel)}</small>
+    <div class="ovdepts">${Object.entries(ROLES).map(([k,v])=>`<div class="ovdept${k===r?" you":""}"><b>${esc(v.name)}</b><small>${k===r?"You":"A teammate"}</small></div>`).join("")}</div></div>
+   <div class="ovstem" aria-hidden="true"></div>
+   <div class="ovout"><b>${esc(WHO.outside||"Outside")}</b><div class="ovorgs">${out.map(o=>`<div class="ovorg"><b>${esc(o.short||o.name)}</b><small>${esc(o.rel)}</small></div>`).join("")}</div></div>
+  </div></section>`;
+ const cards=WHO.orgs.map((o,i)=>`<section class="card worg${i?"":" wteam"}"><div class="worghead"><h2>${esc(o.name)}</h2><span class="wrel">${esc(o.rel)}</span></div>
+   <p class="muted" style="margin:0">${esc(o.what)}</p>${o.people.length?`<div class="wppl">${[...o.people].sort((a,b)=>rank(a)-rank(b)).map(p=>whoPerson(p,r)).join("")}</div>`:""}</section>`).join("");
+ const also=WHO.also&&WHO.also.length?`<section class="card"><h2>Also mentioned</h2><ul class="walso">${WHO.also.map(([n,l])=>`<li><b>${esc(n)}</b>: ${esc(l)}</li>`).join("")}</ul></section>`:"";
+ return task(`Who's who in this case: the organisations, and the people in each. ${WHO_SRC?"The authors of your sources":"The people who write to you"} are marked; greyed-out people write to a teammate.`)+ov+cards+also;
+}
+V.who=whoHTML;
+
+render();
+</script>
+</body>
+</html>

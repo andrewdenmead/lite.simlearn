@@ -1,0 +1,1091 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<title>Ashworth &amp; Vale: The Check Inquiry (Pro) — SimLearn</title>
+<link rel="icon" href="/favicon.ico" sizes="any"><link rel="icon" type="image/png" href="/favicon-32.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: Lite-style single column. Plain header, five tabs, a task line on every tab, content as cards and emails. */
+:root{
+  /* Lite's palette and fonts (studio/template.html), with Pro marked by Lite's amber on tabs and badge. Light only, like Lite. */
+  --bg:#FBFBF8; --surface:#ffffff; --sunk:#ECEFF3; --ink:#1D2733; --muted:#4A5562; --line:#D4D9E1;
+  --blue:#2C5282; --blue-soft:#EEF3F9; --amber:#C98A1B; --amber-soft:#FBF1DC;
+  --good:#2F6B47; --good-soft:#E3F0E7; --bad:#9B2C2C; --bad-soft:#F7E4E4; --warn:#7A5A0E; --warn-soft:#FBF1DC; --proto:#FBF1DC;
+  --ui:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --serif:Charter,"Bitstream Charter","Sitka Text",Cambria,Georgia,serif;
+  --mono:ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+body{background:var(--bg);color:var(--ink);font-family:var(--ui);font-size:16px;line-height:1.55}
+.wrap{max-width:860px;margin:0 auto;padding-left:max(16px, env(safe-area-inset-left,0px));padding-right:max(16px, env(safe-area-inset-right,0px))}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+h1,h2,h3{text-wrap:balance;margin:0;line-height:1.2}
+p{margin:0}
+
+.proto{background:var(--proto);border-bottom:1px dashed var(--line);font-size:13px}
+.proto .wrap{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;padding-block:7px}
+.proto b{color:var(--amber);letter-spacing:.08em;text-transform:uppercase;font-size:11px}
+.ghost{background:transparent;border:1px solid var(--line);border-radius:6px;padding:3px 10px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{background:transparent;border:0;padding:3px 10px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+
+header{background:var(--surface);border-bottom:1px solid var(--line);border-top:4px solid var(--blue)}
+header .wrap{padding-block:18px 0}
+.brand{font-weight:800;color:var(--blue);font-size:14px;letter-spacing:.02em}
+.brand span{background:var(--amber);color:#fff;border-radius:4px;padding:0 6px;margin-left:4px;font-size:12px}
+h1{font-size:clamp(26px,4.5vw,34px);font-weight:800;margin-top:4px}
+.whoami{color:var(--muted);font-size:14.5px;margin-top:2px}
+.tabs{display:flex;gap:2px;overflow-x:auto;margin-top:14px}
+.tabs button{background:transparent;border:0;border-bottom:3px solid transparent;padding:8px 12px;font-weight:700;color:var(--muted);white-space:nowrap}
+.tabs button[aria-current="true"]{color:var(--ink);border-bottom-color:var(--amber)}
+.tabs button:disabled{opacity:.4;cursor:default}
+.tdot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--amber);margin-left:6px;vertical-align:middle}
+
+main .wrap{padding-block:22px 64px;display:flex;flex-direction:column;gap:18px}
+.task{background:var(--blue-soft);border-radius:8px;padding:12px 16px;display:flex;gap:10px;align-items:baseline}
+.task b{color:var(--blue);white-space:nowrap}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card h2{font-size:21px;font-weight:800}
+.card h3{font-size:17px;font-weight:700}
+.step{font-family:var(--mono);font-size:12px;color:var(--blue)}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+.pic{aspect-ratio:16/7;max-width:100%;border-radius:6px;background:repeating-linear-gradient(135deg,var(--sunk) 0 12px,transparent 12px 24px);border:1px dashed var(--line);display:grid;place-items:center;color:var(--muted);font-size:14px;text-align:center;padding:12px}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.fact{background:var(--bg);border-radius:6px;padding:8px 12px}
+.fact .l{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+.fact .v{font-weight:700}
+.roles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}
+.role{text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.role[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft)}
+.role b{font-size:16.5px}
+.role span{font-size:14px;color:var(--muted)}
+.people{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}
+.person{border-left:3px solid var(--line);padding:2px 12px}
+.person b{display:block}
+.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:10px}
+.choice{text-align:left;background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.choice:hover:not(:disabled){border-color:var(--ink)}
+.choice[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft)}
+.choice:disabled{cursor:default}
+.choice:disabled:not([aria-pressed="true"]){opacity:.5}
+.choice .k{font-family:var(--mono);font-size:12px;color:var(--blue)}
+.choice small{color:var(--muted);font-size:14px}
+.btn{background:var(--blue);color:#fff;border:0;border-radius:8px;padding:9px 18px;font-weight:700;align-self:flex-start}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.done{background:var(--good-soft);color:var(--good);border-radius:6px;padding:8px 12px;font-weight:600}
+
+/* emails */
+.mail{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.mail summary{list-style:none;cursor:pointer;padding:12px 16px;display:grid;grid-template-columns:1fr auto;gap:2px 12px}
+.mail summary::-webkit-details-marker{display:none}
+.mail .from{font-weight:400}
+.mail .lbl{color:var(--muted);font-weight:400;margin-right:2px}
+.mail.unread .from,.mail.unread .subj{font-weight:700;color:var(--ink)}
+.udot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--blue);margin-right:8px;vertical-align:1px}
+.mail .subj{grid-column:1/2;color:var(--muted);font-size:14.5px}
+.mail .tag{grid-row:1/3;grid-column:2;align-self:center}
+.mail[open] summary{border-bottom:1px solid var(--line);background:var(--bg)}
+.mail .body p,.card>p,.attach>p{font-family:var(--serif);font-size:1.02rem;line-height:1.62}
+.mail .body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:10px}
+.sig{color:var(--muted)}
+.attach{border:1px solid var(--line);border-radius:6px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.attach .an{font-size:12.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.fine{font-size:13px;color:var(--muted);border-top:1px dotted var(--line);padding-top:6px}
+.rel{font-size:11.5px;font-weight:700;padding:1px 8px;border-radius:99px;white-space:nowrap}
+.rel-high{background:var(--good-soft);color:var(--good)}
+.rel-medium{background:var(--warn-soft);color:var(--warn)}
+.rel-low{background:var(--bad-soft);color:var(--bad)}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+td.num,th.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.mono{font-family:var(--mono);font-size:.9em}
+svg text{fill:var(--muted);font-family:var(--ui);font-size:12px}
+svg .lab{fill:var(--ink);font-size:13px}
+svg .val{fill:var(--ink);font-family:var(--mono);font-size:12px}
+svg .axis{stroke:var(--line)} svg .zero{stroke:var(--muted)}
+svg .neg{fill:var(--bad)} svg .pos{fill:var(--good)}
+svg .ring-bg{stroke:var(--sunk);fill:none} svg .ring{stroke:var(--amber);fill:none}
+.donuts{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:6px}
+.donuts figure{margin:0;text-align:center;font-size:13.5px}
+
+/* audio placeholder */
+.audio{background:var(--blue-soft);border-radius:8px;padding:10px 14px;display:grid;grid-template-columns:auto 1fr;gap:2px 12px;align-items:center}
+.audio .play{width:36px;height:36px;border-radius:50%;border:1.5px dashed var(--blue);background:transparent;color:var(--blue);cursor:not-allowed}
+.audio .t{font-weight:700}
+.audio .s{font-size:13px;color:var(--muted)}
+.audio details{grid-column:1/-1;font-size:14px}
+.audio summary{cursor:pointer;color:var(--blue);font-weight:600}
+.script{display:flex;flex-direction:column;gap:8px;padding-top:6px}
+.sd{font-style:italic;color:var(--muted);font-size:13.5px}
+
+/* investigate */
+.qs{display:flex;flex-direction:column;gap:8px}
+.q{text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:6px;padding:9px 12px}
+.q[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft)}
+.q:disabled:not([aria-pressed="true"]){opacity:.45;cursor:default}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:14px}
+.two>*{min-width:0}
+
+/* timeline */
+.tl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.tc{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;user-select:none}
+.tc[draggable="true"]{cursor:grab}
+.tc.dragging{opacity:.4}
+.tc.over{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-soft)}
+.tc .n{font-family:var(--mono);color:var(--muted);text-align:center}
+.tc .d{display:block;font-family:var(--mono);font-size:12.5px;color:var(--good)}
+.tc .arr{display:flex;gap:4px}
+.tc .arr button{width:34px;height:34px;border-radius:6px;border:1px solid var(--line);background:var(--bg)}
+.tc .arr button:disabled{opacity:.3;cursor:default}
+.tl.ok .tc{border-color:var(--good)}
+.note-strong{background:var(--amber-soft);border-radius:8px;padding:8px 12px}
+.hint{background:var(--warn-soft);border-radius:6px;padding:9px 12px}
+.opt{text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:6px;padding:8px 12px}
+.opt.right{border-color:var(--good);background:var(--good-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.opt:disabled{cursor:default}
+.fb{font-size:14.5px}
+
+textarea{width:100%;min-height:200px;resize:vertical;font:inherit;line-height:1.6;padding:10px 12px;border:1.5px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);box-sizing:border-box}
+.wc{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.board{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:10px}
+.tile{background:var(--bg);border-radius:6px;padding:10px 12px}
+.tile .l{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+.tile .v{font-weight:700}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+.sn{cursor:pointer;border-radius:3px;transition:background .15s}
+.sn:hover{box-shadow:inset 0 -2px 0 var(--amber)}
+#hlpal{position:absolute;z-index:30;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px;display:flex;gap:6px;box-shadow:0 4px 14px rgba(0,0,0,.15)}
+#hlpal[hidden]{display:none}
+#hlpal button{width:28px;height:28px;border-radius:50%;border:1px solid rgba(0,0,0,.15);cursor:pointer}
+#hlpal .none{background:var(--surface);color:var(--muted)}
+#fab{position:fixed;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:20;background:var(--blue);color:#fff;border:0;border-radius:999px;padding:10px 18px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+#fab[hidden],#nb[hidden]{display:none}
+#nb{position:fixed;top:0;right:0;bottom:0;width:min(380px,100vw);z-index:25;background:var(--bg);border-left:1px solid var(--line);overflow-y:auto;padding:calc(14px + env(safe-area-inset-top,0px)) 16px 24px;box-shadow:-6px 0 20px rgba(0,0,0,.12);display:flex;flex-direction:column;gap:10px;box-sizing:border-box}
+.nbhead{display:flex;justify-content:space-between;align-items:center}
+.nbhead h2{font-size:18px}
+.lnk{background:none;border:0;color:var(--blue);text-decoration:underline;padding:0;font-size:14px;cursor:pointer}
+.cc summary{cursor:pointer;display:flex;gap:4px;align-items:center;font-weight:600;font-size:14px}
+.cc i,.nbgroup i{display:inline-block;width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.15);flex:none}
+.ccgrid{display:grid;gap:6px;margin-top:8px}
+.ccgrid label{display:flex;gap:8px;align-items:center}
+.ccgrid input{flex:1;font:inherit;font-size:14px;padding:4px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
+.nbadd{display:flex;flex-direction:column;gap:6px}
+.nbadd textarea{min-height:60px;font-size:14px}
+.btn.small{padding:6px 12px;font-size:14px}
+.nbgroup{display:flex;gap:6px;align-items:center;font-weight:700;font-size:14px;margin-top:6px}
+.nbcard{background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--line);border-radius:8px;padding:8px 10px}
+.nbcard p{font-family:var(--serif);font-size:15px;line-height:1.5}
+.nbcard .src{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-between;gap:8px;margin-top:4px}
+.gate{border:2px dashed var(--amber)}
+.coderow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.coderow input,.numin{font-family:var(--mono);font-size:18px;padding:6px 10px;border:1.5px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);width:12ch}
+.bigcode{font-family:var(--mono);font-size:34px;letter-spacing:.2em;color:var(--good);border:2px solid var(--good);border-radius:8px;padding:6px 18px;align-self:flex-start}
+.pzq{display:flex;flex-direction:column;gap:6px;border-top:1px dotted var(--line);padding-top:10px}
+.opts2{display:flex;flex-wrap:wrap;gap:6px}
+.opts2 .opt[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft)}
+.msg{color:var(--bad);font-size:14px}
+.sortq{display:flex;flex-direction:column;gap:8px}
+.sortrow{display:grid;grid-template-columns:1fr minmax(170px,auto);gap:10px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--bg)}
+.sortrow p{font-family:var(--serif);font-size:15px}
+.sortrow select{font:inherit;font-size:14px;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
+@media (max-width:560px){.sortrow{grid-template-columns:1fr}}
+.swipe{display:none}@media (max-width:560px){.lic{font-size:12.5px}.lic th,.lic td{padding:4px 5px}.lic th{font-size:10px}.swipe{display:block}}
+.opts2 .opt{text-align:left}
+svg .sa{fill:var(--blue)} svg .sb{fill:var(--amber)}
+.legend{display:flex;gap:14px;font-size:13px;color:var(--muted);flex-wrap:wrap}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.sums{width:100%;font-size:14px}
+.sums td.num{white-space:nowrap}
+.sums tr.tot td{font-weight:800;border-top:2px solid var(--ink)}
+
+/* Lite's hand-in (studio/template.html), added for the Pro hand-in */
+.consent{border:1px solid var(--line);background:#fff;border-radius:12px;padding:14px 16px;margin:6px 0}
+.consent label{display:flex;gap:10px;align-items:flex-start;font-weight:600;margin-top:8px}
+.consent input{margin-top:5px;width:18px;height:18px}
+.issues{color:var(--warn);font-size:.92rem}
+.block{width:100%;min-height:260px;font:13px/1.45 ui-monospace,Menlo,Consolas,monospace;border:2px solid var(--blue);border-radius:10px;padding:10px 12px;background:#fff;white-space:pre-wrap;box-sizing:border-box}
+.ok{color:var(--good);font-weight:600}
+#out{display:flex;flex-direction:column;gap:10px}
+
+/* the stop after the role choice and the Who's who tab (_pro_common, 11 Nov 2026) */
+.stopc{border:2px solid var(--bad);background:var(--bad-soft)}
+.stophead{display:flex;gap:12px;align-items:center}
+.stophead h2{margin:0;font-size:1.1rem;line-height:1.35}
+.stopsign{flex:none;display:grid;place-items:center;width:58px;height:58px;background:var(--bad);color:#fff;font-weight:800;font-size:13px;letter-spacing:.06em;clip-path:polygon(30% 0,70% 0,100% 30%,100% 70%,70% 100%,30% 100%,0 70%,0 30%)}
+.ov{display:flex;flex-direction:column}
+.ovteam{border:2px solid var(--blue);background:var(--blue-soft);border-radius:10px;padding:10px 12px}
+.ovteam>b{display:block;font-size:16px}
+.ovteam>small,.ovout>small{color:var(--muted);font-size:13px}
+.ovdepts,.ovorgs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,160px),1fr));gap:6px;margin-top:8px}
+.ovdept,.ovorg{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:14px;line-height:1.3}
+.ovdept.you{border:2px solid var(--amber);background:var(--amber-soft)}
+.ovdept small,.ovorg small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.ovstem{width:2px;height:20px;background:var(--muted);margin:0 auto}
+.ovout{border:1.5px dashed var(--muted);border-radius:10px;padding:8px 12px 12px}
+.ovout>b{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-right:6px}
+.worghead{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
+.worghead h2{margin:0}
+.wrel{font-size:12.5px;font-weight:700;color:var(--blue);background:var(--blue-soft);border-radius:999px;padding:1px 9px}
+.wteam{border-color:var(--blue)}
+.wppl{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:14px}
+.wp{display:flex;gap:10px;align-items:flex-start;min-width:0}
+.wp.dim{opacity:.55}
+.av{position:relative;flex:none;width:44px;height:44px;border-radius:50%;color:#fff;font-weight:700;font-size:15px;display:grid;place-items:center;overflow:hidden}
+.av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.wpt{display:flex;flex-direction:column;min-width:0;line-height:1.35}
+.wjob{font-size:13.5px;color:var(--muted)}
+.wline{font-size:14.5px;margin-top:2px}
+.wtags{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.wtag{font-size:12px;font-weight:700;border-radius:999px;padding:1px 8px;background:var(--sunk);color:var(--muted)}
+.wtag.mine{background:var(--amber-soft);color:var(--warn)}
+.wtag.boss{background:var(--blue-soft);color:var(--blue)}
+.wtag.wit{background:var(--good-soft);color:var(--good)}
+.walso{margin:0;padding-left:1.1rem}
+.walso li{margin:3px 0}
+</style>
+</head>
+<body>
+
+
+<header><div class="wrap">
+  <div class="brand">SimLearn<span>PRO</span></div>
+  <h1>Ashworth &amp; Vale: The Check Inquiry</h1>
+  <p class="whoami" id="who"></p>
+  <nav class="tabs" id="tabs" aria-label="Sections"></nav>
+</div></header>
+<main><div class="wrap" id="main"></div></main>
+<div id="hlpal" hidden role="dialog" aria-label="Highlight colour"><button data-hlc="yellow" style="background:#FFF176" aria-label="Yellow"></button><button data-hlc="green" style="background:#B9F6CA" aria-label="Green"></button><button data-hlc="pink" style="background:#F8BBD0" aria-label="Pink"></button><button data-hlc="blue" style="background:#B3E5FC" aria-label="Blue"></button><button data-hlc="orange" style="background:#FFE0B2" aria-label="Orange"></button><button data-hlc="purple" style="background:#E1BEE7" aria-label="Purple"></button><button data-hlc="none" class="none" aria-label="Remove highlight">✕</button></div>
+<button id="fab" data-act="nbopen" hidden>Notes (0)</button>
+<aside id="nb" hidden aria-label="Your highlights and notes"></aside>
+
+<script>
+const ROLES={
+ A:{name:"Licensing & Product Partnerships",line:"What the check is licensed for, where, and how it's checked",detail:"You manage the company's licensing deals and make sure licensed products meet the standard. Your inbox holds messages from licensing, compliance and quality."},
+ B:{name:"Retail & Customer Insight",line:"Who buys the check, who has stopped, and what they pay",detail:"You look after the stores that sell Ashworth & Vale and the data on its customers. Your inbox holds messages from the flagship store, consumer insight and the resale market."},
+ C:{name:"Brand Strategy & Communications",line:"What the company says, what it knew, and when",detail:"You look after the brand's research and what the company tells investors and the press. Your inbox holds messages from communications, brand research and a former head of licensing."}
+};
+const REL={high:"Reliable",medium:"Personal view",low:"Weak evidence"};
+const fmt=n=>(n<0?"−":"")+"£"+Math.abs(n).toLocaleString("en-GB");
+
+/* charts: a line chart with one line per group */
+function lines(series,label,ylo,yhi,ticks,marks){
+  const W=500,H=200,l=40,r=12,t=12,b=34,w=W-l-r,h=H-t-b,all=series[0].pts,x0=all[0][0],x1=all[all.length-1][0];
+  const X=x=>l+w*(x-x0)/(x1-x0), Y=y=>t+h*(yhi-y)/(yhi-ylo);
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${label}">`;
+  [ylo,(ylo+yhi)/2,yhi].forEach(v=>{s+=`<line class="axis" x1="${l}" x2="${W-r}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${l-6}" y="${Y(v)+4}" text-anchor="end">${v}</text>`;});
+  ticks.forEach(([x,txt])=>{s+=`<text x="${X(x)}" y="${H-16}" text-anchor="middle">${txt}</text>`;});
+  (marks||[]).forEach(([x,txt])=>{s+=`<line class="zero" stroke-dasharray="3 3" x1="${X(x)}" x2="${X(x)}" y1="${t}" y2="${t+h}"/><text class="lab" x="${X(x)+4}" y="${t+12}">${txt}</text>`;});
+  series.forEach(se=>{s+=`<polyline fill="none" stroke="${se.c}" stroke-width="2.5" points="${se.pts.map(([x,y])=>X(x)+","+Y(y)).join(" ")}"/>`;});
+  return `<div class="legend">${series.map(se=>`<span><i style="background:${se.c}"></i>${se.n}</span>`).join("")}</div>`+s+"</svg>";
+}
+const PRO_COVER="";   // the cover picture (build.py fills this in)
+const PRO_AUDIO=[];   // the recordings published next to the page (build.py fills this in)
+function audio(t,voice,script,file){if(file&&PRO_AUDIO.includes(file))return `<div class="audio rec"><div style="flex:1;min-width:0"><div class="t">${t}</div><audio controls preload="none" data-f="${file}" src="audio/${file}.mp3" style="width:100%;margin-top:6px"></audio></div><details data-tf="${file}" ${(S.heard||{})[file]?"":"hidden"} ${(S.tOpen||{})[file]?"open":""}><summary>Show the text</summary><div class="script" data-src="${esc(t)}" data-q="medium">${script}</div></details></div>`;
+ return `<div class="audio"><button class="play" disabled aria-label="Play (recording to come)">▶</button><div><div class="t">${t}</div><div class="s">Recording to come: read the text</div></div><details open><summary>The text</summary><div class="script" data-src="${esc(t)}" data-q="medium">${script}</div></details></div>`;}
+function mail(m){const k=m.from+"|"+m.subj, o=!!S.mailOpen[k], r=!!S.mailRead[k];
+ return `<details class="mail ${r?"read":"unread"}" data-mail="${encodeURIComponent(k)}"${o?" open":""}><summary><span class="from">${r?"":`<span class="udot" aria-label="Unread"></span>`}<span class="lbl">From:</span> ${m.from}</span><span class="subj">${m.subj}</span></summary><div class="body" data-src="${m.from.split(",")[0]}" data-q="${m.rel}">${m.body}</div></details>`;}
+function att(name,html){return `<div class="attach"><div class="an">📎 ${name}</div>${html}</div>`;}
+
+/* ---------- inboxes (every key clue appears in at least two places) ---------- */
+const FWD={from:"Adrian Hensley, Chief Executive",subj:"Fwd: “Gen Z killed the check”",rel:"low",body:`
+ <p>The chair sent me this last night. It's had two million views. Is there anything in it?</p>
+ <p class="muted"><em>“Ashworth &amp; Vale is FINISHED. Fakes on every market stall and TikTok turned the check into a joke. RIP posh tartan.”</em> (a fashion commentary account, 310,000 followers)</p>
+ <p class="fine">The post gives no figures, no dates and no sources.</p>`};
+
+const PRESTIGE=lines([
+  {n:"Premium shoppers aged 25 to 40",c:"var(--blue)",pts:[[-16,72],[-15,73],[-14,72],[-13,72],[-12,73],[-11,72],[-10,72],[-9,71],[-8,69],[-7,67],[-6,66],[-5,64],[-4,62],[-3,60],[-2,58],[-1,56],[0,54]]},
+  {n:"Aged 45 and over",c:"var(--amber)",pts:[[-16,76],[-15,75],[-14,76],[-13,76],[-12,75],[-11,76],[-10,76],[-9,75],[-8,76],[-7,75],[-6,75],[-5,76],[-4,75],[-3,75],[-2,74],[-1,75],[0,75]]}],
+  "Prestige score by quarter: the 25-to-40 group falls 18 points from about two and a half years ago; the 45-plus group stays flat",50,80,
+  [[-16,"4 years ago"],[-12,"3 years ago"],[-8,"2 years ago"],[-4,"1 year ago"],[0,"Now"]],[[-10,"drop begins"]]);
+
+const INBOX={
+ A:[
+  {from:"Divya Anand, Licensing Portfolio Manager",subj:"Current licensing footprint — for the board pack",rel:"high",body:`
+   <p>Putting this in writing so it's on record before the board pack goes out. As of this quarter, Ashworth &amp; Vale has 47 active licensing agreements for the check pattern across 12 countries, including budget umbrellas, phone cases and fast-fashion raincoats in three markets where we have essentially no other retail presence. That's roughly double what it was a decade ago.</p>
+   ${att("Active licences by tier, this quarter",`<div class="tw"><table><thead><tr><th>Tier</th><th class="num">Licences</th><th class="num">Royalties a year</th></tr></thead><tbody>
+    <tr><td>Premium: leather goods, gloves, eyewear, fragrance</td><td class="num">12</td><td class="num">£14.6m</td></tr>
+    <tr><td>Home and lifestyle: cushions, throws, stationery</td><td class="num">16</td><td class="num">£9.6m</td></tr>
+    <tr><td>Budget and mass-market: umbrellas, phone cases, raincoats, travel goods</td><td class="num">19</td><td class="num">£6.8m</td></tr>
+    <tr><td><b>Total</b> (a decade ago: 23 licences)</td><td class="num">47</td><td class="num">£31.0m</td></tr></tbody></table></div>`)}
+   <p>As the table shows, the budget and mass-market licences bring in about £6.8 million a year, just over a fifth of our royalties. Every licence has a clause 9 that lets us end it early in some circumstances; I'm checking which.</p>
+   <p>I've heard people upstairs already calling this a counterfeit-and-internet-trend problem, and maybe it is. What I can't tell you is which customers we're actually losing, or since when.</p>
+   <p class="sig">Divya</p>`},
+  {from:"Conrad Whitfield, Quality & Compliance Lead",subj:"Seizure numbers, for what they're worth",rel:"high",body:`
+   <p>Here are the real figures, not the rounded version that goes in the briefing pack. Customs seizures of counterfeit Ashworth Check goods rose from around 2,000 units a year to over 40,000 units a year across our three biggest markets, and that rise has run over the last three years: not one big spike, but a steady climb.</p>
+   ${att("Counterfeit Ashworth Check goods seized, our three biggest markets",`<div class="tw"><table><thead><tr><th>Year</th><th class="num">Units seized</th></tr></thead><tbody>
+    <tr><td>Three years ago</td><td class="num">about 2,100</td></tr><tr><td>Two years ago</td><td class="num">about 14,800</td></tr>
+    <tr><td>Last year</td><td class="num">about 27,600</td></tr><tr><td>The last twelve months</td><td class="num">about 41,300</td></tr></tbody></table></div>`)}
+   <p>One caution: a seizure counts goods stopped at the border, not goods sold. We've filed more customs alerts in the last two years than ever before, so part of that climb is simply us looking harder. A full crackdown, with alerts in every market, test purchases and court cases, would cost a few hundred thousand pounds a year.</p>
+   <p>What I can't tell from my side is whether that climb caused the current mess or just followed something that was already happening. That depends on when the streetwear trend really started.</p>
+   <p class="sig">Conrad</p>`},
+  {from:"Owen Radcliffe, Licensing Compliance Auditor",subj:"Quality audit frequency — the change nobody flagged",rel:"high",body:`
+   <p>Something worth flagging: in the same year the budget-category licences expanded fastest, licensee quality-audit frequency was quietly cut from quarterly to annual, officially as a cost-saving measure. That means for roughly three years, a huge share of the products carrying our check pattern were checked for quality once a year instead of four times: plenty of room for standards to slip without anyone here noticing quickly.</p>
+   <p>And the raincoat batch two years ago, the one everyone holds up as the system working? It was caught because a junior inspector happened to test it, not because our audit timetable required it.</p>
+   <p>I don't know for certain that quality is what's driving the retail pullback, though: from where I sit, a reputation problem and a real quality complaint would look much the same. What I don't have is the stockists' own reasons.</p>
+   <p class="sig">Owen</p>`}
+ ],
+ B:[
+  {from:"Isla Fenwick, Flagship Retail Manager",subj:"What the stockists are actually telling us",rel:"high",body:`
+   <p>For the record, three of our longest-standing department-store partners have cut their standing orders by between 20 and 35 per cent over the last two seasons. When I pushed for real reasons rather than the polite version, two of the three buyers said almost the same thing independently: their customers increasingly see the check pattern as “everywhere now” rather than special, and they're worried about being seen stocking something that's lost its cachet. It wasn't really about counterfeits or online trends in their language at all; it was about exclusivity.</p>
+   <p>Not one of the three asked for a discount. What they asked was what we're going to do to make the check special again, and whether there's a plan with dates attached. Morag Gilchrist, the buyer at Gilchrist &amp; Rae in Edinburgh, will hold her autumn order until she sees one.</p>
+   <p>What I don't have is the real picture of what we've licensed and where. Before I go back to these buyers with an explanation, I'd need it; right now I'm guessing.</p>
+   <p class="sig">Isla</p>`},
+  {from:"Ifeoma Achebe, Consumer Insight Analyst",subj:"Perception numbers you'll want before the board pack",rel:"high",body:`
+   <p>I ran the numbers again this morning because I couldn't quite believe them the first time. Our brand-prestige tracking score among premium shoppers aged 25 to 40 has dropped 18 points since it started falling, roughly two and a half years ago: the sharpest decline of any age group we track, and well before most of the online noise about the pattern really took off. Older customers, 45-plus, have barely moved.</p>
+   ${att("Brand-prestige score, quarterly survey of about 4,000 premium shoppers",PRESTIGE)}
+   <p>The chart shows how slowly the score usually moves: five points in a year would be unusual. To be fair to the other side, under-30s mention the check far more often than they used to, and they're buying it, mostly second-hand.</p>
+   <p>I've heard the press statement will lean hard on “external factors”, but I haven't seen what it actually says, so I can't yet tell you whether my data backs it up or quietly contradicts it.</p>
+   <p class="sig">Ifeoma</p>`},
+  {from:"Ciaran Doyle, Resale & Streetwear Market Analyst",subj:"Resale crash + trend timeline",rel:"medium",body:`
+   <p>Quick numbers before the meeting. Resale prices for check-pattern pieces have crashed by about 60% since early this year: a bag that resold for £900 two years ago is going for under £400 now. But here's the part people keep skipping past: the streetwear crowd started picking up the pattern roughly fourteen months before that price crash, based on resale-site tagging and second-hand listing volume. It wasn't sudden; it built for over a year before the value actually dropped.</p>
+   ${att("Check-pattern shoulder bag on resale sites",`<div class="tw"><table><thead><tr><th>When</th><th class="num">Typical resale price</th><th class="num">Listings tagged “streetwear”, a month</th></tr></thead><tbody>
+    <tr><td>Two years ago</td><td class="num">£900</td><td class="num">300</td></tr><tr><td>A year ago</td><td class="num">£910</td><td class="num">2,600</td></tr>
+    <tr><td>Early this year</td><td class="num">£930</td><td class="num">5,200</td></tr><tr><td>Now</td><td class="num">£370</td><td class="num">6,800</td></tr></tbody></table></div>`)}
+   <p>I check these sites every week, and nobody upstairs has ever asked for the numbers. A proper monthly tracker with outside data would cost about £200,000 a year.</p>
+   <p>Whether that timeline says anything about who's to blame, I genuinely don't know: that depends on when things were flagged inside the company, and I can't see that side of the business.</p>
+   <p class="sig">Ciaran</p>`}
+ ],
+ C:[
+  {from:"Selma Arkwright, Corporate Communications Manager",subj:"Draft language for the board statement — keep this internal",rel:"medium",body:`
+   <p>Please keep this to the group: it's not final. The current working draft for the board's public statement leads with: “Ashworth &amp; Vale attributes the recent softening in premium sales primarily to unauthorised replica proliferation and an unaffiliated online trend, both outside the company's control.” Legal has already cleared the wording.</p>
+   <p>“Cleared by legal” only means we won't be sued for it. It doesn't mean it's true, or that a good journalist won't take it apart line by line.</p>
+   <p>I'm not saying it's wrong, but all I have behind it is a line from a briefing document, not the real counterfeit figures. I'd want those before I put my name to it.</p>
+   <p class="sig">Selma</p>`},
+  {from:"Tariq Hassan, Brand Equity Research Lead",subj:"The audit nobody wants to talk about",rel:"high",body:`
+   <p>Since it's relevant to what you're investigating, I'll say plainly what I said in the report itself: four years ago, my team completed a Brand Equity Audit that explicitly flagged licensing saturation as a real risk in budget-tier product categories, and recommended a pullback within eighteen months. It was presented to the Executive Committee and then, as far as I can tell, filed and never acted on.</p>
+   ${att("Brand Equity Audit, four years ago: summary page",`<p><b>Risk:</b> licensing saturation in budget-tier categories. <b>Rating:</b> medium-high.</p><p><b>Evidence:</b> early signals (stockist comments, the pace of new budget licences, where the check was being sold).</p><p><b>Recommendation:</b> cut budget-tier licences by about a third within eighteen months.</p>`)}
+   <p>I stand by the analysis, but I'll admit the numbers back then were early signals, not a certainty, and I can understand why a committee with a growth target read “medium-high” as “not yet”. What I can't see from here is whether quality control on licensed goods was really as loose as I suspected.</p>
+   <p class="sig">Tariq</p>`},
+  {from:"Dorothea Winslow, Senior Advisor, Heritage & Licensing",subj:"Some context, before you write anyone off",rel:"medium",body:`
+   <p>I understand you're looking into how we got here, and I'd rather you have the full picture than assume this was carelessness. Twenty-two years ago, when I ran Global Licensing, Ashworth &amp; Vale was eighteen months from insolvency after two disastrous seasons. The licensing programme I built funded three factories and saved roughly 800 jobs, at a time when the alternative on the table was closing our UK manufacturing entirely. I made that call with the information I had then, under real pressure, and I would defend it again in the same circumstances.</p>
+   <p>Whether it should have been wound down sooner is a fair question. I'm not going to hand you a tidy confession, not before I understand how bad this actually is, and I haven't heard what our stockists are really saying.</p>
+   <p class="sig">Dot</p>`}
+ ]
+};
+const BRANCH={
+ hold:{from:"Lucy Aldous, Marketing Director",subj:"The slots are ours, and the film has been tested",rel:"medium",body:`
+  <p>Thank you: the relaunch slots are held for the week after the investor briefing. The agency tested the film, “The Check, Everywhere”, with 600 shoppers last week. Among under-30s, 61% said it made them more likely to buy. Among our existing customers over 45, 38% said it made them less likely, and the comment the agency heard most was “it's on everything now”.</p>
+  <p>To be fair to the film, the young buyers are real, and they are spending, mostly second-hand. They're just not the people who pay £1,200 for a trench coat. The agency can still re-cut the film around whatever the working group finds, as long as it has a brief two weeks before the slots.</p><p class="sig">Lucy</p>`},
+ release:{from:"Ruth Okonjo, Investor Relations Manager",subj:"What the analysts are asking",rel:"medium",body:`
+  <p>Since we let the relaunch slots go, three analysts have rung. The relaunch was the story they expected; now they want the explanation instead. Two questions keep coming back.</p>
+  <p>First: is this counterfeiting, which every luxury house suffers, or something particular to us? One analyst pointed out that seizures of fake luxury goods rose across the whole industry last year. Second: what did the company know, and when? One of them had heard there was an internal report on licensing some years ago. I said I'd come back to her.</p>
+  <p>In my experience, investors forgive a bad year. What they don't forgive is finding out later that we knew.</p><p class="sig">Ruth</p>`}
+};
+
+/* ---------- experts: one per role, from a shortlist ---------- */
+const EXPERTS={
+ turnaround:{name:"Luxury turnaround adviser",who:"Helen Marsh, Marsh Brand Advisory",what:"Has advised heritage houses that recovered from over-exposure. Can tell you what recovery took, and what it cost.",
+  rep:`<p>Every heritage house I've seen recover from over-exposure did the same unglamorous things: fewer licences, no budget categories, real quality checks, and a date for every step. Royalties fell before sales rose, and full recovery took five to seven years.</p>
+   <p>The houses that only added monitoring found that the reports told them what they already knew, and nobody was obliged to act on them. A warning that can be filed away usually is.</p>
+   <p>The first sign of recovery is usually a stockist's order, about a year in.</p>`},
+ lawyer:{name:"Licensing lawyer",who:"Priya Mistry, Mistry Lowe LLP",what:"Drafts and ends brand-licensing contracts. Can tell you how a licence can be ended, and what that costs.",
+  rep:`<p>A brand licence can usually be ended in three ways: at renewal, which costs nothing; under a reputation clause, which needs evidence; or by buying the licensee out, which typically costs about a year's royalties.</p>
+   <p>Reputation clauses are rarely used, because owners don't like admitting damage. The evidence licensees accept is a trade partner's: a retailer or stockist saying, in writing, that the goods are hurting the brand.</p>
+   <p>Limits on categories and shops in new contracts are normal, and licensees accept them more readily than owners expect.</p>`},
+ counterfeit:{name:"Anti-counterfeiting investigator",who:"Graham Ellery, Ellery Brand Protection",what:"Tracks fake goods for luxury brands. Can tell you where counterfeits come from, and what fighting them achieves.",
+  rep:`<p>Counterfeiters copy what is already easy to sell. When a pattern turns up on cheap umbrellas and phone cases in legitimate shops, the fakers find the designs, the suppliers and the buyers ready-made. That's why heavily licensed patterns are faked far more often than tightly controlled ones.</p>
+   <p>In my files, seizures usually start rising a year or two after a licensing push, not before it. Counterfeiting is a symptom of dilution more often than its cause.</p>
+   <p>Crackdowns work against organised sellers. Market stalls and one-off online listings are back within weeks.</p>`},
+ consumer:{name:"Luxury consumer researcher",who:"Nadia Kowalczyk, Kowalczyk Consumer Research",what:"Studies why people buy luxury, and why they stop. Can tell you who leaves first when a brand is everywhere.",
+  rep:`<p>Customers over 45 buy heritage brands mainly for exclusivity, and they are loyal: they leave last. Under-30s care more about cultural relevance than exclusivity.</p>
+   <p>The first to leave are usually the aspiring buyers in their late twenties to early forties, who bought the brand to stand out. When they see it on cheap goods, they don't complain; they quietly stop buying, and the survey numbers fall years before the sales do.</p>
+   <p>Trend buyers usually move on within two or three years, and a brand can look dated for a while afterwards.</p>`},
+ governance:{name:"Board governance adviser",who:"Femi Adeyemi, Adeyemi Governance Partners",what:"Advises boards on risk and internal warnings. Can tell you how investors judge a warning that wasn't acted on.",
+  rep:`<p>Investors don't blame a board for missing what nobody could know. They ask two questions: was the warning clear enough to act on, and was there still time to act when it arrived?</p>
+   <p>A “medium-high” rating with a specific recommendation and a deadline is a clear warning. If that deadline passed before the outside events began, “we couldn't have known” rarely survives.</p>
+   <p>Boards that admit a missed warning early usually face one hard day of coverage. Boards that are found out face months.</p>`},
+ crisis:{name:"Crisis communications consultant",who:"Tom Kendrick, Kendrick Reid",what:"Prepares companies for hostile press and investor questions. Can tell you which explanations survive a journalist.",
+  rep:`<p>Journalists check one thing first: the order of events. They put a company's own numbers next to its explanation and ask which came first. An “external factors” statement survives only if the outside cause came before the problem.</p>
+   <p>Legal approval protects you from being sued, not from being disbelieved.</p>
+   <p>The statements that hold up admit what the company controlled and say what it will change, with dates.</p>`}
+};
+const SHORTLIST={A:["lawyer","counterfeit","turnaround"],B:["consumer","counterfeit","turnaround"],C:["governance","crisis","consumer"]};
+
+const WIT={
+ malcolm:{name:"Malcolm Pryce",role:"former Chief Commercial Officer, retired",voice:"male, 60s, polished southern English, assured, a little defensive",
+  account:`<p class="sd">[A quiet study. A clock ticks in the background.]</p><p>I sat on the Executive Committee for eleven years, so let me tell you how it looked from the inside. The audit was one input among many. It said “medium-high”, not “critical”, and the evidence was early. Meanwhile the royalties were paying for new looms at the mill.</p><p>Nobody in that room could have known a streetwear craze was coming. Hindsight is a wonderful thing.</p>`,
+  qs:[["Did the audit give the committee a deadline?","It recommended a pullback within eighteen months, yes. A recommendation, mind you, not an instruction. Committees get dozens of those."],
+      ["Were new licences approved after the audit?","[pause] Some. About a dozen new budget licences the following year, and the licensee audits went to once a year."],
+      ["Why did licensing keep growing?","Royalties. No factories to build, no stock to hold. Every board likes income like that."]]},
+ kenny:{name:"Kenny Fraser",role:"Managing Director, Clydeside Rainwear (Glasgow)",voice:"male, 50s, Glasgow accent, cheerful and blunt",
+  account:`<p class="sd">[A warehouse. A forklift beeps somewhere behind him.]</p><p>Kenny Fraser, Clydeside Rainwear. We make the budget raincoats and umbrellas with your check: eleven pounds a raincoat, sold in supermarkets up and down the country. We've held the licence for nine years, and we've never missed a royalty payment. It's been good business for both of us.</p><p>Your folk came round once a year to check the stitching, and nobody ever asked us to sell less. My contract's up for renewal in the spring, by the way.</p>`,
+  qs:[["Did quality slip once the audits went to once a year?","Not on our lines. Our returns rate never moved. To be honest, nobody's complaining about the quality. They're complaining it's everywhere."],
+      ["Would you accept a smaller licence?","Fewer products, higher prices, fewer shops? I'd moan about it. But I'd rather have a smaller licence than none. Spring's your moment."],
+      ["Who actually buys the check raincoats you make?","Folk in their late twenties and thirties, mostly. The older crowd buy the real thing. Or they used to."]]}
+};
+
+const CHECKS=[
+ {q:"What did Tariq's Brand Equity Audit recommend, four years ago?",right:1,opts:["A crackdown on counterfeit sellers in the company's three biggest markets","Cutting budget-tier licences by about a third within eighteen months","Ending every licence and making all products in the company's own factories"],
+  why:"Tariq's email and the audit's summary page: a “medium-high” risk in budget-tier categories, and a cut of about a third within eighteen months. Malcolm confirms the deadline when asked."},
+ {q:"Why doesn't the rise in seizures prove that counterfeits caused the decline?",right:0,opts:["Seizures count goods stopped at the border, and the company filed more alerts","Most of the goods seized turned out to be genuine Ashworth & Vale products","The seizures were in markets where Ashworth & Vale has no shops at all"],
+  why:"Conrad: a seizure counts goods stopped, not sold, and the company has filed more customs alerts than ever. His figures also show a steady three-year climb, not a sudden flood."},
+ {q:"Which witness left important facts out of his account?",right:1,opts:["Kenny Fraser","Malcolm Pryce","Neither of them"],
+  why:"Malcolm called the audit “one input among many” but left out that the committee approved about a dozen new budget licences the following year, cut the licensee audits to once a year, and had a deadline of eighteen months."}
+];
+
+const DEC={
+ d1:["Finding 1: What is the root cause of the decline?",
+   ["Self-inflicted dilution","The decline is primarily self-inflicted: decades of aggressive, poorly controlled licensing spread the Ashworth Check across too many cheap product categories, thinning its exclusivity long before anyone outside the company noticed."],
+   ["External disruption","The decline is primarily externally driven: a recent flood of counterfeit goods and a viral streetwear trend, neither of which the company chose or could control."]],
+ d2:["Finding 2: How should the four-year-old Brand Equity Audit be judged?",
+   ["Defensible at the time","The audit's warning was reasonable caution at the time, but what has happened since could not have been foreseen from its data alone: leadership's decision not to act on it was defensible."],
+   ["An actionable warning","The audit was a real, actionable warning: leadership should have acted on it and started a licensing pullback."]],
+ d3:["Recommendation: How should the check be protected from now on?",
+   ["Hard licensing caps","Hard licensing caps and category exclusions: no budget or mass-market licences for the check from now on, even at the cost of royalty income, enforced by regular third-party audits. The budget and mass-market licences bring in about £6.8 million a year (Divya)."],
+   ["Flexible licensing, monitored","Licensing stays flexible for revenue, with an ongoing brand-sentiment and resale-market monitoring system that triggers a mandatory leadership review whenever agreed thresholds are crossed. A monthly tracker with outside data costs about £200,000 a year (Ciaran)."]]
+};
+
+const RANK=[["r1","The licensing programme"],["r2","Counterfeit goods carrying the check"],["r3","The streetwear trend"],["r4","Quality at the licensees' factories"],["r5","The brand's advertising"]];
+const RANK_START=["r2","r3","r5","r1","r4"];
+const REPLIES={
+ r1:()=>`<p>You've put the licensing programme first. Then I'm not spending a penny on anything else until your report is in. I've frozen all new licence deals, and I've asked Isla to tell our stockists that a plan with dates is coming.</p><p>Isla's answer is in your inbox.</p>`,
+ r2:()=>`<p>Counterfeits, then. I've approved a proper crackdown: customs alerts in every market, test purchases and court cases against the big sellers. It's £300,000 for the first year, but at least we'll be seen to act.</p>`,
+ r3:()=>`<p>The trend, then. If we can't stop it, we can join it. I've asked the agency to sign three streetwear creators to wear the check properly: £80,000.</p>`,
+ r4:()=>`<p>Quality, then. I've ordered emergency audits of all 47 licensees this month: £180,000. If anyone's cutting corners, we'll know.</p>`,
+ r5:()=>`<p>Advertising, then. I've asked the agency for a more premium version of the relaunch film: £120,000. A new look might be exactly what the check needs.</p>`
+};
+function reply(){
+ const first=S.rank[0], p=S.rank.indexOf("r1");
+ let extra="";
+ if(first!=="r1"&&p===1) extra="<p>You've put the licensing programme second, so I've asked Divya to look into it as well.</p>";
+ return {from:"Adrian Hensley, Chief Executive",subj:"Re: Interim briefing",rel:"medium",body:REPLIES[first]()+extra+`<p class="sig">Adrian</p>`};
+}
+const CONSEQ={
+ r1:{from:"Isla Fenwick, Flagship Retail Manager",subj:"The licence freeze, and Gilchrist & Rae",rel:"high",body:`<p>Adrian's freeze has gone down well with the stockists. Morag Gilchrist at Gilchrist &amp; Rae, the buyer who was holding her autumn order, has agreed to keep our space in the Edinburgh store for another season while she waits for the plan.</p><p>She asked me one thing: “Will the check still be on phone cases at the station?” I said I'd find out.</p><p class="sig">Isla</p>`},
+ r2:{from:"Conrad Whitfield, Quality & Compliance Lead",subj:"The crackdown, first month",rel:"high",body:`<p>The crackdown has started. Seizures have almost doubled in a month, which is what happens when you file alerts everywhere: you find more.</p><p>Two big online sellers have closed. The market stalls were back within a fortnight, and none of the stockists has changed its order.</p><p class="sig">Conrad</p>`},
+ r3:{from:"Ciaran Doyle, Resale & Streetwear Market Analyst",subj:"The creators' posts",rel:"high",body:`<p>The three creators have posted, and the under-25s loved it. Second-hand listings of check pieces rose again. Resale prices didn't.</p><p>One of Isla's buyers rang to ask why we're paying people to make the check look cheaper.</p><p class="sig">Ciaran</p>`},
+ r4:{from:"Owen Radcliffe, Licensing Compliance Auditor",subj:"The emergency audits",rel:"high",body:`<p>The emergency audits are done: 41 of the 47 licensees passed outright, and the other six had minor findings. Nothing explains a 30% cut in a department store's order.</p><p>Quality isn't what the buyers are complaining about.</p><p class="sig">Owen</p>`},
+ r5:{from:"Isla Fenwick, Flagship Retail Manager",subj:"The buyers have seen the new film",rel:"high",body:`<p>I showed the buyers the premium version of the film. They liked the look. Then all three asked the same question: what's the plan?</p><p>One of them called it “a beautiful advert for a check that's on everything”.</p><p class="sig">Isla</p>`}
+};
+const STANDING={r1:()=>"Adrian has frozen all new licence deals. Gilchrist & Rae will keep Ashworth & Vale's space for another season while it waits for a plan.",
+ r2:()=>"Adrian has spent £300,000 on a counterfeit crackdown. Seizures are up, and the stockists haven't changed their orders.",
+ r3:()=>"Adrian has spent £80,000 on three streetwear creators. Listings rose; resale prices didn't, and a buyer has complained.",
+ r4:()=>"Adrian has spent £180,000 on emergency audits of every licensee. Quality turned out not to be the problem.",
+ r5:()=>"Adrian has spent £120,000 on a more premium relaunch film. The buyers want a plan, not a film."};
+const MISSTEP={r2:["Counterfeit crackdown, first year",-300000],r3:["Three streetwear creators",-80000],r4:["Emergency audits of all 47 licensees",-180000],r5:["A more premium relaunch film",-120000]};
+const EPI_RANK={r2:"The £300,000 crackdown closed two online sellers; the market stalls were back within a fortnight.",r3:"The streetwear creators' posts are still the first thing that comes up when you search for the check.",r4:"The £180,000 emergency audits found nothing that explained the stockists' cuts.",r5:"The premium relaunch film won an advertising award."};
+function inboxList(){const list=[...INBOX[R()]]; if(R()==="C"&&S.fork) list.splice(1,0,BRANCH[S.fork]); list.push(FWD); if(S.ranked) list.unshift(CONSEQ[S.rank[0]]); return list;}
+
+/* ---------- team puzzles ---------- */
+const PZ={
+ 1:{owner:"B",title:"The timeline",
+   intro:"Adrian's first question from investors will be simple: which came first? Ciaran has written the main events on the office whiteboard, but some have no dates yet. Put them in order around the moment the streetwear crowd picked up the check.",
+   screen:`<div class="attach"><div class="an">Ciaran's whiteboard · what we know so far</div>
+     <p>Resale crash: about 60%, from early this year.</p>
+     <p>Prestige score, 25-to-40s: falling for about two and a half years.</p>
+     <p>Stockists' order cuts: over the last two seasons.</p>
+     <p class="fine">Still missing: when the streetwear tagging started, the audit, the licensee audits and the seizures.</p></div>`,
+   qs:[{q:"When did the streetwear crowd start picking up the check?",type:"choice",opts:["About four years ago, around the time of Tariq's audit","About two years ago, fourteen months before the crash","Early this year, at the same time as the resale crash"],ans:"About two years ago, fourteen months before the crash"},
+       {q:"Did each event happen before or after the streetwear crowd picked up the check?",type:"sort",cats:["Before the trend began","After the trend began"],
+        items:[["Tariq's audit recommended a pullback of budget-tier licences","Before the trend began"],
+               ["Resale prices crashed by about 60%","After the trend began"],
+               ["Licensee quality audits were cut to once a year","Before the trend began"],
+               ["The prestige score among 25-to-40s started to fall","Before the trend began"],
+               ["Three stockists cut their standing orders","After the trend began"],
+               ["Counterfeit seizures started their steady climb","Before the trend began"],
+               ["The audit's eighteen-month deadline passed","Before the trend began"]]},
+       {q:"When the trend began, how long ago had the audit's deadline passed?",type:"choice",opts:["About six months earlier: the deadline came first","It hadn't passed: it was still a year away","About two years earlier, soon after the audit"],ans:"About six months earlier: the deadline came first"}],
+   hint:"The audit's date and deadline are in Brand Strategy & Communications' inbox (Tariq). When the licensee audits were cut and when the seizures began to climb: Licensing & Product Partnerships (Owen, Conrad).",
+   out:{ok:"Adrian has a dated timeline for the investor pack, and it has cost nothing. When the analysts ask which came first, the working group's report can show them.",
+        fail:"Nobody could put the events in order, so Adrian has paid forensic accountants to rebuild the timeline before the briefing: £45,000."}},
+ 2:{owner:"C",title:"Selma's draft",
+   intro:"Legal has cleared Selma's draft statement for the investor pack, and tomorrow it goes to the company's brokers as an early briefing note. Before it does, Selma wants every sentence checked against what the whole team knows. Decide whether each claim is true, misleading or false, and why.",
+   screen:`<div class="attach"><div class="an">Draft statement for investors · cleared by legal (S. Arkwright)</div>
+     <p><b>Claim 1:</b> The softening in premium sales is a recent development.</p>
+     <p><b>Claim 2:</b> It follows a sudden flood of counterfeit goods across our markets.</p>
+     <p><b>Claim 3:</b> Our licensing programme has been stable for many years.</p></div>`,
+   qs:[{q:"Claim 1",type:"choice",opts:["True: sales only started falling in the last two seasons","Misleading: the prestige drop began two and a half years ago","False: sales are still rising, and only resale prices have fallen"],ans:"Misleading: the prestige drop began two and a half years ago"},
+       {q:"Claim 2",type:"choice",opts:["True: seizures jumped from 2,000 to 40,000 in a single year","Misleading: the fakes are real, but most were seized in other markets","False: seizures climbed steadily over three years, not suddenly"],ans:"False: seizures climbed steadily over three years, not suddenly"},
+       {q:"Claim 3",type:"choice",opts:["False: there are 47 licences now, roughly double a decade ago","True: the same licences have simply been renewed for years","Misleading: the number is stable, but the products have changed"],ans:"False: there are 47 licences now, roughly double a decade ago"}],
+   hint:"Claim 1: Retail & Customer Insight has the prestige figures and their dates. Claims 2 and 3: Licensing & Product Partnerships has the seizure figures and the number of licences.",
+   out:{ok:"Selma has rewritten the draft, and legal has cleared the new wording. The “external factors” version never left the building.",
+        fail:"The draft went to the brokers as an early briefing note. Whatever the Board finally says, it will be measured against those words."}},
+ 3:{owner:"A",title:"The licence list",
+   intro:"Divya has pulled six licences from the full list of 47. Whatever the Board decides, Adrian wants to know what ending some licences would really involve. Work out which licences matter, what clause 9 needs and what it would cost.",
+   screen:`<div class="attach"><div class="an">Licence list · extract (D. Anand)</div>
+     <p class="fine swipe">Swipe the table sideways to see the royalties and renewal dates.</p>
+     <div class="tw"><table class="lic"><thead><tr><th>Licensee</th><th>Products (retail price)</th><th>Sold in</th><th class="num">Royalties a year</th><th>Renewal</th></tr></thead><tbody>
+      <tr><td>Clydeside Rainwear</td><td>Raincoats, umbrellas (£11–£19)</td><td>Supermarkets, UK</td><td class="num">£1.4m</td><td>In 5 months</td></tr>
+      <tr><td>Pemberton Home</td><td>Cushions, throws (£95–£240)</td><td>Department stores</td><td class="num">£0.7m</td><td>In 9 months</td></tr>
+      <tr><td>Kesh Mobile</td><td>Phone cases (£8)</td><td>Station kiosks, online</td><td class="num">£1.1m</td><td>In 8 months</td></tr>
+      <tr><td>Hollis &amp; Grieve</td><td>Leather gloves (£120)</td><td>Department stores</td><td class="num">£0.9m</td><td>In 2 years</td></tr>
+      <tr><td>Marlo Fashion</td><td>Fast-fashion raincoats (£15)</td><td>Three markets with no A&amp;V shops</td><td class="num">£1.6m</td><td>In 3 years</td></tr>
+      <tr><td>Brightway Travel</td><td>Wash bags, luggage tags (£6–£12)</td><td>Airport shops</td><td class="num">£0.5m</td><td>In 10 months</td></tr></tbody></table></div>
+     <p><b>Clause 9 (in every licence):</b> Ashworth &amp; Vale may end this licence early, with six months' notice, where written evidence from its trade partners shows that the licensed goods are damaging the reputation of the Check.</p></div>`,
+   qs:[{q:"Which of these licences are in the tier that Tariq's audit warned about?",type:"choice",opts:["Pemberton Home and Hollis & Grieve","Clydeside, Kesh, Marlo and Brightway","Clydeside, Kesh and Marlo, but not Brightway","All six: every licence spreads the check"],ans:"Clydeside, Kesh, Marlo and Brightway"},
+       {q:"What evidence the team already has would fit clause 9?",type:"choice",opts:["Conrad's figures: over 40,000 fakes seized in a year","Two stockists' buyers: the check is “everywhere now”","Ifeoma's survey: down 18 points among 25-to-40s"],ans:"Two stockists' buyers: the check is “everywhere now”"},
+       {q:"How much do the budget licences that renew within a year bring in?",type:"choice",opts:["About £4.6 million a year","About £3.7 million a year","About £3.0 million a year","About £1.6 million a year"],ans:"About £3.0 million a year"}],
+   hint:"Which tier the audit warned about is in Brand Strategy & Communications' inbox (Tariq). What the stockists' buyers said is in Retail & Customer Insight's (Isla).",
+   out:{ok:"Divya has a plan: the budget licences that renew within a year (about £3 million a year in royalties) can simply end at renewal, and clause 9, backed by the stockists' comments in writing, covers the rest. Nothing would be paid to buy licences back.",
+        fail:"Divya couldn't show how clause 9 would work, so her estimate for ending budget licences early assumes buying them back: about £1.5 million on top of the lost royalties."}}
+};
+const CODES={1:{first:"1847",help:"1302",fail:"1569"},2:{first:"3086",help:"3961",fail:"3420"},3:{first:"6914",help:"6457",fail:"6038"}};
+const TIER_LABEL={first:"Solved first time",help:"Solved with help",fail:"Not solved"};
+const pzDone=(r,n)=>!!S.pz[n].tier&&!!S.gate[r][n];
+const allPz=r=>[1,2,3].every(n=>pzDone(r,n));
+const ok=n=>S.pz[n].tier&&S.pz[n].tier!=="fail";
+const failed=n=>S.pz[n].tier==="fail";
+
+/* ---------- option texts after consequences, and the year after the briefing ---------- */
+function optInfo(k,v){
+ let desc=DEC[k][v==="A"?1:2][1];
+ if(k==="d1"&&v==="A"&&failed(2)) desc+=" The brokers already have Selma's “external factors” draft, so changing the story means an extra analysts' call: about £40,000 (Selma).";
+ if(k==="d1"&&v==="B"&&failed(2)) desc+=" It matches the draft the brokers already have.";
+ if(k==="d3"&&v==="A"&&S.pz[3].tier) desc+=ok(3)?" Divya's plan: the budget licences that renew within a year (about £3 million a year) end at renewal, and clause 9 covers the rest, with nothing paid to buy licences back.":" With no plan for clause 9, ending licences early means buying them back: about £1.5 million on top of the lost royalties (Divya).";
+ return {desc};
+}
+/* each line: what happened, prestige points won back (+) or lost (−), money spent or given up */
+function ledger(){const L=[],add=(l,p,m)=>L.push([l,p,m||0]);
+ if(S.fork==="hold"){add("Relaunch slots: the agency's holding fee",0,-150000);
+  if(S.d3==="A")add("The held slots told the story of fewer, better products",1);
+  if(S.d3==="B")add("The relaunch film ran: older customers said the check was on everything",-1);}
+ if(S.ranked&&S.rank[0]==="r1")add("Licence freeze: Gilchrist & Rae kept Ashworth & Vale's space",1);
+ if(S.ranked&&S.rank[0]==="r3")add("Paid streetwear creators: the check looked cheaper still",-1);
+ if(S.ranked&&MISSTEP[S.rank[0]])add(MISSTEP[S.rank[0]][0],0,MISSTEP[S.rank[0]][1]);
+ if(failed(1))add("Forensic accountants to rebuild the timeline",0,-45000);
+ if(S.d1==="A"){add("A straight answer to investors: the stockists agreed to meet",5);
+  if(failed(2))add("Correcting the draft the brokers already had: a second analysts' call",-1,-40000);}
+ if(S.d1==="B"){add("The “external factors” story fell apart in the trade press",-2);
+  if(failed(2))add("A trade journal had the draft statement a week early",-1);}
+ if(S.d2==="B")add("The missed audit admitted: Tariq Hassan reviews every licence",3);
+ if(S.d2==="A")add("The shelved audit read as an excuse",-3);
+ if(S.d3==="A"){add("Royalties given up in the first year",0,-3000000);
+  if(failed(3)){add("Budget licences wound down slowly, with two bought back",3);add("Buying two licences back early",0,-1500000);}
+  else add("Budget licences ended at renewal or under clause 9",4);}
+ if(S.d3==="B"){add("Monthly reports, but the check still everywhere",1);add("Monthly resale and sentiment tracker",0,-200000);}
+ return L;}
+const points=()=>ledger().reduce((a,r)=>a+r[1],0);
+const money=()=>ledger().reduce((a,r)=>a+r[2],0);
+const pointWords=()=>{const p=points(); return p>0?`has won back ${p} of the 18 points it lost`:p<0?`has fallen another ${-p} point${p===-1?"":"s"}`:"hasn't moved";};
+const spentSoFar=()=>(S.fork==="hold"?150000:0)+(S.ranked&&MISSTEP[S.rank[0]]?-MISSTEP[S.rank[0]][1]:0)+(failed(1)?45000:0);
+
+/* ---------- notes: highlights, colour code, free notes ---------- */
+const HL=[["yellow","#FFF176"],["green","#B9F6CA"],["pink","#F8BBD0"],["blue","#B3E5FC"],["orange","#FFE0B2"],["purple","#E1BEE7"]];
+const HLC=Object.fromEntries(HL);
+const HL_HINT=["Key fact","Evidence","Doubt","Number","Ask the team","Use in writing"];
+function hsh(t){let h=5381;for(const c of t)h=((h<<5)+h+c.charCodeAt(0))>>>0;return h.toString(36);}
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function wrapSentences(root){
+ root.querySelectorAll("[data-src]").forEach(box=>{
+  const src=box.dataset.src, q=box.dataset.q||"medium";
+  box.querySelectorAll("p").forEach(p=>{
+   if(p.dataset.w||p.closest("[data-src]")!==box||p.classList.contains("sd")||p.classList.contains("sig")||p.querySelector("button,input,svg"))return;
+   const t=p.textContent.replace(/\s+/g," ").trim(); if(!t)return;
+   const parts=t.match(/(?:[^.!?]|\.(?=\d))+(?:[.!?]+["”’)]*|$)/g)||[t];
+   const N=S.notes[R()];
+   p.innerHTML=parts.map(x=>{x=x.trim(); const k=hsh(src+"|"+x), h=N.hl[k];
+     return `<span class="sn" data-k="${k}" data-src="${esc(src)}" data-q="${q}"${h?` style="background:${HLC[h.c]}"`:""}>${esc(x)}</span>`;}).join(" ");
+   p.dataset.w="1";});
+ });
+}
+let palFor=null;
+function openPal(el){palFor=el;const pal=document.getElementById("hlpal");const r=el.getBoundingClientRect();
+ pal.hidden=false; pal.style.top=(window.scrollY+r.bottom+6)+"px"; pal.style.left=Math.max(8,Math.min(window.scrollX+r.left,window.scrollX+document.documentElement.clientWidth-pal.offsetWidth-8))+"px";}
+function closePal(){document.getElementById("hlpal").hidden=true;palFor=null;}
+function notesHTML(){
+ const N=S.notes[R()], items=Object.entries(N.hl);
+ const cc=`<details class="cc"><summary>${HL.map(([,c])=>`<i style="background:${c}"></i>`).join("")}<span>My colour code</span></summary><div class="ccgrid">${HL.map(([k,c],i)=>`<label><i style="background:${c}"></i><input data-cc="${k}" maxlength="24" value="${esc(N.cc[k]||"")}" placeholder="${HL_HINT[i]}" aria-label="${k} means"></label>`).join("")}</div></details>`;
+ const add=`<div class="nbadd"><textarea id="nbnew" maxlength="400" placeholder="A note of your own…" aria-label="A note of your own"></textarea><button class="btn small" data-act="noteadd">Add note</button></div>`;
+ const free=N.free.map((t,i)=>`<div class="nbcard mine"><p>${esc(t)}</p><div class="src">Your note <button class="lnk" data-act="noterm" data-v="${i}">Delete</button></div></div>`).join("");
+ const groups=HL.map(([k,c])=>{const g=items.filter(([,h])=>h.c===k); if(!g.length)return "";
+   return `<div class="nbgroup"><i style="background:${c}"></i>${esc(N.cc[k]||k[0].toUpperCase()+k.slice(1))}</div>`+g.map(([key,h])=>`<div class="nbcard" style="border-left-color:${c}"><p>${esc(h.t)}</p><div class="src">${esc(h.src)} <button class="lnk" data-act="hlrm" data-v="${key}">Remove</button></div></div>`).join("");}).join("");
+ return `<div class="nbhead"><h2>Your highlights and notes</h2><button class="lnk" data-act="nbclose" aria-label="Close notes">Close ✕</button></div>${cc}${add}${free}${items.length?groups:`<p class="muted small">Tap any sentence in the Context, your emails, a report or a recording's text to highlight it. Your highlights collect here.</p>`}`;
+}
+
+/* ---------- state ---------- */
+const fresh=()=>({role:null,tab:"context",unlock:false,fork:null,expert:null,picks:{malcolm:null,kenny:null},checks:{},d1:null,d2:null,d3:null,decided:false,text:"",handed:false,rank:[...RANK_START],ranked:false,mailOpen:{},mailRead:{},notes:{A:{hl:{},cc:{},free:[]},B:{hl:{},cc:{},free:[]},C:{hl:{},cc:{},free:[]}},nbOpen:false,pz:{1:{tier:null,tries:[0,0,0],ok:[0,0,0],hint:false,sel:{}},2:{tier:null,tries:[0,0,0],ok:[0,0,0],hint:false,sel:{}},3:{tier:null,tries:[0,0,0],ok:[0,0,0],hint:false,sel:{}}},gate:{A:{},B:{},C:{}},gateMsg:""});
+let S=fresh();
+const STORE_KEY="simlearn-pro-ashworthpro";
+try{const x=JSON.parse(sessionStorage.getItem(STORE_KEY)||"null"); if(x&&typeof x==="object"&&!Array.isArray(x)) S=Object.assign(fresh(),x);}catch(e){}
+function save(){try{sessionStorage.setItem(STORE_KEY,JSON.stringify(S));}catch(e){}}
+const TABS=[["context","Context"],["who","Who's who"],["inbox","Inbox"],["puzzles","Team puzzles"],["investigate","Investigate"],["decide","Decide"]];
+const ready=()=>S.unlock||(S.role&&S.fork);
+const tabOpen=t=>t==="context"||(t==="who"&&!!S.role&&!!(S.go||S.fork))||(ready()&&(["inbox","puzzles"].includes(t)||S.unlock||allPz(R())));
+const PATH={hold:"kept the relaunch slots",release:"let the relaunch slots go"};
+
+const ENDING_HASH=776968751;
+function endLockHTML(){return `<section class="card"><h2>What happened next</h2><p>When <b>everyone in your team</b> has created their submission, ask your teacher for the code to find out what happened.</p><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input id="endcode" inputmode="numeric" autocomplete="off" maxlength="4" aria-label="Code from your teacher" style="width:7em;font:inherit;padding:6px 10px;border:1px solid var(--line);border-radius:8px"><button class="btn" data-act="endcode">Open</button> <span class="msg" aria-live="polite">${S.endMsg||""}</span></div></section>`;}
+function render(){
+  save();
+  document.getElementById("who").textContent=S.role?`Your role: ${ROLES[S.role].name}${S.fork?` · Path: ${PATH[S.fork]}`:""}`:"Read the context, then choose your role.";
+  document.getElementById("tabs").innerHTML=TABS.map(([k,l])=>`<button data-act="tab" data-v="${k}" aria-current="${S.tab===k}" ${tabOpen(k)?"":"disabled"}>${l}${k==="inbox"&&tabOpen(k)&&inboxList().some(m=>!S.mailRead[m.from+"|"+m.subj])?`<span class="tdot" aria-label="unread emails"></span>`:""}</button>`).join("");
+  document.getElementById("main").innerHTML=V[S.tab]();
+  wrapSentences(document.getElementById("main"));
+  if(S.tab==="context"&&(!S.role||!(S.go||S.fork))){const cs=[...document.querySelectorAll("#main section.card")],i=cs.findIndex(c=>/^\s*3 ·/.test((c.querySelector(".step")||{}).textContent||""));if(i>0){cs.slice(i).forEach(c=>{c.hidden=true;c.style.display="none";});cs[i-1].insertAdjacentHTML("afterend",S.role?`<section class="card stopc" id="stopgate" role="status"><div class="stophead"><span class="stopsign" aria-hidden="true">STOP</span><h2>Stop. Wait until everyone in your team has chosen a role and your teacher says go.</h2></div><p>Your role: <b>${esc(ROLES[S.role].name)}</b>. Check that each of you has a different role.</p><button class="btn" data-act="go">Go on</button></section>`:`<section class="card" id="rolegate"><p class="note-strong" style="margin:0"><strong>Choose your role above to read on.</strong> Each of you takes a different role: agree who is who in your team first.</p></section>`);}}
+  const nb=document.getElementById("nb"); nb.hidden=!S.nbOpen; if(S.nbOpen) nb.innerHTML=notesHTML();
+  const fab=document.getElementById("fab"); fab.hidden=!S.role; fab.textContent=`Notes (${Object.keys(S.notes[R()].hl).length+S.notes[R()].free.length})`;
+  if(S.tab==="investigate"&&!S.ranked) bindDrag("rank");
+  if(S.tab==="decide"){const ta=document.getElementById("cf"); if(ta){ta.value=S.text; wc();}}
+}
+const task=t=>`<div class="task"><b>Your task</b><span>${t}</span></div>`;
+const R=()=>S.role||"A";
+
+const V={
+ context(){
+  const r=S.role;
+  return task("Read from top to bottom. Choose your role, then make your first decision: agree as a team, then everyone enters the same choice.")
+  +`<section class="card" data-src="Context" data-q="medium"><span class="step">1 · Where you work</span><h2>Ashworth &amp; Vale, British heritage fashion</h2>
+    ${PRO_COVER?`<img src="${PRO_COVER}" alt="" style="display:block;width:100%;height:auto;border-radius:10px">`:""}
+    <p>Ashworth &amp; Vale has spent over a century turning a single design into shorthand for quiet British luxury. Since 1911, its navy, bottle-green and black tartan check, still woven at the company's mill in the Scottish Borders, has appeared on trench coats, scarves and leather goods carried by three generations of loyal customers, who paid a premium precisely because so few other people owned one.</p>
+    <p>That premium has been evaporating. Over the past two years, sales among the brand's core affluent customers have fallen sharply, three of its longest-standing department-store stockists have quietly reduced their orders, and second-hand marketplaces are flooded with check-pattern pieces reselling for a fraction of their original price. At the same time, the pattern is turning up everywhere, on budget raincoats, phone cases and market-stall knockoffs, worn by exactly the customers the brand never positioned itself for.</p>
+    <p>Two stories come up in every meeting. Five years ago, a handful of viral posts accused an Ashworth &amp; Vale factory of unsafe working conditions. Leadership pulled a whole product line from three countries within a week, an estimated £2 million loss, before an internal investigation traced the claims to a rival's marketing agency. And two years ago, a junior quality inspector flagged a small batch of licensed raincoats that failed basic waterproofing tests. The batch was recalled within 48 hours, before a single unit reached the shops.</p>
+    <div class="facts"><div class="fact"><div class="l">The check</div><div class="v">Since 1911</div></div><div class="fact"><div class="l">Investor briefing</div><div class="v">In three weeks</div></div></div></section>`
+  +`<section class="card" data-src="Context" data-q="medium"><span class="step">2 · Who you are</span><h2>The working group</h2>
+    <p>You are three members of a cross-functional working group set up to investigate the decline. Each of you sees different information. Choose your role.</p>
+    <div class="roles">${Object.entries(ROLES).map(([k,v])=>`<button class="role" data-act="role" data-v="${k}" aria-pressed="${r===k}" ${S.fork&&S.role?"disabled":""}><b>${v.name}</b><span>${v.line}</span></button>`).join("")}</div>${S.fork&&S.role?`<p class="muted small">Your role is fixed now that your team has made its first decision.</p>`:""}
+    ${r?`<p><strong>Your role: ${ROLES[r].name}.</strong> ${ROLES[r].detail}</p>`:""}
+    <h3 style="margin-top:6px">Other people you'll hear from</h3>
+    <div class="people"><div class="person"><b>Adrian Hensley</b><span class="muted small">Chief Executive. Your boss.</span></div><div class="person"><b>Malcolm Pryce</b><span class="muted small">Former Chief Commercial Officer, now retired.</span></div><div class="person"><b>Kenny Fraser</b><span class="muted small">Clydeside Rainwear, one of the licensees.</span></div></div></section>`
+  +`<section class="card" data-src="Context" data-q="medium"><span class="step">3 · The situation</span><h2>Three questions, three weeks</h2>
+    <p>The Executive Board faces investors and the press in three weeks with an explanation, and right now the company doesn't have one it trusts. Some executives want to move straight to a relaunch campaign. Others insist the company needs to understand what actually happened first, and whether the decline was set in motion by decisions Ashworth &amp; Vale made itself, long before anyone outside noticed. The Board wants three things from your group: the root cause of the decline; a view on an internal Brand Equity Audit from four years ago, which nobody seems to have acted on; and a safeguard for the future. Adrian needs your report in ten days.</p></section>`
+  +`<section class="card" data-src="Context" data-q="medium"><span class="step">4 · It starts</span><h2>A voicemail from Adrian</h2>
+    ${audio("Voicemail from Adrian Hensley","male, 50s, Yorkshire accent, calm and deliberate",`<p class="sd">[On a train. A station announcement fades out.]</p><p>Adrian here. I'm on the train back from the mill, so this'll be quick. I've just walked the weaving floor, and the looms are busy. It's the shops that are quiet. The agency rang again. They're holding the relaunch slots for the week after the investor briefing, and they want an answer tonight.</p><p>Before you start: everyone in this building has a favourite explanation. The fakes, the streetwear kids, the advertising. I don't want a favourite. I want the one that survives a journalist with a calendar.</p><p>So, do we keep the slots or let them go? Let me know by six.</p>`,"ashworthpro_voicemail")}</section>`
+  +`<section class="card" data-src="Context" data-q="medium"><span class="step">5 · Your first decision</span><h2>Keep the relaunch slots, or let them go?</h2>
+    <p>The agency has a relaunch campaign ready and is holding television and poster slots for the week after the investor briefing. Keeping them means paying a holding fee now, before anyone knows what the campaign should say. Letting them go costs nothing, but the next free slots are three months later. You haven't seen the evidence yet. Agree as a team, then everyone enters the same choice.</p>
+    <div class="choices">${[["hold","A","Keep the slots: pay the holding fee","£150,000 from the marketing budget (the agency's figure, via Lucy Aldous, Marketing Director). The campaign can run the week after the briefing, whatever it ends up saying."],["release","B","Let the slots go","No cost. If the Board wants a campaign, the next free slots are three months after the briefing."]].map(([v,k,t,c])=>`<button class="choice" data-act="fork" data-v="${v}" aria-pressed="${S.fork===v}" ${S.fork?"disabled":""}><span class="k">OPTION ${k}</span><b>${t}</b><small>${c}</small></button>`).join("")}</div>
+    ${S.fork?(S.role?`<p class="done">Decision made. Some of the evidence you see depends on this choice. Go to your inbox.</p><button class="btn" data-act="tab" data-v="inbox">Open your inbox</button>`:`<p class="done">Decision made. Now choose your role above.</p>`):""}</section>`;
+ },
+ inbox(){
+  const list=inboxList();
+  return task("Read your emails and tell your team what you've found, in your own words. Your teammates have different emails. Not every source is equally reliable.")
+  +`<div style="display:flex;flex-direction:column;gap:10px">${list.map(m=>mail(m)).join("")}</div>`;
+ },
+ puzzles(){
+  const r=R(); let h=task("Each of you has one puzzle, and nobody can solve theirs alone. When a puzzle appears on someone's screen, everyone gathers round that screen until it's solved. Each result changes what happens next.");
+  const done=[1,2,3].filter(n=>pzDone(r,n));
+  if(done.length) h+=`<section class="card"><h2>Results so far</h2>${done.map(n=>`<p><b>${PZ[n].title}</b> (${ROLES[PZ[n].owner].name}): ${TIER_LABEL[S.pz[n].tier]}. ${ok(n)?PZ[n].out.ok:PZ[n].out.fail}${PZ[n].owner===r&&S.pz[n].tier?` <span class="note-strong">Code for your teammates: <b class="mono">${CODES[n][S.pz[n].tier]}</b></span>`:""}</p>`).join("")}</section>`;
+  const n=[1,2,3].find(x=>!pzDone(r,x));
+  if(!n) return h+`<p class="done">All three puzzles are done.</p><button class="btn" data-act="tab" data-v="investigate">Go to Investigate</button>`;
+  const P=PZ[n];
+  if(P.owner!==r) return h+`<section class="card gate"><span class="step">Puzzle ${n} of 3</span><h2>${ROLES[P.owner].name} needs your help</h2>
+     <p>Go and look at their screen. They have a puzzle called <b>${P.title}</b>, and they need facts from your emails to solve it. When it's done, their screen shows a four-digit code. Type it here to carry on.</p>
+     <div class="coderow"><input id="gatecode" inputmode="numeric" maxlength="4" placeholder="0000" aria-label="Code from ${ROLES[P.owner].name}"><button class="btn" data-act="gate" data-v="${n}">Carry on</button></div>${S.gateMsg?`<p class="msg">${S.gateMsg}</p>`:""}</section>`;
+  const Z=S.pz[n];
+  if(Z.tier) return h+`<section class="card"><span class="step">Puzzle ${n} of 3 · ${P.title}</span><h2>${TIER_LABEL[Z.tier]}</h2><p>${ok(n)?P.out.ok:P.out.fail}</p>
+     <p>Show this code to your teammates. They need it to carry on.</p><div class="bigcode">${CODES[n][Z.tier]}</div>
+     <button class="btn" data-act="pznext" data-v="${n}">I've shared the code</button></section>`;
+  return h+`<section class="card"><span class="step">Puzzle ${n} of 3 · your puzzle</span><h2>${P.title}</h2><p>${P.intro}</p>
+    <p class="note-strong"><strong>Call your teammates over.</strong> You can't solve this from your own emails alone.</p>${P.screen}
+    ${P.qs.map((q,i)=>{const done=Z.ok[i], missed=Z.tries[i]>=2;
+      return `<div class="pzq"><h3>${i+1}. ${q.q}</h3>${done?(missed?`<p class="hint">Not solved. The answer was: ${q.type==="sort"?q.items.map(([x,c])=>x+" → "+c).join(" · "):q.ans}</p>`:`<p class="done">${q.type==="sort"?"All events sorted":q.ans} ✓</p>`):
+        (q.type==="sort"?`<div class="sortq">${q.items.map(([t],j)=>`<div class="sortrow"><p>${t}</p><select data-sort="${n}_${i}_${j}" aria-label="Event ${j+1}"><option value="">Choose…</option>${q.cats.map(c=>`<option${(Z.sort&&Z.sort[i]&&Z.sort[i][j])===c?" selected":""}>${c}</option>`).join("")}</select></div>`).join("")}</div>${Z.sortMsg&&Z.sortMsg[i]?`<p class="msg">${Z.sortMsg[i]}</p>`:""}`:
+        `<div class="opts2">${q.opts.map(o=>`<button class="opt" data-act="pzsel" data-n="${n}" data-i="${i}" data-v="${esc(o)}" aria-pressed="${Z.sel[i]===o}">${o}</button>`).join("")}</div>`)+
+       `<div class="coderow"><button class="btn" data-act="pzcheck" data-n="${n}" data-i="${i}">Check</button>${Z.tries[i]?`<span class="msg">Not yet. One more try: a second wrong answer means this puzzle isn't solved.</span>`:""}</div>`}</div>`;}).join("")}
+    ${Z.hint?`<p class="hint">${P.hint}</p>`:`<button class="lnk" data-act="pzhint" data-v="${n}">Show a hint (counts as help)</button>`}</section>`;
+ },
+ investigate(){
+  const sl=SHORTLIST[R()], e=S.expert;
+  return task("Question the two witnesses, then agree your interim briefing as a team: everyone sends Adrian the same order. If you have time, hire one outside expert first.")
+  +`<section class="card"><h2>Hire an expert (if you have time)</h2><p>This step is optional. Adrian has set aside money for outside help, enough for each of you to bring in one expert. Experts are expensive and only answer the question you hire them for, so think about what your team most needs to know. Each role has a different shortlist, and some experts appear on more than one list.</p>
+    <div class="choices">${sl.map(k=>`<button class="choice" data-act="expert" data-v="${k}" aria-pressed="${e===k}" ${e?"disabled":""}><b>${EXPERTS[k].name}</b><small><em>${EXPERTS[k].who}</em><br>${EXPERTS[k].what}</small></button>`).join("")}</div>
+    ${e?`<div class="attach" data-src="${EXPERTS[e].who.split(",")[0]}" data-q="high"><div class="an">📎 Report from ${EXPERTS[e].who}</div>${EXPERTS[e].rep}</div>`:""}</section>`
+  +`<section class="card"><h2>The witnesses</h2><p>Malcolm and Kenny both have a stake in how this story is told. <strong>One of them is leaving things out.</strong> Listen for what's missing, then choose your one question for each.</p>
+    <div class="two">${Object.entries(WIT).map(([k,w])=>{const p=S.picks[k];
+      return `<div style="display:flex;flex-direction:column;gap:10px"><h3>${w.name} <span class="muted small">· ${w.role}</span></h3>
+       ${audio(`${w.name}'s account`,w.voice,w.account,"ashworthpro_"+k)}
+       <div class="qs">${w.qs.map((q,i)=>`<button class="q" data-act="ask" data-w="${k}" data-v="${i}" aria-pressed="${p===i}" ${p!==null?"disabled":""}>${q[0]}</button>`).join("")}</div>
+       ${p!==null?audio(`${w.name} answers`,w.voice,`<p>${w.qs[p][1]}</p>`,"ashworthpro_"+k+"_"+(p+1)):""}</div>`;}).join("")}</div></section>`
+  +`<section class="card"><h2>Interim briefing for Adrian</h2>
+    <p>Adrian sees the chair on Thursday and needs your view now, before your final findings. Below are the explanations people in the building keep giving, in the order the office has been talking about them. Put them in order, from the most important cause of the decline to the least.</p>
+    <p class="note-strong"><strong>Adrian will act on whatever you put first, straight away.</strong></p>
+    <ol class="tl" id="rk">${S.rank.map((id,i)=>{const t=RANK.find(x=>x[0]===id);
+      return `<li class="tc" data-id="${id}" draggable="${!S.ranked}"><span class="n">${i+1}</span><span>${t[1]}</span><span class="arr">${S.ranked?"":`<button data-act="mv" data-l="rank" data-v="${i}" data-d="-1" aria-label="Move up" ${i?"":"disabled"}>↑</button><button data-act="mv" data-l="rank" data-v="${i}" data-d="1" aria-label="Move down" ${i<RANK.length-1?"":"disabled"}>↓</button>`}</span></li>`;}).join("")}</ol>
+    ${S.ranked?`<p class="done">Sent to Adrian. His reply is below, and there's a new email in your inbox.</p>${mail(reply())}`:`<button class="btn" data-act="sendrank">Send to Adrian</button>`}</section>`;
+ },
+ decide(){
+  const dis=S.decided?"disabled":"";
+  let h=task("Check what you've worked out, then agree two findings and one recommendation as a team: everyone enters the same choices. Then write a short root cause report. After you hand in, you'll hear what happened next.");
+  const forkLine=S.fork==="hold"?"The relaunch slots are held for the week after the briefing, for a £150,000 holding fee.":S.fork==="release"?"The relaunch slots have gone; the next free slots are three months after the briefing.":"";
+  h+=`<section class="card"><h2>Where things stand</h2><p>${forkLine} ${S.ranked?STANDING[S.rank[0]]():"Adrian is still waiting for your interim briefing."}</p>${[1,2,3].filter(n=>S.pz[n].tier).map(n=>`<p><b>${PZ[n].title}:</b> ${ok(n)?PZ[n].out.ok:PZ[n].out.fail}</p>`).join("")}
+   <div class="facts"><div class="fact"><div class="l">Weeks to the investor briefing</div><div class="v">3</div></div><div class="fact"><div class="l">Unplanned spending so far</div><div class="v">${fmt(spentSoFar())}</div></div></div></section>`;
+  h+=`<section class="card"><h2>What have you worked out?</h2>${CHECKS.map((c,qi)=>{const a=S.checks[qi];
+     return `<div style="display:flex;flex-direction:column;gap:6px"><h3>${qi+1}. ${c.q}</h3>${c.opts.map((o,oi)=>`<button class="opt ${a===undefined?"":oi===c.right?"right":oi===a?"wrong":""}" data-act="chk" data-q="${qi}" data-v="${oi}" ${a!==undefined?"disabled":""}>${o}</button>`).join("")}${a!==undefined?`<p class="fb">${a===c.right?"<strong>Yes.</strong> ":"<strong>Not quite.</strong> "}${c.why}</p>`:""}</div>`;}).join("")}</section>`;
+  h+=["d1","d2","d3"].map(k=>{const D=DEC[k];return `<section class="card"><h2>${D[0]}</h2><div class="choices">${[1,2].map(i=>{const v=i===1?"A":"B", o=optInfo(k,v);
+    return `<button class="choice" data-act="dec" data-q="${k}" data-v="${v}" aria-pressed="${S[k]===v}" ${dis}><span class="k">OPTION ${v}</span><b>${D[i][0]}</b><small>${o.desc}</small></button>`;}).join("")}</div></section>`;}).join("");
+  if(!S.decided) return h+`<button class="btn" data-act="lock" ${canLock()?"":"disabled"}>Confirm our findings</button>`;
+  if(!S.handed)h+=`<p><button class="btn small" data-act="undec">Change our decisions</button> <span class="muted small">Until you hand in, your team can still change its decisions.</span></p>`;
+  h+=`<section class="card"><h2>${roleW(S.role).section?"Your section: "+esc(roleW(S.role).section.label):"Root cause report"}</h2>${roleW(S.role).section?`<p>About ${roleW(S.role).words} words. ${esc(roleW(S.role).section.task)}</p>`:`<p>Write 120–180 words for Adrian and the Executive Board: your two findings and your recommendation, and how they fit together, the evidence that convinced you (name the person or document, and use the dates and numbers), and the strongest argument against your diagnosis, with your answer to it.</p>`}
+   <p class="muted small">Useful language: <em>The evidence strongly suggests…</em> · <em>This was compounded by…</em> · <em>While the original decision was justified at the time, …</em> · <em>well before…</em></p>
+   <textarea id="cf" aria-label="${roleW(S.role).label}"></textarea>
+   <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><span class="wc" id="wc">0 words</span></div>${handinHTML()}</section>`;
+  if(!S.handed) return h;
+  if(!S.endOpen){h+=endLockHTML();return h;}
+  const p=points();
+  h+=`<section class="card"><h2>A year after the briefing</h2>${audio("Fashion business news: The Selvedge","newsreader, light music bed under",epilogue())}
+   <p><strong>A year after the investor briefing, the prestige score among 25-to-40s ${pointWords()}.</strong></p>
+   <div class="board"><div class="tile"><div class="l">Prestige points won back (of 18 lost)</div><div class="v">${p>0?"+":""}${p}</div></div><div class="tile"><div class="l">Spent or given up since the inquiry began</div><div class="v">${fmt(-money())}</div></div></div>
+   <details><summary class="small" style="cursor:pointer;color:var(--blue);font-weight:600">How that adds up</summary><div class="tw"><table class="sums"><thead><tr><th>What happened</th><th class="num">Prestige points</th><th class="num">Money</th></tr></thead><tbody>${ledger().map(([l,pt,m])=>`<tr><td>${l}</td><td class="num">${pt?(pt>0?"+":"")+pt:""}</td><td class="num">${m?fmt(m):""}</td></tr>`).join("")}<tr class="tot"><td>Total</td><td class="num">${p>0?"+":""}${p}</td><td class="num">${fmt(money())}</td></tr></tbody></table></div><p class="small muted">Prestige points: Ifeoma's quarterly survey of premium shoppers aged 25 to 40, which fell 18 points before the inquiry.</p></details>
+   <p>Now find a group that made the other choice at the start, and ask them what happened to them.</p></section>`;
+  return h;
+ }
+};
+const canLock=()=>!!(S.d1&&S.d2&&S.d3);
+
+function epilogue(){
+ const p=[`<p class="sd">[News jingle, then a light music bed under]</p>`];
+ if(S.fork==="hold") p.push(S.d3==="A"?"Ashworth & Vale kept its relaunch slots, and the film it finally ran was not the one the agency first made: a short piece about fewer, better things, with the check back on coats and scarves and off the phone cases.":"Ashworth & Vale kept its relaunch slots and ran the agency's film, “The Check, Everywhere”, the week after the briefing. Younger viewers liked it. Many older customers said it proved the check was on everything.");
+ else p.push("Ashworth & Vale let its relaunch slots go, and went into the investor briefing with an explanation instead of an advert.");
+ if(S.d1==="A") p.push(`Adrian Hensley told investors the decline was largely self-inflicted: decades of licensing had thinned the check's exclusivity. The share price dipped on the day, but the trade press called it “the first straight answer in years”, and the stockists agreed to meet.${failed(2)?" Because the brokers already had the “external factors” draft, the change of story needed a second analysts' call and a second day of headlines.":""}`);
+ else p.push(`Adrian Hensley blamed counterfeiters and the streetwear trend. Within a week, a trade journal set Ashworth & Vale's own licensing numbers next to the seizure figures and asked which came first. The company had no good answer.${failed(2)?" The journal had seen the draft statement a week early, from one of the brokers.":""}`);
+ if(S.d2==="B") p.push("The Board admitted that the audit should have triggered a pullback, and asked Tariq Hassan to lead a review of every licence. When the audit later reached a trade journal, it was a one-day story, because the company had already said what it would change.");
+ else p.push("The Board described the shelved audit as reasonable caution at the time. When the audit later reached a trade journal, with its eighteen-month deadline, most readers took that as an excuse, and the story ran for weeks.");
+ if(S.d3==="A") p.push(`Budget and mass-market licences are being wound down, with third-party audits on the rest. ${failed(3)?"With no plan for clause 9, Divya Anand had to buy two licences back, at about £1.5 million, and the wind-down is taking twice as long.":"The budget licences renewing within the year ended on schedule, and clause 9, backed by the stockists' letters, covered the rest."} About £3 million of royalties went in the first year. Kenny Fraser's Clydeside Rainwear gave up its supermarket lines and signed a smaller licence for heavier raincoats, sold only in department stores, and one stockist has already restored part of its order.`);
+ else p.push("Licensing continues, with a monthly resale and sentiment report and review thresholds. The first report showed the check still “everywhere”, and two stockists are still waiting for a plan with dates.");
+ const extra=[];
+ if(S.ranked&&S.rank[0]==="r1") extra.push("Adrian's early freeze on new licences kept Gilchrist & Rae on board while the report was written.");
+ if(S.ranked&&EPI_RANK[S.rank[0]]) extra.push(EPI_RANK[S.rank[0]]);
+ if(failed(1)) extra.push("The forensic accountants' timeline cost £45,000.");
+ if(extra.length) p.push(extra.join(" "));
+ return p.map((x,i)=>i?`<p>${x}</p>`:x).join("");
+}
+/* ---------- actions ---------- */
+function wc(){const ta=document.getElementById("cf");document.getElementById("wc").textContent=`${(ta.value.trim().match(/\S+/g)||[]).length} words`;}
+document.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.id==="gatecode"){const bt=document.querySelector("[data-act=gate]");if(bt){e.preventDefault();bt.click();}}});
+document.addEventListener("toggle",e=>{const d=e.target;if(d.dataset&&d.dataset.tf){S.tOpen=Object.assign({},S.tOpen,{[d.dataset.tf]:d.open});save();return;}if(!d.dataset||!d.dataset.mail)return;const k=decodeURIComponent(d.dataset.mail);
+ S.mailOpen[k]=d.open; if(d.open&&!S.mailRead[k]){S.mailRead[k]=true;d.classList.replace("unread","read");const u=d.querySelector(".udot");if(u)u.remove();}},true);
+document.addEventListener("input",e=>{if(e.target.id==="cf"){S.text=e.target.value;wc();}});
+document.addEventListener("click",e=>{
+ const sw=e.target.closest("[data-hlc]"); if(sw&&palFor){const N=S.notes[R()],k=palFor.dataset.k;
+   if(sw.dataset.hlc==="none"){delete N.hl[k];} else N.hl[k]={c:sw.dataset.hlc,t:palFor.textContent,src:palFor.dataset.src,q:palFor.dataset.q};
+   closePal(); render(); return;}
+ const sn=e.target.closest(".sn"); if(sn){openPal(sn);return;}
+ if(!e.target.closest("#hlpal"))closePal();
+ const b=e.target.closest("[data-act]");if(!b||b.disabled)return;act(b.dataset.act,b.dataset);});
+document.addEventListener("change",e=>{const v=e.target.dataset&&e.target.dataset.sort; if(!v)return; const [n,i,j]=v.split("_"); const Z=S.pz[n]; Z.sort=Z.sort||{}; Z.sort[i]=Z.sort[i]||{}; if(e.target.value)Z.sort[i][j]=e.target.value; else delete Z.sort[i][j];});
+document.addEventListener("input",e=>{if(e.target.dataset&&e.target.dataset.cc){S.notes[R()].cc[e.target.dataset.cc]=e.target.value;}});
+function act(a,d){
+ switch(a){
+  case "role":if(!(S.fork&&S.role))S.role=d.v;break;
+  case "undec":if(!S.handed){S.decided=false;S.sub=null;S.issues=[];}break;
+  case "tab":if(tabOpen(d.v)){S.tab=d.v;window.scrollTo({top:0});}break;
+  case "fork":if(!S.fork)S.fork=d.v;break;
+  case "expert":if(!S.expert)S.expert=d.v;break;
+  case "ask":if(S.picks[d.w]===null)S.picks[d.w]=+d.v;break;
+  case "mv":{const L=S[d.l],i=+d.v,j=i+(+d.d);if(j<0||j>=L.length)return;flip(d.l,()=>{[L[i],L[j]]=[L[j],L[i]];});return;}
+  case "sendrank":S.ranked=true;break;
+  case "nbopen":S.nbOpen=true;break;
+  case "go":if(S.role)S.go=true;break;
+  case "endcode":{const c=((document.getElementById("endcode")||{}).value||"").trim();if(fnv(c)===ENDING_HASH){S.endOpen=true;S.endMsg="";}else S.endMsg=c?"That isn't the code. Check it with your teacher.":"";break;}
+  case "nbclose":S.nbOpen=false;break;
+  case "hlrm":{const N=S.notes[R()];delete N.hl[d.v];break;}
+  case "noteadd":{const t=(document.getElementById("nbnew")||{}).value||""; if(t.trim())S.notes[R()].free.push(t.trim()); break;}
+  case "noterm":S.notes[R()].free.splice(+d.v,1);break;
+  case "pzsel":S.pz[d.n].sel[d.i]=d.v;break;
+  case "pzhint":S.pz[d.v].hint=true;break;
+  case "pzcheck":{const n=+d.n,i=+d.i,Z=S.pz[n],q=PZ[n].qs[i];
+    let right;
+    if(q.type==="sort"){const got=(Z.sort&&Z.sort[i])||{}; if(Object.keys(got).length<q.items.length){Z.sortMsg={...(Z.sortMsg||{}),[i]:"Sort every event first."};break;}
+      const n2=q.items.filter(([,c],j)=>got[j]===c).length; right=n2===q.items.length; Z.sortMsg={...(Z.sortMsg||{}),[i]:right?"":`${n2} of ${q.items.length} are right.`};}
+    else{const a=Z.sel[i]; if(!a)return; right=a===q.ans;}
+    if(right)Z.ok[i]=1; else {Z.tries[i]++; if(Z.tries[i]>=2){Z.ok[i]=1;Z.failq=true;}}
+    if(Z.ok.slice(0,PZ[n].qs.length).every(Boolean)) Z.tier=Z.failq?"fail":(Z.hint||Z.tries.some(t=>t>0))?"help":"first";
+    break;}
+  case "pznext":S.gate[R()][d.v]=S.pz[d.v].tier;S.gateMsg="";break;
+  case "gate":{const n=+d.v,c=((document.getElementById("gatecode")||{}).value||"").replace(/[\uFF10-\uFF19]/g,x=>String.fromCharCode(x.charCodeAt(0)-0xFEE0)).replace(/\D/g,""),t=Object.keys(CODES[n]).find(k=>CODES[n][k]===c);
+    if(t){S.pz[n].tier=t;S.gate[R()][n]=t;S.gateMsg="";} else {const m=[1,2,3].find(x=>x!==n&&Object.values(CODES[x]).includes(c));if(m&&PZ[m].owner!==R()){const tm=Object.keys(CODES[m]).find(k=>CODES[m][k]===c);S.pz[m].tier=tm;S.gate[R()][m]=tm;}S.gateMsg=m?`That's the code for puzzle ${m}${m>n?" (saved)":""}. This box needs the code for puzzle ${n} (“${PZ[n].title}”).`:"That code doesn't work. Check it with your teammate.";} break;}
+  case "chk":if(S.checks[d.q]===undefined)S.checks[d.q]=+d.v;break;
+  case "dec":if(!S.decided)S[d.q]=d.v;break;
+  case "lock":if(canLock())S.decided=true;break;
+  case "hand":makeSub();render();{const bl=document.getElementById("block")||document.getElementById("issues");if(bl&&bl.scrollIntoView)bl.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"center"});}return;
+  case "pdf":downloadPdf();return;
+  case "copy":copyBlock();return;
+ }
+ render();
+}
+const LIST_ID={rank:"rk"};
+function flip(key,mutate){
+ const sel=`#${LIST_ID[key]} .tc`, before={};
+ document.querySelectorAll(sel).forEach(c=>before[c.dataset.id]=c.getBoundingClientRect().top);
+ mutate();render();
+ if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+ document.querySelectorAll(sel).forEach(c=>{const dy=before[c.dataset.id]-c.getBoundingClientRect().top;
+  if(dy){c.style.transition="none";c.style.transform=`translateY(${dy}px)`;requestAnimationFrame(()=>{c.style.transition="transform .22s ease";c.style.transform="";});}});
+}
+let drag=null;
+function bindDrag(key){
+ const L=S[key];
+ document.querySelectorAll(`#${LIST_ID[key]} .tc[draggable="true"]`).forEach(c=>{
+  c.addEventListener("dragstart",e=>{drag=c.dataset.id;c.classList.add("dragging");try{e.dataTransfer.setData("text/plain",drag);}catch(_){}});
+  c.addEventListener("dragend",()=>{c.classList.remove("dragging");drag=null;});
+  c.addEventListener("dragover",e=>{e.preventDefault();if(c.dataset.id!==drag)c.classList.add("over");});
+  c.addEventListener("dragleave",()=>c.classList.remove("over"));
+  c.addEventListener("drop",e=>{e.preventDefault();const to=c.dataset.id;if(!drag||to===drag||!L.includes(drag))return;
+   flip(key,()=>{const from=L.indexOf(drag);L.splice(from,1);const ti=L.indexOf(to);L.splice(from<=ti?ti+1:ti,0,drag);});});
+ });
+}
+
+/* ---------- hand-in: Lite's submission block and PDF (GUIDE 2n). Everything below up to "Pro hand-in" is copied
+   verbatim from studio/template.html by cartridges/authoring/_pro_common.py, so the check code matches blocks.py.
+   Nothing is sent anywhere: the block and the PDF are made here in the browser. ---------- */
+const LITE={"id": "ashworthpro", "version": 1, "title": "Ashworth & Vale: The Check Inquiry (Pro)", "writing": {"label": "root cause report", "addressee": "Adrian Hensley and the Executive Board", "by_role": {"A": {"label": "report section on the future safeguard", "words": 150, "task": "Write your section of the working group's root cause report for Adrian and the Executive Board: the safeguard for the future. Open with one sentence that gives your group's overall diagnosis. Then argue your group's recommendation with the evidence from your own inbox (who said it, the dates, the numbers), give the strongest argument against it and answer it. Mention the other two decisions only in passing (if yours depends on one of them, say how in a sentence): your teammates write those sections.", "decision": "D3"}, "B": {"label": "report section on the root cause", "words": 150, "task": "Write your section of the working group's root cause report for Adrian and the Executive Board: the root cause of the decline. Open with one sentence that gives your group's overall diagnosis. Then argue your group's finding with the evidence from your own inbox (who said it, the dates, the numbers), give the strongest argument against it and answer it. Mention the other two decisions only in passing (if yours depends on one of them, say how in a sentence): your teammates write those sections.", "decision": "D1"}, "C": {"label": "report section on the Brand Equity Audit", "words": 150, "task": "Write your section of the working group's root cause report for Adrian and the Executive Board: how the four-year-old Brand Equity Audit should be judged. Open with one sentence that gives your group's overall diagnosis. Then argue your group's finding with the evidence from your own inbox (who said it, the dates, the numbers), give the strongest argument against it and answer it. Mention the other two decisions only in passing (if yours depends on one of them, say how in a sentence): your teammates write those sections.", "decision": "D2"}}}, "roles": {"A": {"dept": "Licensing & Product Partnerships", "chars": {"expert": "expert_a", "malcolm": "malcolm_a", "kenny": "kenny_a"}}, "B": {"dept": "Retail & Customer Insight", "chars": {"expert": "expert_b", "malcolm": "malcolm_b", "kenny": "kenny_b"}}, "C": {"dept": "Brand Strategy & Communications", "chars": {"expert": "expert_c", "malcolm": "malcolm_c", "kenny": "kenny_c"}}}, "decisions": {"d1": "D1", "d2": "D2", "d3": "D3"}};
+function fnv(str){ let h = 0x811c9dc5; for (const ch of new TextEncoder().encode(str)) { h ^= ch; h = Math.imul(h, 0x01000193) >>> 0; } return h >>> 0; }
+function checkCode(parts){
+  const A = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
+  const s = parts.join("|");
+  const four = h => { let n = h % 923521, o = ""; for (let i = 0; i < 4; i++) { o += A[n % 31]; n = Math.floor(n / 31); } return o; };
+  return four(fnv(s)) + "-" + four(fnv(s + "#"));
+}
+const norm = t => t.replace(/\s+/g, " ").trim();
+function words(t){ return (t.trim().match(/\S+/g) || []).length; }
+function taskName(W){ return W.addressee ? `${W.label} to ${W.addressee}` : W.label; }
+const PDFW = {"R":[278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584,761,556,0,222,556,333,1000,556,556,333,1000,667,333,1000,0,611,0,0,222,222,333,333,350,556,1000,333,1000,500,333,944,0,500,667,278,333,556,556,556,556,260,556,333,737,370,556,584,333,737,333,400,584,333,333,333,556,537,278,333,333,365,556,834,834,834,611,667,667,667,667,667,667,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,500,556,556,556,556,278,278,278,278,556,556,556,556,556,556,556,584,611,556,556,556,556,500,556,500],"B":[278,333,474,556,556,889,722,238,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,333,333,584,584,584,611,975,722,722,722,722,667,611,778,722,278,556,722,611,833,722,778,667,778,722,667,611,722,667,944,667,667,611,333,278,333,584,556,333,556,611,556,611,556,333,611,611,278,278,556,278,889,611,611,611,611,389,556,333,611,556,778,556,556,500,389,280,389,584,761,556,0,278,556,500,1000,556,556,333,1000,667,333,1000,0,611,0,0,278,278,500,500,350,556,1000,333,1000,556,333,944,0,500,667,278,333,556,556,556,556,280,556,333,737,370,556,584,333,737,333,400,584,333,333,333,611,556,278,333,333,365,556,834,834,834,611,722,722,722,722,722,722,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,556,556,556,556,556,278,278,278,278,611,611,611,611,611,611,611,584,611,611,611,611,611,556,611,556]};
+const PDF_WIN = {"8364":128,"8218":130,"402":131,"8222":132,"8230":133,"8224":134,"8225":135,"710":136,"8240":137,"352":138,"8249":139,"338":140,"381":142,"8216":145,"8217":146,"8220":147,"8221":148,"8226":149,"8211":150,"8212":151,"732":152,"8482":153,"353":154,"8250":155,"339":156,"382":158,"376":159};   // Unicode -> WinAnsi byte, for 0x80-0x9F
+const PDF_ALT = {"Ł":"L","ł":"l","Đ":"D","đ":"d","ı":"i","ħ":"h","‐":"-","‑":"-","−":"-","′":"'","″":"\"","\u2009":" ","\u202f":" ","→":"->","←":"<-","≈":"~","≤":"<=","≥":">="};
+function pdfByte(ch){
+  const u = ch.codePointAt(0);
+  if (u >= 32 && u <= 126) return u;
+  if (u >= 160 && u <= 255) return u;
+  if (PDF_WIN[u] !== undefined) return PDF_WIN[u];
+  if (u === 9) return 32;
+  const base = ch.normalize("NFKD").replace(/[̀-ͯ]/g, "");   // ł, ő, ş… fall back to the plain letter
+  if (base && base !== ch && base.length === 1) return pdfByte(base);
+  return 63;   // ?
+}
+// Letters the PDF font can't show: a few by hand, then compatibility forms (ﬁ -> fi, ² -> 2), else "?".
+const pdfClean = s => [...String(s).replace(/[ŁłĐđıħ‐‑−′″\u2009\u202f→←≈≤≥]/g, c => PDF_ALT[c])].map(c => {
+  if (c === "\n" || pdfByte(c) !== 63 || c === "?") return c;
+  const k = c.normalize("NFKD").replace(/[\u0300-\u036f]/g, "");
+  return k && [...k].every(x => pdfByte(x) !== 63) ? k : c;
+}).join("");
+function pdfWidth(text, font, size){
+  let w = 0; for (const ch of text) { const b = pdfByte(ch); w += PDFW[font][b - 32] || 556; } return w * size / 1000;
+}
+function pdfStr(text){   // a PDF literal string in WinAnsi, with octal escapes
+  let out = "(";
+  for (const ch of text) {
+    const b = pdfByte(ch);
+    if (b === 40 || b === 41 || b === 92) out += "\\" + String.fromCharCode(b);
+    else if (b > 126) out += "\\" + b.toString(8).padStart(3, "0");
+    else out += String.fromCharCode(b);
+  }
+  return out + ")";
+}
+function pdfWrap(text, font, size, width){
+  const lines = [];
+  text.split("\n").forEach(par => {
+    if (!par.trim()) { lines.push(""); return; }
+    let line = "";
+    par.split(/\s+/).filter(Boolean).forEach(word => {
+      const tryLine = line ? line + " " + word : word;
+      if (pdfWidth(tryLine, font, size) <= width) { line = tryLine; return; }
+      if (line) lines.push(line);
+      while (pdfWidth(word, font, size) > width) {          // a very long word: break it (one pass per line)
+        const chars = [...word]; let n = 0, w = 0;
+        while (n < chars.length) { const cw = pdfWidth(chars[n], font, size); if (n > 0 && w + cw > width) break; w += cw; n++; }
+        lines.push(chars.slice(0, n).join("")); word = chars.slice(n).join("");
+      }
+      line = word;
+    });
+    lines.push(line);
+  });
+  return lines;
+}
+function utf16Hex(text){
+  let h = "FEFF";
+  for (let i = 0; i < text.length; i++) h += text.charCodeAt(i).toString(16).padStart(4, "0").toUpperCase();
+  return "<" + h + ">";
+}
+function makePdf({title, subtitle, body, note, footer, block, fileName}){
+  [title, subtitle, body, note, footer] = [title, subtitle, body, note, footer].map(pdfClean);
+  const W = 595.28, H = 841.89, M = 64, TW = W - 2 * M;
+  const pages = []; let ops = [], y = H - M;
+  const newPage = () => { if (ops.length) pages.push(ops); ops = []; y = H - M; };
+  const text = (s, font, size, x, yy, grey) => ops.push(`BT /${font} ${size} Tf ${grey ? "0.4 0.45 0.5 rg" : "0.11 0.15 0.2 rg"} ${x.toFixed(2)} ${yy.toFixed(2)} Td ${pdfStr(s)} Tj ET`);
+  const para = (s, font, size, lead, grey) => pdfWrap(s, font, size, TW).forEach(l => {
+    if (y - lead < M + 20) newPage();
+    y -= lead; if (l) text(l, font, size, M, y, grey);
+  });
+  para(title, "B", 16, 21);
+  para(subtitle, "R", 9.5, 13, true);
+  y -= 14;
+  para(body, "R", 11, 15.5);
+  y -= 18;
+  para(note, "R", 8, 11, true);
+  newPage();
+  // objects: 1 catalog, 2 pages, 3 font R, 4 font B, 5 embedded file, 6 filespec, 7 info, then page/content pairs
+  const objs = [];
+  const enc = new TextEncoder(), blockBytes = enc.encode(block);
+  const kids = pages.map((_, i) => `${8 + i * 2} 0 R`).join(" ");
+  objs[1] = `<< /Type /Catalog /Pages 2 0 R /Names << /EmbeddedFiles << /Names [${pdfStr(fileName)} 6 0 R] >> >> /PageMode /UseNone >>`;
+  objs[2] = `<< /Type /Pages /Kids [${kids}] /Count ${pages.length} >>`;
+  objs[3] = `<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>`;
+  objs[4] = `<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>`;
+  objs[5] = {dict: `<< /Type /EmbeddedFile /Subtype /text#2Fplain /Length ${blockBytes.length} >>`, data: blockBytes};
+  objs[6] = `<< /Type /Filespec /F ${pdfStr(fileName)} /UF ${utf16Hex(fileName)} /EF << /F 5 0 R >> /Desc ${pdfStr("SimLearn answers for the teacher tool")} >>`;
+  objs[7] = `<< /Title ${utf16Hex(title)} /Creator (SimLearn) /Producer (SimLearn) /SimLearnSubmission ${utf16Hex(block)} >>`;
+  pages.forEach((p, i) => {
+    const foot = `BT /R 7.5 Tf 0.4 0.45 0.5 rg ${M} 36 Td ${pdfStr(footer + (pages.length > 1 ? ` · page ${i + 1} of ${pages.length}` : ""))} Tj ET`;
+    const content = enc.encode([...p, foot].join("\n").split("").map(c => c.charCodeAt(0) < 256 ? c : "?").join(""));
+    objs[8 + i * 2] = `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${W} ${H}] /Resources << /Font << /R 3 0 R /B 4 0 R >> >> /Contents ${9 + i * 2} 0 R >>`;
+    objs[9 + i * 2] = {dict: `<< /Length ${content.length} >>`, data: content};
+  });
+  // assemble with byte offsets (all strings here are ASCII)
+  const parts = [], offs = []; let len = 0;
+  const add = b => { parts.push(b); len += b.length; };
+  add(enc.encode("%PDF-1.7\n")); add(new Uint8Array([0x25, 0xE2, 0xE3, 0xCF, 0xD3, 0x0A]));   // marks the file as binary
+  for (let n = 1; n < objs.length; n++) {
+    offs[n] = len;
+    const o = objs[n];
+    if (typeof o === "string") add(enc.encode(`${n} 0 obj\n${o}\nendobj\n`));
+    else { add(enc.encode(`${n} 0 obj\n${o.dict}\nstream\n`)); add(o.data); add(enc.encode(`\nendstream\nendobj\n`)); }
+  }
+  const xref = len;
+  let x = `xref\n0 ${objs.length}\n0000000000 65535 f \n`;
+  for (let n = 1; n < objs.length; n++) x += String(offs[n]).padStart(10, "0") + " 00000 n \n";
+  add(enc.encode(x + `trailer\n<< /Size ${objs.length} /Root 1 0 R /Info 7 0 R >>\nstartxref\n${xref}\n%%EOF\n`));
+  return new Blob(parts, {type: "application/pdf"});
+}
+
+/* ---------- Pro hand-in ---------- */
+function proChoices(r){
+ const c=LITE.roles[r].chars, sl=SHORTLIST[r]||[], out=[];
+ out.push(`${c.expert}=${S.expert&&sl.includes(S.expert)?"o"+(sl.indexOf(S.expert)+1):"-"}`);
+ Object.keys(WIT).forEach(w=>{const p=S.picks[w]; out.push(`${c[w]}=${p===null||p===undefined?"-":"o"+(p+1)}`);});
+ return out.join(", ");
+}
+// The Pro line: the team's fork, interim briefing (Morven/Moira acts on the first) and puzzle tiers (no evidence= since
+// the evidence step was removed, 9 Nov 2026). Not part of the check code (blocks.py reads it into sub["pro"]).
+function proLine(){
+ return `Pro: fork=${S.fork||"none"}, briefing=${S.ranked?S.rank.join(">"):"none"}, puzzles=${[1,2,3].map(n=>`${n}:${S.pz[n].tier||"none"}`).join(",")}`;
+}
+// writing.by_role (GUIDE 3c): the student's role writes its own section of the group's report
+function roleW(r){const W=LITE.writing, t=W.by_role&&W.by_role[r];
+ return t?Object.assign({},W,{label:t.label||W.label,words:t.words,section:t}):W;}
+function makeSub(){
+ const r=S.role, W=roleW(r), missing=[];
+ S.sub=null;
+ if(!r||!LITE.roles[r]){S.issues=["Choose your role first (Context)."];return;}
+ const memoText=(S.text||"").trim();
+ const open=Object.entries(WIT).filter(([k])=>S.picks[k]===null||S.picks[k]===undefined).map(([,w])=>w.name);
+ if(open.length) missing.push(`You haven't chosen what to ask ${open.join(", ")} yet (Investigate).`);
+ const openDec=LITE.budget?(S.decided?[]:["budget"]):Object.keys(LITE.decisions).filter(k=>!S[k]);
+ if(openDec.length) missing.push(LITE.budget?"Your group's budget isn't confirmed yet (Decide).":`Your group's answer is missing for ${openDec.map(k=>LITE.decisions[k]).join(", ")} (Decide).`);
+ if(words(memoText)<50) missing.push("Your text is very short — write your "+W.label+" first.");
+ S.issues=missing;
+ if(openDec.length||words(memoText)<50) return;
+ const ai=S.consent?"yes":"no";
+ const choices=proChoices(r);
+ const decisions=LITE.budget?LITE.budget.map(id=>`${id}=${+((S.budget||{})[id])||0}`).join(", ")   // Lite's budget format
+                           :Object.entries(LITE.decisions).map(([k,id])=>`${id}=${S[k]}`).join(", ");
+ const parts=[LITE.id, LITE.version, r, choices, decisions, ai, ai==="yes"?norm(memoText):""];
+ const code=checkCode(parts);
+ const head=[
+  "=== SIMLEARN SUBMISSION ===",
+  ai==="yes"?"AI check: ALLOWED":"AI check: NOT ALLOWED - grade by hand",
+  `Scenario: ${LITE.id} v${LITE.version} (${LITE.title})`,
+  `Role: ${r} (${LITE.roles[r].dept})`,
+  `Info choices: ${choices}`,
+  `Group decisions: ${decisions}`,
+  proLine(),
+  `Check: ${code}`,
+ ];
+ const block=ai==="yes"?[...head,`--- ${taskName(W)} (${words(memoText)} words) ---`,memoText,"=== END ==="].join("\n")
+                       :[...head,"=== END ===","",`My ${taskName(W)} (${words(memoText)} words):`,"",memoText].join("\n");
+ S.sub={block, blockOnly: ai==="yes"?block:[...head,"=== END ==="].join("\n"), code, ai, r, n:words(memoText), memo:memoText};
+ S.handed=true;
+}
+function subHTML(){const x=S.sub; if(!x) return "";
+ return `
+    <h2>Your submission</h2>
+    <p>Hand it in the way your <b>Moodle assignment</b> asks for:</p>
+    <p><b>A file upload?</b> Download your PDF and upload it to the assignment.</p>
+    <p><button type="button" class="btn" id="pdf" data-act="pdf">Download my submission (PDF)</button> <span id="pdfmsg" class="ok" aria-live="polite"></span></p>
+    <p><b>A text box?</b> Copy everything in the box below and paste it in. ${x.ai==="yes" ? "" : "Your text sits below the SimLearn part, so your teacher can mark it by hand."}</p>
+    <textarea class="block" id="block" readonly>${esc(x.block)}</textarea>
+    <p><button type="button" class="btn" id="copy" data-act="copy">Copy to clipboard</button> <span id="copied" class="ok" aria-live="polite"></span></p>
+    <p class="muted small">If you change your text or your answers later, create your submission again before you hand it in.</p>`;}
+function handinHTML(){
+ return `<div class="consent">
+      <b>Can your teacher check your text with AI?</b>
+      <p class="small">Your teacher may use the SimLearn teacher tool, which can ask an AI system (Claude, by Anthropic) to suggest feedback on your writing. Only your text and your group's choices would be sent — not your name. Your teacher always makes the final decision about your grade. If you say no, your teacher marks your text by hand. Saying no has no effect on your grade.</p>
+      <label><input type="checkbox" id="consent" ${S.consent?"checked":""}> Yes, my teacher may check my text with AI.</label>
+    </div>
+    <div id="issues" class="issues">${(S.issues||[]).map(m=>`<p>${esc(m)}</p>`).join("")}</div>
+    <button type="button" class="btn" data-act="hand">Create my submission</button>
+    <div id="out">${subHTML()}</div>`;
+}
+function downloadPdf(){
+ const x=S.sub; if(!x) return;
+ const W=roleW(x.r), rr=LITE.roles[x.r];
+ const cap=taskName(W).charAt(0).toUpperCase()+taskName(W).slice(1);
+ const today=new Date().toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"});
+ const blob=makePdf({
+  title: cap,
+  subtitle: `${LITE.title} · Role ${x.r}${rr.dept?" ("+rr.dept+")":""} · ${x.n} words · ${today}`,
+  body: x.memo,
+  note: (x.ai==="yes"
+   ? "This file also carries your SimLearn answers for your teacher's SimLearn tool: your information choices, your group's decisions and a copy of your text. You agreed that your teacher may check your text with AI."
+   : "This file also carries your SimLearn answers for your teacher's SimLearn tool: your information choices and your group's decisions, but not your text. You did not agree to an AI check, so your teacher will mark your text by hand.")
+   + ` Check code: ${x.code}.`,
+  footer: `SimLearn · ${LITE.title}`,
+  block: x.blockOnly, fileName: "simlearn-submission.txt"});
+ const a=document.createElement("a");
+ a.href=URL.createObjectURL(blob); a.download=`simlearn-${LITE.id}-role-${x.r}.pdf`;
+ document.body.appendChild(a); a.click(); a.remove();
+ setTimeout(()=>URL.revokeObjectURL(a.href),120000);
+ const m=document.getElementById("pdfmsg"); if(m) m.textContent="Look in your Downloads, then upload the file to Moodle. If nothing downloaded, open this page in Safari, Chrome or Firefox (not inside an app), or use the text box below.";
+}
+async function copyBlock(){
+ const ta=document.getElementById("block"), msg=document.getElementById("copied"); if(!ta) return;
+ const done=()=>{msg.textContent="Copied — now paste it into Moodle.";};
+ try{await navigator.clipboard.writeText(ta.value); return done();}catch(e){}
+ // older method: still works in many embedded frames where the modern one is blocked
+ ta.focus(); ta.select(); ta.setSelectionRange(0,ta.value.length);
+ let ok=false; try{ok=document.execCommand("copy");}catch(e){}
+ if(ok) return done();
+ msg.textContent="Your browser blocked copying. The text is selected — press Ctrl+C (or ⌘C) to copy it.";
+}
+
+// a recorded clip's text appears once the student has listened to the end (GUIDE 2h); media events don't bubble
+document.addEventListener("ended",e=>{const a=e.target; if(!a||a.tagName!=="AUDIO"||!a.dataset.f)return;
+ S.heard=Object.assign({},S.heard,{[a.dataset.f]:1}); const box=a.closest(".audio"), dt=box&&box.querySelector("details"); if(dt)dt.hidden=false; save();},true);
+
+document.addEventListener("change",e=>{if(e.target.id==="consent"){S.consent=e.target.checked;S.sub=null;S.issues=[];render();}});
+document.addEventListener("input",e=>{if(e.target.id!=="cf")return; if(S.sub){S.sub=null;const o=document.getElementById("out");if(o)o.innerHTML="";} save();});
+
+
+/* ---------- Who's who (_pro_common, 11 Nov 2026): the data is WHO in make_<code>.py ---------- */
+const WHO={"outside": "Outside Ashworth & Vale", "orgs": [{"id": "av", "name": "Ashworth & Vale", "rel": "Your company", "what": "A British heritage fashion house. Its check has been woven at its mill in the Scottish Borders since 1911.", "people": [{"id": "adrian", "name": "Adrian Hensley", "title": "Chief Executive", "tag": "boss", "line": "Leads the company. He left the voicemail."}, {"id": "divya", "name": "Divya Anand", "title": "Licensing Portfolio Manager", "roles": "A", "line": "Manages the company's licensing deals."}, {"id": "conrad", "name": "Conrad Whitfield", "title": "Quality & Compliance Lead", "roles": "A", "line": "Looks after quality and compliance, including fakes."}, {"id": "owen", "name": "Owen Radcliffe", "title": "Licensing Compliance Auditor", "roles": "A", "line": "Audits licensed products against the standard."}, {"id": "isla", "name": "Isla Fenwick", "title": "Flagship Retail Manager", "roles": "B", "line": "Runs the flagship store and talks to the stockists."}, {"id": "ifeoma", "name": "Ifeoma Achebe", "title": "Consumer Insight Analyst", "roles": "B", "line": "Studies the brand's customers."}, {"id": "ciaran", "name": "Ciaran Doyle", "title": "Resale & Streetwear Market Analyst", "roles": "B", "line": "Follows resale prices and streetwear trends."}, {"id": "selma", "name": "Selma Arkwright", "title": "Corporate Communications Manager", "roles": "C", "line": "Drafts what the company tells investors and the press."}, {"id": "tariq", "name": "Tariq Hassan", "title": "Brand Equity Research Lead", "roles": "C", "line": "Leads the brand's research."}, {"id": "dorothea", "name": "Dorothea Winslow", "title": "Senior Advisor, Heritage & Licensing", "roles": "C", "line": "A former head of licensing, now an advisor."}, {"id": "lucy", "name": "Lucy Aldous", "title": "Marketing Director", "line": "Works with the agency on the relaunch campaign."}, {"id": "malcolm", "name": "Malcolm Pryce", "title": "Former Chief Commercial Officer, retired", "tag": "witness", "line": "Was one of the company's leaders before he retired."}]}, {"id": "clydeside", "name": "Clydeside Rainwear", "rel": "A licensee", "what": "A Glasgow company that holds a licence to use the check.", "people": [{"id": "kenny", "name": "Kenny Fraser", "title": "Managing Director, Clydeside Rainwear", "tag": "witness", "line": "Runs Clydeside Rainwear."}]}, {"id": "agency", "name": "The advertising agency", "short": "The agency", "rel": "Relaunch campaign", "what": "Has a relaunch campaign ready and is holding television and poster slots for the week after the investor briefing.", "people": []}], "also": [["The Brand Equity Audit", "an internal audit from four years ago; the Board wants your view on it."], ["The factory rumour", "five years ago: a product line pulled from three countries within a week over viral posts."], ["The raincoat recall", "two years ago: a batch of licensed raincoats recalled within 48 hours."]]};
+const PRO_PHOTOS={};   // people's photos (build.py fills this in from cartridges/images/<code>_<person id>.jpg)
+const WHO_AVC=["#2C5282","#2F6B47","#9B2C2C","#7A5A0E","#5B3F8C","#1F6F78","#8C3F63","#4A5562"];
+const WHO_SRC=TABS.some(t=>t[0]==="inbox"&&t[1]==="Sources");
+function whoAvatar(p){
+ const n=p.name.replace(/^(Dr|Prof|Professor|Sir|Dame)\.?\s+/,"").split(/\s+/), ini=(n[0][0]+(n.length>1?n[n.length-1][0]:"")).toUpperCase();
+ let h=7; for(const ch of p.id) h=(h*31+ch.charCodeAt(0))>>>0;
+ return `<span class="av" style="background:${WHO_AVC[h%WHO_AVC.length]}" aria-hidden="true">${esc(ini)}${PRO_PHOTOS[p.id]?`<img src="${PRO_PHOTOS[p.id]}" alt="" onerror="this.remove()">`:""}</span>`;}
+function whoPerson(p,r){
+ const roles=p.roles||"", mine=roles.includes(r), other=roles&&!mine&&!p.tag, t=[];
+ if(p.tag==="boss") t.push(`<span class="wtag boss">${esc(p.badge||"Your boss")}</span>`);
+ if(p.tag==="witness") t.push(`<span class="wtag wit">Everyone hears from them (Investigate)</span>`);
+ if(mine) t.push(`<span class="wtag mine">${WHO_SRC?"In your sources":"In your inbox"}</span>`);
+ else if(roles) t.push(`<span class="wtag">${WHO_SRC?"Sources of":"Inbox of"}: ${roles.split("").map(x=>esc(ROLES[x].name)).join(", ")}</span>`);
+ return `<div class="wp${other?" dim":""}" data-person="${esc(p.id)}">${whoAvatar(p)}<div class="wpt"><b>${esc(p.name)}</b><span class="wjob">${esc(p.title)}</span><span class="wline">${esc(p.line)}</span>${t.length?`<span class="wtags">${t.join("")}</span>`:""}</div></div>`;}
+function whoHTML(){
+ const r=R(), team=WHO.orgs[0], out=WHO.orgs.slice(1);
+ const rank=p=>p.tag==="boss"?0:(p.roles||"").includes(r)?1:p.tag==="witness"?2:!p.roles?3:4;
+ const ov=`<section class="card"><h2>How it fits together</h2><div class="ov">
+   <div class="ovteam"><b>${esc(team.name)}</b><small>${esc(team.rel)}</small>
+    <div class="ovdepts">${Object.entries(ROLES).map(([k,v])=>`<div class="ovdept${k===r?" you":""}"><b>${esc(v.name)}</b><small>${k===r?"You":"A teammate"}</small></div>`).join("")}</div></div>
+   <div class="ovstem" aria-hidden="true"></div>
+   <div class="ovout"><b>${esc(WHO.outside||"Outside")}</b><div class="ovorgs">${out.map(o=>`<div class="ovorg"><b>${esc(o.short||o.name)}</b><small>${esc(o.rel)}</small></div>`).join("")}</div></div>
+  </div></section>`;
+ const cards=WHO.orgs.map((o,i)=>`<section class="card worg${i?"":" wteam"}"><div class="worghead"><h2>${esc(o.name)}</h2><span class="wrel">${esc(o.rel)}</span></div>
+   <p class="muted" style="margin:0">${esc(o.what)}</p>${o.people.length?`<div class="wppl">${[...o.people].sort((a,b)=>rank(a)-rank(b)).map(p=>whoPerson(p,r)).join("")}</div>`:""}</section>`).join("");
+ const also=WHO.also&&WHO.also.length?`<section class="card"><h2>Also mentioned</h2><ul class="walso">${WHO.also.map(([n,l])=>`<li><b>${esc(n)}</b>: ${esc(l)}</li>`).join("")}</ul></section>`:"";
+ return task(`Who's who in this case: the organisations, and the people in each. ${WHO_SRC?"The authors of your sources":"The people who write to you"} are marked; greyed-out people write to a teammate.`)+ov+cards+also;
+}
+V.who=whoHTML;
+
+render();
+</script>
+</body>
+</html>

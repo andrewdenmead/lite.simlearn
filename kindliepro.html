@@ -225,6 +225,42 @@ textarea{width:100%;min-height:200px;resize:vertical;font:inherit;line-height:1.
 .block{width:100%;min-height:260px;font:13px/1.45 ui-monospace,Menlo,Consolas,monospace;border:2px solid var(--blue);border-radius:10px;padding:10px 12px;background:#fff;white-space:pre-wrap;box-sizing:border-box}
 .ok{color:var(--good);font-weight:600}
 #out{display:flex;flex-direction:column;gap:10px}
+
+/* the stop after the role choice and the Who's who tab (_pro_common, 11 Nov 2026) */
+.stopc{border:2px solid var(--bad);background:var(--bad-soft)}
+.stophead{display:flex;gap:12px;align-items:center}
+.stophead h2{margin:0;font-size:1.1rem;line-height:1.35}
+.stopsign{flex:none;display:grid;place-items:center;width:58px;height:58px;background:var(--bad);color:#fff;font-weight:800;font-size:13px;letter-spacing:.06em;clip-path:polygon(30% 0,70% 0,100% 30%,100% 70%,70% 100%,30% 100%,0 70%,0 30%)}
+.ov{display:flex;flex-direction:column}
+.ovteam{border:2px solid var(--blue);background:var(--blue-soft);border-radius:10px;padding:10px 12px}
+.ovteam>b{display:block;font-size:16px}
+.ovteam>small,.ovout>small{color:var(--muted);font-size:13px}
+.ovdepts,.ovorgs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,160px),1fr));gap:6px;margin-top:8px}
+.ovdept,.ovorg{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:14px;line-height:1.3}
+.ovdept.you{border:2px solid var(--amber);background:var(--amber-soft)}
+.ovdept small,.ovorg small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.ovstem{width:2px;height:20px;background:var(--muted);margin:0 auto}
+.ovout{border:1.5px dashed var(--muted);border-radius:10px;padding:8px 12px 12px}
+.ovout>b{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-right:6px}
+.worghead{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
+.worghead h2{margin:0}
+.wrel{font-size:12.5px;font-weight:700;color:var(--blue);background:var(--blue-soft);border-radius:999px;padding:1px 9px}
+.wteam{border-color:var(--blue)}
+.wppl{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:14px}
+.wp{display:flex;gap:10px;align-items:flex-start;min-width:0}
+.wp.dim{opacity:.55}
+.av{position:relative;flex:none;width:44px;height:44px;border-radius:50%;color:#fff;font-weight:700;font-size:15px;display:grid;place-items:center;overflow:hidden}
+.av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.wpt{display:flex;flex-direction:column;min-width:0;line-height:1.35}
+.wjob{font-size:13.5px;color:var(--muted)}
+.wline{font-size:14.5px;margin-top:2px}
+.wtags{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.wtag{font-size:12px;font-weight:700;border-radius:999px;padding:1px 8px;background:var(--sunk);color:var(--muted)}
+.wtag.mine{background:var(--amber-soft);color:var(--warn)}
+.wtag.boss{background:var(--blue-soft);color:var(--blue)}
+.wtag.wit{background:var(--good-soft);color:var(--good)}
+.walso{margin:0;padding-left:1.1rem}
+.walso li{margin:3px 0}
 </style>
 </head>
 <body>
@@ -538,9 +574,9 @@ let S=fresh();
 const STORE_KEY="simlearn-pro-kindliepro";
 try{const x=JSON.parse(sessionStorage.getItem(STORE_KEY)||"null"); if(x&&typeof x==="object"&&!Array.isArray(x)) S=Object.assign(fresh(),x);}catch(e){}
 function save(){try{sessionStorage.setItem(STORE_KEY,JSON.stringify(S));}catch(e){}}
-const TABS=[["context","Context"],["inbox","Sources"],["puzzles","Team puzzles"],["investigate","Investigate"],["decide","Decide"]];
+const TABS=[["context","Context"],["who","Who's who"],["inbox","Sources"],["puzzles","Team puzzles"],["investigate","Investigate"],["decide","Decide"]];
 const ready=()=>S.unlock||(S.role&&S.fork);
-const tabOpen=t=>t==="context"||(ready()&&(["inbox","puzzles"].includes(t)||S.unlock||allPz(R())));
+const tabOpen=t=>t==="context"||(t==="who"&&!!S.role&&!!(S.go||S.fork))||(ready()&&(["inbox","puzzles"].includes(t)||S.unlock||allPz(R())));
 
 const ENDING_HASH=418548712;
 function endLockHTML(){return `<section class="card"><h2>What happened next</h2><p>When <b>everyone in your team</b> has created their submission, ask your teacher for the code to find out what happened.</p><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input id="endcode" inputmode="numeric" autocomplete="off" maxlength="4" aria-label="Code from your teacher" style="width:7em;font:inherit;padding:6px 10px;border:1px solid var(--line);border-radius:8px"><button class="btn" data-act="endcode">Open</button> <span class="msg" aria-live="polite">${S.endMsg||""}</span></div></section>`;}
@@ -550,7 +586,7 @@ function render(){
   document.getElementById("tabs").innerHTML=TABS.map(([k,l])=>`<button data-act="tab" data-v="${k}" aria-current="${S.tab===k}" ${tabOpen(k)?"":"disabled"}>${l}${k==="inbox"&&tabOpen(k)&&inboxList().some(m=>!S.mailRead[m.from+"|"+m.subj])?`<span class="tdot" aria-label="unread items"></span>`:""}</button>`).join("");
   document.getElementById("main").innerHTML=V[S.tab]();
   wrapSentences(document.getElementById("main"));
-  if(S.tab==="context"&&!S.role){const cs=[...document.querySelectorAll("#main section.card")],i=cs.findIndex(c=>/^\s*3 ·/.test((c.querySelector(".step")||{}).textContent||""));if(i>0){cs.slice(i).forEach(c=>{c.hidden=true;c.style.display="none";});cs[i-1].insertAdjacentHTML("afterend",`<section class="card" id="rolegate"><p class="note-strong" style="margin:0"><strong>Choose your role above to read on.</strong> Each of you takes a different role: agree who is who in your team first.</p></section>`);}}
+  if(S.tab==="context"&&(!S.role||!(S.go||S.fork))){const cs=[...document.querySelectorAll("#main section.card")],i=cs.findIndex(c=>/^\s*3 ·/.test((c.querySelector(".step")||{}).textContent||""));if(i>0){cs.slice(i).forEach(c=>{c.hidden=true;c.style.display="none";});cs[i-1].insertAdjacentHTML("afterend",S.role?`<section class="card stopc" id="stopgate" role="status"><div class="stophead"><span class="stopsign" aria-hidden="true">STOP</span><h2>Stop. Wait until everyone in your team has chosen a role and your teacher says go.</h2></div><p>Your role: <b>${esc(ROLES[S.role].name)}</b>. Check that each of you has a different role.</p><button class="btn" data-act="go">Go on</button></section>`:`<section class="card" id="rolegate"><p class="note-strong" style="margin:0"><strong>Choose your role above to read on.</strong> Each of you takes a different role: agree who is who in your team first.</p></section>`);}}
   const nb=document.getElementById("nb"); nb.hidden=!S.nbOpen; if(S.nbOpen) nb.innerHTML=notesHTML();
   const fab=document.getElementById("fab"); fab.hidden=!S.role; fab.textContent=`Notes (${Object.keys(S.notes[R()].hl).length+S.notes[R()].free.length})`;
   if(S.tab==="investigate"&&!S.ranked) bindDrag("rank");
@@ -689,6 +725,7 @@ function act(a,d){
   case "mv":{const L=S[d.l],i=+d.v,j=i+(+d.d);if(j<0||j>=L.length)return;flip(d.l,()=>{[L[i],L[j]]=[L[j],L[i]];});return;}
   case "sendrank":S.ranked=true;break;
   case "nbopen":S.nbOpen=true;break;
+  case "go":if(S.role)S.go=true;break;
   case "endcode":{const c=((document.getElementById("endcode")||{}).value||"").trim();if(fnv(c)===ENDING_HASH){S.endOpen=true;S.endMsg="";}else S.endMsg=c?"That isn't the code. Check it with your teacher.":"";break;}
   case "nbclose":S.nbOpen=false;break;
   case "copyref":{const k=decodeURIComponent(d.v), m=k==="news"?{cite:NEWS.cite}:inboxList().find(x=>x.from+"|"+x.subj===k); if(!m)return;
@@ -969,6 +1006,39 @@ document.addEventListener("ended",e=>{const a=e.target; if(!a||a.tagName!=="AUDI
 
 document.addEventListener("change",e=>{if(e.target.id==="consent"){S.consent=e.target.checked;S.sub=null;S.issues=[];render();}});
 document.addEventListener("input",e=>{if(e.target.id!=="cf")return; if(S.sub){S.sub=null;const o=document.getElementById("out");if(o)o.innerHTML="";} save();});
+
+
+/* ---------- Who's who (_pro_common, 11 Nov 2026): the data is WHO in make_<code>.py ---------- */
+const WHO={"outside": "Outside the commission", "orgs": [{"id": "commission", "name": "The independent commission", "short": "The commission", "rel": "Your organisation", "what": "Set up by the government to say why the unit's stories worked, whether the deception was justified, and what should happen to the unit.", "people": [{"id": "ishbel", "name": "Ishbel Rennie", "title": "Chair; Professor of Public Law, Edinburgh Stuart University", "tag": "boss", "line": "Chairs the commission. She left the voicemail."}, {"id": "aled", "name": "Aled Pryce", "title": "Counsel to the Commission", "line": "The commission's lawyer."}, {"id": "nisha", "name": "Nisha Raman", "title": "Public Health Adviser to the Commission", "line": "Advises the commission on public health."}]}, {"id": "unis", "name": "Universities and institutes", "short": "Universities", "rel": "Authors of sources", "what": "Researchers whose papers are among the evidence team's sources.", "people": [{"id": "kwaku", "name": "Kwaku Appiah", "title": "Thameside University, London", "roles": "A", "line": "Writes on how messages change behaviour."}, {"id": "eva", "name": "Eva Rosendahl", "title": "Winchester Institute of Philosophy", "roles": "B", "line": "Writes on whether deceiving the public can be justified."}, {"id": "simon", "name": "Simon Carver", "title": "University of the West Midlands", "roles": "B", "line": "Writes on whether deceiving the public can be justified."}, {"id": "matthew", "name": "Matthew Brook", "title": "Northern School of Media, Newcastle", "roles": "C", "line": "Writes on trust in the news."}, {"id": "henrietta", "name": "Henrietta Quirke", "title": "School of Government, Birmingham Midlands University", "roles": "C", "line": "Writes on how a unit like this could be governed."}]}, {"id": "research", "name": "Evaluation and campaign research", "short": "Research centres", "rel": "Evidence on the campaigns", "what": "Centres that measure what public campaigns achieve.", "people": [{"id": "laura", "name": "Laura Pendlebury", "title": "Centre for Policy Evaluation, Leeds", "roles": "A", "line": "Wrote the independent evaluation of the unit's campaigns."}, {"id": "fiona", "name": "Fiona Laird", "title": "Research Director, Campaign Effectiveness Forum", "tag": "witness", "line": "Gives evidence to the commission."}]}, {"id": "unit", "name": "The Public Safety Communications Unit", "short": "The unit", "rel": "The unit under review", "what": "A government unit that placed 412 invented items in the media from 2032 to 2034. Its work is suspended.", "people": [{"id": "peter", "name": "Peter Hext", "title": "Former Head of the Public Safety Communications Unit", "tag": "witness", "line": "Ran the unit. Gives evidence to the commission."}]}, {"id": "committee", "name": "The Commons Public Administration Committee", "short": "The Commons committee", "rel": "Will question the commission", "what": "MPs who will question the commission on its findings.", "people": []}], "also": [["The Central Office of Information", "made Britain's public information films for sixty-five years."], ["The Northern Ledger", "the paper whose article (Moffat, 2035) is in the Context."], ["The Cabinet Office", "needs the commission's terms of reference by Friday."]]};
+const PRO_PHOTOS={};   // people's photos (build.py fills this in from cartridges/images/<code>_<person id>.jpg)
+const WHO_AVC=["#2C5282","#2F6B47","#9B2C2C","#7A5A0E","#5B3F8C","#1F6F78","#8C3F63","#4A5562"];
+const WHO_SRC=TABS.some(t=>t[0]==="inbox"&&t[1]==="Sources");
+function whoAvatar(p){
+ const n=p.name.replace(/^(Dr|Prof|Professor|Sir|Dame)\.?\s+/,"").split(/\s+/), ini=(n[0][0]+(n.length>1?n[n.length-1][0]:"")).toUpperCase();
+ let h=7; for(const ch of p.id) h=(h*31+ch.charCodeAt(0))>>>0;
+ return `<span class="av" style="background:${WHO_AVC[h%WHO_AVC.length]}" aria-hidden="true">${esc(ini)}${PRO_PHOTOS[p.id]?`<img src="${PRO_PHOTOS[p.id]}" alt="" onerror="this.remove()">`:""}</span>`;}
+function whoPerson(p,r){
+ const roles=p.roles||"", mine=roles.includes(r), other=roles&&!mine&&!p.tag, t=[];
+ if(p.tag==="boss") t.push(`<span class="wtag boss">${esc(p.badge||"Your boss")}</span>`);
+ if(p.tag==="witness") t.push(`<span class="wtag wit">Everyone hears from them (Investigate)</span>`);
+ if(mine) t.push(`<span class="wtag mine">${WHO_SRC?"In your sources":"In your inbox"}</span>`);
+ else if(roles) t.push(`<span class="wtag">${WHO_SRC?"Sources of":"Inbox of"}: ${roles.split("").map(x=>esc(ROLES[x].name)).join(", ")}</span>`);
+ return `<div class="wp${other?" dim":""}" data-person="${esc(p.id)}">${whoAvatar(p)}<div class="wpt"><b>${esc(p.name)}</b><span class="wjob">${esc(p.title)}</span><span class="wline">${esc(p.line)}</span>${t.length?`<span class="wtags">${t.join("")}</span>`:""}</div></div>`;}
+function whoHTML(){
+ const r=R(), team=WHO.orgs[0], out=WHO.orgs.slice(1);
+ const rank=p=>p.tag==="boss"?0:(p.roles||"").includes(r)?1:p.tag==="witness"?2:!p.roles?3:4;
+ const ov=`<section class="card"><h2>How it fits together</h2><div class="ov">
+   <div class="ovteam"><b>${esc(team.name)}</b><small>${esc(team.rel)}</small>
+    <div class="ovdepts">${Object.entries(ROLES).map(([k,v])=>`<div class="ovdept${k===r?" you":""}"><b>${esc(v.name)}</b><small>${k===r?"You":"A teammate"}</small></div>`).join("")}</div></div>
+   <div class="ovstem" aria-hidden="true"></div>
+   <div class="ovout"><b>${esc(WHO.outside||"Outside")}</b><div class="ovorgs">${out.map(o=>`<div class="ovorg"><b>${esc(o.short||o.name)}</b><small>${esc(o.rel)}</small></div>`).join("")}</div></div>
+  </div></section>`;
+ const cards=WHO.orgs.map((o,i)=>`<section class="card worg${i?"":" wteam"}"><div class="worghead"><h2>${esc(o.name)}</h2><span class="wrel">${esc(o.rel)}</span></div>
+   <p class="muted" style="margin:0">${esc(o.what)}</p>${o.people.length?`<div class="wppl">${[...o.people].sort((a,b)=>rank(a)-rank(b)).map(p=>whoPerson(p,r)).join("")}</div>`:""}</section>`).join("");
+ const also=WHO.also&&WHO.also.length?`<section class="card"><h2>Also mentioned</h2><ul class="walso">${WHO.also.map(([n,l])=>`<li><b>${esc(n)}</b>: ${esc(l)}</li>`).join("")}</ul></section>`:"";
+ return task(`Who's who in this case: the organisations, and the people in each. ${WHO_SRC?"The authors of your sources":"The people who write to you"} are marked; greyed-out people write to a teammate.`)+ov+cards+also;
+}
+V.who=whoHTML;
 
 render();
 </script>

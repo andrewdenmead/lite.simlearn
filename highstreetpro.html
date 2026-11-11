@@ -1,0 +1,1068 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<title>The Highstreet Inquiry (Pro) — SimLearn</title>
+<link rel="icon" href="/favicon.ico" sizes="any"><link rel="icon" type="image/png" href="/favicon-32.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: Lite-style single column. Plain header, five tabs, a task line on every tab, content as cards and emails. */
+:root{
+  /* Lite's palette and fonts (studio/template.html), with Pro marked by Lite's amber on tabs and badge. Light only, like Lite. */
+  --bg:#FBFBF8; --surface:#ffffff; --sunk:#ECEFF3; --ink:#1D2733; --muted:#4A5562; --line:#D4D9E1;
+  --blue:#2C5282; --blue-soft:#EEF3F9; --amber:#C98A1B; --amber-soft:#FBF1DC;
+  --good:#2F6B47; --good-soft:#E3F0E7; --bad:#9B2C2C; --bad-soft:#F7E4E4; --warn:#7A5A0E; --warn-soft:#FBF1DC; --proto:#FBF1DC;
+  --ui:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --serif:Charter,"Bitstream Charter","Sitka Text",Cambria,Georgia,serif;
+  --mono:ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+body{background:var(--bg);color:var(--ink);font-family:var(--ui);font-size:16px;line-height:1.55}
+.wrap{max-width:860px;margin:0 auto;padding-left:max(16px, env(safe-area-inset-left,0px));padding-right:max(16px, env(safe-area-inset-right,0px))}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+h1,h2,h3{text-wrap:balance;margin:0;line-height:1.2}
+p{margin:0}
+
+.proto{background:var(--proto);border-bottom:1px dashed var(--line);font-size:13px}
+.proto .wrap{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;padding-block:7px}
+.proto b{color:var(--amber);letter-spacing:.08em;text-transform:uppercase;font-size:11px}
+.ghost{background:transparent;border:1px solid var(--line);border-radius:6px;padding:3px 10px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{background:transparent;border:0;padding:3px 10px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+
+header{background:var(--surface);border-bottom:1px solid var(--line);border-top:4px solid var(--blue)}
+header .wrap{padding-block:18px 0}
+.brand{font-weight:800;color:var(--blue);font-size:14px;letter-spacing:.02em}
+.brand span{background:var(--amber);color:#fff;border-radius:4px;padding:0 6px;margin-left:4px;font-size:12px}
+h1{font-size:clamp(26px,4.5vw,34px);font-weight:800;margin-top:4px}
+.whoami{color:var(--muted);font-size:14.5px;margin-top:2px}
+.tabs{display:flex;gap:2px;overflow-x:auto;margin-top:14px}
+.tabs button{background:transparent;border:0;border-bottom:3px solid transparent;padding:8px 12px;font-weight:700;color:var(--muted);white-space:nowrap}
+.tabs button[aria-current="true"]{color:var(--ink);border-bottom-color:var(--amber)}
+.tabs button:disabled{opacity:.4;cursor:default}
+.tdot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--amber);margin-left:6px;vertical-align:middle}
+
+main .wrap{padding-block:22px 64px;display:flex;flex-direction:column;gap:18px}
+.task{background:var(--blue-soft);border-radius:8px;padding:12px 16px;display:flex;gap:10px;align-items:baseline}
+.task b{color:var(--blue);white-space:nowrap}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card h2{font-size:21px;font-weight:800}
+.card h3{font-size:17px;font-weight:700}
+.step{font-family:var(--mono);font-size:12px;color:var(--blue)}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+.pic{aspect-ratio:16/7;max-width:100%;border-radius:6px;background:repeating-linear-gradient(135deg,var(--sunk) 0 12px,transparent 12px 24px);border:1px dashed var(--line);display:grid;place-items:center;color:var(--muted);font-size:14px;text-align:center;padding:12px}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.fact{background:var(--bg);border-radius:6px;padding:8px 12px}
+.fact .l{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+.fact .v{font-weight:700}
+.roles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}
+.role{text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.role[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft)}
+.role b{font-size:16.5px}
+.role span{font-size:14px;color:var(--muted)}
+.people{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}
+.person{border-left:3px solid var(--line);padding:2px 12px}
+.person b{display:block}
+.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:10px}
+.choice{text-align:left;background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.choice:hover:not(:disabled){border-color:var(--ink)}
+.choice[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft)}
+.choice:disabled{cursor:default}
+.choice:disabled:not([aria-pressed="true"]){opacity:.5}
+.choice .k{font-family:var(--mono);font-size:12px;color:var(--blue)}
+.choice small{color:var(--muted);font-size:14px}
+.btn{background:var(--blue);color:#fff;border:0;border-radius:8px;padding:9px 18px;font-weight:700;align-self:flex-start}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.done{background:var(--good-soft);color:var(--good);border-radius:6px;padding:8px 12px;font-weight:600}
+
+/* emails */
+.mail{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.mail summary{list-style:none;cursor:pointer;padding:12px 16px;display:grid;grid-template-columns:1fr auto;gap:2px 12px}
+.mail summary::-webkit-details-marker{display:none}
+.mail .from{font-weight:400}
+.mail .lbl{color:var(--muted);font-weight:400;margin-right:2px}
+.mail.unread .from,.mail.unread .subj{font-weight:700;color:var(--ink)}
+.udot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--blue);margin-right:8px;vertical-align:1px}
+.mail .subj{grid-column:1/2;color:var(--muted);font-size:14.5px}
+.mail .tag{grid-row:1/3;grid-column:2;align-self:center}
+.mail[open] summary{border-bottom:1px solid var(--line);background:var(--bg)}
+.mail .body p,.card>p,.attach>p{font-family:var(--serif);font-size:1.02rem;line-height:1.62}
+.mail .body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:10px}
+.sig{color:var(--muted)}
+.attach{border:1px solid var(--line);border-radius:6px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.attach .an{font-size:12.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.fine{font-size:13px;color:var(--muted);border-top:1px dotted var(--line);padding-top:6px}
+.rel{font-size:11.5px;font-weight:700;padding:1px 8px;border-radius:99px;white-space:nowrap}
+.rel-high{background:var(--good-soft);color:var(--good)}
+.rel-medium{background:var(--warn-soft);color:var(--warn)}
+.rel-low{background:var(--bad-soft);color:var(--bad)}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+td.num,th.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.mono{font-family:var(--mono);font-size:.9em}
+svg text{fill:var(--muted);font-family:var(--ui);font-size:12px}
+svg .lab{fill:var(--ink);font-size:13px}
+svg .val{fill:var(--ink);font-family:var(--mono);font-size:12px}
+svg .axis{stroke:var(--line)} svg .zero{stroke:var(--muted)}
+svg .neg{fill:var(--bad)} svg .pos{fill:var(--good)}
+svg .ring-bg{stroke:var(--sunk);fill:none} svg .ring{stroke:var(--amber);fill:none}
+.donuts{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:6px}
+.donuts figure{margin:0;text-align:center;font-size:13.5px}
+
+/* audio placeholder */
+.audio{background:var(--blue-soft);border-radius:8px;padding:10px 14px;display:grid;grid-template-columns:auto 1fr;gap:2px 12px;align-items:center}
+.audio .play{width:36px;height:36px;border-radius:50%;border:1.5px dashed var(--blue);background:transparent;color:var(--blue);cursor:not-allowed}
+.audio .t{font-weight:700}
+.audio .s{font-size:13px;color:var(--muted)}
+.audio details{grid-column:1/-1;font-size:14px}
+.audio summary{cursor:pointer;color:var(--blue);font-weight:600}
+.script{display:flex;flex-direction:column;gap:8px;padding-top:6px}
+.sd{font-style:italic;color:var(--muted);font-size:13.5px}
+
+/* investigate */
+.qs{display:flex;flex-direction:column;gap:8px}
+.q{text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:6px;padding:9px 12px}
+.q[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft)}
+.q:disabled:not([aria-pressed="true"]){opacity:.45;cursor:default}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:14px}
+.two>*{min-width:0}
+
+/* timeline */
+.tl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.tc{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;user-select:none}
+.tc[draggable="true"]{cursor:grab}
+.tc.dragging{opacity:.4}
+.tc.over{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-soft)}
+.tc .n{font-family:var(--mono);color:var(--muted);text-align:center}
+.tc .d{display:block;font-family:var(--mono);font-size:12.5px;color:var(--good)}
+.tc .arr{display:flex;gap:4px}
+.tc .arr button{width:34px;height:34px;border-radius:6px;border:1px solid var(--line);background:var(--bg)}
+.tc .arr button:disabled{opacity:.3;cursor:default}
+.tl.ok .tc{border-color:var(--good)}
+.note-strong{background:var(--amber-soft);border-radius:8px;padding:8px 12px}
+.hint{background:var(--warn-soft);border-radius:6px;padding:9px 12px}
+.opt{text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:6px;padding:8px 12px}
+.opt.right{border-color:var(--good);background:var(--good-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.opt:disabled{cursor:default}
+.fb{font-size:14.5px}
+
+textarea{width:100%;min-height:200px;resize:vertical;font:inherit;line-height:1.6;padding:10px 12px;border:1.5px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);box-sizing:border-box}
+.wc{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.board{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:10px}
+.tile{background:var(--bg);border-radius:6px;padding:10px 12px}
+.tile .l{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+.tile .v{font-weight:700}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+.sn{cursor:pointer;border-radius:3px;transition:background .15s}
+.sn:hover{box-shadow:inset 0 -2px 0 var(--amber)}
+#hlpal{position:absolute;z-index:30;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px;display:flex;gap:6px;box-shadow:0 4px 14px rgba(0,0,0,.15)}
+#hlpal[hidden]{display:none}
+#hlpal button{width:28px;height:28px;border-radius:50%;border:1px solid rgba(0,0,0,.15);cursor:pointer}
+#hlpal .none{background:var(--surface);color:var(--muted)}
+#fab{position:fixed;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:20;background:var(--blue);color:#fff;border:0;border-radius:999px;padding:10px 18px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+#fab[hidden],#nb[hidden]{display:none}
+#nb{position:fixed;top:0;right:0;bottom:0;width:min(380px,100vw);z-index:25;background:var(--bg);border-left:1px solid var(--line);overflow-y:auto;padding:calc(14px + env(safe-area-inset-top,0px)) 16px 24px;box-shadow:-6px 0 20px rgba(0,0,0,.12);display:flex;flex-direction:column;gap:10px;box-sizing:border-box}
+.nbhead{display:flex;justify-content:space-between;align-items:center}
+.nbhead h2{font-size:18px}
+.lnk{background:none;border:0;color:var(--blue);text-decoration:underline;padding:0;font-size:14px;cursor:pointer}
+.cc summary{cursor:pointer;display:flex;gap:4px;align-items:center;font-weight:600;font-size:14px}
+.cc i,.nbgroup i{display:inline-block;width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.15);flex:none}
+.ccgrid{display:grid;gap:6px;margin-top:8px}
+.ccgrid label{display:flex;gap:8px;align-items:center}
+.ccgrid input{flex:1;font:inherit;font-size:14px;padding:4px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
+.nbadd{display:flex;flex-direction:column;gap:6px}
+.nbadd textarea{min-height:60px;font-size:14px}
+.btn.small{padding:6px 12px;font-size:14px}
+.nbgroup{display:flex;gap:6px;align-items:center;font-weight:700;font-size:14px;margin-top:6px}
+.nbcard{background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--line);border-radius:8px;padding:8px 10px}
+.nbcard p{font-family:var(--serif);font-size:15px;line-height:1.5}
+.nbcard .src{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-between;gap:8px;margin-top:4px}
+.gate{border:2px dashed var(--amber)}
+.coderow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.coderow input,.numin{font-family:var(--mono);font-size:18px;padding:6px 10px;border:1.5px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);width:12ch}
+.bigcode{font-family:var(--mono);font-size:34px;letter-spacing:.2em;color:var(--good);border:2px solid var(--good);border-radius:8px;padding:6px 18px;align-self:flex-start}
+.pzq{display:flex;flex-direction:column;gap:6px;border-top:1px dotted var(--line);padding-top:10px}
+.opts2{display:flex;flex-wrap:wrap;gap:6px}
+.opts2 .opt[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft)}
+.msg{color:var(--bad);font-size:14px}
+.sortq{display:flex;flex-direction:column;gap:8px}
+.sortrow{display:grid;grid-template-columns:1fr minmax(170px,auto);gap:10px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--bg)}
+.sortrow p{font-family:var(--serif);font-size:15px}
+.sortrow select{font:inherit;font-size:14px;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
+@media (max-width:560px){.sortrow{grid-template-columns:1fr}}
+.opts2 .opt{text-align:left}
+svg .sa{fill:var(--blue)} svg .sb{fill:var(--amber)}
+.legend{display:flex;gap:14px;font-size:13px;color:var(--muted);flex-wrap:wrap}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.sums{width:100%;font-size:14px}
+.sums td.num{white-space:nowrap}
+.sums tr.tot td{font-weight:800;border-top:2px solid var(--ink)}
+
+/* Lite's hand-in (studio/template.html), added for the Pro hand-in */
+.consent{border:1px solid var(--line);background:#fff;border-radius:12px;padding:14px 16px;margin:6px 0}
+.consent label{display:flex;gap:10px;align-items:flex-start;font-weight:600;margin-top:8px}
+.consent input{margin-top:5px;width:18px;height:18px}
+.issues{color:var(--warn);font-size:.92rem}
+.block{width:100%;min-height:260px;font:13px/1.45 ui-monospace,Menlo,Consolas,monospace;border:2px solid var(--blue);border-radius:10px;padding:10px 12px;background:#fff;white-space:pre-wrap;box-sizing:border-box}
+.ok{color:var(--good);font-weight:600}
+#out{display:flex;flex-direction:column;gap:10px}
+
+/* the stop after the role choice and the Who's who tab (_pro_common, 11 Nov 2026) */
+.stopc{border:2px solid var(--bad);background:var(--bad-soft)}
+.stophead{display:flex;gap:12px;align-items:center}
+.stophead h2{margin:0;font-size:1.1rem;line-height:1.35}
+.stopsign{flex:none;display:grid;place-items:center;width:58px;height:58px;background:var(--bad);color:#fff;font-weight:800;font-size:13px;letter-spacing:.06em;clip-path:polygon(30% 0,70% 0,100% 30%,100% 70%,70% 100%,30% 100%,0 70%,0 30%)}
+.ov{display:flex;flex-direction:column}
+.ovteam{border:2px solid var(--blue);background:var(--blue-soft);border-radius:10px;padding:10px 12px}
+.ovteam>b{display:block;font-size:16px}
+.ovteam>small,.ovout>small{color:var(--muted);font-size:13px}
+.ovdepts,.ovorgs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,160px),1fr));gap:6px;margin-top:8px}
+.ovdept,.ovorg{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:14px;line-height:1.3}
+.ovdept.you{border:2px solid var(--amber);background:var(--amber-soft)}
+.ovdept small,.ovorg small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.ovstem{width:2px;height:20px;background:var(--muted);margin:0 auto}
+.ovout{border:1.5px dashed var(--muted);border-radius:10px;padding:8px 12px 12px}
+.ovout>b{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-right:6px}
+.worghead{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
+.worghead h2{margin:0}
+.wrel{font-size:12.5px;font-weight:700;color:var(--blue);background:var(--blue-soft);border-radius:999px;padding:1px 9px}
+.wteam{border-color:var(--blue)}
+.wppl{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:14px}
+.wp{display:flex;gap:10px;align-items:flex-start;min-width:0}
+.wp.dim{opacity:.55}
+.av{position:relative;flex:none;width:44px;height:44px;border-radius:50%;color:#fff;font-weight:700;font-size:15px;display:grid;place-items:center;overflow:hidden}
+.av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.wpt{display:flex;flex-direction:column;min-width:0;line-height:1.35}
+.wjob{font-size:13.5px;color:var(--muted)}
+.wline{font-size:14.5px;margin-top:2px}
+.wtags{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.wtag{font-size:12px;font-weight:700;border-radius:999px;padding:1px 8px;background:var(--sunk);color:var(--muted)}
+.wtag.mine{background:var(--amber-soft);color:var(--warn)}
+.wtag.boss{background:var(--blue-soft);color:var(--blue)}
+.wtag.wit{background:var(--good-soft);color:var(--good)}
+.walso{margin:0;padding-left:1.1rem}
+.walso li{margin:3px 0}
+</style>
+</head>
+<body>
+
+
+<header><div class="wrap">
+  <div class="brand">SimLearn<span>PRO</span></div>
+  <h1>The Highstreet Inquiry</h1>
+  <p class="whoami" id="who"></p>
+  <nav class="tabs" id="tabs" aria-label="Sections"></nav>
+</div></header>
+<main><div class="wrap" id="main"></div></main>
+<div id="hlpal" hidden role="dialog" aria-label="Highlight colour"><button data-hlc="yellow" style="background:#FFF176" aria-label="Yellow"></button><button data-hlc="green" style="background:#B9F6CA" aria-label="Green"></button><button data-hlc="pink" style="background:#F8BBD0" aria-label="Pink"></button><button data-hlc="blue" style="background:#B3E5FC" aria-label="Blue"></button><button data-hlc="orange" style="background:#FFE0B2" aria-label="Orange"></button><button data-hlc="purple" style="background:#E1BEE7" aria-label="Purple"></button><button data-hlc="none" class="none" aria-label="Remove highlight">✕</button></div>
+<button id="fab" data-act="nbopen" hidden>Notes (0)</button>
+<aside id="nb" hidden aria-label="Your highlights and notes"></aside>
+
+<script>
+const ROLES={
+ A:{name:"Creative & Production Analyst",line:"The film, the trailer and how it was cut",detail:"You look at the film itself and the trailer that sold it: how it was made, how it was cut and what test audiences said. Your inbox holds messages from Beacon's story department and its cutting room."},
+ B:{name:"Audience & Market Analyst",line:"Who came, what they thought and what they said",detail:"You look at the audience: who bought tickets, how they reacted, and what critics and filmgoers said afterwards. Your inbox holds messages from a cinema chain and a film critic."},
+ C:{name:"Leadership & Communications Analyst",line:"Who decided what, and who knew",detail:"You look at the decisions: who saw which warnings, what leadership decided and what the studio said in public. Your inbox holds messages from Beacon's heads of marketing and communications."}
+};
+const REL={high:"Reliable",medium:"Personal view",low:"Weak evidence"};
+const fmt=n=>(n<0?"−":"")+"$"+Math.abs(n).toLocaleString("en-GB");
+
+const PRO_COVER="";   // the cover picture (build.py fills this in)
+const PRO_AUDIO=[];   // the recordings published next to the page (build.py fills this in)
+function audio(t,voice,script,file){if(file&&PRO_AUDIO.includes(file))return `<div class="audio rec"><div style="flex:1;min-width:0"><div class="t">${t}</div><audio controls preload="none" data-f="${file}" src="audio/${file}.mp3" style="width:100%;margin-top:6px"></audio></div><details data-tf="${file}" ${(S.heard||{})[file]?"":"hidden"} ${(S.tOpen||{})[file]?"open":""}><summary>Show the text</summary><div class="script" data-src="${esc(t)}" data-q="medium">${script}</div></details></div>`;
+ return `<div class="audio"><button class="play" disabled aria-label="Play (recording to come)">▶</button><div><div class="t">${t}</div><div class="s">Recording to come: read the text</div></div><details open><summary>The text</summary><div class="script" data-src="${esc(t)}" data-q="medium">${script}</div></details></div>`;}
+function mail(m){const k=m.from+"|"+m.subj, o=!!S.mailOpen[k], r=!!S.mailRead[k];
+ return `<details class="mail ${r?"read":"unread"}" data-mail="${encodeURIComponent(k)}"${o?" open":""}><summary><span class="from">${r?"":`<span class="udot" aria-label="Unread"></span>`}<span class="lbl">From:</span> ${m.from}</span><span class="subj">${m.subj}</span></summary><div class="body" data-src="${m.from.split(",")[0]}" data-q="${m.rel}">${m.body}</div></details>`;}
+function att(name,html){return `<div class="attach"><div class="an">📎 ${name}</div>${html}</div>`;}
+
+/* ---------- inboxes (Lite's emails, with the Pro's few additions) ---------- */
+const FWD={from:"Renata Cole, Chief Content Officer",subj:"Fwd: “Stormbreak ate Highstreet alive”",rel:"low",body:`
+ <p>This is doing the rounds upstairs. For what it's worth.</p>
+ <p class="muted"><em>“No family film survives opening against Stormbreak. Highstreet never stood a chance. Blame the calendar, not the campaign.”</em> (box-office blogger, 1.2 million followers, Monday)</p>
+ <p class="fine">The post gives no figures beyond the opening weekend.</p>`};
+
+const INBOX={
+ A:[
+  {from:"Naomi Blackwood, Story Editor, Beacon Pictures",subj:"The memo nobody wants to talk about",rel:"high",body:`
+   <p>I should tell you directly, since I don't think anyone else will. Six weeks before release, I sent a memo to marketing leadership about a pattern in our test-screening comment cards. Forty-one per cent of the audience used words like “confusing” or “not what I expected” when they compared the trailer they'd seen with the film. That's not a normal number for us, and our “definite recommend” score was only 58 per cent.</p>
+   <p>I named the problem clearly, in writing: the film is a pointed story about debt and who gets to own a home, and the marketing was selling something much lighter.</p>
+   <p>To be clear, the cards didn't say the film was bad. Plenty of people praised the writing and the family's story. What they disliked was the surprise.</p>
+   <p>What I don't know is whether anyone else in the building saw the same risk before release.</p>
+   ${att("Three of the test-screening comment cards",`<p>“Great writing. But the trailer made it look like a party game.”</p><p>“Not what I expected. My two kids were confused.”</p><p>“Moving. I had no idea it would be about losing a home.”</p>`)}
+   <p class="sig">Naomi</p>`},
+  {from:"Kwame Osei, Trailer Editor, Beacon Pictures",subj:"How many versions of that trailer did you see?",rel:"high",body:`
+   <p>Happy to walk you through the cutting process, because I think it matters more than people realise. I cut the teaser trailer four times. Each round, at marketing's request, I removed more of the film's central storyline, a family facing eviction, and added more comedy and nostalgic board-game moments. The version that shipped used less than ten seconds of the eviction story in a two-and-a-half-minute trailer.</p>
+   <p>The director noticed and asked twice to keep the family's story in: once after marketing's first round of notes, and again six weeks before release. Both times the studio said it was too late to change course.</p>
+   <p>One more fact: only my second cut ever went in front of a test audience. The fourth, the one that shipped, was never tested.</p>
+   <p>In fairness to marketing, the light version did very well online, with more views and shares than any Beacon trailer before it. They'd tell you the promise is theirs to make, because they carry the commercial risk.</p>
+   ${att("My cutting-room log",`<div class="tw"><table><thead><tr><th>Cut</th><th>The family's story</th><th>Tested?</th></tr></thead><tbody>
+    <tr><td>1</td><td>About 40 seconds</td><td>No</td></tr>
+    <tr><td>2</td><td>About 25 seconds</td><td>Yes, with a test audience</td></tr>
+    <tr><td>3</td><td>About 15 seconds</td><td>No</td></tr>
+    <tr><td>4 (shipped)</td><td>Under 10 seconds</td><td>No</td></tr></tbody></table></div>`)}
+   <p class="sig">Kwame</p>`}
+ ],
+ B:[
+  {from:"Diego Ferraro, Exhibitor Relations, Silverline Cinemas",subj:"The exit-poll numbers, if you want the real picture",rel:"high",body:`
+   <p>I can give you the actual opening-weekend numbers rather than the trade headlines. Our pre-show surveys showed the audience was mainly families expecting light, nostalgic entertainment: that's who the marketing brought in. Our exit polls showed “would recommend” scores collapsing in exactly that family group, down to about a third of our usual level for a wide family release. Meanwhile, a smaller group of adult cinemagoers who usually watch more serious films rated it highly, with some of the best scores we've seen from them all year.</p>
+   <p>You could see it online too. By the Sunday, the clips people were sharing were scenes of the family packing up their home, with captions like “they said this was a comedy”.</p>
+   <p>Then the second weekend: down about 65 per cent. For a family film with an opening like that, we'd normally expect 35 to 40.</p>
+   <p>What I can't tell from my side is whether that mismatch was predictable before release.</p>
+   ${att("Silverline exit polls, opening weekend: “would recommend”",`<div class="tw"><table><thead><tr><th>Group</th><th class="num">Highstreet</th><th class="num">Our usual level</th></tr></thead><tbody>
+    <tr><td>Families with children</td><td class="num">24%</td><td class="num">72%</td></tr>
+    <tr><td>Adults who usually watch more serious films</td><td class="num">89%</td><td class="num">74%</td></tr></tbody></table></div>`)}
+   <p class="sig">Diego</p>`},
+  {from:"Idris Bakare, Film Critic, The Weekly Reel",subj:"What critics actually said, versus what got repeated",rel:"medium",body:`
+   <p>I think the trade coverage has flattened what actually happened, so let me be precise. Critics were genuinely positive about the writing and the film's message, and several reviews praised how it handled the housing story. But an unusual number of reviews, written independently, used some version of the same phrase: “the marketing sold a different movie.”</p>
+   <p>Ordinary filmgoers' reviews, not critics', were harshest on one point: feeling misled by the campaign. They complained about that far more than about the film itself. Several people wrote that they had taken their children because the trailer looked like a family comedy, and left halfway through. That isn't a reaction to a bad film. It's a reaction to a broken promise, and it's the kind that spreads by word of mouth.</p>
+   <p>What I don't know is whether anyone inside the studio said the same thing before release.</p>
+   <p class="sig">Idris</p>`}
+ ],
+ C:[
+  {from:"Julia Ferris, Head of Global Marketing, Beacon Pictures",subj:"I made that call, and I'd want you to understand why",rel:"medium",body:`
+   <p>I want to tell you this myself rather than have you piece it together second-hand. I read Naomi Blackwood's memo before release, including her figure of 41 per cent, and I decided not to change course. We had followed the same light, nostalgic playbook as last year's big toy adaptation, and that film became one of the biggest cultural moments the industry had seen in years.</p>
+   <p>By the time the memo landed, our partners had built stock and displays for over two thousand shops around that lighter tone, and I understood their contracts to mean penalties for any major change so close to release. The board treated a change as off the table. The director had raised the tone with me as well, and I gave the same answer: it was too late.</p>
+   <p>And remember Halbrook: we once spent millions reacting to a few test comments, for nothing.</p>
+   <p>I made a defensible decision with the information I had, but I don't know for certain it was the right one. What I haven't seen is the cinemas' exit-poll data, broken down by audience.</p>
+   <p class="sig">Julia</p>`},
+  {from:"Malik Harlan, Head of Communications, Beacon Pictures",subj:"The gap between what we said and what we knew",rel:"high",body:`
+   <p>I'll give you the full picture rather than the version that's easiest to repeat. In public, our messaging expressed full confidence throughout the campaign, and we never mentioned any internal concerns. That's fairly standard. Separately, though, my own team wrote an internal risk memo about a month before release that rated “audience expectation mismatch” as a moderate-to-high risk. That memo stayed in my department. Risk memos go to the department head, there's no rule for when one must go higher, and it was never formally passed on to the wider leadership group.</p>
+   <p>Then, within 48 hours of release, my press office was answering questions about clips of the eviction scenes that had spread online without any context.</p>
+   <p>What I don't know is whether the trailer that shipped was the version the studio originally tested.</p>
+   ${att("Communications risk register, one month before release",`<div class="tw"><table><thead><tr><th>Risk</th><th>Rating</th><th>Passed on?</th></tr></thead><tbody>
+    <tr><td>Audience expectation mismatch</td><td>Moderate-to-high</td><td>No</td></tr>
+    <tr><td>Release date against Stormbreak</td><td>Low</td><td>No</td></tr>
+    <tr><td>Partner stock arriving late</td><td>Low</td><td>No</td></tr></tbody></table></div>`)}
+   <p class="sig">Malik</p>`}
+ ]
+};
+const BRANCH={
+ ask:{from:"Jade Morrow, Social & Fan Engagement Lead, Beacon Pictures",subj:"The fan survey: 14,200 replies",rel:"medium",body:`
+  <p>The survey closed last night: 14,200 replies in two days. The top answer to “Why didn't Highstreet do better?” was “Too many big films at once” (44%), then “The trailer didn't match the film” (29%).</p>
+  <p>To be honest about who answered: most of them follow us on social media, and about half never saw Highstreet. Among the people who did see it, the trailer answer came top, at 52%. The press liked the story, though: two trade papers wrote that Beacon is listening to its fans.</p><p class="sig">Jade</p>`},
+ quiet:{from:"Priya Shah, Head of Insight, Silverline Cinemas",subj:"Screening-level data, in confidence",rel:"high",body:`
+  <p>Thank you for keeping this private. As promised, here is our screening-level data, in confidence. In week two, our daytime screenings of Highstreet (before 6 pm, mostly families) fell 74%. Evening screenings, mostly adults, fell 41%. Stormbreak's daytime screenings fell 38% over the same weekend.</p>
+  <p>Our staff also logged families leaving before the end in about one in four family screenings on the first Saturday. That's very unusual. In fairness, Stormbreak did take most of our largest screens on the opening weekend.</p><p class="sig">Priya Shah</p>`}
+};
+
+/* ---------- experts: one per role, from a shortlist ---------- */
+const EXPERTS={
+ trailer:{name:"Trailer-campaign veteran",who:"Sam Whitlock, former head of trailers at a rival studio",what:"Cut and approved trailers for twenty-five years. Can tell you how trailers go wrong, and how long a fix takes.",
+  rep:`<p>A trailer can be recut in about ten days, and a new version can be online within two weeks. Partner products, shop displays and the release date don't have to change for that: only the footage in the trailer does.</p>
+   <p>The studios I trust screen every final cut against the finished film before anything goes out, in a room with the director, the story editor and the trailer editor. The director is usually the first to spot a mismatch, because they know which scenes carry the story.</p>
+   <p>The worst case I see again and again: one version is tested, a later version ships, and nobody who has seen the film signs it off.</p>`},
+ audience:{name:"Word-of-mouth researcher",who:"Dr Kofi Mensah, independent audience researcher",what:"Studies how audiences talk about films after they've seen them, online and off.",
+  rep:`<p>Audiences who expect one kind of film and get another are about twice as likely to tell friends not to go, even when they rate the film itself as good. A surprise like that feels like being tricked.</p>
+   <p>After it, the clips people share online are almost always the scenes the marketing left out. They become the film's real trailer, and they travel faster than the paid one.</p>
+   <p>Good reviews rarely fix it: critics judge the film, while ordinary audiences judge the whole promise.</p>`},
+ crisis:{name:"Communications adviser",who:"Helen Strachan, crisis communications consultant, Edinburgh",what:"Advises studios on how warnings travel inside a company, and what happens when they don't.",
+  rep:`<p>Projecting confidence in public is normal: every studio does it. What matters is what happens inside the building.</p>
+   <p>In most of the post-mortems I've worked on, someone had written the problem down before launch, usually someone outside marketing. The warning died because there was no route for it: it went to a department head and stopped there.</p>
+   <p>The studios that learn from this set a rule: any written concern about whether a campaign matches its film goes straight to the final sign-off meeting, and somebody has to answer it in writing.</p>`},
+ boxoffice:{name:"Box-office statistician",who:"Dr Amara Lind, box-office data analyst",what:"Has analysed thousands of releases. Can tell you what the numbers say about a flop.",
+  rep:`<p>I compared 40 recent wide releases that opened against a rival blockbuster. Head-to-head dates went with success about as often as with failure. A rival usually costs a film some of its opening weekend, not its second.</p>
+   <p>The second-weekend drop is what tells you about word of mouth. A healthy family film drops 30 to 40 per cent. A drop of 60 per cent or more nearly always means audiences are telling each other not to go.</p>
+   <p>Bad luck exists, but it rarely explains a collapse in week two.</p>`},
+ testing:{name:"Test-screening researcher",who:"Marta Kowalski, audience-testing consultant",what:"Has run test screenings for studios for fifteen years. Knows what a normal result looks like.",
+  rep:`<p>Most studios treat a “definite recommend” score below 70 per cent as a real warning sign, not noise. Yet in roughly two out of three cases where a film misses that line, the studio goes ahead with its original marketing plan.</p>
+   <p>On a normal studio film, about one comment card in ten says “confusing” or “not what I expected”. Above a quarter is rare, and when it happens it is almost always about the marketing, not the film.</p>
+   <p>A handful of angry cards is noise. A pattern across hundreds of cards is a signal.</p>`},
+ partners:{name:"Entertainment lawyer",who:"Ruth Adair, brand-partnership lawyer",what:"Writes the contracts between studios and their brand partners.",
+  rep:`<p>Most partner contracts protect three things: the release date, the film's title, and the logo, characters and colours on the partners' products. Penalties apply if the studio changes those.</p>
+   <p>Trailers, posters and online adverts are usually the studio's own business. Changing them is rarely a breach, though partners like to be told in advance.</p>
+   <p>The most common mistake I see is a studio assuming its whole campaign is locked when only the products are.</p>`}
+};
+const SHORTLIST={A:["trailer","audience","crisis"],B:["audience","boxoffice","testing"],C:["testing","partners","crisis"]};
+
+const WIT={
+ theo:{name:"Theo Lockhart",role:"Head of Brand Partnerships, Beacon Pictures",voice:"male, General American, upbeat and smooth",
+  account:`<p class="sd">[A busy office. Upbeat and fast, a salesman's energy.]</p><p>Look, the partner programme was the best thing about Highstreet. Forty-two partners, products in over two thousand shops, the biggest programme in Beacon's history. Everyone loved the bright look.</p><p>Then Stormbreak opened on the same weekend and took the families. That's the story. And once partners sign, the campaign's locked. That's how these deals work. Nobody could have changed course six weeks out.</p>`,
+  qs:[["Why did the partners matter so much?","They paid for a lot of the advertising. Every mug and cushion in a shop window was a free advert for the film, and the partners promoted it in their own stores too. You don't throw that away."],
+      ["How did the partners' products sell?","Brilliantly, before release. After the second weekend, most shops cut their prices by half, and some sent stock back. The products were fine. People just stopped talking about the film."],
+      ["What did the partner contracts protect?","[pause] The release date, the title, and the look on the products: the colours, the logo, the game pieces. The trailer wasn't in the contracts. A new trailer was never a breach. Nobody asked me."]]},
+ callum:{name:"Callum Rae",role:"Director of Highstreet",voice:"male, Dundee accent, quiet and careful",
+  account:`<p class="sd">[A quiet edit suite. Slow and careful.]</p><p>I made a film about a family losing their home. It's funny in places, because families are funny, even on their worst days. But it was never a comedy. I'm proud of it, and I'd make it the same way again.</p><p>What I didn't make is the film in the trailer. I said so. More than once.</p>`,
+  qs:[["What did you ask the studio for?","To keep the family's story in the trailer. Twice: after marketing's first notes, and again six weeks before release. Both times I was told it was too late."],
+      ["Did you see the final trailer before it went out?","No. I saw the second cut, the one they tested. The final one I saw online the day it launched. Nobody asked me to sign anything off."],
+      ["How did the audiences who came for the film react?","Wonderfully. I've had letters from people who've lost homes themselves, and some of the best reviews of my career. They just weren't the people the posters had invited."]]}
+};
+
+const CHECKS=[
+ {q:"What did 41% of the test-screening cards say?",right:1,opts:["That the film was too long","That it was confusing or not what they expected","That the tickets cost too much"],
+  why:"Naomi's memo: 41% used words like “confusing” or “not what I expected” when they compared the trailer with the film. Julia read the same figure before release."},
+ {q:"Which audience rated Highstreet highest in Silverline's exit polls?",right:0,opts:["Adults who usually watch more serious films","Families with children","Teenagers who know the board game"],
+  why:"Diego: families' “would recommend” scores fell to about a third of the usual level, while adults who usually watch serious films gave some of their best scores of the year."},
+ {q:"Who left important facts out of their story?",right:1,opts:["Callum","Theo","Naomi"],
+  why:"Theo said the campaign was locked once partners signed. His contracts protected the release date, the title and the look on the products, not the trailer."}
+];
+
+const DEC={
+ d1:["Finding 1: What was the main cause?",
+   ["A tone mismatch","The campaign created a real mismatch between the tone it promised and what the finished film delivered. Beacon would re-market the home release with a new trailer and key art: about $300,000."],
+   ["Bad luck and timing","The campaign ran into bad luck and a crowded release calendar: factors largely outside its control. The home release keeps the current campaign: no extra cost."]],
+ d2:["Finding 2: Was there a clear early warning?",
+   ["A clear warning","The test-screening comment pattern was a clear warning that should have triggered a strategy review. Beacon would add a red-flag rule (a low test score or a high mismatch rate triggers a review): about $80,000 a year."],
+   ["No reliable signal","Nothing available at the time was a reliable enough signal to justify changing an expensive, already-committed campaign. No new rule and no extra cost."]],
+ d3:["Finding 3: Who should own tone accuracy?",
+   ["Marketing and leadership","They own the external promise and carry the commercial consequences, even though they see the finished film last. No extra cost."],
+   ["Creative and production","They see the finished film first, even though marketing carries the commercial risk. A sign-off screening of every final trailer, with the power to stop it: about $100,000 a film and two weeks."]]
+};
+
+const RANK=[["r1","The campaign promised a different film from the one in cinemas"],["r2","Stormbreak opened on the same weekend"],["r3","There was too little advertising in the final fortnight"],["r4","Critics turned against the film"],["r5","Audiences are tired of films based on games and toys"]];
+const RANK_START=["r2","r3","r5","r1","r4"];
+const REPLIES={
+ r1:()=>`<p>You've put the gap between the campaign and the film first. That's the hardest answer for this building, so thank you. I've paused the Marble Run partner brief until the people who have seen the finished film agree what it's really about. Kwame has offered to start a new home-release trailer for Highstreet straight away.</p><p>I've also asked Naomi for the full card data. It's in your inbox.</p>`,
+ r2:()=>`<p>Right. If the date was the problem, Marble Run won't make the same mistake. I've moved it three weeks away from the big summer releases. Julia says the partners will need new dates on their packaging.</p>`,
+ r3:()=>`<p>I've approved another $500,000 of advertising for Highstreet's home release, using the campaign we already have. If people didn't know about the film, they will now.</p>`,
+ r4:()=>`<p>I've asked Malik to set up early screenings and a critics' programme for Marble Run: $60,000. We need critics on our side next time.</p>`,
+ r5:()=>`<p>I've commissioned a trends report on films based on games and toys, for $25,000. If audiences are tired of them, Marble Run needs to know.</p>`
+};
+function reply(){
+ const first=S.rank[0], p=S.rank.indexOf("r1");
+ let extra="";
+ if(first!=="r1"&&p===1) extra="<p>You've put the campaign and the film second, so I've asked Naomi to send me her card data as well.</p>";
+ return {from:"Renata Cole, Chief Content Officer",subj:"Re: Interim briefing",rel:"medium",body:REPLIES[first]()+extra+`<p class="sig">Renata</p>`};
+}
+const CONSEQ={
+ r1:{from:"Naomi Blackwood, Story Editor, Beacon Pictures",subj:"The full card data, as Renata asked",rel:"high",body:`<p>Renata asked for the full test-screening data, so here it is, split by who came. Families were about six in ten of the test audience.</p>
+   ${att("Test screening: comment cards and scores, by group",`<div class="tw"><table><thead><tr><th>Group</th><th class="num">“Confusing” or “not what I expected”</th><th class="num">“Definite recommend”</th></tr></thead><tbody>
+    <tr><td>Families with children</td><td class="num">58%</td><td class="num">44%</td></tr>
+    <tr><td>Adults without children</td><td class="num">17%</td><td class="num">78%</td></tr>
+    <tr><td><b>Whole audience</b></td><td class="num"><b>41%</b></td><td class="num"><b>58%</b></td></tr></tbody></table></div>`)}<p>The adults loved it. The families had been promised something else.</p><p class="sig">Naomi</p>`},
+ r2:{from:"Julia Ferris, Head of Global Marketing, Beacon Pictures",subj:"Moving Marble Run",rel:"medium",body:`<p>Renata has moved Marble Run's release by three weeks. Our fourteen partners need new dates on their packaging: about $350,000. We also lose the first week of the school holidays, which our planners value at about $250,000 at the box office.</p><p>I'll be honest: I'm not sure the date was ever our real problem.</p><p class="sig">Julia</p>`},
+ r3:{from:"Diego Ferraro, Exhibitor Relations, Silverline Cinemas",subj:"The new adverts",rel:"high",body:`<p>Your new adverts are everywhere, and more people are clicking through to Highstreet's home-release page. But the reviews underneath still say the same thing: “not what I expected”. People know about the film. The adverts just keep making the same promise.</p><p class="sig">Diego</p>`},
+ r4:{from:"Idris Bakare, Film Critic, The Weekly Reel",subj:"Your critics' programme",rel:"medium",body:`<p>Thanks for the invitation to Beacon's new critics' programme. But I should say it plainly: critics weren't Highstreet's problem. Most of us liked the film. It was ordinary filmgoers who felt misled, and they don't come to early screenings.</p><p class="sig">Idris</p>`},
+ r5:{from:"Malik Harlan, Head of Communications, Beacon Pictures",subj:"The trends report",rel:"high",body:`<p>The trends report is in. Films based on games and toys had their best year ever, and audiences say they want more of them. The board asked me this morning why we paid $25,000 to find that out.</p><p class="sig">Malik</p>`}
+};
+const STANDING={r1:()=>"Renata has paused the Marble Run partner brief until people who have seen the film agree its tone. Kwame has started a new home-release trailer, and Naomi has sent the full card data.",
+ r2:()=>"Renata has moved Marble Run's release by three weeks: about $600,000 in new packaging dates and lost holiday ticket sales.",
+ r3:()=>"Renata has spent another $500,000 advertising Highstreet's home release with the current campaign. The reviews underneath haven't changed.",
+ r4:()=>"Renata has paid $60,000 for a critics' programme, although critics liked the film.",
+ r5:()=>"Renata has paid $25,000 for a trends report that says films based on games and toys had their best year."};
+const MISSTEP={r2:["Marble Run's release date moved: packaging and holiday ticket sales","Marketing and box office",-600000],r3:["Extra advertising for the current campaign","Marketing budget",-500000],r4:["A critics' programme for Marble Run","Marketing budget",-60000],r5:["Trends report on game and toy films","Marketing budget",-25000]};
+const EPI_RANK={r2:"Moving Marble Run's date cost about $600,000, and nobody can say it helped.",r3:"The extra $500,000 of advertising made more people aware of Highstreet's home release, but it repeated the old promise.",r4:"Critics enjoyed Beacon's new programme, but they had never been the problem.",r5:"The board still jokes about the $25,000 report that said game and toy films were booming."};
+function inboxList(){const list=[...INBOX[R()]]; if(R()==="B"&&S.fork) list.splice(1,0,BRANCH[S.fork]); list.push(FWD); if(S.ranked) list.unshift(CONSEQ[S.rank[0]]); return list;}
+
+/* ---------- team puzzles ---------- */
+const PZ={
+ 1:{owner:"B",title:"The exit-poll cards",
+   intro:"Diego has sent a sample of Silverline's exit-poll cards from Highstreet's opening Saturday. Silverline's programmers decide on Monday whether to keep the film in evening slots. Diego will only argue for it if the team can say what the cards show, and whether Beacon could have seen it coming. Sort the cards, then answer two questions.",
+   screen:`<p class="muted small">Each card says who the person came with and what they wrote on the way out.</p>`,
+   qs:[{q:"Sort the cards: what is each one about?",type:"sort",cats:["Felt misled by the campaign","Liked the film","Disliked the film itself","Nothing to do with the film"],
+        items:[["Family of four: “We were told it was a comedy. My kids were upset by the eviction scenes.”","Felt misled by the campaign"],
+               ["Couple in their fifties: “The sharpest film I've seen this year. Brilliant writing.”","Liked the film"],
+               ["Teenager with friends: “Too long, and too slow in the middle.”","Disliked the film itself"],
+               ["Parent with two children: “Nothing like the trailer. We left halfway.”","Felt misled by the campaign"],
+               ["Grandparent with a grandchild: “The popcorn was cold and the seats were sticky.”","Nothing to do with the film"],
+               ["Adult on their own: “Moving and funny. The family scenes stayed with me.”","Liked the film"],
+               ["Parent with a child: “The adverts promised a game night. This was about losing your home.”","Felt misled by the campaign"],
+               ["Student: “The ending felt rushed.”","Disliked the film itself"]]},
+       {q:"When could Beacon have seen the same reaction?",type:"choice",opts:["Only after release, from Silverline's own exit polls","A month before release, in the partners' first shop sales figures","Six weeks before release, in the test-screening comment cards"],ans:"Six weeks before release, in the test-screening comment cards"},
+       {q:"Which department inside Beacon had already rated this risk?",type:"choice",opts:["Communications, in a risk memo","Marketing, in its launch plan","Finance, in its box-office forecast"],ans:"Communications, in a risk memo"}],
+   hint:"Creative & Production knows what the test-screening cards said, and when. Leadership & Communications knows which department wrote its own risk rating.",
+   out:{ok:"Diego took the team's reading of the cards to Silverline's programmers. They will keep Highstreet in evening slots for adults for two more weeks.",
+        fail:"Without a clear reading of the cards, Silverline's programmers have dropped Highstreet from all but 40 screens, before the adults who liked it could find it."}},
+ 2:{owner:"A",title:"Who knew what, and when",
+   intro:"Renata wants one page for the board: who knew what, and when. Naomi has started a timeline, but the events are on separate cards and she only knows some of the dates. Put each event in the right period, then answer two questions.",
+   screen:`<p class="muted small">Each card is one event. Your teammates know when some of them happened.</p>`,
+   qs:[{q:"Sort the events: when did each one happen?",type:"sort",cats:["Before Naomi's memo","Six weeks before release","About a month before release","The release weekend"],
+        items:[["Clips of the eviction scenes spread online without any context.","The release weekend"],
+               ["Kwame's second cut is shown to a test audience.","Before Naomi's memo"],
+               ["Communications rates “audience expectation mismatch” moderate-to-high.","About a month before release"],
+               ["The director asks, for the second time, to keep the family's story.","Six weeks before release"],
+               ["Partners finish stock and displays for over two thousand shops.","Before Naomi's memo"],
+               ["Families' “would recommend” scores collapse in Silverline's exit polls.","The release weekend"],
+               ["Naomi writes to marketing leadership about the comment cards.","Six weeks before release"],
+               ["The press office answers questions about the clips.","The release weekend"]]},
+       {q:"How many written warnings about the tone existed before release?",type:"choice",opts:["One: Naomi's memo, and nothing else on paper","Two: Naomi's memo and the risk memo","Three: Naomi's memo, the risk memo and Idris's review"],ans:"Two: Naomi's memo and the risk memo"},
+       {q:"Which warning never reached the wider leadership group?",type:"choice",opts:["The director's request","Naomi's memo to marketing leadership","Communications' own risk memo"],ans:"Communications' own risk memo"}],
+   hint:"Leadership & Communications knows when the partners' stock was ready, when its own risk memo was written and what the press office was doing. Audience & Market knows what happened on the release weekend.",
+   out:{ok:"Renata has a one-page timeline for the board. She asks Julia and Malik to present it themselves, so the board sees a process problem, not a culprit. Naomi and Kwame have started drafting how a final sign-off could work.",
+        fail:"Without a timeline, the board has hired outside lawyers to find out who knew what: $120,000 and a fortnight of interviews."}},
+ 3:{owner:"C",title:"The draft statement",
+   intro:"Malik's press office has drafted a short statement for the trade press, and Renata wants to send it today. Each line makes one claim. Using what your whole team knows, decide whether each claim is true, misleading or false, and why.",
+   screen:`<div class="attach"><div class="an">Beacon Pictures · draft statement for the trade press</div>
+     <p><b>Claim 1:</b> Test audiences responded warmly to Highstreet.</p>
+     <p><b>Claim 2:</b> Critics and audiences simply didn't take to the film.</p>
+     <p><b>Claim 3:</b> The campaign was fully tested before release.</p></div>`,
+   qs:[{q:"Claim 1",type:"choice",opts:["True: most of the cards praised the writing and the family's story","Misleading: the writing won praise, but 41% said “not what I expected”","False: most test cards said the film itself was badly made and too long"],ans:"Misleading: the writing won praise, but 41% said “not what I expected”"},
+       {q:"Claim 2",type:"choice",opts:["True: both critics and ordinary filmgoers gave it poor scores everywhere","Misleading: critics liked it, but every audience group in the exit polls disliked it","False: critics praised it, and adults rated it highly"],ans:"False: critics praised it, and adults rated it highly"},
+       {q:"Claim 3",type:"choice",opts:["False: only the second cut was tested, and the fourth shipped untested","True: every trailer cut was shown to a test audience","Misleading: the trailer was tested, but only online with fans rather than in a cinema"],ans:"False: only the second cut was tested, and the fourth shipped untested"}],
+   hint:"Claims 1 and 3: Creative & Production has the test cards and the cutting-room log. Claim 2: Audience & Market has the reviews and the exit polls.",
+   out:{ok:"Malik pulled the statement, and Renata sent a short, honest one instead: the studio is reviewing its own campaign. The trade press is waiting for the inquiry's findings, and so are Marble Run's partners.",
+        fail:"The statement went out. Two days later, a trade paper printed extracts from Naomi's memo under the headline “Beacon ignored its own warning”. Three of Marble Run's fourteen partners have put about $450,000 in fees on hold."}}
+};
+const CODES={1:{first:"2461",help:"2487",fail:"2409"},2:{first:"6152",help:"6138",fail:"6194"},3:{first:"9326",help:"9371",fail:"9350"}};
+const TIER_LABEL={first:"Solved first time",help:"Solved with help",fail:"Not solved"};
+const pzDone=(r,n)=>!!S.pz[n].tier&&!!S.gate[r][n];
+const allPz=r=>[1,2,3].every(n=>pzDone(r,n));
+const ok=n=>S.pz[n].tier&&S.pz[n].tier!=="fail";
+const failed=n=>S.pz[n].tier==="fail";
+
+/* ---------- money: what the options cost, and the six-month result ---------- */
+const D1COST=()=>S.ranked&&S.rank[0]==="r1"?200000:300000;
+const D3COST=()=>ok(2)?60000:100000;
+function spentSoFar(){let t=0;
+ if(S.fork==="ask") t+=40000;
+ if(S.ranked&&MISSTEP[S.rank[0]]) t-=MISSTEP[S.rank[0]][2];
+ if(failed(2)) t+=120000;
+ if(failed(3)) t+=450000;
+ return t;}
+function optInfo(k,v){
+ let desc=DEC[k][v==="A"?1:2][1];
+ if(k==="d1"&&v==="A"){
+  if(D1COST()<300000) desc=desc.replace("about $300,000","about $200,000, because Kwame has already started a new cut");
+  if(S.ranked&&S.rank[0]==="r3") desc+=" The $500,000 of extra advertising for the current campaign has already been spent.";
+ }
+ if(k==="d2"&&failed(3)) desc+=" The studio's statement has already told the press that test audiences responded warmly.";
+ if(k==="d3"&&v==="B"&&ok(2)) desc=desc.replace("about $100,000 a film and two weeks.","about $60,000 a film and two weeks, because Naomi and Kwame have already drafted the steps from the team's timeline.");
+ return {desc};
+}
+function ledger(){const L=[],add=(l,s,v)=>L.push([l,s,v]);
+ if(S.fork==="ask"){add("Fan survey: agency and prizes","Marketing budget",-40000); if(S.d1==="A")add("Survey fans invited to an early home-release screening","Home-release sales",150000);}
+ if(S.fork==="quiet")add("Silverline's goodwill: premium screens for Marble Run","Box office",200000);
+ if(S.ranked&&MISSTEP[S.rank[0]])add(...MISSTEP[S.rank[0]]);
+ if(ok(1))add("Two more weeks of evening screenings for adults","Box office",400000);
+ if(failed(2))add("Outside lawyers: who knew what","Legal budget",-120000);
+ if(failed(3))add("Partner fees on hold after the statement","Marble Run partner income",-450000);
+ if(S.d1==="A"){add("New home-release trailer and key art","Marketing budget",-D1COST());add("Adult audiences found the film at home","Home-release sales",1000000);}
+ if(S.d1==="B")add("Home release below plan: the same complaints, at home","Home-release sales",-300000);
+ if(S.d2==="A"){add("Red-flag review rule, first year","Operating budget",-80000);add("Marble Run's test problem fixed in the edit, not in reshoots","Marble Run production",500000);}
+ if(S.d2==="B")add("Marble Run's warning noticed late: reshoots of the first act","Marble Run production",-400000);
+ if(S.d3==="A")add("Marble Run's trailer recut and partner displays redone after the director objected","Marketing budget and partners",-600000);
+ if(S.d3==="B")add("Sign-off screening of Marble Run's final trailer","Marketing budget",-D3COST());
+ return L;}
+const net=()=>ledger().reduce((a,r)=>a+r[2],0);
+const netWords=()=>{const n=net(); return n>0?`${fmt(n)} ahead of plan`:n<0?`${fmt(-n)} behind plan`:"exactly on plan";};
+
+/* ---------- notes: highlights, colour code, free notes ---------- */
+const HL=[["yellow","#FFF176"],["green","#B9F6CA"],["pink","#F8BBD0"],["blue","#B3E5FC"],["orange","#FFE0B2"],["purple","#E1BEE7"]];
+const HLC=Object.fromEntries(HL);
+const HL_HINT=["Key fact","Evidence","Doubt","Number","Ask the team","Use in writing"];
+function hsh(t){let h=5381;for(const c of t)h=((h<<5)+h+c.charCodeAt(0))>>>0;return h.toString(36);}
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function wrapSentences(root){
+ root.querySelectorAll("[data-src]").forEach(box=>{
+  const src=box.dataset.src, q=box.dataset.q||"medium";
+  box.querySelectorAll("p").forEach(p=>{
+   if(p.dataset.w||p.closest("[data-src]")!==box||p.classList.contains("sd")||p.classList.contains("sig")||p.querySelector("button,input,svg"))return;
+   const t=p.textContent.replace(/\s+/g," ").trim(); if(!t)return;
+   const parts=t.match(/(?:[^.!?]|\.(?=\d))+(?:[.!?]+["”’)]*|$)/g)||[t];
+   const N=S.notes[R()];
+   p.innerHTML=parts.map(x=>{x=x.trim(); const k=hsh(src+"|"+x), h=N.hl[k];
+     return `<span class="sn" data-k="${k}" data-src="${esc(src)}" data-q="${q}"${h?` style="background:${HLC[h.c]}"`:""}>${esc(x)}</span>`;}).join(" ");
+   p.dataset.w="1";});
+ });
+}
+let palFor=null;
+function openPal(el){palFor=el;const pal=document.getElementById("hlpal");const r=el.getBoundingClientRect();
+ pal.hidden=false; pal.style.top=(window.scrollY+r.bottom+6)+"px"; pal.style.left=Math.max(8,Math.min(window.scrollX+r.left,window.scrollX+document.documentElement.clientWidth-pal.offsetWidth-8))+"px";}
+function closePal(){document.getElementById("hlpal").hidden=true;palFor=null;}
+function notesHTML(){
+ const N=S.notes[R()], items=Object.entries(N.hl);
+ const cc=`<details class="cc"><summary>${HL.map(([,c])=>`<i style="background:${c}"></i>`).join("")}<span>My colour code</span></summary><div class="ccgrid">${HL.map(([k,c],i)=>`<label><i style="background:${c}"></i><input data-cc="${k}" maxlength="24" value="${esc(N.cc[k]||"")}" placeholder="${HL_HINT[i]}" aria-label="${k} means"></label>`).join("")}</div></details>`;
+ const add=`<div class="nbadd"><textarea id="nbnew" maxlength="400" placeholder="A note of your own…" aria-label="A note of your own"></textarea><button class="btn small" data-act="noteadd">Add note</button></div>`;
+ const free=N.free.map((t,i)=>`<div class="nbcard mine"><p>${esc(t)}</p><div class="src">Your note <button class="lnk" data-act="noterm" data-v="${i}">Delete</button></div></div>`).join("");
+ const groups=HL.map(([k,c])=>{const g=items.filter(([,h])=>h.c===k); if(!g.length)return "";
+   return `<div class="nbgroup"><i style="background:${c}"></i>${esc(N.cc[k]||k[0].toUpperCase()+k.slice(1))}</div>`+g.map(([key,h])=>`<div class="nbcard" style="border-left-color:${c}"><p>${esc(h.t)}</p><div class="src">${esc(h.src)} <button class="lnk" data-act="hlrm" data-v="${key}">Remove</button></div></div>`).join("");}).join("");
+ return `<div class="nbhead"><h2>Your highlights and notes</h2><button class="lnk" data-act="nbclose" aria-label="Close notes">Close ✕</button></div>${cc}${add}${free}${items.length?groups:`<p class="muted small">Tap any sentence in the Context, your emails, a report or a recording's text to highlight it. Your highlights collect here.</p>`}`;
+}
+
+/* ---------- state ---------- */
+const fresh=()=>({role:null,tab:"context",unlock:false,fork:null,expert:null,picks:{theo:null,callum:null},checks:{},d1:null,d2:null,d3:null,decided:false,text:"",handed:false,rank:[...RANK_START],ranked:false,mailOpen:{},mailRead:{},notes:{A:{hl:{},cc:{},free:[]},B:{hl:{},cc:{},free:[]},C:{hl:{},cc:{},free:[]}},nbOpen:false,pz:{1:{tier:null,tries:[0,0,0],ok:[0,0,0],hint:false,sel:{}},2:{tier:null,tries:[0,0,0],ok:[0,0,0],hint:false,sel:{}},3:{tier:null,tries:[0,0,0],ok:[0,0,0],hint:false,sel:{}}},gate:{A:{},B:{},C:{}},gateMsg:""});
+let S=fresh();
+const STORE_KEY="simlearn-pro-highstreetpro";
+try{const x=JSON.parse(sessionStorage.getItem(STORE_KEY)||"null"); if(x&&typeof x==="object"&&!Array.isArray(x)) S=Object.assign(fresh(),x);}catch(e){}
+function save(){try{sessionStorage.setItem(STORE_KEY,JSON.stringify(S));}catch(e){}}
+const TABS=[["context","Context"],["who","Who's who"],["inbox","Inbox"],["puzzles","Team puzzles"],["investigate","Investigate"],["decide","Decide"]];
+const ready=()=>S.unlock||(S.role&&S.fork);
+const tabOpen=t=>t==="context"||(t==="who"&&!!S.role&&!!(S.go||S.fork))||(ready()&&(["inbox","puzzles"].includes(t)||S.unlock||allPz(R())));
+const PATH={ask:"asked the fans in public",quiet:"kept the inquiry inside"};
+
+const ENDING_HASH=3459013556;
+function endLockHTML(){return `<section class="card"><h2>What happened next</h2><p>When <b>everyone in your team</b> has created their submission, ask your teacher for the code to find out what happened.</p><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input id="endcode" inputmode="numeric" autocomplete="off" maxlength="4" aria-label="Code from your teacher" style="width:7em;font:inherit;padding:6px 10px;border:1px solid var(--line);border-radius:8px"><button class="btn" data-act="endcode">Open</button> <span class="msg" aria-live="polite">${S.endMsg||""}</span></div></section>`;}
+function render(){
+  save();
+  document.getElementById("who").textContent=S.role?`You are the ${ROLES[S.role].name}${S.fork?` · Path: ${PATH[S.fork]}`:""}`:"Read the context, then choose your role.";
+  document.getElementById("tabs").innerHTML=TABS.map(([k,l])=>`<button data-act="tab" data-v="${k}" aria-current="${S.tab===k}" ${tabOpen(k)?"":"disabled"}>${l}${k==="inbox"&&tabOpen(k)&&inboxList().some(m=>!S.mailRead[m.from+"|"+m.subj])?`<span class="tdot" aria-label="unread emails"></span>`:""}</button>`).join("");
+  document.getElementById("main").innerHTML=V[S.tab]();
+  wrapSentences(document.getElementById("main"));
+  if(S.tab==="context"&&(!S.role||!(S.go||S.fork))){const cs=[...document.querySelectorAll("#main section.card")],i=cs.findIndex(c=>/^\s*3 ·/.test((c.querySelector(".step")||{}).textContent||""));if(i>0){cs.slice(i).forEach(c=>{c.hidden=true;c.style.display="none";});cs[i-1].insertAdjacentHTML("afterend",S.role?`<section class="card stopc" id="stopgate" role="status"><div class="stophead"><span class="stopsign" aria-hidden="true">STOP</span><h2>Stop. Wait until everyone in your team has chosen a role and your teacher says go.</h2></div><p>Your role: <b>${esc(ROLES[S.role].name)}</b>. Check that each of you has a different role.</p><button class="btn" data-act="go">Go on</button></section>`:`<section class="card" id="rolegate"><p class="note-strong" style="margin:0"><strong>Choose your role above to read on.</strong> Each of you takes a different role: agree who is who in your team first.</p></section>`);}}
+  const nb=document.getElementById("nb"); nb.hidden=!S.nbOpen; if(S.nbOpen) nb.innerHTML=notesHTML();
+  const fab=document.getElementById("fab"); fab.hidden=!S.role; fab.textContent=`Notes (${Object.keys(S.notes[R()].hl).length+S.notes[R()].free.length})`;
+  if(S.tab==="investigate"&&!S.ranked) bindDrag("rank");
+  if(S.tab==="decide"){const ta=document.getElementById("cf"); if(ta){ta.value=S.text; wc();}}
+}
+const task=t=>`<div class="task"><b>Your task</b><span>${t}</span></div>`;
+const R=()=>S.role||"A";
+
+const V={
+ context(){
+  const r=S.role;
+  return task("Read from top to bottom. Choose your role, then make your first decision: agree as a team, then everyone enters the same choice.")
+  +`<section class="card" data-src="Context" data-q="medium"><span class="step">1 · The case</span><h2>Beacon Pictures and Highstreet</h2>
+    ${PRO_COVER?`<img src="${PRO_COVER}" alt="" style="display:block;width:100%;height:auto;border-radius:10px">`:""}
+    <p>Beacon Pictures spent eighteen months building the marketing campaign for Highstreet, a big-budget film based on a much-loved property-trading board game. The playbook was almost identical to last year's surprise blockbuster toy adaptation: an online content tool, dozens of brand collaborations, a bold colour identity and a release date set directly against a rival blockbuster, Stormbreak. Every box was ticked. Then the film opened to a soft weekend, word of mouth never built, and by the second week it had almost vanished from conversation.</p>
+    <p>In film marketing, the campaign is a promise. The trailer, the key art (the main poster image) and the brand tie-ins all tell audiences what kind of film to expect. Before release, studios hold test screenings, where a recruited audience watches the film and fills in comment cards; many studios treat the share who would “definitely recommend” it as the key score. After release, cinemas run exit polls, and the drop in ticket sales from the first weekend to the second shows how strong word of mouth is.</p>
+    <p>Two old stories shape how Beacon's leaders think about warnings. Two years ago, Beacon pulled and reshot a campaign after a handful of negative test-screening comments, at a cost of several million dollars, and the original version, quietly tested afterwards, would have done just as well: the Halbrook False Alarm. On an earlier release, though, a mid-level story editor raised concerns early, leadership delayed the trailer by three weeks to recut it, and the film modestly outperformed expectations: the Sentinel Save.</p>
+    <div class="facts"><div class="fact"><div class="l">Campaign</div><div class="v">18 months</div></div><div class="fact"><div class="l">Opening weekend</div><div class="v">Soft, against Stormbreak</div></div><div class="fact"><div class="l">Second weekend</div><div class="v">Almost gone</div></div><div class="fact"><div class="l">Next adaptation</div><div class="v">Marble Run</div></div></div></section>`
+  +`<section class="card" data-src="Context" data-q="medium"><span class="step">2 · Who you are</span><h2>The inquiry team</h2>
+    <p>The board has asked Vantage & Marsh, an outside creative-research consultancy with offices in London and Edinburgh, to find out what happened before the studio uses the same playbook again. You are three of its analysts. Each of you sees different information. Choose your role.</p>
+    <div class="roles">${Object.entries(ROLES).map(([k,v])=>`<button class="role" data-act="role" data-v="${k}" aria-pressed="${r===k}" ${S.fork&&S.role?"disabled":""}><b>${v.name}</b><span>${v.line}</span></button>`).join("")}</div>${S.fork&&S.role?`<p class="muted small">Your role is fixed now that your team has made its first decision.</p>`:""}
+    ${r?`<p><strong>You are the ${ROLES[r].name}.</strong> ${ROLES[r].detail}</p>`:""}
+    <h3 style="margin-top:6px">Other people you'll hear from</h3>
+    <div class="people"><div class="person"><b>Renata Cole</b><span class="muted small">Chief Content Officer at Beacon Pictures. She asked for the inquiry, and your report goes to her.</span></div><div class="person"><b>Theo Lockhart</b><span class="muted small">Head of Brand Partnerships at Beacon. Built Highstreet's partner programme.</span></div><div class="person"><b>Callum Rae</b><span class="muted small">The director of Highstreet.</span></div></div></section>`
+  +`<section class="card" data-src="Context" data-q="medium"><span class="step">3 · The situation</span><h2>One week, three findings</h2>
+    <p>Theories inside the building already conflict. Some blame bad luck and a crowded release calendar. Others think something went wrong between what the marketing promised and what audiences found in the cinema. Beacon's next adaptation, Marble Run, based on a children's toy, begins its marketing planning in exactly one week, and fourteen brand partners are waiting for its brief.</p>
+    <p>The board wants your root-cause report before that kick-off meeting, not after it. It must give three findings: the main cause of Highstreet's collapse, whether there was a clear early warning, and who should have final say over whether a campaign's tone matches its film.</p></section>`
+  +`<section class="card" data-src="Context" data-q="medium"><span class="step">4 · It starts</span><h2>A voicemail from Renata</h2>
+    ${audio("Voicemail from Renata Cole","female, Dublin accent, calm and decisive",`<p class="sd">[An office. Phones ring in the background.]</p><p>Hello, it's Renata Cole. Thanks for taking this on at such short notice. Half the building says Highstreet was bad luck: Stormbreak opened the same weekend, and that was that. The other half says the trailer sold a different film.</p><p>I need to know which before Thursday, because Marble Run's marketing starts the week after, and fourteen partners are waiting for our brief. I'm not looking for someone to blame. I want to understand what happened, so it doesn't happen twice.</p><p>Oh, and one thing can't wait. Malik wants to know today whether we ask the fans what went wrong, in public. Talk to each other and let me know this afternoon.</p>`,"highstreetpro_voicemail")}</section>`
+  +`<section class="card" data-src="Context" data-q="medium"><span class="step">5 · Your first decision</span><h2>Ask the fans in public, or keep the inquiry inside?</h2>
+    <p>Jade, Beacon's fan engagement lead, can post a survey for Highstreet's ticket-buyers and social media followers today. It would bring in thousands of opinions quickly, and the press would see a studio that listens. Silverline Cinemas would rather Beacon stayed quiet: if the inquiry stays private, it will share its full screening-by-screening data in confidence. You haven't seen the evidence yet. Agree as a team, then everyone enters the same choice.</p>
+    <div class="choices">${[["ask","A","Ask the fans: post a public survey today","Costs $40,000 for an agency and prizes. Thousands of opinions in two days, but the press will report that Beacon is asking what went wrong."],["quiet","B","Keep the inquiry inside the building","No cost. Silverline shares its full data in confidence, but nobody outside hears from Beacon until the report is out."]].map(([v,k,t,c])=>`<button class="choice" data-act="fork" data-v="${v}" aria-pressed="${S.fork===v}" ${S.fork?"disabled":""}><span class="k">OPTION ${k}</span><b>${t}</b><small>${c}</small></button>`).join("")}</div>
+    ${S.fork?(S.role?`<p class="done">Decision made. Some of the evidence you see depends on this choice. Go to your inbox.</p><button class="btn" data-act="tab" data-v="inbox">Open your inbox</button>`:`<p class="done">Decision made. Now choose your role above.</p>`):""}</section>`;
+ },
+ inbox(){
+  const list=inboxList();
+  return task("Read your emails and tell your team what you've found, in your own words. Your teammates have different emails. Not every source is equally reliable.")
+  +`<div style="display:flex;flex-direction:column;gap:10px">${list.map(m=>mail(m)).join("")}</div>`;
+ },
+ puzzles(){
+  const r=R(); let h=task("Each of you has one puzzle, and nobody can solve theirs alone. When a puzzle appears on someone's screen, everyone gathers round that screen until it's solved. Each result changes what happens next.");
+  const done=[1,2,3].filter(n=>pzDone(r,n));
+  if(done.length) h+=`<section class="card"><h2>Results so far</h2>${done.map(n=>`<p><b>${PZ[n].title}</b> (${ROLES[PZ[n].owner].name}): ${TIER_LABEL[S.pz[n].tier]}. ${ok(n)?PZ[n].out.ok:PZ[n].out.fail}${PZ[n].owner===r&&S.pz[n].tier?` <span class="note-strong">Code for your teammates: <b class="mono">${CODES[n][S.pz[n].tier]}</b></span>`:""}</p>`).join("")}</section>`;
+  const n=[1,2,3].find(x=>!pzDone(r,x));
+  if(!n) return h+`<p class="done">All three puzzles are done.</p><button class="btn" data-act="tab" data-v="investigate">Go to Investigate</button>`;
+  const P=PZ[n];
+  if(P.owner!==r) return h+`<section class="card gate"><span class="step">Puzzle ${n} of 3</span><h2>The ${ROLES[P.owner].name} needs your help</h2>
+     <p>Go and look at their screen. They have a puzzle called <b>${P.title}</b>, and they need facts from your emails to solve it. When it's done, their screen shows a four-digit code. Type it here to carry on.</p>
+     <div class="coderow"><input id="gatecode" inputmode="numeric" maxlength="4" placeholder="0000" aria-label="Code from the ${ROLES[P.owner].name}"><button class="btn" data-act="gate" data-v="${n}">Carry on</button></div>${S.gateMsg?`<p class="msg">${S.gateMsg}</p>`:""}</section>`;
+  const Z=S.pz[n];
+  if(Z.tier) return h+`<section class="card"><span class="step">Puzzle ${n} of 3 · ${P.title}</span><h2>${TIER_LABEL[Z.tier]}</h2><p>${ok(n)?P.out.ok:P.out.fail}</p>
+     <p>Show this code to your teammates. They need it to carry on.</p><div class="bigcode">${CODES[n][Z.tier]}</div>
+     <button class="btn" data-act="pznext" data-v="${n}">I've shared the code</button></section>`;
+  return h+`<section class="card"><span class="step">Puzzle ${n} of 3 · your puzzle</span><h2>${P.title}</h2><p>${P.intro}</p>
+    <p class="note-strong"><strong>Call your teammates over.</strong> You can't solve this from your own emails alone.</p>${P.screen}
+    ${P.qs.map((q,i)=>{const done=Z.ok[i], left=2-Z.tries[i];
+      return `<div class="pzq"><h3>${i+1}. ${q.q}</h3>${done?(Z.qfail&&Z.qfail[i]?`<p class="msg">Not solved. The answer: ${q.type==="sort"?q.items.map(([x,c])=>esc(x)+" → "+c).join(" · "):q.ans}</p>`:`<p class="done">${q.type==="sort"?"All entries sorted":q.ans} ✓</p>`):
+       (q.type==="sort"?`<div class="sortq">${q.items.map(([t],j)=>`<div class="sortrow"><p>${t}</p><select data-sort="${n}_${i}_${j}" aria-label="Entry ${j+1}"><option value="">Choose…</option>${q.cats.map(c=>`<option${(Z.sort&&Z.sort[i]&&Z.sort[i][j])===c?" selected":""}>${c}</option>`).join("")}</select></div>`).join("")}</div>${Z.sortMsg&&Z.sortMsg[i]?`<p class="msg">${Z.sortMsg[i]}</p>`:""}`:
+        `<div class="opts2">${q.opts.map(o=>`<button class="opt" data-act="pzsel" data-n="${n}" data-i="${i}" data-v="${esc(o)}" aria-pressed="${Z.sel[i]===o}">${o}</button>`).join("")}</div>`)+
+       `<div class="coderow"><button class="btn" data-act="pzcheck" data-n="${n}" data-i="${i}">Check</button>${Z.tries[i]?`<span class="msg">Not yet. ${left} ${left===1?"try":"tries"} left.</span>`:""}</div>`}</div>`;}).join("")}
+    ${Z.hint?`<p class="hint">${P.hint}</p>`:`<button class="lnk" data-act="pzhint" data-v="${n}">Show a hint (counts as help)</button>`}</section>`;
+ },
+ investigate(){
+  const sl=SHORTLIST[R()], e=S.expert;
+  return task("Question the two witnesses, then agree your interim briefing as a team: everyone sends Renata the same order. If you have time, hire one outside expert first.")
+  +`<section class="card"><h2>Hire an expert (if you have time)</h2><p>This step is optional. Renata has set aside money for outside help, enough for each of you to bring in one expert. Experts are expensive and only answer the question you hire them for, so think about what your team most needs to know. Each role has a different shortlist, and some experts appear on more than one list.</p>
+    <div class="choices">${sl.map(k=>`<button class="choice" data-act="expert" data-v="${k}" aria-pressed="${e===k}" ${e?"disabled":""}><b>${EXPERTS[k].name}</b><small><em>${EXPERTS[k].who}</em><br>${EXPERTS[k].what}</small></button>`).join("")}</div>
+    ${e?`<div class="attach" data-src="${EXPERTS[e].who.split(",")[0]}" data-q="high"><div class="an">📎 Report from ${EXPERTS[e].who}</div>${EXPERTS[e].rep}</div>`:""}</section>`
+  +`<section class="card"><h2>The witnesses</h2><p>Theo and Callum both have something at stake in this inquiry. <strong>One of them is leaving things out.</strong> Listen for what's missing, then choose your one question for each.</p>
+    <div class="two">${Object.entries(WIT).map(([k,w])=>{const p=S.picks[k];
+      return `<div style="display:flex;flex-direction:column;gap:10px"><h3>${w.name} <span class="muted small">· ${w.role}</span></h3>
+       ${audio(`${w.name}'s account`,w.voice,w.account,"highstreetpro_"+k)}
+       <div class="qs">${w.qs.map((q,i)=>`<button class="q" data-act="ask" data-w="${k}" data-v="${i}" aria-pressed="${p===i}" ${p!==null?"disabled":""}>${q[0]}</button>`).join("")}</div>
+       ${p!==null?audio(`${w.name} answers`,w.voice,`<p>${w.qs[p][1]}</p>`,"highstreetpro_"+k+"_"+(p+1)):""}</div>`;}).join("")}</div></section>`
+  +`<section class="card"><h2>Interim briefing for Renata</h2>
+    <p>Renata meets the board tomorrow and needs your view now, before your final findings. Below are the five explanations people in the building are giving, in the order they talk about them. Put them in order, from the most likely to explain why Highstreet collapsed to the least likely.</p>
+    <p class="note-strong"><strong>Renata will act on whatever you put first, straight away.</strong></p>
+    <ol class="tl" id="rk">${S.rank.map((id,i)=>{const t=RANK.find(x=>x[0]===id);
+      return `<li class="tc" data-id="${id}" draggable="${!S.ranked}"><span class="n">${i+1}</span><span>${t[1]}</span><span class="arr">${S.ranked?"":`<button data-act="mv" data-l="rank" data-v="${i}" data-d="-1" aria-label="Move up" ${i?"":"disabled"}>↑</button><button data-act="mv" data-l="rank" data-v="${i}" data-d="1" aria-label="Move down" ${i<RANK.length-1?"":"disabled"}>↓</button>`}</span></li>`;}).join("")}</ol>
+    ${S.ranked?`<p class="done">Sent to Renata. Her reply is below, and there's a new email in your inbox.</p>${mail(reply())}`:`<button class="btn" data-act="sendrank">Send to Renata</button>`}</section>`;
+ },
+ decide(){
+  const dis=S.decided?"disabled":"";
+  let h=task("Check what you've worked out, then agree three findings as a team: everyone enters the same choices. Then write a short root cause report. After you hand in, you'll hear what happened next.");
+  const forkLine=S.fork==="ask"?"Jade's survey had 14,200 replies, and the press has reported that Beacon is asking its fans what went wrong. The survey cost $40,000.":S.fork==="quiet"?"The inquiry is still private, and Silverline has shared its screening-level data in confidence.":"";
+  h+=`<section class="card"><h2>Where things stand</h2><p>${forkLine} ${S.ranked?STANDING[S.rank[0]]():"Renata is still waiting for your interim briefing."}</p>${[1,2,3].filter(n=>S.pz[n].tier).map(n=>`<p><b>${PZ[n].title}:</b> ${ok(n)?PZ[n].out.ok:PZ[n].out.fail}</p>`).join("")}
+   <div class="facts"><div class="fact"><div class="l">Extra spending so far</div><div class="v">${fmt(spentSoFar())}</div></div><div class="fact"><div class="l">Report due</div><div class="v">Before Marble Run's kick-off</div></div></div></section>`;
+  h+=`<section class="card"><h2>What have you worked out?</h2>${CHECKS.map((c,qi)=>{const a=S.checks[qi];
+     return `<div style="display:flex;flex-direction:column;gap:6px"><h3>${qi+1}. ${c.q}</h3>${c.opts.map((o,oi)=>`<button class="opt ${a===undefined?"":oi===c.right?"right":oi===a?"wrong":""}" data-act="chk" data-q="${qi}" data-v="${oi}" ${a!==undefined?"disabled":""}>${o}</button>`).join("")}${a!==undefined?`<p class="fb">${a===c.right?"<strong>Yes.</strong> ":"<strong>Not quite.</strong> "}${c.why}</p>`:""}</div>`;}).join("")}</section>`;
+  h+=["d1","d2","d3"].map(k=>{const D=DEC[k];return `<section class="card"><h2>${D[0]}</h2><div class="choices">${[1,2].map(i=>{const v=i===1?"A":"B", o=optInfo(k,v);
+    return `<button class="choice" data-act="dec" data-q="${k}" data-v="${v}" aria-pressed="${S[k]===v}" ${dis}><span class="k">OPTION ${v}</span><b>${D[i][0]}</b><small>${o.desc}</small></button>`;}).join("")}</div></section>`;}).join("");
+  if(!S.decided) return h+`<button class="btn" data-act="lock" ${canLock()?"":"disabled"}>Confirm our findings</button>`;
+  if(!S.handed)h+=`<p><button class="btn small" data-act="undec">Change our decisions</button> <span class="muted small">Until you hand in, your team can still change its decisions.</span></p>`;
+  h+=`<section class="card"><h2>${roleW(S.role).section?"Your section: "+esc(roleW(S.role).section.label):"Root cause report"}</h2>${roleW(S.role).section?`<p>About ${roleW(S.role).words} words. ${esc(roleW(S.role).section.task)}</p>`:`<p>Write 120–180 words for Renata: your three findings, the evidence that convinced you (name the person or document, and use the numbers and dates), and the strongest argument against your findings, with your answer to it.</p>`}
+   <p class="muted small">Useful language: <em>The main cause was…</em> · <em>According to…</em> · <em>Although the decision was understandable at the time, …</em> · <em>In future, … should …</em></p>
+   <textarea id="cf" aria-label="${roleW(S.role).label}"></textarea>
+   <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><span class="wc" id="wc">0 words</span></div>${handinHTML()}</section>`;
+  if(!S.handed) return h;
+  if(!S.endOpen){h+=endLockHTML();return h;}
+  h+=`<section class="card"><h2>Six months later</h2>${audio("Trade news: Screen Desk","newsreader, light music bed under",epilogue())}
+   <p><strong>Six months on, Beacon is ${netWords()} on Highstreet and Marble Run.</strong></p>
+   <details><summary class="small" style="cursor:pointer;color:var(--blue);font-weight:600">How that adds up</summary><div class="tw"><table class="sums"><thead><tr><th>What happened</th><th>Paid from / effect</th><th class="num">Amount</th></tr></thead><tbody>${ledger().map(([l,src,v])=>`<tr><td>${l}</td><td class="muted">${src}</td><td class="num">${v>0?"+":""}${fmt(v)}</td></tr>`).join("")}<tr class="tot"><td>Against plan</td><td></td><td class="num">${net()>0?"+":""}${fmt(net())}</td></tr></tbody></table></div></details>
+   <p>Now find a group that made the other choice at the start, and ask them what happened to them.</p></section>`;
+  return h;
+ }
+};
+const canLock=()=>!!(S.d1&&S.d2&&S.d3);
+
+function epilogue(){
+ const p=[`<p class="sd">[News jingle, then a light music bed under]</p>`];
+ if(S.fork==="ask") p.push(S.d1==="A"?"Beacon's fan survey paid off. The fans who had answered it were invited to an early screening of Highstreet's home release, and many of them posted about the film they had actually seen.":"Beacon's fan survey made headlines, but the fans who answered it never heard back, and the home release used the same bright campaign many of them had complained about.");
+ else p.push("Beacon kept its inquiry private. Silverline, grateful for the confidence, promised Marble Run premium screens on its opening weekend.");
+ if(S.d1==="A") p.push(`Highstreet's home release came with a new trailer and new key art that showed the family's story.${D1COST()<300000?" Kwame's head start saved $100,000.":""} Adult audiences who had missed the film in cinemas found it at home, and it beat its home-release plan comfortably.`);
+ else p.push("Highstreet's home release kept the bright campaign. The reviews underneath it said what audiences had said in the cinema, “not what I expected”, and it sold well below plan.");
+ if(S.d2==="A") p.push("Under Beacon's new red-flag rule, Marble Run's first test screening scored 61% “definite recommend”, which triggered a review at once. The problem, a confusing first act, was fixed in the edit, months before any partner had built stock.");
+ else p.push("Marble Run's first test screening scored 61% “definite recommend”. With no rule to act on it, the campaign went ahead, and two months later Beacon paid for reshoots of the first act.");
+ if(S.d3==="B") p.push("Marble Run's director, story editor and trailer editor screened the final trailer against the film and signed it off. Nobody asked for a recut.");
+ else p.push("Marketing kept final say over tone. Marble Run's first trailer sold a bright adventure, its director objected, and after a month of argument the trailer was recut and the partners' shop displays were redone to match.");
+ const extra=[];
+ if(S.ranked&&EPI_RANK[S.rank[0]]) extra.push(EPI_RANK[S.rank[0]]);
+ if(ok(1)) extra.push("Silverline's two extra weeks of evening screenings brought Highstreet some of the adult audience it had been missing.");
+ else if(failed(1)) extra.push("Silverline dropped Highstreet from most of its screens before the adults who liked it could find it.");
+ if(failed(2)) extra.push("The outside lawyers' review of who knew what cost $120,000 and a fortnight.");
+ if(failed(3)) extra.push("After the press statement, three of Marble Run's partners kept their fees on hold for months.");
+ if(extra.length) p.push(extra.join(" "));
+ return p.map((x,i)=>i?`<p>${x}</p>`:x).join("");
+}
+
+/* ---------- actions ---------- */
+function wc(){const ta=document.getElementById("cf");document.getElementById("wc").textContent=`${(ta.value.trim().match(/\S+/g)||[]).length} words`;}
+document.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.id==="gatecode"){const bt=document.querySelector("[data-act=gate]");if(bt){e.preventDefault();bt.click();}}});
+document.addEventListener("toggle",e=>{const d=e.target;if(d.dataset&&d.dataset.tf){S.tOpen=Object.assign({},S.tOpen,{[d.dataset.tf]:d.open});save();return;}if(!d.dataset||!d.dataset.mail)return;const k=decodeURIComponent(d.dataset.mail);
+ S.mailOpen[k]=d.open; if(d.open&&!S.mailRead[k]){S.mailRead[k]=true;d.classList.replace("unread","read");const u=d.querySelector(".udot");if(u)u.remove();}},true);
+document.addEventListener("input",e=>{if(e.target.id==="cf"){S.text=e.target.value;wc();}});
+document.addEventListener("click",e=>{
+ const sw=e.target.closest("[data-hlc]"); if(sw&&palFor){const N=S.notes[R()],k=palFor.dataset.k;
+   if(sw.dataset.hlc==="none"){delete N.hl[k];} else N.hl[k]={c:sw.dataset.hlc,t:palFor.textContent,src:palFor.dataset.src,q:palFor.dataset.q};
+   closePal(); render(); return;}
+ const sn=e.target.closest(".sn"); if(sn){openPal(sn);return;}
+ if(!e.target.closest("#hlpal"))closePal();
+ const b=e.target.closest("[data-act]");if(!b||b.disabled)return;act(b.dataset.act,b.dataset);});
+document.addEventListener("change",e=>{const v=e.target.dataset&&e.target.dataset.sort; if(!v)return; const [n,i,j]=v.split("_"); const Z=S.pz[n]; Z.sort=Z.sort||{}; Z.sort[i]=Z.sort[i]||{}; if(e.target.value)Z.sort[i][j]=e.target.value; else delete Z.sort[i][j];});
+document.addEventListener("input",e=>{if(e.target.dataset&&e.target.dataset.cc){S.notes[R()].cc[e.target.dataset.cc]=e.target.value;}});
+function act(a,d){
+ switch(a){
+  case "role":if(!(S.fork&&S.role))S.role=d.v;break;
+  case "undec":if(!S.handed){S.decided=false;S.sub=null;S.issues=[];}break;
+  case "tab":if(tabOpen(d.v)){S.tab=d.v;window.scrollTo({top:0});}break;
+  case "fork":if(!S.fork)S.fork=d.v;break;
+  case "expert":if(!S.expert)S.expert=d.v;break;
+  case "ask":if(S.picks[d.w]===null)S.picks[d.w]=+d.v;break;
+  case "mv":{const L=S[d.l],i=+d.v,j=i+(+d.d);if(j<0||j>=L.length)return;flip(d.l,()=>{[L[i],L[j]]=[L[j],L[i]];});return;}
+  case "sendrank":S.ranked=true;break;
+  case "nbopen":S.nbOpen=true;break;
+  case "go":if(S.role)S.go=true;break;
+  case "endcode":{const c=((document.getElementById("endcode")||{}).value||"").trim();if(fnv(c)===ENDING_HASH){S.endOpen=true;S.endMsg="";}else S.endMsg=c?"That isn't the code. Check it with your teacher.":"";break;}
+  case "nbclose":S.nbOpen=false;break;
+  case "hlrm":{const N=S.notes[R()];delete N.hl[d.v];break;}
+  case "noteadd":{const t=(document.getElementById("nbnew")||{}).value||""; if(t.trim())S.notes[R()].free.push(t.trim()); break;}
+  case "noterm":S.notes[R()].free.splice(+d.v,1);break;
+  case "pzsel":S.pz[d.n].sel[d.i]=d.v;break;
+  case "pzhint":S.pz[d.v].hint=true;break;
+  case "pzcheck":{const n=+d.n,i=+d.i,Z=S.pz[n],q=PZ[n].qs[i];
+    let right;
+    if(q.type==="sort"){const got=(Z.sort&&Z.sort[i])||{}; if(Object.keys(got).length<q.items.length){Z.sortMsg={...(Z.sortMsg||{}),[i]:"Sort every entry first."};break;}
+      const n2=q.items.filter(([,c],j)=>got[j]===c).length; right=n2===q.items.length; Z.sortMsg={...(Z.sortMsg||{}),[i]:right?"":`${n2} of ${q.items.length} are right.`};}
+    else{const a=Z.sel[i]; if(!a)return; right=a===q.ans;}
+    if(right)Z.ok[i]=1; else {Z.tries[i]++; if(Z.tries[i]>=2){Z.ok[i]=1;Z.failq=true;Z.qfail=Object.assign({},Z.qfail,{[i]:1});}}
+    if(Z.ok.slice(0,PZ[n].qs.length).every(Boolean)) Z.tier=Z.failq?"fail":(Z.hint||Z.tries.some(t=>t>0))?"help":"first";
+    break;}
+  case "pznext":S.gate[R()][d.v]=S.pz[d.v].tier;S.gateMsg="";break;
+  case "gate":{const n=+d.v,c=((document.getElementById("gatecode")||{}).value||"").replace(/[\uFF10-\uFF19]/g,x=>String.fromCharCode(x.charCodeAt(0)-0xFEE0)).replace(/\D/g,""),t=Object.keys(CODES[n]).find(k=>CODES[n][k]===c);
+    if(t){S.pz[n].tier=t;S.gate[R()][n]=t;S.gateMsg="";} else {const m=[1,2,3].find(x=>x!==n&&Object.values(CODES[x]).includes(c));if(m&&PZ[m].owner!==R()){const tm=Object.keys(CODES[m]).find(k=>CODES[m][k]===c);S.pz[m].tier=tm;S.gate[R()][m]=tm;}S.gateMsg=m?`That's the code for puzzle ${m}${m>n?" (saved)":""}. This box needs the code for puzzle ${n} (“${PZ[n].title}”).`:"That code doesn't work. Check it with your teammate.";} break;}
+  case "chk":if(S.checks[d.q]===undefined)S.checks[d.q]=+d.v;break;
+  case "dec":if(!S.decided)S[d.q]=d.v;break;
+  case "lock":if(canLock())S.decided=true;break;
+  case "hand":makeSub();render();{const bl=document.getElementById("block")||document.getElementById("issues");if(bl&&bl.scrollIntoView)bl.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"center"});}return;
+  case "pdf":downloadPdf();return;
+  case "copy":copyBlock();return;
+ }
+ render();
+}
+const LIST_ID={rank:"rk"};
+function flip(key,mutate){
+ const sel=`#${LIST_ID[key]} .tc`, before={};
+ document.querySelectorAll(sel).forEach(c=>before[c.dataset.id]=c.getBoundingClientRect().top);
+ mutate();render();
+ if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+ document.querySelectorAll(sel).forEach(c=>{const dy=before[c.dataset.id]-c.getBoundingClientRect().top;
+  if(dy){c.style.transition="none";c.style.transform=`translateY(${dy}px)`;requestAnimationFrame(()=>{c.style.transition="transform .22s ease";c.style.transform="";});}});
+}
+let drag=null;
+function bindDrag(key){
+ const L=S[key];
+ document.querySelectorAll(`#${LIST_ID[key]} .tc[draggable="true"]`).forEach(c=>{
+  c.addEventListener("dragstart",e=>{drag=c.dataset.id;c.classList.add("dragging");try{e.dataTransfer.setData("text/plain",drag);}catch(_){}});
+  c.addEventListener("dragend",()=>{c.classList.remove("dragging");drag=null;});
+  c.addEventListener("dragover",e=>{e.preventDefault();if(c.dataset.id!==drag)c.classList.add("over");});
+  c.addEventListener("dragleave",()=>c.classList.remove("over"));
+  c.addEventListener("drop",e=>{e.preventDefault();const to=c.dataset.id;if(!drag||to===drag||!L.includes(drag))return;
+   flip(key,()=>{const from=L.indexOf(drag);L.splice(from,1);const ti=L.indexOf(to);L.splice(from<=ti?ti+1:ti,0,drag);});});
+ });
+}
+
+/* ---------- hand-in: Lite's submission block and PDF (GUIDE 2n). Everything below up to "Pro hand-in" is copied
+   verbatim from studio/template.html by cartridges/authoring/_pro_common.py, so the check code matches blocks.py.
+   Nothing is sent anywhere: the block and the PDF are made here in the browser. ---------- */
+const LITE={"id": "highstreetpro", "version": 1, "title": "The Highstreet Inquiry (Pro)", "writing": {"label": "root cause report", "addressee": "Renata Cole, Chief Content Officer, Beacon Pictures", "by_role": {"A": {"label": "root cause report section on who owns tone accuracy", "words": 150, "task": "Write your section of the team's root cause report for Renata: the finding on who should own tone accuracy. Open with one sentence that gives your team's overall conclusion. Then argue your team's finding on who should own tone accuracy with the evidence from your own inbox (who said it, the numbers, the dates), give the strongest argument against that finding and answer it. Mention the other two findings only in passing: your teammates write those sections.", "decision": "D3"}, "B": {"label": "root cause report section on the primary cause", "words": 150, "task": "Write your section of the team's root cause report for Renata: the finding on the primary cause. Open with one sentence that gives your team's overall conclusion. Then argue your team's finding on the primary cause with the evidence from your own inbox (who said it, the numbers, the dates), give the strongest argument against that finding and answer it. Mention the other two findings only in passing: your teammates write those sections.", "decision": "D1"}, "C": {"label": "root cause report section on the early signal", "words": 150, "task": "Write your section of the team's root cause report for Renata: the finding on the early signal. Open with one sentence that gives your team's overall conclusion. Then argue your team's finding on the early signal with the evidence from your own inbox (who said it, the numbers, the dates), give the strongest argument against that finding and answer it. Mention the other two findings only in passing: your teammates write those sections.", "decision": "D2"}}}, "roles": {"A": {"dept": "Creative & Production Analyst", "chars": {"expert": "expert_a", "theo": "theo_a", "callum": "callum_a"}}, "B": {"dept": "Audience & Market Analyst", "chars": {"expert": "expert_b", "theo": "theo_b", "callum": "callum_b"}}, "C": {"dept": "Leadership & Communications Analyst", "chars": {"expert": "expert_c", "theo": "theo_c", "callum": "callum_c"}}}, "decisions": {"d1": "D1", "d2": "D2", "d3": "D3"}};
+function fnv(str){ let h = 0x811c9dc5; for (const ch of new TextEncoder().encode(str)) { h ^= ch; h = Math.imul(h, 0x01000193) >>> 0; } return h >>> 0; }
+function checkCode(parts){
+  const A = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
+  const s = parts.join("|");
+  const four = h => { let n = h % 923521, o = ""; for (let i = 0; i < 4; i++) { o += A[n % 31]; n = Math.floor(n / 31); } return o; };
+  return four(fnv(s)) + "-" + four(fnv(s + "#"));
+}
+const norm = t => t.replace(/\s+/g, " ").trim();
+function words(t){ return (t.trim().match(/\S+/g) || []).length; }
+function taskName(W){ return W.addressee ? `${W.label} to ${W.addressee}` : W.label; }
+const PDFW = {"R":[278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584,761,556,0,222,556,333,1000,556,556,333,1000,667,333,1000,0,611,0,0,222,222,333,333,350,556,1000,333,1000,500,333,944,0,500,667,278,333,556,556,556,556,260,556,333,737,370,556,584,333,737,333,400,584,333,333,333,556,537,278,333,333,365,556,834,834,834,611,667,667,667,667,667,667,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,500,556,556,556,556,278,278,278,278,556,556,556,556,556,556,556,584,611,556,556,556,556,500,556,500],"B":[278,333,474,556,556,889,722,238,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,333,333,584,584,584,611,975,722,722,722,722,667,611,778,722,278,556,722,611,833,722,778,667,778,722,667,611,722,667,944,667,667,611,333,278,333,584,556,333,556,611,556,611,556,333,611,611,278,278,556,278,889,611,611,611,611,389,556,333,611,556,778,556,556,500,389,280,389,584,761,556,0,278,556,500,1000,556,556,333,1000,667,333,1000,0,611,0,0,278,278,500,500,350,556,1000,333,1000,556,333,944,0,500,667,278,333,556,556,556,556,280,556,333,737,370,556,584,333,737,333,400,584,333,333,333,611,556,278,333,333,365,556,834,834,834,611,722,722,722,722,722,722,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,556,556,556,556,556,278,278,278,278,611,611,611,611,611,611,611,584,611,611,611,611,611,556,611,556]};
+const PDF_WIN = {"8364":128,"8218":130,"402":131,"8222":132,"8230":133,"8224":134,"8225":135,"710":136,"8240":137,"352":138,"8249":139,"338":140,"381":142,"8216":145,"8217":146,"8220":147,"8221":148,"8226":149,"8211":150,"8212":151,"732":152,"8482":153,"353":154,"8250":155,"339":156,"382":158,"376":159};   // Unicode -> WinAnsi byte, for 0x80-0x9F
+const PDF_ALT = {"Ł":"L","ł":"l","Đ":"D","đ":"d","ı":"i","ħ":"h","‐":"-","‑":"-","−":"-","′":"'","″":"\"","\u2009":" ","\u202f":" ","→":"->","←":"<-","≈":"~","≤":"<=","≥":">="};
+function pdfByte(ch){
+  const u = ch.codePointAt(0);
+  if (u >= 32 && u <= 126) return u;
+  if (u >= 160 && u <= 255) return u;
+  if (PDF_WIN[u] !== undefined) return PDF_WIN[u];
+  if (u === 9) return 32;
+  const base = ch.normalize("NFKD").replace(/[̀-ͯ]/g, "");   // ł, ő, ş… fall back to the plain letter
+  if (base && base !== ch && base.length === 1) return pdfByte(base);
+  return 63;   // ?
+}
+// Letters the PDF font can't show: a few by hand, then compatibility forms (ﬁ -> fi, ² -> 2), else "?".
+const pdfClean = s => [...String(s).replace(/[ŁłĐđıħ‐‑−′″\u2009\u202f→←≈≤≥]/g, c => PDF_ALT[c])].map(c => {
+  if (c === "\n" || pdfByte(c) !== 63 || c === "?") return c;
+  const k = c.normalize("NFKD").replace(/[\u0300-\u036f]/g, "");
+  return k && [...k].every(x => pdfByte(x) !== 63) ? k : c;
+}).join("");
+function pdfWidth(text, font, size){
+  let w = 0; for (const ch of text) { const b = pdfByte(ch); w += PDFW[font][b - 32] || 556; } return w * size / 1000;
+}
+function pdfStr(text){   // a PDF literal string in WinAnsi, with octal escapes
+  let out = "(";
+  for (const ch of text) {
+    const b = pdfByte(ch);
+    if (b === 40 || b === 41 || b === 92) out += "\\" + String.fromCharCode(b);
+    else if (b > 126) out += "\\" + b.toString(8).padStart(3, "0");
+    else out += String.fromCharCode(b);
+  }
+  return out + ")";
+}
+function pdfWrap(text, font, size, width){
+  const lines = [];
+  text.split("\n").forEach(par => {
+    if (!par.trim()) { lines.push(""); return; }
+    let line = "";
+    par.split(/\s+/).filter(Boolean).forEach(word => {
+      const tryLine = line ? line + " " + word : word;
+      if (pdfWidth(tryLine, font, size) <= width) { line = tryLine; return; }
+      if (line) lines.push(line);
+      while (pdfWidth(word, font, size) > width) {          // a very long word: break it (one pass per line)
+        const chars = [...word]; let n = 0, w = 0;
+        while (n < chars.length) { const cw = pdfWidth(chars[n], font, size); if (n > 0 && w + cw > width) break; w += cw; n++; }
+        lines.push(chars.slice(0, n).join("")); word = chars.slice(n).join("");
+      }
+      line = word;
+    });
+    lines.push(line);
+  });
+  return lines;
+}
+function utf16Hex(text){
+  let h = "FEFF";
+  for (let i = 0; i < text.length; i++) h += text.charCodeAt(i).toString(16).padStart(4, "0").toUpperCase();
+  return "<" + h + ">";
+}
+function makePdf({title, subtitle, body, note, footer, block, fileName}){
+  [title, subtitle, body, note, footer] = [title, subtitle, body, note, footer].map(pdfClean);
+  const W = 595.28, H = 841.89, M = 64, TW = W - 2 * M;
+  const pages = []; let ops = [], y = H - M;
+  const newPage = () => { if (ops.length) pages.push(ops); ops = []; y = H - M; };
+  const text = (s, font, size, x, yy, grey) => ops.push(`BT /${font} ${size} Tf ${grey ? "0.4 0.45 0.5 rg" : "0.11 0.15 0.2 rg"} ${x.toFixed(2)} ${yy.toFixed(2)} Td ${pdfStr(s)} Tj ET`);
+  const para = (s, font, size, lead, grey) => pdfWrap(s, font, size, TW).forEach(l => {
+    if (y - lead < M + 20) newPage();
+    y -= lead; if (l) text(l, font, size, M, y, grey);
+  });
+  para(title, "B", 16, 21);
+  para(subtitle, "R", 9.5, 13, true);
+  y -= 14;
+  para(body, "R", 11, 15.5);
+  y -= 18;
+  para(note, "R", 8, 11, true);
+  newPage();
+  // objects: 1 catalog, 2 pages, 3 font R, 4 font B, 5 embedded file, 6 filespec, 7 info, then page/content pairs
+  const objs = [];
+  const enc = new TextEncoder(), blockBytes = enc.encode(block);
+  const kids = pages.map((_, i) => `${8 + i * 2} 0 R`).join(" ");
+  objs[1] = `<< /Type /Catalog /Pages 2 0 R /Names << /EmbeddedFiles << /Names [${pdfStr(fileName)} 6 0 R] >> >> /PageMode /UseNone >>`;
+  objs[2] = `<< /Type /Pages /Kids [${kids}] /Count ${pages.length} >>`;
+  objs[3] = `<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>`;
+  objs[4] = `<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>`;
+  objs[5] = {dict: `<< /Type /EmbeddedFile /Subtype /text#2Fplain /Length ${blockBytes.length} >>`, data: blockBytes};
+  objs[6] = `<< /Type /Filespec /F ${pdfStr(fileName)} /UF ${utf16Hex(fileName)} /EF << /F 5 0 R >> /Desc ${pdfStr("SimLearn answers for the teacher tool")} >>`;
+  objs[7] = `<< /Title ${utf16Hex(title)} /Creator (SimLearn) /Producer (SimLearn) /SimLearnSubmission ${utf16Hex(block)} >>`;
+  pages.forEach((p, i) => {
+    const foot = `BT /R 7.5 Tf 0.4 0.45 0.5 rg ${M} 36 Td ${pdfStr(footer + (pages.length > 1 ? ` · page ${i + 1} of ${pages.length}` : ""))} Tj ET`;
+    const content = enc.encode([...p, foot].join("\n").split("").map(c => c.charCodeAt(0) < 256 ? c : "?").join(""));
+    objs[8 + i * 2] = `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${W} ${H}] /Resources << /Font << /R 3 0 R /B 4 0 R >> >> /Contents ${9 + i * 2} 0 R >>`;
+    objs[9 + i * 2] = {dict: `<< /Length ${content.length} >>`, data: content};
+  });
+  // assemble with byte offsets (all strings here are ASCII)
+  const parts = [], offs = []; let len = 0;
+  const add = b => { parts.push(b); len += b.length; };
+  add(enc.encode("%PDF-1.7\n")); add(new Uint8Array([0x25, 0xE2, 0xE3, 0xCF, 0xD3, 0x0A]));   // marks the file as binary
+  for (let n = 1; n < objs.length; n++) {
+    offs[n] = len;
+    const o = objs[n];
+    if (typeof o === "string") add(enc.encode(`${n} 0 obj\n${o}\nendobj\n`));
+    else { add(enc.encode(`${n} 0 obj\n${o.dict}\nstream\n`)); add(o.data); add(enc.encode(`\nendstream\nendobj\n`)); }
+  }
+  const xref = len;
+  let x = `xref\n0 ${objs.length}\n0000000000 65535 f \n`;
+  for (let n = 1; n < objs.length; n++) x += String(offs[n]).padStart(10, "0") + " 00000 n \n";
+  add(enc.encode(x + `trailer\n<< /Size ${objs.length} /Root 1 0 R /Info 7 0 R >>\nstartxref\n${xref}\n%%EOF\n`));
+  return new Blob(parts, {type: "application/pdf"});
+}
+
+/* ---------- Pro hand-in ---------- */
+function proChoices(r){
+ const c=LITE.roles[r].chars, sl=SHORTLIST[r]||[], out=[];
+ out.push(`${c.expert}=${S.expert&&sl.includes(S.expert)?"o"+(sl.indexOf(S.expert)+1):"-"}`);
+ Object.keys(WIT).forEach(w=>{const p=S.picks[w]; out.push(`${c[w]}=${p===null||p===undefined?"-":"o"+(p+1)}`);});
+ return out.join(", ");
+}
+// The Pro line: the team's fork, interim briefing (Morven/Moira acts on the first) and puzzle tiers (no evidence= since
+// the evidence step was removed, 9 Nov 2026). Not part of the check code (blocks.py reads it into sub["pro"]).
+function proLine(){
+ return `Pro: fork=${S.fork||"none"}, briefing=${S.ranked?S.rank.join(">"):"none"}, puzzles=${[1,2,3].map(n=>`${n}:${S.pz[n].tier||"none"}`).join(",")}`;
+}
+// writing.by_role (GUIDE 3c): the student's role writes its own section of the group's report
+function roleW(r){const W=LITE.writing, t=W.by_role&&W.by_role[r];
+ return t?Object.assign({},W,{label:t.label||W.label,words:t.words,section:t}):W;}
+function makeSub(){
+ const r=S.role, W=roleW(r), missing=[];
+ S.sub=null;
+ if(!r||!LITE.roles[r]){S.issues=["Choose your role first (Context)."];return;}
+ const memoText=(S.text||"").trim();
+ const open=Object.entries(WIT).filter(([k])=>S.picks[k]===null||S.picks[k]===undefined).map(([,w])=>w.name);
+ if(open.length) missing.push(`You haven't chosen what to ask ${open.join(", ")} yet (Investigate).`);
+ const openDec=LITE.budget?(S.decided?[]:["budget"]):Object.keys(LITE.decisions).filter(k=>!S[k]);
+ if(openDec.length) missing.push(LITE.budget?"Your group's budget isn't confirmed yet (Decide).":`Your group's answer is missing for ${openDec.map(k=>LITE.decisions[k]).join(", ")} (Decide).`);
+ if(words(memoText)<50) missing.push("Your text is very short — write your "+W.label+" first.");
+ S.issues=missing;
+ if(openDec.length||words(memoText)<50) return;
+ const ai=S.consent?"yes":"no";
+ const choices=proChoices(r);
+ const decisions=LITE.budget?LITE.budget.map(id=>`${id}=${+((S.budget||{})[id])||0}`).join(", ")   // Lite's budget format
+                           :Object.entries(LITE.decisions).map(([k,id])=>`${id}=${S[k]}`).join(", ");
+ const parts=[LITE.id, LITE.version, r, choices, decisions, ai, ai==="yes"?norm(memoText):""];
+ const code=checkCode(parts);
+ const head=[
+  "=== SIMLEARN SUBMISSION ===",
+  ai==="yes"?"AI check: ALLOWED":"AI check: NOT ALLOWED - grade by hand",
+  `Scenario: ${LITE.id} v${LITE.version} (${LITE.title})`,
+  `Role: ${r} (${LITE.roles[r].dept})`,
+  `Info choices: ${choices}`,
+  `Group decisions: ${decisions}`,
+  proLine(),
+  `Check: ${code}`,
+ ];
+ const block=ai==="yes"?[...head,`--- ${taskName(W)} (${words(memoText)} words) ---`,memoText,"=== END ==="].join("\n")
+                       :[...head,"=== END ===","",`My ${taskName(W)} (${words(memoText)} words):`,"",memoText].join("\n");
+ S.sub={block, blockOnly: ai==="yes"?block:[...head,"=== END ==="].join("\n"), code, ai, r, n:words(memoText), memo:memoText};
+ S.handed=true;
+}
+function subHTML(){const x=S.sub; if(!x) return "";
+ return `
+    <h2>Your submission</h2>
+    <p>Hand it in the way your <b>Moodle assignment</b> asks for:</p>
+    <p><b>A file upload?</b> Download your PDF and upload it to the assignment.</p>
+    <p><button type="button" class="btn" id="pdf" data-act="pdf">Download my submission (PDF)</button> <span id="pdfmsg" class="ok" aria-live="polite"></span></p>
+    <p><b>A text box?</b> Copy everything in the box below and paste it in. ${x.ai==="yes" ? "" : "Your text sits below the SimLearn part, so your teacher can mark it by hand."}</p>
+    <textarea class="block" id="block" readonly>${esc(x.block)}</textarea>
+    <p><button type="button" class="btn" id="copy" data-act="copy">Copy to clipboard</button> <span id="copied" class="ok" aria-live="polite"></span></p>
+    <p class="muted small">If you change your text or your answers later, create your submission again before you hand it in.</p>`;}
+function handinHTML(){
+ return `<div class="consent">
+      <b>Can your teacher check your text with AI?</b>
+      <p class="small">Your teacher may use the SimLearn teacher tool, which can ask an AI system (Claude, by Anthropic) to suggest feedback on your writing. Only your text and your group's choices would be sent — not your name. Your teacher always makes the final decision about your grade. If you say no, your teacher marks your text by hand. Saying no has no effect on your grade.</p>
+      <label><input type="checkbox" id="consent" ${S.consent?"checked":""}> Yes, my teacher may check my text with AI.</label>
+    </div>
+    <div id="issues" class="issues">${(S.issues||[]).map(m=>`<p>${esc(m)}</p>`).join("")}</div>
+    <button type="button" class="btn" data-act="hand">Create my submission</button>
+    <div id="out">${subHTML()}</div>`;
+}
+function downloadPdf(){
+ const x=S.sub; if(!x) return;
+ const W=roleW(x.r), rr=LITE.roles[x.r];
+ const cap=taskName(W).charAt(0).toUpperCase()+taskName(W).slice(1);
+ const today=new Date().toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"});
+ const blob=makePdf({
+  title: cap,
+  subtitle: `${LITE.title} · Role ${x.r}${rr.dept?" ("+rr.dept+")":""} · ${x.n} words · ${today}`,
+  body: x.memo,
+  note: (x.ai==="yes"
+   ? "This file also carries your SimLearn answers for your teacher's SimLearn tool: your information choices, your group's decisions and a copy of your text. You agreed that your teacher may check your text with AI."
+   : "This file also carries your SimLearn answers for your teacher's SimLearn tool: your information choices and your group's decisions, but not your text. You did not agree to an AI check, so your teacher will mark your text by hand.")
+   + ` Check code: ${x.code}.`,
+  footer: `SimLearn · ${LITE.title}`,
+  block: x.blockOnly, fileName: "simlearn-submission.txt"});
+ const a=document.createElement("a");
+ a.href=URL.createObjectURL(blob); a.download=`simlearn-${LITE.id}-role-${x.r}.pdf`;
+ document.body.appendChild(a); a.click(); a.remove();
+ setTimeout(()=>URL.revokeObjectURL(a.href),120000);
+ const m=document.getElementById("pdfmsg"); if(m) m.textContent="Look in your Downloads, then upload the file to Moodle. If nothing downloaded, open this page in Safari, Chrome or Firefox (not inside an app), or use the text box below.";
+}
+async function copyBlock(){
+ const ta=document.getElementById("block"), msg=document.getElementById("copied"); if(!ta) return;
+ const done=()=>{msg.textContent="Copied — now paste it into Moodle.";};
+ try{await navigator.clipboard.writeText(ta.value); return done();}catch(e){}
+ // older method: still works in many embedded frames where the modern one is blocked
+ ta.focus(); ta.select(); ta.setSelectionRange(0,ta.value.length);
+ let ok=false; try{ok=document.execCommand("copy");}catch(e){}
+ if(ok) return done();
+ msg.textContent="Your browser blocked copying. The text is selected — press Ctrl+C (or ⌘C) to copy it.";
+}
+
+// a recorded clip's text appears once the student has listened to the end (GUIDE 2h); media events don't bubble
+document.addEventListener("ended",e=>{const a=e.target; if(!a||a.tagName!=="AUDIO"||!a.dataset.f)return;
+ S.heard=Object.assign({},S.heard,{[a.dataset.f]:1}); const box=a.closest(".audio"), dt=box&&box.querySelector("details"); if(dt)dt.hidden=false; save();},true);
+
+document.addEventListener("change",e=>{if(e.target.id==="consent"){S.consent=e.target.checked;S.sub=null;S.issues=[];render();}});
+document.addEventListener("input",e=>{if(e.target.id!=="cf")return; if(S.sub){S.sub=null;const o=document.getElementById("out");if(o)o.innerHTML="";} save();});
+
+
+/* ---------- Who's who (_pro_common, 11 Nov 2026): the data is WHO in make_<code>.py ---------- */
+const WHO={"outside": "Outside the inquiry team", "orgs": [{"id": "vm", "name": "Vantage & Marsh", "rel": "Your company", "what": "An outside creative-research consultancy with offices in London and Edinburgh. You are three of its analysts.", "people": []}, {"id": "beacon", "name": "Beacon Pictures", "short": "Beacon Pictures", "rel": "The studio: your client", "what": "The film studio behind Highstreet. Its board asked for the inquiry.", "people": [{"id": "renata", "name": "Renata Cole", "title": "Chief Content Officer, Beacon Pictures", "tag": "boss", "badge": "Your client", "line": "Asked for the inquiry; your report goes to her. She left the voicemail."}, {"id": "naomi", "name": "Naomi Blackwood", "title": "Story Editor, Beacon Pictures", "roles": "A", "line": "Works in Beacon's story department."}, {"id": "kwame", "name": "Kwame Osei", "title": "Trailer Editor, Beacon Pictures", "roles": "A", "line": "Cuts trailers in Beacon's cutting room."}, {"id": "julia", "name": "Julia Ferris", "title": "Head of Global Marketing, Beacon Pictures", "roles": "C", "line": "Leads Beacon's marketing."}, {"id": "malik", "name": "Malik Harlan", "title": "Head of Communications, Beacon Pictures", "roles": "C", "line": "Handles what Beacon says in public."}, {"id": "jade", "name": "Jade Morrow", "title": "Social & Fan Engagement Lead, Beacon Pictures", "line": "Runs Beacon's contact with fans online."}, {"id": "theo", "name": "Theo Lockhart", "title": "Head of Brand Partnerships, Beacon Pictures", "tag": "witness", "line": "Built Highstreet's partner programme."}, {"id": "callum", "name": "Callum Rae", "title": "Director of Highstreet", "tag": "witness", "line": "Directed the film."}]}, {"id": "silverline", "name": "Silverline Cinemas", "short": "Silverline", "rel": "Cinema chain", "what": "A cinema chain that showed Highstreet.", "people": [{"id": "diego", "name": "Diego Ferraro", "title": "Exhibitor Relations, Silverline Cinemas", "roles": "B", "line": "Silverline's contact for the studios."}]}, {"id": "reel", "name": "The Weekly Reel", "rel": "The press", "what": "A film magazine.", "people": [{"id": "idris", "name": "Idris Bakare", "title": "Film Critic, The Weekly Reel", "roles": "B", "line": "Reviews films for The Weekly Reel."}]}], "also": [["Stormbreak", "a rival blockbuster that opened on the same weekend as Highstreet."], ["Marble Run", "Beacon's next adaptation; its marketing planning starts in one week."], ["The Halbrook False Alarm", "a campaign Beacon pulled and reshot after a few negative test-screening comments."], ["The Sentinel Save", "a trailer Beacon delayed by three weeks to recut after a story editor's concerns."]]};
+const PRO_PHOTOS={};   // people's photos (build.py fills this in from cartridges/images/<code>_<person id>.jpg)
+const WHO_AVC=["#2C5282","#2F6B47","#9B2C2C","#7A5A0E","#5B3F8C","#1F6F78","#8C3F63","#4A5562"];
+const WHO_SRC=TABS.some(t=>t[0]==="inbox"&&t[1]==="Sources");
+function whoAvatar(p){
+ const n=p.name.replace(/^(Dr|Prof|Professor|Sir|Dame)\.?\s+/,"").split(/\s+/), ini=(n[0][0]+(n.length>1?n[n.length-1][0]:"")).toUpperCase();
+ let h=7; for(const ch of p.id) h=(h*31+ch.charCodeAt(0))>>>0;
+ return `<span class="av" style="background:${WHO_AVC[h%WHO_AVC.length]}" aria-hidden="true">${esc(ini)}${PRO_PHOTOS[p.id]?`<img src="${PRO_PHOTOS[p.id]}" alt="" onerror="this.remove()">`:""}</span>`;}
+function whoPerson(p,r){
+ const roles=p.roles||"", mine=roles.includes(r), other=roles&&!mine&&!p.tag, t=[];
+ if(p.tag==="boss") t.push(`<span class="wtag boss">${esc(p.badge||"Your boss")}</span>`);
+ if(p.tag==="witness") t.push(`<span class="wtag wit">Everyone hears from them (Investigate)</span>`);
+ if(mine) t.push(`<span class="wtag mine">${WHO_SRC?"In your sources":"In your inbox"}</span>`);
+ else if(roles) t.push(`<span class="wtag">${WHO_SRC?"Sources of":"Inbox of"}: ${roles.split("").map(x=>esc(ROLES[x].name)).join(", ")}</span>`);
+ return `<div class="wp${other?" dim":""}" data-person="${esc(p.id)}">${whoAvatar(p)}<div class="wpt"><b>${esc(p.name)}</b><span class="wjob">${esc(p.title)}</span><span class="wline">${esc(p.line)}</span>${t.length?`<span class="wtags">${t.join("")}</span>`:""}</div></div>`;}
+function whoHTML(){
+ const r=R(), team=WHO.orgs[0], out=WHO.orgs.slice(1);
+ const rank=p=>p.tag==="boss"?0:(p.roles||"").includes(r)?1:p.tag==="witness"?2:!p.roles?3:4;
+ const ov=`<section class="card"><h2>How it fits together</h2><div class="ov">
+   <div class="ovteam"><b>${esc(team.name)}</b><small>${esc(team.rel)}</small>
+    <div class="ovdepts">${Object.entries(ROLES).map(([k,v])=>`<div class="ovdept${k===r?" you":""}"><b>${esc(v.name)}</b><small>${k===r?"You":"A teammate"}</small></div>`).join("")}</div></div>
+   <div class="ovstem" aria-hidden="true"></div>
+   <div class="ovout"><b>${esc(WHO.outside||"Outside")}</b><div class="ovorgs">${out.map(o=>`<div class="ovorg"><b>${esc(o.short||o.name)}</b><small>${esc(o.rel)}</small></div>`).join("")}</div></div>
+  </div></section>`;
+ const cards=WHO.orgs.map((o,i)=>`<section class="card worg${i?"":" wteam"}"><div class="worghead"><h2>${esc(o.name)}</h2><span class="wrel">${esc(o.rel)}</span></div>
+   <p class="muted" style="margin:0">${esc(o.what)}</p>${o.people.length?`<div class="wppl">${[...o.people].sort((a,b)=>rank(a)-rank(b)).map(p=>whoPerson(p,r)).join("")}</div>`:""}</section>`).join("");
+ const also=WHO.also&&WHO.also.length?`<section class="card"><h2>Also mentioned</h2><ul class="walso">${WHO.also.map(([n,l])=>`<li><b>${esc(n)}</b>: ${esc(l)}</li>`).join("")}</ul></section>`:"";
+ return task(`Who's who in this case: the organisations, and the people in each. ${WHO_SRC?"The authors of your sources":"The people who write to you"} are marked; greyed-out people write to a teammate.`)+ov+cards+also;
+}
+V.who=whoHTML;
+
+render();
+</script>
+</body>
+</html>
