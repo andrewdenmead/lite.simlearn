@@ -216,7 +216,8 @@ svg .sa{fill:var(--blue)} svg .sb{fill:var(--amber)}
 #out{display:flex;flex-direction:column;gap:10px}
 
 /* the stop after the role choice and the Who's who tab (_pro_common, 11 Nov 2026) */
-.stopc{border:2px solid var(--bad);background:var(--bad-soft)}
+.stopc{border:2px solid var(--blue);background:var(--blue-soft)}
+.stopc h2{margin:0 0 6px;font-size:1.15rem}
 .stophead{display:flex;gap:12px;align-items:center}
 .stophead h2{margin:0;font-size:1.1rem;line-height:1.35}
 .stopsign{flex:none;display:grid;place-items:center;width:58px;height:58px;background:var(--bad);color:#fff;font-weight:800;font-size:13px;letter-spacing:.06em;clip-path:polygon(30% 0,70% 0,100% 30%,100% 70%,70% 100%,30% 100%,0 70%,0 30%)}
@@ -607,7 +608,7 @@ function render(){
   document.getElementById("tabs").innerHTML=TABS.map(([k,l])=>`<button data-act="tab" data-v="${k}" aria-current="${S.tab===k}" ${tabOpen(k)?"":"disabled"}>${l}${k==="inbox"&&tabOpen(k)&&inboxList().some(m=>!S.mailRead[m.from+"|"+m.subj])?`<span class="tdot" aria-label="unread emails"></span>`:""}</button>`).join("");
   document.getElementById("main").innerHTML=V[S.tab]();
   wrapSentences(document.getElementById("main"));
-  if(S.tab==="context"&&(!S.role||!(S.go||S.fork))){const cs=[...document.querySelectorAll("#main section.card")],i=cs.findIndex(c=>/^\s*3 ·/.test((c.querySelector(".step")||{}).textContent||""));if(i>0){cs.slice(i).forEach(c=>{c.hidden=true;c.style.display="none";});cs[i-1].insertAdjacentHTML("afterend",S.role?`<section class="card stopc" id="stopgate" role="status"><div class="stophead"><span class="stopsign" aria-hidden="true">STOP</span><h2>Stop. Wait until everyone in your team has chosen a role and your teacher says go.</h2></div><p>Your role: <b>${esc(ROLES[S.role].name)}</b>. Check that each of you has a different role.</p><button class="btn" data-act="go">Go on</button></section>`:`<section class="card" id="rolegate"><p class="note-strong" style="margin:0"><strong>Choose your role above to read on.</strong> Each of you takes a different role: agree who is who in your team first.</p></section>`);}}
+  if(S.tab==="context"&&(!S.role||!(S.go||S.fork))){const cs=[...document.querySelectorAll("#main section.card")],i=cs.findIndex(c=>/^\s*3 ·/.test((c.querySelector(".step")||{}).textContent||""));if(i>0){cs.slice(i).forEach(c=>{c.hidden=true;c.style.display="none";});cs[i-1].insertAdjacentHTML("afterend",S.role?`<section class="card stopc" id="stopgate" role="status"><h2>Your role: ${esc(ROLES[S.role].name)}</h2><p>Check that each member of your group has a different role.</p><button class="btn" data-act="go">Go on</button></section>`:`<section class="card" id="rolegate"><p class="note-strong" style="margin:0"><strong>Choose your role above to read on.</strong> Each of you takes a different role: agree who is who in your team first.</p></section>`);}}
   const nb=document.getElementById("nb"); nb.hidden=!S.nbOpen; if(S.nbOpen) nb.innerHTML=notesHTML();
   const fab=document.getElementById("fab"); fab.hidden=!S.role; fab.textContent=`Notes (${Object.keys(S.notes[R()].hl).length+S.notes[R()].free.length})`;
   if(S.tab==="investigate"&&!S.ranked) bindDrag("rank");
@@ -1062,7 +1063,11 @@ function whoPerson(p,r){
  else if(roles) t.push(`<span class="wtag">${WHO_SRC?"Sources of":"Inbox of"}: ${roles.split("").map(x=>esc(ROLES[x].name)).join(", ")}</span>`);
  return `<div class="wp${other?" dim":""}" data-person="${esc(p.id)}">${whoAvatar(p)}<div class="wpt"><b>${esc(p.name)}</b><span class="wjob">${esc(p.title)}</span><span class="wline">${esc(p.line)}</span>${t.length?`<span class="wtags">${t.join("")}</span>`:""}</div></div>`;}
 function whoHTML(){
- const r=R(), team=WHO.orgs[0], out=WHO.orgs.slice(1);
+ // an organisation with no people and no name of its own ("A small lab in Bristol") is a line under "Also mentioned",
+ // not a card (Andrew, 11 Nov 2026: "either it should have a name, or it's not relevant enough")
+ const minor=(o,i)=>i>0&&!o.people.length&&/^(An? |The [a-z])/.test(o.name);
+ const orgs=WHO.orgs.filter((o,i)=>!minor(o,i)), extra=WHO.orgs.filter(minor).map(o=>[o.name,o.rel.charAt(0).toLowerCase()+o.rel.slice(1)+"."]);
+ const r=R(), team=orgs[0], out=orgs.slice(1);
  const rank=p=>p.tag==="boss"?0:(p.roles||"").includes(r)?1:p.tag==="witness"?2:!p.roles?3:4;
  const ov=`<section class="card"><h2>How it fits together</h2><div class="ov">
    <div class="ovteam"><b>${esc(team.name)}</b><small>${esc(team.rel)}</small>
@@ -1070,9 +1075,10 @@ function whoHTML(){
    <div class="ovstem" aria-hidden="true"></div>
    <div class="ovout"><b>${esc(WHO.outside||"Outside")}</b><div class="ovorgs">${out.map(o=>`<div class="ovorg"><b>${esc(o.short||o.name)}</b><small>${esc(o.rel)}</small></div>`).join("")}</div></div>
   </div></section>`;
- const cards=WHO.orgs.map((o,i)=>`<section class="card worg${i?"":" wteam"}"><div class="worghead"><h2>${esc(o.name)}</h2><span class="wrel">${esc(o.rel)}</span></div>
+ const cards=orgs.map((o,i)=>`<section class="card worg${i?"":" wteam"}"><div class="worghead"><h2>${esc(o.name)}</h2><span class="wrel">${esc(o.rel)}</span></div>
    <p class="muted" style="margin:0">${esc(o.what)}</p>${o.people.length?`<div class="wppl">${[...o.people].sort((a,b)=>rank(a)-rank(b)).map(p=>whoPerson(p,r)).join("")}</div>`:""}</section>`).join("");
- const also=WHO.also&&WHO.also.length?`<section class="card"><h2>Also mentioned</h2><ul class="walso">${WHO.also.map(([n,l])=>`<li><b>${esc(n)}</b>: ${esc(l)}</li>`).join("")}</ul></section>`:"";
+ const alsoAll=[...extra,...(WHO.also||[])];
+ const also=alsoAll.length?`<section class="card"><h2>Also mentioned</h2><ul class="walso">${alsoAll.map(([n,l])=>`<li><b>${esc(n)}</b>: ${esc(l)}</li>`).join("")}</ul></section>`:"";
  return task(`Who's who in this case: the organisations, and the people in each. ${WHO_SRC?"The authors of your sources":"The people who write to you"} are marked; greyed-out people write to a teammate.`)+ov+cards+also;
 }
 V.who=whoHTML;
