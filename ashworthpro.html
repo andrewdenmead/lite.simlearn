@@ -269,9 +269,9 @@ svg .sa{fill:var(--blue)} svg .sb{fill:var(--amber)}
 
 <script>
 const ROLES={
- A:{name:"Licensing & Product Partnerships",line:"What the check is licensed for, where, and how it's checked",detail:"You manage the company's licensing deals and make sure licensed products meet the standard. Your inbox holds messages from licensing and from quality and compliance."},
- B:{name:"Retail & Customer Insight",line:"Who buys the check, who has stopped, and what they pay",detail:"You look after the stores that sell Ashworth & Vale and the data on its customers. Your inbox holds messages from the flagship store and from consumer insight."},
- C:{name:"Brand Strategy & Communications",line:"What the company says, what it knew, and when",detail:"You look after the brand's research and what the company tells investors and the press. Your inbox holds messages from brand research and a former head of licensing."}
+ A:{name:"Licensing & Product Partnerships",line:"What the check is licensed for, where, and how it's checked",detail:"You manage the company's licensing deals and make sure licensed products meet the standard. Your inbox holds messages from licensing, compliance and quality."},
+ B:{name:"Retail & Customer Insight",line:"Who buys the check, who has stopped, and what they pay",detail:"You look after the stores that sell Ashworth & Vale and the data on its customers. Your inbox holds messages from the flagship store, consumer insight and the resale market."},
+ C:{name:"Brand Strategy & Communications",line:"What the company says, what it knew, and when",detail:"You look after the brand's research and what the company tells investors and the press. Your inbox holds messages from communications, brand research and a former head of licensing."}
 };
 const REL={high:"Reliable",medium:"Personal view",low:"Weak evidence"};
 const fmt=n=>(n<0?"−":"")+"£"+Math.abs(n).toLocaleString("en-GB");
@@ -309,106 +309,127 @@ const PRESTIGE=lines([
 
 const INBOX={
  A:[
-  {from:"Meera Anand, Licensing Portfolio Manager",subj:"Current licensing footprint — for the board pack",rel:"high",body:`
-   <p>For the record, before the board pack goes out: Ashworth &amp; Vale has 47 active licensing agreements for the check across 12 countries, including budget umbrellas, phone cases and fast-fashion raincoats in three markets where we have no other retail presence. That's roughly double what it was a decade ago.</p>
+  {from:"Divya Anand, Licensing Portfolio Manager",subj:"Current licensing footprint — for the board pack",rel:"high",body:`
+   <p>Putting this in writing so it's on record before the board pack goes out. As of this quarter, Ashworth &amp; Vale has 47 active licensing agreements for the check pattern across 12 countries, including budget umbrellas, phone cases and fast-fashion raincoats in three markets where we have essentially no other retail presence. That's roughly double what it was a decade ago.</p>
    ${att("Active licences by tier, this quarter",`<div class="tw"><table><thead><tr><th>Tier</th><th class="num">Licences</th><th class="num">Royalties a year</th></tr></thead><tbody>
     <tr><td>Premium: leather goods, gloves, eyewear, fragrance</td><td class="num">12</td><td class="num">£14.6m</td></tr>
     <tr><td>Home and lifestyle: cushions, throws, stationery</td><td class="num">16</td><td class="num">£9.6m</td></tr>
     <tr><td>Budget and mass-market: umbrellas, phone cases, raincoats, travel goods</td><td class="num">19</td><td class="num">£6.8m</td></tr>
     <tr><td><b>Total</b> (a decade ago: 23 licences)</td><td class="num">47</td><td class="num">£31.0m</td></tr></tbody></table></div>`)}
-   <p>The budget and mass-market licences bring in about £6.8 million a year, just over a fifth of our royalties. Every licence has a clause 9 that lets us end it early in some circumstances; I'm checking which.</p>
-   <p>People upstairs are already calling this a counterfeit-and-internet-trend problem. What I can't tell you is which customers we're actually losing, or since when.</p>
-   <p class="sig">Meera</p>`},
-  {from:"Conrad Whitfield, Quality & Compliance Lead",subj:"Seizures and audits: the real figures",rel:"high",body:`
-   <p>The real figures, not the rounded ones in the briefing pack. Customs seizures of counterfeit Ashworth Check goods in our three biggest markets rose from about 2,000 to over 40,000 units a year over the last three years: a steady climb, not one big spike.</p>
+   <p>As the table shows, the budget and mass-market licences bring in about £6.8 million a year, just over a fifth of our royalties. Every licence has a clause 9 that lets us end it early in some circumstances; I'm checking which.</p>
+   <p>I've heard people upstairs already calling this a counterfeit-and-internet-trend problem, and maybe it is. What I can't tell you is which customers we're actually losing, or since when.</p>
+   <p class="sig">Divya</p>`},
+  {from:"Conrad Whitfield, Quality & Compliance Lead",subj:"Seizure numbers, for what they're worth",rel:"high",body:`
+   <p>Here are the real figures, not the rounded version that goes in the briefing pack. Customs seizures of counterfeit Ashworth Check goods rose from around 2,000 units a year to over 40,000 units a year across our three biggest markets, and that rise has run over the last three years: not one big spike, but a steady climb.</p>
    ${att("Counterfeit Ashworth Check goods seized, our three biggest markets",`<div class="tw"><table><thead><tr><th>Year</th><th class="num">Units seized</th></tr></thead><tbody>
     <tr><td>Three years ago</td><td class="num">about 2,100</td></tr><tr><td>Two years ago</td><td class="num">about 14,800</td></tr>
     <tr><td>Last year</td><td class="num">about 27,600</td></tr><tr><td>The last twelve months</td><td class="num">about 41,300</td></tr></tbody></table></div>`)}
-   <p>One caution: a seizure counts goods stopped at the border, not goods sold, and we've filed more customs alerts in the last two years than ever before. A full crackdown would cost a few hundred thousand pounds a year.</p>
-   <p>Something nobody flagged: in the same year the budget licences grew fastest, licensee quality audits were cut from quarterly to once a year, to save money, and stayed that way for about three years. The raincoat batch two years ago was caught because a junior inspector happened to test it, not because the timetable required it.</p>
-   <p>What I can't tell is whether the seizures caused this or followed something already happening. That depends on when the streetwear trend started.</p>
-   <p class="sig">Conrad</p>`}
+   <p>One caution: a seizure counts goods stopped at the border, not goods sold. We've filed more customs alerts in the last two years than ever before, so part of that climb is simply us looking harder. A full crackdown, with alerts in every market, test purchases and court cases, would cost a few hundred thousand pounds a year.</p>
+   <p>What I can't tell from my side is whether that climb caused the current mess or just followed something that was already happening. That depends on when the streetwear trend really started.</p>
+   <p class="sig">Conrad</p>`},
+  {from:"Owen Radcliffe, Licensing Compliance Auditor",subj:"Quality audit frequency — the change nobody flagged",rel:"high",body:`
+   <p>Something worth flagging: in the same year the budget-category licences expanded fastest, licensee quality-audit frequency was quietly cut from quarterly to annual, officially as a cost-saving measure. That means for roughly three years, a huge share of the products carrying our check pattern were checked for quality once a year instead of four times: plenty of room for standards to slip without anyone here noticing quickly.</p>
+   <p>And the raincoat batch two years ago, the one everyone holds up as the system working? It was caught because a junior inspector happened to test it, not because our audit timetable required it.</p>
+   <p>I don't know for certain that quality is what's driving the retail pullback, though: from where I sit, a reputation problem and a real quality complaint would look much the same. What I don't have is the stockists' own reasons.</p>
+   <p class="sig">Owen</p>`}
  ],
  B:[
-  {from:"Rosie Pickering, Flagship Retail Manager",subj:"What the stockists are actually telling us",rel:"high",body:`
-   <p>Three of our longest-standing department-store stockists have cut their standing orders by 20 to 35 per cent over the last two seasons. When I pushed for the real reasons, two of the three buyers said the same thing independently: their customers now see the check as “everywhere now” rather than special. It wasn't about counterfeits or online trends; it was about exclusivity.</p>
-   <p>Not one asked for a discount. They asked what we'll do to make the check special again, and whether there's a plan with dates. The buyer at Albion House in York will hold her autumn order until she sees one.</p>
-   <p>What I don't have is the real picture of what we've licensed and where.</p>
-   <p class="sig">Rosie</p>`},
-  {from:"Ifeoma Achebe, Consumer Insight Analyst",subj:"Perception and resale numbers for the board pack",rel:"high",body:`
-   <p>Our prestige score among premium shoppers aged 25 to 40 has dropped 18 points since it started falling, about two and a half years ago: the sharpest fall of any age group, and well before most of the online noise. The 45-plus group has barely moved. The score usually moves slowly: five points in a year would be unusual.</p>
+  {from:"Isla Fenwick, Flagship Retail Manager",subj:"What the stockists are actually telling us",rel:"high",body:`
+   <p>For the record, three of our longest-standing department-store partners have cut their standing orders by between 20 and 35 per cent over the last two seasons. When I pushed for real reasons rather than the polite version, two of the three buyers said almost the same thing independently: their customers increasingly see the check pattern as “everywhere now” rather than special, and they're worried about being seen stocking something that's lost its cachet. It wasn't really about counterfeits or online trends in their language at all; it was about exclusivity.</p>
+   <p>Not one of the three asked for a discount. What they asked was what we're going to do to make the check special again, and whether there's a plan with dates attached. Morag Gilchrist, the buyer at Gilchrist &amp; Rae in Edinburgh, will hold her autumn order until she sees one.</p>
+   <p>What I don't have is the real picture of what we've licensed and where. Before I go back to these buyers with an explanation, I'd need it; right now I'm guessing.</p>
+   <p class="sig">Isla</p>`},
+  {from:"Ifeoma Achebe, Consumer Insight Analyst",subj:"Perception numbers you'll want before the board pack",rel:"high",body:`
+   <p>I ran the numbers again this morning because I couldn't quite believe them the first time. Our brand-prestige tracking score among premium shoppers aged 25 to 40 has dropped 18 points since it started falling, roughly two and a half years ago: the sharpest decline of any age group we track, and well before most of the online noise about the pattern really took off. Older customers, 45-plus, have barely moved.</p>
    ${att("Brand-prestige score, quarterly survey of about 4,000 premium shoppers",PRESTIGE)}
-   <p>I watch the resale sites too. Resale prices for the check have crashed by about 60% since early this year, but the streetwear crowd started picking up the pattern about fourteen months before that crash.</p>
+   <p>The chart shows how slowly the score usually moves: five points in a year would be unusual. To be fair to the other side, under-30s mention the check far more often than they used to, and they're buying it, mostly second-hand.</p>
+   <p>I've heard the press statement will lean hard on “external factors”, but I haven't seen what it actually says, so I can't yet tell you whether my data backs it up or quietly contradicts it.</p>
+   <p class="sig">Ifeoma</p>`},
+  {from:"Ciaran Doyle, Resale & Streetwear Market Analyst",subj:"Resale crash + trend timeline",rel:"medium",body:`
+   <p>Quick numbers before the meeting. Resale prices for check-pattern pieces have crashed by about 60% since early this year: a bag that resold for £900 two years ago is going for under £400 now. But here's the part people keep skipping past: the streetwear crowd started picking up the pattern roughly fourteen months before that price crash, based on resale-site tagging and second-hand listing volume. It wasn't sudden; it built for over a year before the value actually dropped.</p>
    ${att("Check-pattern shoulder bag on resale sites",`<div class="tw"><table><thead><tr><th>When</th><th class="num">Typical resale price</th><th class="num">Listings tagged “streetwear”, a month</th></tr></thead><tbody>
     <tr><td>Two years ago</td><td class="num">£900</td><td class="num">300</td></tr><tr><td>A year ago</td><td class="num">£910</td><td class="num">2,600</td></tr>
     <tr><td>Early this year</td><td class="num">£930</td><td class="num">5,200</td></tr><tr><td>Now</td><td class="num">£370</td><td class="num">6,800</td></tr></tbody></table></div>`)}
-   <p>To be fair to the other side, under-30s mention the check far more than they used to, and they're buying it, mostly second-hand. A proper monthly resale tracker with outside data would cost about £200,000 a year.</p>
-   <p>What I don't know is when things were flagged inside the company.</p>
-   <p class="sig">Ifeoma</p>`}
+   <p>I check these sites every week, and nobody upstairs has ever asked for the numbers. A proper monthly tracker with outside data would cost about £200,000 a year.</p>
+   <p>Whether that timeline says anything about who's to blame, I genuinely don't know: that depends on when things were flagged inside the company, and I can't see that side of the business.</p>
+   <p class="sig">Ciaran</p>`}
  ],
  C:[
+  {from:"Selma Arkwright, Corporate Communications Manager",subj:"Draft language for the board statement — keep this internal",rel:"medium",body:`
+   <p>Please keep this to the group: it's not final. The current working draft for the board's public statement leads with: “Ashworth &amp; Vale attributes the recent softening in premium sales primarily to unauthorised replica proliferation and an unaffiliated online trend, both outside the company's control.” Legal has already cleared the wording.</p>
+   <p>“Cleared by legal” only means we won't be sued for it. It doesn't mean it's true, or that a good journalist won't take it apart line by line.</p>
+   <p>I'm not saying it's wrong, but all I have behind it is a line from a briefing document, not the real counterfeit figures. I'd want those before I put my name to it.</p>
+   <p class="sig">Selma</p>`},
   {from:"Tariq Hassan, Brand Equity Research Lead",subj:"The audit nobody wants to talk about",rel:"high",body:`
-   <p>I'll say plainly what I said in the report itself. Four years ago, my team's Brand Equity Audit flagged licensing saturation in budget-tier categories as a real risk and recommended a pullback within eighteen months. It went to the Executive Committee and was, as far as I can tell, filed and never acted on.</p>
+   <p>Since it's relevant to what you're investigating, I'll say plainly what I said in the report itself: four years ago, my team completed a Brand Equity Audit that explicitly flagged licensing saturation as a real risk in budget-tier product categories, and recommended a pullback within eighteen months. It was presented to the Executive Committee and then, as far as I can tell, filed and never acted on.</p>
    ${att("Brand Equity Audit, four years ago: summary page",`<p><b>Risk:</b> licensing saturation in budget-tier categories. <b>Rating:</b> medium-high.</p><p><b>Evidence:</b> early signals (stockist comments, the pace of new budget licences, where the check was being sold).</p><p><b>Recommendation:</b> cut budget-tier licences by about a third within eighteen months.</p>`)}
-   <p>I stand by it, but the numbers were early signals, not a certainty, and I can see why a committee with a growth target read “medium-high” as “not yet”. What I can't see from here is whether quality control on licensed goods was as loose as I suspected.</p>
+   <p>I stand by the analysis, but I'll admit the numbers back then were early signals, not a certainty, and I can understand why a committee with a growth target read “medium-high” as “not yet”. What I can't see from here is whether quality control on licensed goods was really as loose as I suspected.</p>
    <p class="sig">Tariq</p>`},
   {from:"Dorothea Winslow, Senior Advisor, Heritage & Licensing",subj:"Some context, before you write anyone off",rel:"medium",body:`
-   <p>Twenty-two years ago, when I ran Global Licensing, Ashworth &amp; Vale was eighteen months from insolvency. The licensing programme I built funded three factories and saved roughly 800 jobs, when the alternative was closing our UK manufacturing. I would defend that call again.</p>
-   <p>Communications has sent me the draft board statement to check, since it touches licensing. It leads with: “Ashworth &amp; Vale attributes the recent softening in premium sales primarily to unauthorised replica proliferation and an unaffiliated online trend, both outside the company's control.” Legal has cleared it, which only means we won't be sued for it. I won't pretend I'd be sorry if it were right.</p>
-   <p>Whether licensing should have been wound down sooner is a fair question. I haven't heard what our stockists are really saying.</p>
+   <p>I understand you're looking into how we got here, and I'd rather you have the full picture than assume this was carelessness. Twenty-two years ago, when I ran Global Licensing, Ashworth &amp; Vale was eighteen months from insolvency after two disastrous seasons. The licensing programme I built funded three factories and saved roughly 800 jobs, at a time when the alternative on the table was closing our UK manufacturing entirely. I made that call with the information I had then, under real pressure, and I would defend it again in the same circumstances.</p>
+   <p>Whether it should have been wound down sooner is a fair question. I'm not going to hand you a tidy confession, not before I understand how bad this actually is, and I haven't heard what our stockists are really saying.</p>
    <p class="sig">Dot</p>`}
  ]
 };
 const BRANCH={
- hold:{from:"Adrian Hensley, Chief Executive",subj:"The slots are held, and the film has been tested",rel:"medium",body:`
-  <p>The slots are held. The agency tested its film, “The Check, Everywhere”, with 600 shoppers: 61% of under-30s said it made them more likely to buy, and 38% of our customers over 45 said less likely (“it's on everything now”). The agency can re-cut the film if it has a brief two weeks before the slots.</p><p class="sig">Adrian</p>`},
- release:{from:"Adrian Hensley, Chief Executive",subj:"What the analysts are asking",rel:"medium",body:`
-  <p>Since we let the slots go, three analysts have rung. Two questions keep coming back. Is this counterfeiting, which every luxury house suffers (seizures of fake luxury goods rose across the whole industry last year)? And what did we know, and when? One has heard of an internal report on licensing.</p><p>Investors forgive a bad year. They don't forgive finding out later that we knew.</p><p class="sig">Adrian</p>`}
+ hold:{from:"Lucy Aldous, Marketing Director",subj:"The slots are ours, and the film has been tested",rel:"medium",body:`
+  <p>Thank you: the relaunch slots are held for the week after the investor briefing. The agency tested the film, “The Check, Everywhere”, with 600 shoppers last week. Among under-30s, 61% said it made them more likely to buy. Among our existing customers over 45, 38% said it made them less likely, and the comment the agency heard most was “it's on everything now”.</p>
+  <p>To be fair to the film, the young buyers are real, and they are spending, mostly second-hand. They're just not the people who pay £1,200 for a trench coat. The agency can still re-cut the film around whatever the working group finds, as long as it has a brief two weeks before the slots.</p><p class="sig">Lucy</p>`},
+ release:{from:"Ruth Okonjo, Investor Relations Manager",subj:"What the analysts are asking",rel:"medium",body:`
+  <p>Since we let the relaunch slots go, three analysts have rung. The relaunch was the story they expected; now they want the explanation instead. Two questions keep coming back.</p>
+  <p>First: is this counterfeiting, which every luxury house suffers, or something particular to us? One analyst pointed out that seizures of fake luxury goods rose across the whole industry last year. Second: what did the company know, and when? One of them had heard there was an internal report on licensing some years ago. I said I'd come back to her.</p>
+  <p>In my experience, investors forgive a bad year. What they don't forgive is finding out later that we knew.</p><p class="sig">Ruth</p>`}
 };
 
 /* ---------- experts: one per role, from a shortlist ---------- */
 const EXPERTS={
- turnaround:{name:"Luxury turnaround adviser",who:"a brand advisory firm",what:"Has advised heritage houses that recovered from over-exposure. Can tell you what recovery took, and what it cost.",
-  rep:`<p>Every heritage house I've seen recover from over-exposure did the same things: fewer licences, no budget categories, real quality checks, and a date for every step. Royalties fell before sales rose; full recovery took five to seven years. The first sign is usually a stockist's order, about a year in.</p>
-   <p>Houses that only added monitoring got reports that nobody was obliged to act on. A warning that can be filed away usually is.</p>`},
- lawyer:{name:"Licensing lawyer",who:"a law firm that drafts brand licences",what:"Drafts and ends brand-licensing contracts. Can tell you how a licence can be ended, and what that costs.",
-  rep:`<p>A licence can be ended at renewal, which costs nothing; under a reputation clause, which needs evidence; or by buying the licensee out, usually about a year's royalties.</p>
-   <p>The evidence licensees accept is a trade partner's: a retailer or stockist saying, in writing, that the goods are hurting the brand. Limits on categories and shops in new contracts are normal.</p>`},
- counterfeit:{name:"Anti-counterfeiting investigator",who:"a brand-protection firm",what:"Tracks fake goods for luxury brands. Can tell you where counterfeits come from, and what fighting them achieves.",
-  rep:`<p>Counterfeiters copy what is already easy to sell. When a pattern is on cheap umbrellas and phone cases in legitimate shops, the designs, suppliers and buyers are ready-made, so heavily licensed patterns are faked far more often.</p>
-   <p>In my files, seizures usually start rising a year or two after a licensing push, not before it. Crackdowns stop organised sellers; market stalls are back within weeks.</p>`},
- consumer:{name:"Luxury consumer researcher",who:"a consumer research agency",what:"Studies why people buy luxury, and why they stop. Can tell you who leaves first when a brand is everywhere.",
-  rep:`<p>Over-45s buy heritage brands for exclusivity and leave last. Under-30s care more about cultural relevance, and trend buyers usually move on within two or three years.</p>
-   <p>The first to leave are the aspiring buyers in their late twenties to early forties. When they see the brand on cheap goods, they quietly stop buying, and the survey numbers fall years before the sales do.</p>`},
- governance:{name:"Board governance adviser",who:"a board advisory firm",what:"Advises boards on risk and internal warnings. Can tell you how investors judge a warning that wasn't acted on.",
-  rep:`<p>Investors ask two questions: was the warning clear enough to act on, and was there still time to act? A “medium-high” rating with a recommendation and a deadline is a clear warning. If that deadline passed before the outside events began, “we couldn't have known” rarely survives.</p>
-   <p>Boards that admit a missed warning early face one hard day of coverage; boards that are found out face months.</p>`},
- crisis:{name:"Crisis communications consultant",who:"a crisis communications firm",what:"Prepares companies for hostile press and investor questions. Can tell you which explanations survive a journalist.",
-  rep:`<p>Journalists check the order of events first: they put a company's own numbers next to its explanation. An “external factors” statement survives only if the outside cause came before the problem. Legal approval protects you from being sued, not from being disbelieved.</p>
-   <p>Statements that hold up admit what the company controlled and say what it will change, with dates.</p>`}
+ turnaround:{name:"Luxury turnaround adviser",who:"Helen Marsh, Marsh Brand Advisory",what:"Has advised heritage houses that recovered from over-exposure. Can tell you what recovery took, and what it cost.",
+  rep:`<p>Every heritage house I've seen recover from over-exposure did the same unglamorous things: fewer licences, no budget categories, real quality checks, and a date for every step. Royalties fell before sales rose, and full recovery took five to seven years.</p>
+   <p>The houses that only added monitoring found that the reports told them what they already knew, and nobody was obliged to act on them. A warning that can be filed away usually is.</p>
+   <p>The first sign of recovery is usually a stockist's order, about a year in.</p>`},
+ lawyer:{name:"Licensing lawyer",who:"Priya Mistry, Mistry Lowe LLP",what:"Drafts and ends brand-licensing contracts. Can tell you how a licence can be ended, and what that costs.",
+  rep:`<p>A brand licence can usually be ended in three ways: at renewal, which costs nothing; under a reputation clause, which needs evidence; or by buying the licensee out, which typically costs about a year's royalties.</p>
+   <p>Reputation clauses are rarely used, because owners don't like admitting damage. The evidence licensees accept is a trade partner's: a retailer or stockist saying, in writing, that the goods are hurting the brand.</p>
+   <p>Limits on categories and shops in new contracts are normal, and licensees accept them more readily than owners expect.</p>`},
+ counterfeit:{name:"Anti-counterfeiting investigator",who:"Graham Ellery, Ellery Brand Protection",what:"Tracks fake goods for luxury brands. Can tell you where counterfeits come from, and what fighting them achieves.",
+  rep:`<p>Counterfeiters copy what is already easy to sell. When a pattern turns up on cheap umbrellas and phone cases in legitimate shops, the fakers find the designs, the suppliers and the buyers ready-made. That's why heavily licensed patterns are faked far more often than tightly controlled ones.</p>
+   <p>In my files, seizures usually start rising a year or two after a licensing push, not before it. Counterfeiting is a symptom of dilution more often than its cause.</p>
+   <p>Crackdowns work against organised sellers. Market stalls and one-off online listings are back within weeks.</p>`},
+ consumer:{name:"Luxury consumer researcher",who:"Nadia Kowalczyk, Kowalczyk Consumer Research",what:"Studies why people buy luxury, and why they stop. Can tell you who leaves first when a brand is everywhere.",
+  rep:`<p>Customers over 45 buy heritage brands mainly for exclusivity, and they are loyal: they leave last. Under-30s care more about cultural relevance than exclusivity.</p>
+   <p>The first to leave are usually the aspiring buyers in their late twenties to early forties, who bought the brand to stand out. When they see it on cheap goods, they don't complain; they quietly stop buying, and the survey numbers fall years before the sales do.</p>
+   <p>Trend buyers usually move on within two or three years, and a brand can look dated for a while afterwards.</p>`},
+ governance:{name:"Board governance adviser",who:"Femi Adeyemi, Adeyemi Governance Partners",what:"Advises boards on risk and internal warnings. Can tell you how investors judge a warning that wasn't acted on.",
+  rep:`<p>Investors don't blame a board for missing what nobody could know. They ask two questions: was the warning clear enough to act on, and was there still time to act when it arrived?</p>
+   <p>A “medium-high” rating with a specific recommendation and a deadline is a clear warning. If that deadline passed before the outside events began, “we couldn't have known” rarely survives.</p>
+   <p>Boards that admit a missed warning early usually face one hard day of coverage. Boards that are found out face months.</p>`},
+ crisis:{name:"Crisis communications consultant",who:"Tom Kendrick, Kendrick Reid",what:"Prepares companies for hostile press and investor questions. Can tell you which explanations survive a journalist.",
+  rep:`<p>Journalists check one thing first: the order of events. They put a company's own numbers next to its explanation and ask which came first. An “external factors” statement survives only if the outside cause came before the problem.</p>
+   <p>Legal approval protects you from being sued, not from being disbelieved.</p>
+   <p>The statements that hold up admit what the company controlled and say what it will change, with dates.</p>`}
 };
 const SHORTLIST={A:["lawyer","counterfeit","turnaround"],B:["consumer","counterfeit","turnaround"],C:["governance","crisis","consumer"]};
 
 const WIT={
- dot:{name:"Dorothea Winslow",role:"Senior Advisor, on the Executive Committee",voice:"female, late 60s, standard Southern British, composed, a little guarded",
-  account:`<p class="sd">[A quiet study. A clock ticks in the background.]</p><p>I've sat on the Executive Committee for eleven years, so let me tell you how it looked from the inside. The audit was one input among many. It said “medium-high”, not “critical”, and the evidence was early. Meanwhile the royalties were paying for new looms at the mill.</p><p>Nobody in that room could have known a streetwear craze was coming. Hindsight is a wonderful thing.</p>`,
+ malcolm:{name:"Malcolm Pryce",role:"former Chief Commercial Officer, retired",voice:"male, 60s, polished southern English, assured, a little defensive",
+  account:`<p class="sd">[A quiet study. A clock ticks in the background.]</p><p>I sat on the Executive Committee for eleven years, so let me tell you how it looked from the inside. The audit was one input among many. It said “medium-high”, not “critical”, and the evidence was early. Meanwhile the royalties were paying for new looms at the mill.</p><p>Nobody in that room could have known a streetwear craze was coming. Hindsight is a wonderful thing.</p>`,
   qs:[["Did the audit give the committee a deadline?","It recommended a pullback within eighteen months, yes. A recommendation, mind you, not an instruction. Committees get dozens of those."],
-      ["Were new licences approved after the audit?","[pause] Some. About a dozen new budget licences the following year. And the licensee audits went to once a year."],
+      ["Were new licences approved after the audit?","[pause] Some. About a dozen new budget licences the following year, and the licensee audits went to once a year."],
       ["Why did licensing keep growing?","Royalties. No factories to build, no stock to hold. Every board likes income like that."]]},
- kenny:{name:"Kenny Lomax",role:"Managing Director, Pennine Rainwear (Bolton)",voice:"male, 50s, Lancashire accent, cheerful and blunt",
-  account:`<p class="sd">[A warehouse. A forklift beeps somewhere behind him.]</p><p>Kenny Lomax, Pennine Rainwear. We make the budget raincoats and umbrellas with your check: eleven pounds a raincoat, sold in supermarkets up and down the country. We've held the licence for nine years and never missed a royalty payment.</p><p>Your lot came round once a year to check the stitching, and nobody ever asked us to sell less. My contract's up for renewal in the spring, by the way.</p>`,
+ kenny:{name:"Kenny Fraser",role:"Managing Director, Clydeside Rainwear (Glasgow)",voice:"male, 50s, Glasgow accent, cheerful and blunt",
+  account:`<p class="sd">[A warehouse. A forklift beeps somewhere behind him.]</p><p>Kenny Fraser, Clydeside Rainwear. We make the budget raincoats and umbrellas with your check: eleven pounds a raincoat, sold in supermarkets up and down the country. We've held the licence for nine years, and we've never missed a royalty payment. It's been good business for both of us.</p><p>Your folk came round once a year to check the stitching, and nobody ever asked us to sell less. My contract's up for renewal in the spring, by the way.</p>`,
   qs:[["Did quality slip once the audits went to once a year?","Not on our lines. Our returns rate never moved. To be honest, nobody's complaining about the quality. They're complaining it's everywhere."],
       ["Would you accept a smaller licence?","Fewer products, higher prices, fewer shops? I'd moan about it. But I'd rather have a smaller licence than none. Spring's your moment."],
-      ["Who actually buys the check raincoats you make?","People in their late twenties and thirties, mostly. The older crowd buy the real thing. Or they used to."]]}
+      ["Who actually buys the check raincoats you make?","Folk in their late twenties and thirties, mostly. The older crowd buy the real thing. Or they used to."]]}
 };
 
 const CHECKS=[
  {q:"What did Tariq's Brand Equity Audit recommend, four years ago?",right:1,opts:["A crackdown on counterfeit sellers in the company's three biggest markets","Cutting budget-tier licences by about a third within eighteen months","Ending every licence and making all products in the company's own factories"],
-  why:"Tariq's email and the audit's summary page: a “medium-high” risk in budget-tier categories, and a cut of about a third within eighteen months. Dot confirms the deadline when asked."},
+  why:"Tariq's email and the audit's summary page: a “medium-high” risk in budget-tier categories, and a cut of about a third within eighteen months. Malcolm confirms the deadline when asked."},
  {q:"Why doesn't the rise in seizures prove that counterfeits caused the decline?",right:0,opts:["Seizures count goods stopped at the border, and the company filed more alerts","Most of the goods seized turned out to be genuine Ashworth & Vale products","The seizures were in markets where Ashworth & Vale has no shops at all"],
   why:"Conrad: a seizure counts goods stopped, not sold, and the company has filed more customs alerts than ever. His figures also show a steady three-year climb, not a sudden flood."},
- {q:"Which witness left important facts out of their account?",right:1,opts:["Kenny Lomax","Dorothea Winslow","Neither of them"],
-  why:"Dot called the audit “one input among many” but left out that the committee approved about a dozen new budget licences the following year, cut the licensee audits to once a year, and had a deadline of eighteen months."}
+ {q:"Which witness left important facts out of his account?",right:1,opts:["Kenny Fraser","Malcolm Pryce","Neither of them"],
+  why:"Malcolm called the audit “one input among many” but left out that the committee approved about a dozen new budget licences the following year, cut the licensee audits to once a year, and had a deadline of eighteen months."}
 ];
 
 const DEC={
@@ -419,14 +440,14 @@ const DEC={
    ["Defensible at the time","The audit's warning was reasonable caution at the time, but what has happened since could not have been foreseen from its data alone: leadership's decision not to act on it was defensible."],
    ["An actionable warning","The audit was a real, actionable warning: leadership should have acted on it and started a licensing pullback."]],
  d3:["Recommendation: How should the check be protected from now on?",
-   ["Hard licensing caps","Hard licensing caps and category exclusions: no budget or mass-market licences for the check from now on, even at the cost of royalty income, enforced by regular third-party audits. The budget and mass-market licences bring in about £6.8 million a year (Meera)."],
-   ["Flexible licensing, monitored","Licensing stays flexible for revenue, with an ongoing brand-sentiment and resale-market monitoring system that triggers a mandatory leadership review whenever agreed thresholds are crossed. A monthly tracker with outside data costs about £200,000 a year (Ifeoma)."]]
+   ["Hard licensing caps","Hard licensing caps and category exclusions: no budget or mass-market licences for the check from now on, even at the cost of royalty income, enforced by regular third-party audits. The budget and mass-market licences bring in about £6.8 million a year (Divya)."],
+   ["Flexible licensing, monitored","Licensing stays flexible for revenue, with an ongoing brand-sentiment and resale-market monitoring system that triggers a mandatory leadership review whenever agreed thresholds are crossed. A monthly tracker with outside data costs about £200,000 a year (Ciaran)."]]
 };
 
 const RANK=[["r1","The licensing programme"],["r2","Counterfeit goods carrying the check"],["r3","The streetwear trend"],["r4","Quality at the licensees' factories"],["r5","The brand's advertising"]];
 const RANK_START=["r2","r3","r5","r1","r4"];
 const REPLIES={
- r1:()=>`<p>You've put the licensing programme first. Then I'm not spending a penny on anything else until your report is in. I've frozen all new licence deals, and I've asked Rosie to tell our stockists that a plan with dates is coming.</p>`,
+ r1:()=>`<p>You've put the licensing programme first. Then I'm not spending a penny on anything else until your report is in. I've frozen all new licence deals, and I've asked Isla to tell our stockists that a plan with dates is coming.</p><p>Isla's answer is in your inbox.</p>`,
  r2:()=>`<p>Counterfeits, then. I've approved a proper crackdown: customs alerts in every market, test purchases and court cases against the big sellers. It's £300,000 for the first year, but at least we'll be seen to act.</p>`,
  r3:()=>`<p>The trend, then. If we can't stop it, we can join it. I've asked the agency to sign three streetwear creators to wear the check properly: £80,000.</p>`,
  r4:()=>`<p>Quality, then. I've ordered emergency audits of all 47 licensees this month: £180,000. If anyone's cutting corners, we'll know.</p>`,
@@ -435,30 +456,30 @@ const REPLIES={
 function reply(){
  const first=S.rank[0], p=S.rank.indexOf("r1");
  let extra="";
- if(first!=="r1"&&p===1) extra="<p>You've put the licensing programme second, so I've asked Meera to look into it as well.</p>";
+ if(first!=="r1"&&p===1) extra="<p>You've put the licensing programme second, so I've asked Divya to look into it as well.</p>";
  return {from:"Adrian Hensley, Chief Executive",subj:"Re: Interim briefing",rel:"medium",body:REPLIES[first]()+extra+`<p class="sig">Adrian</p>`};
 }
 const CONSEQ={
- r1:{from:"Rosie Pickering, Flagship Retail Manager",subj:"The licence freeze, and Albion House",rel:"high",body:`<p>Adrian's freeze has gone down well with the stockists. The buyer at Albion House, who was holding her autumn order, will keep our space in the York store for another season while she waits for the plan.</p><p>She asked me one thing: “Will the check still be on phone cases at the station?”</p><p class="sig">Rosie</p>`},
- r2:{from:"Conrad Whitfield, Quality & Compliance Lead",subj:"The crackdown, first month",rel:"high",body:`<p>Seizures have almost doubled in a month, which is what happens when you file alerts everywhere: you find more. Two big online sellers have closed. The market stalls were back within a fortnight, and no stockist has changed its order.</p><p class="sig">Conrad</p>`},
- r3:{from:"Ifeoma Achebe, Consumer Insight Analyst",subj:"The creators' posts",rel:"high",body:`<p>The three creators have posted, and the under-25s loved it. Second-hand listings rose again; resale prices didn't. One of Rosie's buyers rang to ask why we're paying people to make the check look cheaper.</p><p class="sig">Ifeoma</p>`},
- r4:{from:"Conrad Whitfield, Quality & Compliance Lead",subj:"The emergency audits",rel:"high",body:`<p>The emergency audits are done: 41 of the 47 licensees passed outright, and the other six had minor findings. Nothing explains a 30% cut in a stockist's order. Quality isn't what the buyers are complaining about.</p><p class="sig">Conrad</p>`},
- r5:{from:"Rosie Pickering, Flagship Retail Manager",subj:"The buyers have seen the new film",rel:"high",body:`<p>I showed the buyers the premium film. They liked the look. Then all three asked the same question: what's the plan? One called it “a beautiful advert for a check that's on everything”.</p><p class="sig">Rosie</p>`}
+ r1:{from:"Isla Fenwick, Flagship Retail Manager",subj:"The licence freeze, and Gilchrist & Rae",rel:"high",body:`<p>Adrian's freeze has gone down well with the stockists. Morag Gilchrist at Gilchrist &amp; Rae, the buyer who was holding her autumn order, has agreed to keep our space in the Edinburgh store for another season while she waits for the plan.</p><p>She asked me one thing: “Will the check still be on phone cases at the station?” I said I'd find out.</p><p class="sig">Isla</p>`},
+ r2:{from:"Conrad Whitfield, Quality & Compliance Lead",subj:"The crackdown, first month",rel:"high",body:`<p>The crackdown has started. Seizures have almost doubled in a month, which is what happens when you file alerts everywhere: you find more.</p><p>Two big online sellers have closed. The market stalls were back within a fortnight, and none of the stockists has changed its order.</p><p class="sig">Conrad</p>`},
+ r3:{from:"Ciaran Doyle, Resale & Streetwear Market Analyst",subj:"The creators' posts",rel:"high",body:`<p>The three creators have posted, and the under-25s loved it. Second-hand listings of check pieces rose again. Resale prices didn't.</p><p>One of Isla's buyers rang to ask why we're paying people to make the check look cheaper.</p><p class="sig">Ciaran</p>`},
+ r4:{from:"Owen Radcliffe, Licensing Compliance Auditor",subj:"The emergency audits",rel:"high",body:`<p>The emergency audits are done: 41 of the 47 licensees passed outright, and the other six had minor findings. Nothing explains a 30% cut in a department store's order.</p><p>Quality isn't what the buyers are complaining about.</p><p class="sig">Owen</p>`},
+ r5:{from:"Isla Fenwick, Flagship Retail Manager",subj:"The buyers have seen the new film",rel:"high",body:`<p>I showed the buyers the premium version of the film. They liked the look. Then all three asked the same question: what's the plan?</p><p>One of them called it “a beautiful advert for a check that's on everything”.</p><p class="sig">Isla</p>`}
 };
-const STANDING={r1:()=>"Adrian has frozen all new licence deals. Albion House will keep Ashworth & Vale's space for another season while it waits for a plan.",
+const STANDING={r1:()=>"Adrian has frozen all new licence deals. Gilchrist & Rae will keep Ashworth & Vale's space for another season while it waits for a plan.",
  r2:()=>"Adrian has spent £300,000 on a counterfeit crackdown. Seizures are up, and the stockists haven't changed their orders.",
  r3:()=>"Adrian has spent £80,000 on three streetwear creators. Listings rose; resale prices didn't, and a buyer has complained.",
  r4:()=>"Adrian has spent £180,000 on emergency audits of every licensee. Quality turned out not to be the problem.",
  r5:()=>"Adrian has spent £120,000 on a more premium relaunch film. The buyers want a plan, not a film."};
 const MISSTEP={r2:["Counterfeit crackdown, first year",-300000],r3:["Three streetwear creators",-80000],r4:["Emergency audits of all 47 licensees",-180000],r5:["A more premium relaunch film",-120000]};
 const EPI_RANK={r2:"The £300,000 crackdown closed two online sellers; the market stalls were back within a fortnight.",r3:"The streetwear creators' posts are still the first thing that comes up when you search for the check.",r4:"The £180,000 emergency audits found nothing that explained the stockists' cuts.",r5:"The premium relaunch film won an advertising award."};
-function inboxList(){const list=[...INBOX[R()]]; list.push(FWD); return list;}
+function inboxList(){const list=[...INBOX[R()]]; if(R()==="C"&&S.fork) list.splice(1,0,BRANCH[S.fork]); list.push(FWD); if(S.ranked) list.unshift(CONSEQ[S.rank[0]]); return list;}
 
 /* ---------- team puzzles ---------- */
 const PZ={
  1:{owner:"B",title:"The timeline",
-   intro:"Adrian's first question from investors will be simple: which came first? Ifeoma has written the main events on the office whiteboard, but some have no dates yet. Put them in order around the moment the streetwear crowd picked up the check.",
-   screen:`<div class="attach"><div class="an">Ifeoma's whiteboard · what we know so far</div>
+   intro:"Adrian's first question from investors will be simple: which came first? Ciaran has written the main events on the office whiteboard, but some have no dates yet. Put them in order around the moment the streetwear crowd picked up the check.",
+   screen:`<div class="attach"><div class="an">Ciaran's whiteboard · what we know so far</div>
      <p>Resale crash: about 60%, from early this year.</p>
      <p>Prestige score, 25-to-40s: falling for about two and a half years.</p>
      <p>Stockists' order cuts: over the last two seasons.</p>
@@ -473,12 +494,12 @@ const PZ={
                ["Counterfeit seizures started their steady climb","Before the trend began"],
                ["The audit's eighteen-month deadline passed","Before the trend began"]]},
        {q:"When the trend began, how long ago had the audit's deadline passed?",type:"choice",opts:["About six months earlier: the deadline came first","It hadn't passed: it was still a year away","About two years earlier, soon after the audit"],ans:"About six months earlier: the deadline came first"}],
-   hint:"The audit's date and deadline are in Brand Strategy & Communications' inbox (Tariq). When the licensee audits were cut and when the seizures began to climb: Licensing & Product Partnerships (Conrad).",
+   hint:"The audit's date and deadline are in Brand Strategy & Communications' inbox (Tariq). When the licensee audits were cut and when the seizures began to climb: Licensing & Product Partnerships (Owen, Conrad).",
    out:{ok:"Adrian has a dated timeline for the investor pack, and it has cost nothing. When the analysts ask which came first, the working group's report can show them.",
         fail:"Nobody could put the events in order, so Adrian has paid forensic accountants to rebuild the timeline before the briefing: £45,000."}},
- 2:{owner:"C",title:"The draft statement",
-   intro:"Legal has cleared the communications team's draft statement for the investor pack, and tomorrow it goes to the company's brokers as an early briefing note. Before it does, Dot wants every sentence checked against what the whole team knows. Decide whether each claim is true, misleading or false, and why.",
-   screen:`<div class="attach"><div class="an">Draft statement for investors · cleared by legal (Communications)</div>
+ 2:{owner:"C",title:"Selma's draft",
+   intro:"Legal has cleared Selma's draft statement for the investor pack, and tomorrow it goes to the company's brokers as an early briefing note. Before it does, Selma wants every sentence checked against what the whole team knows. Decide whether each claim is true, misleading or false, and why.",
+   screen:`<div class="attach"><div class="an">Draft statement for investors · cleared by legal (S. Arkwright)</div>
      <p><b>Claim 1:</b> The softening in premium sales is a recent development.</p>
      <p><b>Claim 2:</b> It follows a sudden flood of counterfeit goods across our markets.</p>
      <p><b>Claim 3:</b> Our licensing programme has been stable for many years.</p></div>`,
@@ -486,26 +507,26 @@ const PZ={
        {q:"Claim 2",type:"choice",opts:["True: seizures jumped from 2,000 to 40,000 in a single year","Misleading: the fakes are real, but most were seized in other markets","False: seizures climbed steadily over three years, not suddenly"],ans:"False: seizures climbed steadily over three years, not suddenly"},
        {q:"Claim 3",type:"choice",opts:["False: there are 47 licences now, roughly double a decade ago","True: the same licences have simply been renewed for years","Misleading: the number is stable, but the products have changed"],ans:"False: there are 47 licences now, roughly double a decade ago"}],
    hint:"Claim 1: Retail & Customer Insight has the prestige figures and their dates. Claims 2 and 3: Licensing & Product Partnerships has the seizure figures and the number of licences.",
-   out:{ok:"Communications has rewritten the draft, and legal has cleared the new wording. The “external factors” version never left the building.",
+   out:{ok:"Selma has rewritten the draft, and legal has cleared the new wording. The “external factors” version never left the building.",
         fail:"The draft went to the brokers as an early briefing note. Whatever the Board finally says, it will be measured against those words."}},
  3:{owner:"A",title:"The licence list",
-   intro:"Meera has pulled six licences from the full list of 47. Whatever the Board decides, Adrian wants to know what ending some licences would really involve. Work out which licences matter, what clause 9 needs and what it would cost.",
-   screen:`<div class="attach"><div class="an">Licence list · extract (M. Anand)</div>
+   intro:"Divya has pulled six licences from the full list of 47. Whatever the Board decides, Adrian wants to know what ending some licences would really involve. Work out which licences matter, what clause 9 needs and what it would cost.",
+   screen:`<div class="attach"><div class="an">Licence list · extract (D. Anand)</div>
      <p class="fine swipe">Swipe the table sideways to see the royalties and renewal dates.</p>
      <div class="tw"><table class="lic"><thead><tr><th>Licensee</th><th>Products (retail price)</th><th>Sold in</th><th class="num">Royalties a year</th><th>Renewal</th></tr></thead><tbody>
-      <tr><td>Pennine Rainwear</td><td>Raincoats, umbrellas (£11–£19)</td><td>Supermarkets, UK</td><td class="num">£1.4m</td><td>In 5 months</td></tr>
-      <tr><td>A home-goods maker</td><td>Cushions, throws (£95–£240)</td><td>Department stores</td><td class="num">£0.7m</td><td>In 9 months</td></tr>
-      <tr><td>A phone-case maker</td><td>Phone cases (£8)</td><td>Station kiosks, online</td><td class="num">£1.1m</td><td>In 8 months</td></tr>
-      <tr><td>A glove maker</td><td>Leather gloves (£120)</td><td>Department stores</td><td class="num">£0.9m</td><td>In 2 years</td></tr>
-      <tr><td>A fast-fashion chain</td><td>Fast-fashion raincoats (£15)</td><td>Three markets with no A&amp;V shops</td><td class="num">£1.6m</td><td>In 3 years</td></tr>
-      <tr><td>A travel-goods maker</td><td>Wash bags, luggage tags (£6–£12)</td><td>Airport shops</td><td class="num">£0.5m</td><td>In 10 months</td></tr></tbody></table></div>
+      <tr><td>Clydeside Rainwear</td><td>Raincoats, umbrellas (£11–£19)</td><td>Supermarkets, UK</td><td class="num">£1.4m</td><td>In 5 months</td></tr>
+      <tr><td>Pemberton Home</td><td>Cushions, throws (£95–£240)</td><td>Department stores</td><td class="num">£0.7m</td><td>In 9 months</td></tr>
+      <tr><td>Kesh Mobile</td><td>Phone cases (£8)</td><td>Station kiosks, online</td><td class="num">£1.1m</td><td>In 8 months</td></tr>
+      <tr><td>Hollis &amp; Grieve</td><td>Leather gloves (£120)</td><td>Department stores</td><td class="num">£0.9m</td><td>In 2 years</td></tr>
+      <tr><td>Marlo Fashion</td><td>Fast-fashion raincoats (£15)</td><td>Three markets with no A&amp;V shops</td><td class="num">£1.6m</td><td>In 3 years</td></tr>
+      <tr><td>Brightway Travel</td><td>Wash bags, luggage tags (£6–£12)</td><td>Airport shops</td><td class="num">£0.5m</td><td>In 10 months</td></tr></tbody></table></div>
      <p><b>Clause 9 (in every licence):</b> Ashworth &amp; Vale may end this licence early, with six months' notice, where written evidence from its trade partners shows that the licensed goods are damaging the reputation of the Check.</p></div>`,
-   qs:[{q:"Which of these licences are in the tier that Tariq's audit warned about?",type:"choice",opts:["The home-goods and glove makers","Rainwear, phones, fast fashion and travel","Rainwear, phone cases and fast fashion","All six: every one of them spreads the check"],ans:"Rainwear, phones, fast fashion and travel"},
+   qs:[{q:"Which of these licences are in the tier that Tariq's audit warned about?",type:"choice",opts:["Pemberton Home and Hollis & Grieve","Clydeside, Kesh, Marlo and Brightway","Clydeside, Kesh and Marlo, but not Brightway","All six: every licence spreads the check"],ans:"Clydeside, Kesh, Marlo and Brightway"},
        {q:"What evidence the team already has would fit clause 9?",type:"choice",opts:["Conrad's figures: over 40,000 fakes seized in a year","Two stockists' buyers: the check is “everywhere now”","Ifeoma's survey: down 18 points among 25-to-40s"],ans:"Two stockists' buyers: the check is “everywhere now”"},
        {q:"How much do the budget licences that renew within a year bring in?",type:"choice",opts:["About £4.6 million a year","About £3.7 million a year","About £3.0 million a year","About £1.6 million a year"],ans:"About £3.0 million a year"}],
-   hint:"Which tier the audit warned about is in Brand Strategy & Communications' inbox (Tariq). What the stockists' buyers said is in Retail & Customer Insight's (Rosie).",
-   out:{ok:"Meera has a plan: the budget licences that renew within a year (about £3 million a year in royalties) can simply end at renewal, and clause 9, backed by the stockists' comments in writing, covers the rest. Nothing would be paid to buy licences back.",
-        fail:"Meera couldn't show how clause 9 would work, so her estimate for ending budget licences early assumes buying them back: about £1.5 million on top of the lost royalties."}}
+   hint:"Which tier the audit warned about is in Brand Strategy & Communications' inbox (Tariq). What the stockists' buyers said is in Retail & Customer Insight's (Isla).",
+   out:{ok:"Divya has a plan: the budget licences that renew within a year (about £3 million a year in royalties) can simply end at renewal, and clause 9, backed by the stockists' comments in writing, covers the rest. Nothing would be paid to buy licences back.",
+        fail:"Divya couldn't show how clause 9 would work, so her estimate for ending budget licences early assumes buying them back: about £1.5 million on top of the lost royalties."}}
 };
 const CODES={1:{first:"1847",help:"1302",fail:"1569"},2:{first:"3086",help:"3961",fail:"3420"},3:{first:"6914",help:"6457",fail:"6038"}};
 const TIER_LABEL={first:"Solved first time",help:"Solved with help",fail:"Not solved"};
@@ -517,9 +538,9 @@ const failed=n=>S.pz[n].tier==="fail";
 /* ---------- option texts after consequences, and the year after the briefing ---------- */
 function optInfo(k,v){
  let desc=DEC[k][v==="A"?1:2][1];
- if(k==="d1"&&v==="A"&&failed(2)) desc+=" The brokers already have the “external factors” draft, so changing the story means an extra analysts' call: about £40,000.";
+ if(k==="d1"&&v==="A"&&failed(2)) desc+=" The brokers already have Selma's “external factors” draft, so changing the story means an extra analysts' call: about £40,000 (Selma).";
  if(k==="d1"&&v==="B"&&failed(2)) desc+=" It matches the draft the brokers already have.";
- if(k==="d3"&&v==="A"&&S.pz[3].tier) desc+=ok(3)?" Meera's plan: the budget licences that renew within a year (about £3 million a year) end at renewal, and clause 9 covers the rest, with nothing paid to buy licences back.":" With no plan for clause 9, ending licences early means buying them back: about £1.5 million on top of the lost royalties (Meera).";
+ if(k==="d3"&&v==="A"&&S.pz[3].tier) desc+=ok(3)?" Divya's plan: the budget licences that renew within a year (about £3 million a year) end at renewal, and clause 9 covers the rest, with nothing paid to buy licences back.":" With no plan for clause 9, ending licences early means buying them back: about £1.5 million on top of the lost royalties (Divya).";
  return {desc};
 }
 /* each line: what happened, prestige points won back (+) or lost (−), money spent or given up */
@@ -527,7 +548,7 @@ function ledger(){const L=[],add=(l,p,m)=>L.push([l,p,m||0]);
  if(S.fork==="hold"){add("Relaunch slots: the agency's holding fee",0,-150000);
   if(S.d3==="A")add("The held slots told the story of fewer, better products",1);
   if(S.d3==="B")add("The relaunch film ran: older customers said the check was on everything",-1);}
- if(S.ranked&&S.rank[0]==="r1")add("Licence freeze: Albion House kept Ashworth & Vale's space",1);
+ if(S.ranked&&S.rank[0]==="r1")add("Licence freeze: Gilchrist & Rae kept Ashworth & Vale's space",1);
  if(S.ranked&&S.rank[0]==="r3")add("Paid streetwear creators: the check looked cheaper still",-1);
  if(S.ranked&&MISSTEP[S.rank[0]])add(MISSTEP[S.rank[0]][0],0,MISSTEP[S.rank[0]][1]);
  if(failed(1))add("Forensic accountants to rebuild the timeline",0,-45000);
@@ -581,7 +602,7 @@ function notesHTML(){
 }
 
 /* ---------- state ---------- */
-const fresh=()=>({role:null,tab:"context",unlock:false,fork:null,expert:null,picks:{dot:null,kenny:null},checks:{},d1:null,d2:null,d3:null,decided:false,text:"",handed:false,rank:[...RANK_START],ranked:false,mailOpen:{},mailRead:{},notes:{A:{hl:{},cc:{},free:[]},B:{hl:{},cc:{},free:[]},C:{hl:{},cc:{},free:[]}},nbOpen:false,pz:{1:{tier:null,tries:[0,0,0],ok:[0,0,0],hint:false,sel:{}},2:{tier:null,tries:[0,0,0],ok:[0,0,0],hint:false,sel:{}},3:{tier:null,tries:[0,0,0],ok:[0,0,0],hint:false,sel:{}}},gate:{A:{},B:{},C:{}},gateMsg:""});
+const fresh=()=>({role:null,tab:"context",unlock:false,fork:null,expert:null,picks:{malcolm:null,kenny:null},checks:{},d1:null,d2:null,d3:null,decided:false,text:"",handed:false,rank:[...RANK_START],ranked:false,mailOpen:{},mailRead:{},notes:{A:{hl:{},cc:{},free:[]},B:{hl:{},cc:{},free:[]},C:{hl:{},cc:{},free:[]}},nbOpen:false,pz:{1:{tier:null,tries:[0,0,0],ok:[0,0,0],hint:false,sel:{}},2:{tier:null,tries:[0,0,0],ok:[0,0,0],hint:false,sel:{}},3:{tier:null,tries:[0,0,0],ok:[0,0,0],hint:false,sel:{}}},gate:{A:{},B:{},C:{}},gateMsg:""});
 let S=fresh();
 const STORE_KEY="simlearn-pro-ashworthpro";
 try{const x=JSON.parse(sessionStorage.getItem(STORE_KEY)||"null"); if(x&&typeof x==="object"&&!Array.isArray(x)) S=Object.assign(fresh(),x);}catch(e){}
@@ -614,7 +635,7 @@ const V={
   return task("Read from top to bottom. Choose your role, then make your first decision: agree as a team, then everyone enters the same choice.")
   +`<section class="card" data-src="Context" data-q="medium"><span class="step">1 · Where you work</span><h2>Ashworth &amp; Vale, British heritage fashion</h2>
     ${PRO_COVER?`<img src="${PRO_COVER}" alt="" style="display:block;width:100%;height:auto;border-radius:10px">`:""}
-    <p>Ashworth &amp; Vale has spent over a century turning a single design into shorthand for quiet British luxury. Since 1911, its navy, bottle-green and black tartan check, still woven at the company's mill in Yorkshire, has appeared on trench coats, scarves and leather goods carried by three generations of loyal customers, who paid a premium precisely because so few other people owned one.</p>
+    <p>Ashworth &amp; Vale has spent over a century turning a single design into shorthand for quiet British luxury. Since 1911, its navy, bottle-green and black tartan check, still woven at the company's mill in the Scottish Borders, has appeared on trench coats, scarves and leather goods carried by three generations of loyal customers, who paid a premium precisely because so few other people owned one.</p>
     <p>That premium has been evaporating. Over the past two years, sales among the brand's core affluent customers have fallen sharply, three of its longest-standing department-store stockists have quietly reduced their orders, and second-hand marketplaces are flooded with check-pattern pieces reselling for a fraction of their original price. At the same time, the pattern is turning up everywhere, on budget raincoats, phone cases and market-stall knockoffs, worn by exactly the customers the brand never positioned itself for.</p>
     <p>Two stories come up in every meeting. Five years ago, a handful of viral posts accused an Ashworth &amp; Vale factory of unsafe working conditions. Leadership pulled a whole product line from three countries within a week, an estimated £2 million loss, before an internal investigation traced the claims to a rival's marketing agency. And two years ago, a junior quality inspector flagged a small batch of licensed raincoats that failed basic waterproofing tests. The batch was recalled within 48 hours, before a single unit reached the shops.</p>
     <div class="facts"><div class="fact"><div class="l">The check</div><div class="v">Since 1911</div></div><div class="fact"><div class="l">Investor briefing</div><div class="v">In three weeks</div></div></div></section>`
@@ -623,15 +644,15 @@ const V={
     <div class="roles">${Object.entries(ROLES).map(([k,v])=>`<button class="role" data-act="role" data-v="${k}" aria-pressed="${r===k}" ${S.fork&&S.role?"disabled":""}><b>${v.name}</b><span>${v.line}</span></button>`).join("")}</div>${S.fork&&S.role?`<p class="muted small">Your role is fixed now that your team has made its first decision.</p>`:""}
     ${r?`<p><strong>Your role: ${ROLES[r].name}.</strong> ${ROLES[r].detail}</p>`:""}
     <h3 style="margin-top:6px">Other people you'll hear from</h3>
-    <div class="people"><div class="person"><b>Adrian Hensley</b><span class="muted small">Chief Executive. Your boss.</span></div><div class="person"><b>Dorothea Winslow</b><span class="muted small">Senior Advisor, on the Executive Committee.</span></div><div class="person"><b>Kenny Lomax</b><span class="muted small">Pennine Rainwear, one of the licensees.</span></div></div></section>`
+    <div class="people"><div class="person"><b>Adrian Hensley</b><span class="muted small">Chief Executive. Your boss.</span></div><div class="person"><b>Malcolm Pryce</b><span class="muted small">Former Chief Commercial Officer, now retired.</span></div><div class="person"><b>Kenny Fraser</b><span class="muted small">Clydeside Rainwear, one of the licensees.</span></div></div></section>`
   +`<section class="card" data-src="Context" data-q="medium"><span class="step">3 · The situation</span><h2>Three questions, three weeks</h2>
     <p>The Executive Board faces investors and the press in three weeks with an explanation, and right now the company doesn't have one it trusts. Some executives want to move straight to a relaunch campaign. Others insist the company needs to understand what actually happened first, and whether the decline was set in motion by decisions Ashworth &amp; Vale made itself, long before anyone outside noticed. The Board wants three things from your group: the root cause of the decline; a view on an internal Brand Equity Audit from four years ago, which nobody seems to have acted on; and a safeguard for the future. Adrian needs your report in ten days.</p></section>`
   +`<section class="card" data-src="Context" data-q="medium"><span class="step">4 · It starts</span><h2>A voicemail from Adrian</h2>
     ${audio("Voicemail from Adrian Hensley","male, 50s, Yorkshire accent, calm and deliberate",`<p class="sd">[On a train. A station announcement fades out.]</p><p>Adrian here. I'm on the train back from the mill, so this'll be quick. I've just walked the weaving floor, and the looms are busy. It's the shops that are quiet. The agency rang again. They're holding the relaunch slots for the week after the investor briefing, and they want an answer tonight.</p><p>Before you start: everyone in this building has a favourite explanation. The fakes, the streetwear kids, the advertising. I don't want a favourite. I want the one that survives a journalist with a calendar.</p><p>So, do we keep the slots or let them go? Let me know by six.</p>`,"ashworthpro_voicemail")}</section>`
   +`<section class="card" data-src="Context" data-q="medium"><span class="step">5 · Your first decision</span><h2>Keep the relaunch slots, or let them go?</h2>
     <p>The agency has a relaunch campaign ready and is holding television and poster slots for the week after the investor briefing. Keeping them means paying a holding fee now, before anyone knows what the campaign should say. Letting them go costs nothing, but the next free slots are three months later. You haven't seen the evidence yet. Agree as a team, then everyone enters the same choice.</p>
-    <div class="choices">${[["hold","A","Keep the slots: pay the holding fee","£150,000 from the marketing budget (the agency's figure). The campaign can run the week after the briefing, whatever it ends up saying."],["release","B","Let the slots go","No cost. If the Board wants a campaign, the next free slots are three months after the briefing."]].map(([v,k,t,c])=>`<button class="choice" data-act="fork" data-v="${v}" aria-pressed="${S.fork===v}" ${S.fork?"disabled":""}><span class="k">OPTION ${k}</span><b>${t}</b><small>${c}</small></button>`).join("")}</div>
-    ${S.fork?(S.role?`<p class="done">Decision made. Adrian's reply is below: everyone in your team sees it.</p>${mail(BRANCH[S.fork])}<button class="btn" data-act="tab" data-v="inbox">Open your inbox</button>`:`<p class="done">Decision made. Now choose your role above.</p>${mail(BRANCH[S.fork])}`):""}</section>`;
+    <div class="choices">${[["hold","A","Keep the slots: pay the holding fee","£150,000 from the marketing budget (the agency's figure, via Lucy Aldous, Marketing Director). The campaign can run the week after the briefing, whatever it ends up saying."],["release","B","Let the slots go","No cost. If the Board wants a campaign, the next free slots are three months after the briefing."]].map(([v,k,t,c])=>`<button class="choice" data-act="fork" data-v="${v}" aria-pressed="${S.fork===v}" ${S.fork?"disabled":""}><span class="k">OPTION ${k}</span><b>${t}</b><small>${c}</small></button>`).join("")}</div>
+    ${S.fork?(S.role?`<p class="done">Decision made. Some of the evidence you see depends on this choice. Go to your inbox.</p><button class="btn" data-act="tab" data-v="inbox">Open your inbox</button>`:`<p class="done">Decision made. Now choose your role above.</p>`):""}</section>`;
  },
  inbox(){
   const list=inboxList();
@@ -667,7 +688,7 @@ const V={
   +`<section class="card"><h2>Hire an expert (if you have time)</h2><p>This step is optional. Adrian has set aside money for outside help, enough for each of you to bring in one expert. Experts are expensive and only answer the question you hire them for, so think about what your team most needs to know. Each role has a different shortlist, and some experts appear on more than one list.</p>
     <div class="choices">${sl.map(k=>`<button class="choice" data-act="expert" data-v="${k}" aria-pressed="${e===k}" ${e?"disabled":""}><b>${EXPERTS[k].name}</b><small><em>${EXPERTS[k].who}</em><br>${EXPERTS[k].what}</small></button>`).join("")}</div>
     ${e?`<div class="attach" data-src="${EXPERTS[e].who.split(",")[0]}" data-q="high"><div class="an">📎 Report from ${EXPERTS[e].who}</div>${EXPERTS[e].rep}</div>`:""}</section>`
-  +`<section class="card"><h2>The witnesses</h2><p>Dot and Kenny both have a stake in how this story is told. <strong>One of them is leaving things out.</strong> Listen for what's missing, then choose your one question for each.</p>
+  +`<section class="card"><h2>The witnesses</h2><p>Malcolm and Kenny both have a stake in how this story is told. <strong>One of them is leaving things out.</strong> Listen for what's missing, then choose your one question for each.</p>
     <div class="two">${Object.entries(WIT).map(([k,w])=>{const p=S.picks[k];
       return `<div style="display:flex;flex-direction:column;gap:10px"><h3>${w.name} <span class="muted small">· ${w.role}</span></h3>
        ${audio(`${w.name}'s account`,w.voice,w.account,"ashworthpro_"+k)}
@@ -678,7 +699,7 @@ const V={
     <p class="note-strong"><strong>Adrian will act on whatever you put first, straight away.</strong></p>
     <ol class="tl" id="rk">${S.rank.map((id,i)=>{const t=RANK.find(x=>x[0]===id);
       return `<li class="tc" data-id="${id}" draggable="${!S.ranked}"><span class="n">${i+1}</span><span>${t[1]}</span><span class="arr">${S.ranked?"":`<button data-act="mv" data-l="rank" data-v="${i}" data-d="-1" aria-label="Move up" ${i?"":"disabled"}>↑</button><button data-act="mv" data-l="rank" data-v="${i}" data-d="1" aria-label="Move down" ${i<RANK.length-1?"":"disabled"}>↓</button>`}</span></li>`;}).join("")}</ol>
-    ${S.ranked?`<p class="done">Sent to Adrian. His reply is below, with the first news since.</p>${mail(reply())}${mail(CONSEQ[S.rank[0]])}`:`<button class="btn" data-act="sendrank">Send to Adrian</button>`}</section>`;
+    ${S.ranked?`<p class="done">Sent to Adrian. His reply is below, and there's a new email in your inbox.</p>${mail(reply())}`:`<button class="btn" data-act="sendrank">Send to Adrian</button>`}</section>`;
  },
  decide(){
   const dis=S.decided?"disabled":"";
@@ -699,7 +720,7 @@ const V={
   if(!S.handed) return h;
   if(!S.endOpen){h+=endLockHTML();return h;}
   const p=points();
-  h+=`<section class="card"><h2>A year after the briefing</h2>${audio("Fashion business news","newsreader, light music bed under",epilogue())}
+  h+=`<section class="card"><h2>A year after the briefing</h2>${audio("Fashion business news: The Selvedge","newsreader, light music bed under",epilogue())}
    <p><strong>A year after the investor briefing, the prestige score among 25-to-40s ${pointWords()}.</strong></p>
    <div class="board"><div class="tile"><div class="l">Prestige points won back (of 18 lost)</div><div class="v">${p>0?"+":""}${p}</div></div><div class="tile"><div class="l">Spent or given up since the inquiry began</div><div class="v">${fmt(-money())}</div></div></div>
    <details><summary class="small" style="cursor:pointer;color:var(--blue);font-weight:600">How that adds up</summary><div class="tw"><table class="sums"><thead><tr><th>What happened</th><th class="num">Prestige points</th><th class="num">Money</th></tr></thead><tbody>${ledger().map(([l,pt,m])=>`<tr><td>${l}</td><td class="num">${pt?(pt>0?"+":"")+pt:""}</td><td class="num">${m?fmt(m):""}</td></tr>`).join("")}<tr class="tot"><td>Total</td><td class="num">${p>0?"+":""}${p}</td><td class="num">${fmt(money())}</td></tr></tbody></table></div><p class="small muted">Prestige points: Ifeoma's quarterly survey of premium shoppers aged 25 to 40, which fell 18 points before the inquiry.</p></details>
@@ -717,10 +738,10 @@ function epilogue(){
  else p.push(`Adrian Hensley blamed counterfeiters and the streetwear trend. Within a week, a trade journal set Ashworth & Vale's own licensing numbers next to the seizure figures and asked which came first. The company had no good answer.${failed(2)?" The journal had seen the draft statement a week early, from one of the brokers.":""}`);
  if(S.d2==="B") p.push("The Board admitted that the audit should have triggered a pullback, and asked Tariq Hassan to lead a review of every licence. When the audit later reached a trade journal, it was a one-day story, because the company had already said what it would change.");
  else p.push("The Board described the shelved audit as reasonable caution at the time. When the audit later reached a trade journal, with its eighteen-month deadline, most readers took that as an excuse, and the story ran for weeks.");
- if(S.d3==="A") p.push(`Budget and mass-market licences are being wound down, with third-party audits on the rest. ${failed(3)?"With no plan for clause 9, Meera Anand had to buy two licences back, at about £1.5 million, and the wind-down is taking twice as long.":"The budget licences renewing within the year ended on schedule, and clause 9, backed by the stockists' letters, covered the rest."} About £3 million of royalties went in the first year. Kenny Lomax's Pennine Rainwear gave up its supermarket lines and signed a smaller licence for heavier raincoats, sold only in department stores, and one stockist has already restored part of its order.`);
+ if(S.d3==="A") p.push(`Budget and mass-market licences are being wound down, with third-party audits on the rest. ${failed(3)?"With no plan for clause 9, Divya Anand had to buy two licences back, at about £1.5 million, and the wind-down is taking twice as long.":"The budget licences renewing within the year ended on schedule, and clause 9, backed by the stockists' letters, covered the rest."} About £3 million of royalties went in the first year. Kenny Fraser's Clydeside Rainwear gave up its supermarket lines and signed a smaller licence for heavier raincoats, sold only in department stores, and one stockist has already restored part of its order.`);
  else p.push("Licensing continues, with a monthly resale and sentiment report and review thresholds. The first report showed the check still “everywhere”, and two stockists are still waiting for a plan with dates.");
  const extra=[];
- if(S.ranked&&S.rank[0]==="r1") extra.push("Adrian's early freeze on new licences kept Albion House on board while the report was written.");
+ if(S.ranked&&S.rank[0]==="r1") extra.push("Adrian's early freeze on new licences kept Gilchrist & Rae on board while the report was written.");
  if(S.ranked&&EPI_RANK[S.rank[0]]) extra.push(EPI_RANK[S.rank[0]]);
  if(failed(1)) extra.push("The forensic accountants' timeline cost £45,000.");
  if(extra.length) p.push(extra.join(" "));
@@ -805,7 +826,7 @@ function bindDrag(key){
 /* ---------- hand-in: Lite's submission block and PDF (GUIDE 2n). Everything below up to "Pro hand-in" is copied
    verbatim from studio/template.html by cartridges/authoring/_pro_common.py, so the check code matches blocks.py.
    Nothing is sent anywhere: the block and the PDF are made here in the browser. ---------- */
-const LITE={"id": "ashworthpro", "version": 1, "title": "Ashworth & Vale: The Check Inquiry (Pro)", "writing": {"label": "root cause report", "addressee": "Adrian Hensley and the Executive Board", "by_role": {"A": {"label": "report section on the future safeguard", "words": 150, "task": "Write your section of the working group's root cause report for Adrian and the Executive Board: the safeguard for the future. Open with one sentence that gives your group's overall diagnosis. Then argue your group's recommendation with the evidence from your own inbox (who said it, the dates, the numbers), give the strongest argument against it and answer it. Mention the other two decisions only in passing (if yours depends on one of them, say how in a sentence): your teammates write those sections.", "decision": "D3"}, "B": {"label": "report section on the root cause", "words": 150, "task": "Write your section of the working group's root cause report for Adrian and the Executive Board: the root cause of the decline. Open with one sentence that gives your group's overall diagnosis. Then argue your group's finding with the evidence from your own inbox (who said it, the dates, the numbers), give the strongest argument against it and answer it. Mention the other two decisions only in passing (if yours depends on one of them, say how in a sentence): your teammates write those sections.", "decision": "D1"}, "C": {"label": "report section on the Brand Equity Audit", "words": 150, "task": "Write your section of the working group's root cause report for Adrian and the Executive Board: how the four-year-old Brand Equity Audit should be judged. Open with one sentence that gives your group's overall diagnosis. Then argue your group's finding with the evidence from your own inbox (who said it, the dates, the numbers), give the strongest argument against it and answer it. Mention the other two decisions only in passing (if yours depends on one of them, say how in a sentence): your teammates write those sections.", "decision": "D2"}}}, "roles": {"A": {"dept": "Licensing & Product Partnerships", "chars": {"expert": "expert_a", "dot": "dot_a", "kenny": "kenny_a"}}, "B": {"dept": "Retail & Customer Insight", "chars": {"expert": "expert_b", "dot": "dot_b", "kenny": "kenny_b"}}, "C": {"dept": "Brand Strategy & Communications", "chars": {"expert": "expert_c", "dot": "dot_c", "kenny": "kenny_c"}}}, "decisions": {"d1": "D1", "d2": "D2", "d3": "D3"}};
+const LITE={"id": "ashworthpro", "version": 1, "title": "Ashworth & Vale: The Check Inquiry (Pro)", "writing": {"label": "root cause report", "addressee": "Adrian Hensley and the Executive Board", "by_role": {"A": {"label": "report section on the future safeguard", "words": 150, "task": "Write your section of the working group's root cause report for Adrian and the Executive Board: the safeguard for the future. Open with one sentence that gives your group's overall diagnosis. Then argue your group's recommendation with the evidence from your own inbox (who said it, the dates, the numbers), give the strongest argument against it and answer it. Mention the other two decisions only in passing (if yours depends on one of them, say how in a sentence): your teammates write those sections.", "decision": "D3"}, "B": {"label": "report section on the root cause", "words": 150, "task": "Write your section of the working group's root cause report for Adrian and the Executive Board: the root cause of the decline. Open with one sentence that gives your group's overall diagnosis. Then argue your group's finding with the evidence from your own inbox (who said it, the dates, the numbers), give the strongest argument against it and answer it. Mention the other two decisions only in passing (if yours depends on one of them, say how in a sentence): your teammates write those sections.", "decision": "D1"}, "C": {"label": "report section on the Brand Equity Audit", "words": 150, "task": "Write your section of the working group's root cause report for Adrian and the Executive Board: how the four-year-old Brand Equity Audit should be judged. Open with one sentence that gives your group's overall diagnosis. Then argue your group's finding with the evidence from your own inbox (who said it, the dates, the numbers), give the strongest argument against it and answer it. Mention the other two decisions only in passing (if yours depends on one of them, say how in a sentence): your teammates write those sections.", "decision": "D2"}}}, "roles": {"A": {"dept": "Licensing & Product Partnerships", "chars": {"expert": "expert_a", "malcolm": "malcolm_a", "kenny": "kenny_a"}}, "B": {"dept": "Retail & Customer Insight", "chars": {"expert": "expert_b", "malcolm": "malcolm_b", "kenny": "kenny_b"}}, "C": {"dept": "Brand Strategy & Communications", "chars": {"expert": "expert_c", "malcolm": "malcolm_c", "kenny": "kenny_c"}}}, "decisions": {"d1": "D1", "d2": "D2", "d3": "D3"}};
 function fnv(str){ let h = 0x811c9dc5; for (const ch of new TextEncoder().encode(str)) { h ^= ch; h = Math.imul(h, 0x01000193) >>> 0; } return h >>> 0; }
 function checkCode(parts){
   const A = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
@@ -1033,7 +1054,7 @@ document.addEventListener("input",e=>{if(e.target.id!=="cf")return; if(S.sub){S.
 
 
 /* ---------- Who's who (_pro_common, 11 Nov 2026): the data is WHO in make_<code>.py ---------- */
-const WHO={"outside": "Outside Ashworth & Vale", "orgs": [{"id": "av", "name": "Ashworth & Vale", "rel": "Your company", "what": "A British heritage fashion house. Its check has been woven at its mill in Yorkshire since 1911.", "people": [{"id": "adrian", "name": "Adrian Hensley", "title": "Chief Executive", "tag": "boss", "line": "Leads the company. He left the voicemail."}, {"id": "meera", "name": "Meera Anand", "title": "Licensing Portfolio Manager", "roles": "A", "line": "Manages the company's licensing deals."}, {"id": "conrad", "name": "Conrad Whitfield", "title": "Quality & Compliance Lead", "roles": "A", "line": "Looks after quality and compliance: fakes, and the audits of licensed products."}, {"id": "rosie", "name": "Rosie Pickering", "title": "Flagship Retail Manager", "roles": "B", "line": "Runs the flagship store and talks to the stockists."}, {"id": "ifeoma", "name": "Ifeoma Achebe", "title": "Consumer Insight Analyst", "roles": "B", "line": "Studies the brand's customers and the resale market."}, {"id": "tariq", "name": "Tariq Hassan", "title": "Brand Equity Research Lead", "roles": "C", "line": "Leads the brand's research."}, {"id": "dorothea", "name": "Dorothea Winslow", "title": "Senior Advisor, Heritage & Licensing", "roles": "C", "tag": "witness", "line": "Dot. A former head of licensing, now an advisor and a member of the Executive Committee."}]}, {"id": "pennine", "name": "Pennine Rainwear", "rel": "A licensee", "what": "A rainwear maker in Bolton that holds a licence to use the check.", "people": [{"id": "kenny", "name": "Kenny Lomax", "title": "Managing Director, Pennine Rainwear", "tag": "witness", "line": "Runs Pennine Rainwear."}]}, {"id": "albion", "name": "Albion House", "rel": "A stockist", "what": "A department store in York, one of the stockists that sell Ashworth & Vale.", "people": []}, {"id": "agency", "name": "The advertising agency", "short": "The agency", "rel": "Relaunch campaign", "what": "Has a relaunch campaign ready and is holding television and poster slots for the week after the investor briefing.", "people": []}], "also": [["The Brand Equity Audit", "an internal audit from four years ago; the Board wants your view on it."], ["The factory rumour", "five years ago: a product line pulled from three countries within a week over viral posts."], ["The raincoat recall", "two years ago: a batch of licensed raincoats recalled within 48 hours."]]};
+const WHO={"outside": "Outside Ashworth & Vale", "orgs": [{"id": "av", "name": "Ashworth & Vale", "rel": "Your company", "what": "A British heritage fashion house. Its check has been woven at its mill in the Scottish Borders since 1911.", "people": [{"id": "adrian", "name": "Adrian Hensley", "title": "Chief Executive", "tag": "boss", "line": "Leads the company. He left the voicemail."}, {"id": "divya", "name": "Divya Anand", "title": "Licensing Portfolio Manager", "roles": "A", "line": "Manages the company's licensing deals."}, {"id": "conrad", "name": "Conrad Whitfield", "title": "Quality & Compliance Lead", "roles": "A", "line": "Looks after quality and compliance, including fakes."}, {"id": "owen", "name": "Owen Radcliffe", "title": "Licensing Compliance Auditor", "roles": "A", "line": "Audits licensed products against the standard."}, {"id": "isla", "name": "Isla Fenwick", "title": "Flagship Retail Manager", "roles": "B", "line": "Runs the flagship store and talks to the stockists."}, {"id": "ifeoma", "name": "Ifeoma Achebe", "title": "Consumer Insight Analyst", "roles": "B", "line": "Studies the brand's customers."}, {"id": "ciaran", "name": "Ciaran Doyle", "title": "Resale & Streetwear Market Analyst", "roles": "B", "line": "Follows resale prices and streetwear trends."}, {"id": "selma", "name": "Selma Arkwright", "title": "Corporate Communications Manager", "roles": "C", "line": "Drafts what the company tells investors and the press."}, {"id": "tariq", "name": "Tariq Hassan", "title": "Brand Equity Research Lead", "roles": "C", "line": "Leads the brand's research."}, {"id": "dorothea", "name": "Dorothea Winslow", "title": "Senior Advisor, Heritage & Licensing", "roles": "C", "line": "A former head of licensing, now an advisor."}, {"id": "lucy", "name": "Lucy Aldous", "title": "Marketing Director", "line": "Works with the agency on the relaunch campaign."}, {"id": "malcolm", "name": "Malcolm Pryce", "title": "Former Chief Commercial Officer, retired", "tag": "witness", "line": "Was one of the company's leaders before he retired."}]}, {"id": "clydeside", "name": "Clydeside Rainwear", "rel": "A licensee", "what": "A Glasgow company that holds a licence to use the check.", "people": [{"id": "kenny", "name": "Kenny Fraser", "title": "Managing Director, Clydeside Rainwear", "tag": "witness", "line": "Runs Clydeside Rainwear."}]}, {"id": "agency", "name": "The advertising agency", "short": "The agency", "rel": "Relaunch campaign", "what": "Has a relaunch campaign ready and is holding television and poster slots for the week after the investor briefing.", "people": []}], "also": [["The Brand Equity Audit", "an internal audit from four years ago; the Board wants your view on it."], ["The factory rumour", "five years ago: a product line pulled from three countries within a week over viral posts."], ["The raincoat recall", "two years ago: a batch of licensed raincoats recalled within 48 hours."]]};
 const PRO_PHOTOS={};   // people's photos (build.py fills this in from cartridges/images/<code>_<person id>.jpg)
 const WHO_AVC=["#2C5282","#2F6B47","#9B2C2C","#7A5A0E","#5B3F8C","#1F6F78","#8C3F63","#4A5562"];
 const WHO_SRC=TABS.some(t=>t[0]==="inbox"&&t[1]==="Sources");
