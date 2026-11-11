@@ -251,6 +251,7 @@ svg .sa{fill:var(--blue)} svg .sb{fill:var(--amber)}
 .wtag.wit{background:var(--good-soft);color:var(--good)}
 .walso{margin:0;padding-left:1.1rem}
 .walso li{margin:3px 0}
+.mail>summary .mav{width:30px;height:30px;border-radius:50%;object-fit:cover;vertical-align:middle;margin:0 8px 0 0}
 </style>
 </head>
 <body>
@@ -297,7 +298,7 @@ const PRO_AUDIO=["herdpro_voicemail", "herdpro_declan", "herdpro_clio", "herdpro
 function audio(t,voice,script,file){if(file&&PRO_AUDIO.includes(file))return `<div class="audio rec"><div style="flex:1;min-width:0"><div class="t">${t}</div><audio controls preload="none" data-f="${file}" src="audio/${file}.mp3" style="width:100%;margin-top:6px"></audio></div><details data-tf="${file}" ${(S.heard||{})[file]?"":"hidden"} ${(S.tOpen||{})[file]?"open":""}><summary>Show the text</summary><div class="script" data-src="${esc(t)}" data-q="medium">${script}</div></details></div>`;
  return `<div class="audio"><button class="play" disabled aria-label="Play (recording to come)">▶</button><div><div class="t">${t}</div><div class="s">Recording to come: read the text</div></div><details open><summary>The text</summary><div class="script" data-src="${esc(t)}" data-q="medium">${script}</div></details></div>`;}
 function mail(m){const k=m.from+"|"+m.subj, o=!!S.mailOpen[k], r=!!S.mailRead[k];
- return `<details class="mail ${r?"read":"unread"}" data-mail="${encodeURIComponent(k)}"${o?" open":""}><summary><span class="from">${r?"":`<span class="udot" aria-label="Unread"></span>`}<span class="lbl">From:</span> ${m.from}</span><span class="subj">${m.subj}</span></summary><div class="body" data-src="${m.from.split(",")[0]}" data-q="${m.rel}">${m.body}</div></details>`;}
+ return `<details class="mail ${r?"read":"unread"}" data-mail="${encodeURIComponent(k)}"${o?" open":""}><summary><span class="from">${whoMailAv(m.from)}${r?"":`<span class="udot" aria-label="Unread"></span>`}<span class="lbl">From:</span> ${m.from}</span><span class="subj">${m.subj}</span></summary><div class="body" data-src="${m.from.split(",")[0]}" data-q="${m.rel}">${m.body}</div></details>`;}
 function att(name,html){return `<div class="attach"><div class="an">📎 ${name}</div>${html}</div>`;}
 
 /* ---------- inboxes (every key clue appears in at least two roles) ---------- */
@@ -1083,6 +1084,9 @@ function whoHTML(){
  return task(`Who's who in this case: the organisations, and the people in each. ${WHO_SRC?"The authors of your sources":"The people who write to you"} are marked; greyed-out people write to a teammate.`)+ov+cards+also;
 }
 V.who=whoHTML;
+function whoMailAv(from){const n=String(from).split(",")[0].trim();
+ const p=WHO.orgs.flatMap(o=>o.people).find(x=>x.name===n);
+ return p&&PRO_PHOTOS[p.id]?`<img class="mav" src="${PRO_PHOTOS[p.id]}" alt="">`:"";}
 
 render();
 </script>

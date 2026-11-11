@@ -102,6 +102,8 @@ legend{font-weight:600;margin-bottom:.5rem}
 .mail>summary{list-style:none;cursor:pointer;padding:14px 16px;display:flex;justify-content:space-between;gap:12px;align-items:baseline}
 .mail>summary::-webkit-details-marker{display:none}
 .mail .from{font-weight:600}
+.mail>summary .mav{flex:none;width:40px;height:40px;border-radius:50%;object-fit:cover;align-self:center}
+.mail>summary .mwho{flex:1;min-width:0}
 .mail .subj{color:var(--ink-2);font-size:.92rem}
 .mail .state{font-size:.8rem;white-space:nowrap;color:var(--ink-2)}
 .mail .state.todo{color:var(--amber);font-weight:600}
@@ -1724,10 +1726,14 @@ function mailHTML(c){
     </div>`;
   }
   return `<details class="mail" id="m_${c.id}" ${open || st.tab==="inbox" || (SPEAK && st.tab==="reading") ? "open" : ""}>
-    <summary><span><span class="from">${esc(c.name)}</span>, <span class="muted">${esc(c.title)}</span><br><span class="subj">${esc(c.subject)}</span></span>
+    <summary>${mailAv(c)}<span class="mwho"><span class="from">${esc(c.name)}</span>, <span class="muted">${esc(c.title)}</span><br><span class="subj">${esc(c.subject)}</span></span>
       <span class="state ${chosen?"":"todo"}">${chosen ? "Answered" : "Choose one"}</span></summary>
     <div class="body"><div class="prose">${hlHTML(c.email, c.id, "email")}</div>${attachHTML(c)}${c.citation ? `<p class="cite"><b>Reference:</b> ${esc(c.citation)}</p>` : ""}${offers}</div></details>`;
 }
+// The sender's photo from the Who's who face library (Andrew, 11 Nov 2026), when there is one
+function mailAv(c){   // S.who.groups[].people[] (build.py who_data); read at render time, after a locked page is opened
+  const p = ((S.who || {}).groups || []).flatMap(g => g.people).find(x => x.name === c.name && x.photo);
+  return p ? `<img class="mav" src="${p.photo}" alt="">` : ""; }
 // Pictures attached to an email (from 27 Oct 2026, design sims): "attachments": [{"src", "alt", "caption"}] on a
 // character; build.py embeds them. Tap a picture to see it full size.
 function attachHTML(c){
