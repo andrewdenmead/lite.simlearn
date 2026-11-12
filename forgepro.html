@@ -246,6 +246,7 @@ textarea{width:100%;min-height:200px;resize:vertical;font:inherit;line-height:1.
 .walso{margin:0;padding-left:1.1rem}
 .walso li{margin:3px 0}
 .mail>summary .mav{width:30px;height:30px;border-radius:50%;object-fit:cover;vertical-align:middle;margin:0 8px 0 0}
+.t3{cursor:pointer}.t3:not(.on){opacity:.75}.t3:not(.on) .n{background:transparent;border:2px dashed var(--line)}.t3.on{border-color:var(--blue);background:var(--blue-soft)}.t3h{margin-left:auto;color:var(--muted);white-space:nowrap}
 </style>
 </head>
 <body>
@@ -662,11 +663,10 @@ const V={
        <div class="qs">${w.qs.map((q,i)=>`<button class="q" data-act="ask" data-w="${k}" data-v="${i}" aria-pressed="${p===i}" ${p!==null?"disabled":""}>${q[0]}</button>`).join("")}</div>
        ${p!==null?audio(`${w.name} answers`,w.voice,`<p>${w.qs[p][1]}</p>`,"forgepro_"+k+"_"+(p+1)):""}</div>`;}).join("")}</div></section>`
   +`<section class="card"><h2>Interim briefing for Moira</h2>
-    <p>Moira meets the board again on Thursday and needs your best explanation now, before your final findings. Below is the list Rupert drew up for her, in his order. Put the explanations in order, from most to least likely.</p>
+    <p>Moira meets the board again on Thursday and needs your best explanation now, before your final findings. Below is the list Rupert drew up for her, in his order. Pick the three most likely explanations and put them in order, the most likely first.</p>
     <p class="note-strong"><strong>Moira will act on whatever you put first, straight away.</strong></p>
-    <ol class="tl" id="rk">${S.rank.map((id,i)=>{const t=RANK.find(x=>x[0]===id);
-      return `<li class="tc" data-id="${id}" draggable="${!S.ranked}"><span class="n">${i+1}</span><span>${t[1]}</span><span class="arr">${S.ranked?"":`<button data-act="mv" data-l="rank" data-v="${i}" data-d="-1" aria-label="Move up" ${i?"":"disabled"}>↑</button><button data-act="mv" data-l="rank" data-v="${i}" data-d="1" aria-label="Move down" ${i<RANK.length-1?"":"disabled"}>↓</button>`}</span></li>`;}).join("")}</ol>
-    ${S.ranked?`<p class="done">Sent to Moira. Her reply is below, and there's a new email in your inbox.</p>${mail(reply())}`:`<button class="btn" data-act="sendrank">Send to Moira</button>`}</section>`;
+    <ol class="tl" id="rk">${rankList()}</ol>
+    ${S.ranked?`<p class="done">Sent to Moira. Her reply is below, and there's a new email in your inbox.</p>${mail(reply())}`:`<button class="btn" data-act="sendrank" ${(S.pick3||0)<3?"disabled":""}>Send to Moira</button>`}</section>`;
  },
  decide(){
   const dis=S.decided?"disabled":"";
@@ -717,7 +717,8 @@ function act(a,d){
   case "expert":if(!S.expert)S.expert=d.v;break;
   case "ask":if(S.picks[d.w]===null)S.picks[d.w]=+d.v;break;
   case "mv":{const L=S[d.l],i=+d.v,j=i+(+d.d);if(j<0||j>=L.length)return;flip(d.l,()=>{[L[i],L[j]]=[L[j],L[i]];});return;}
-  case "sendrank":S.ranked=true;break;
+  case "pick3":if(!S.ranked){const n=S.pick3||0,i=S.rank.indexOf(d.v);if(i<n){S.rank.splice(i,1);const rest=RANK_START.filter(x=>!S.rank.slice(0,n-1).includes(x));S.rank=[...S.rank.slice(0,n-1),...rest];S.pick3=n-1;}else if(n<3){S.rank.splice(i,1);S.rank.splice(n,0,d.v);S.pick3=n+1;}}break;
+  case "sendrank":if((S.pick3||0)<3)break;S.ranked=true;break;
   case "nbopen":S.nbOpen=true;break;
   case "go":if(S.role)S.go=true;break;
   case "endcode":{const c=((document.getElementById("endcode")||{}).value||"").trim();if(fnv(c)===ENDING_HASH){S.endOpen=true;S.endMsg="";}else S.endMsg=c?"That isn't the code. Check it with your teacher.":"";break;}
@@ -900,7 +901,7 @@ function proChoices(r){
 // The Pro line: the team's fork, interim briefing (Morven/Moira acts on the first) and puzzle tiers (no evidence= since
 // the evidence step was removed, 9 Nov 2026). Not part of the check code (blocks.py reads it into sub["pro"]).
 function proLine(){
- return `Pro: fork=${S.fork||"none"}, briefing=${S.ranked?S.rank.join(">"):"none"}, puzzles=${[1,2,3].map(n=>`${n}:${S.pz[n].tier||"none"}`).join(",")}`;
+ return `Pro: fork=${S.fork||"none"}, briefing=${S.ranked?S.rank.slice(0,3).join(">"):"none"}, puzzles=${[1,2,3].map(n=>`${n}:${S.pz[n].tier||"none"}`).join(",")}`;
 }
 // writing.by_role (GUIDE 3c): the student's role writes its own section of the group's report
 function roleW(r){const W=LITE.writing, t=W.by_role&&W.by_role[r];
@@ -1037,6 +1038,12 @@ V.who=whoHTML;
 function whoMailAv(from){const n=String(from).split(",")[0].trim();
  const p=WHO.orgs.flatMap(o=>o.people).find(x=>x.name===n);
  return p&&PRO_PHOTOS[p.id]?`<img class="mav" src="${PRO_PHOTOS[p.id]}" alt="">`:"";}
+
+
+function rankList(){const n=S.pick3||0;
+ return S.rank.map((id,i)=>{const t=RANK.find(x=>x[0]===id), on=i<n;
+  if(S.ranked&&!on)return "";
+  return `<li class="tc t3${on?" on":""}"${S.ranked?"":` role="button" tabindex="0" data-act="pick3" data-v="${id}"`} aria-pressed="${on}"><span class="n">${on?i+1:""}</span><span>${t[1]}</span>${S.ranked?"":`<span class="t3h small">${on?"tap to remove":n<3?"tap to pick":""}</span>`}</li>`;}).join("");}
 
 render();
 </script>
