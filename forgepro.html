@@ -397,9 +397,9 @@ const SHORTLIST={A:["auditor","sensory","shopper"],B:["shopper","pricing","socia
 const WIT={
  rupert:{name:"Rupert Bell",role:"Director of Marketing Strategy",voice:"male, southern English, polished and confident",
   account:`<p class="sd">[Office. Relaxed, polished, a little defensive.]</p><p>Look, I've launched a lot of products. The research was strong: nearly eighty per cent. The focus groups loved it. Leeds was one region, in the first few weeks of a pilot, and you don't redraw a national plan on that.</p><p>And then Vital Bar walks in, forty pence cheaper, on the same shelf, two days after we go national. Shoppers in this category follow price. I'm not saying we got everything right. But the market moved under us.</p>`,
-  qs:[["Did you see the taste test results before the launch?","[pause] I did. Taste and texture “average”, a few comments about it being chalky. Next to seventy-eight per cent interest, I treated it as minor. In hindsight, I'd want a second test before fixing a date."],
+  qs:[["Did you see the taste test results before the launch?","Er… I did. Taste and texture “average”, a few comments about it being chalky. Next to seventy-eight per cent interest, I treated it as minor. In hindsight, I'd want a second test before fixing a date."],
       ["Who exactly did the survey ask?","Our research panel, the one we always use. Lydia's team can give you the detail. It's a very engaged group of people."],
-      ["What did the steering group do with Deja's Leeds report on 5 May?","We noted it. One region, three weeks in, and the rollout was already booked with the retailers. Moving it would have cost us our slots. [pause] Perhaps we could have asked her a few more questions."]]},
+      ["What did the steering group do with Deja's Leeds report on 5 May?","We noted it. One region, three weeks in, and the rollout was already booked with the retailers. Moving it would have cost us our slots. Er… perhaps we could have asked her a few more questions."]]},
  deja:{name:"Deja Boakye",role:"Regional Account Manager",voice:"female, Yorkshire accent, careful",
   account:`<p class="sd">[Quiet office, a phone ringing in the distance.]</p><p>I've run five pilots for this company. Most new bars start slowly, then pick up in week three, when people come back for a second one. Forge didn't. It sat at about fifty-five per cent, and the people who'd tried it weren't coming back.</p><p>I wrote it up carefully, because week three is early, and I sent it in before the national rollout. I didn't say stop. I said look. I'm still not sure anyone did. You might ask Rupert what happened to my report.</p>`,
   qs:[["How long does a pilot normally run?","Four to six weeks, usually. Week three is still early, I know that. That's why I was careful how I wrote it up."],
@@ -546,7 +546,7 @@ function wrapSentences(root){
   box.querySelectorAll("p").forEach(p=>{
    if(p.dataset.w||p.closest("[data-src]")!==box||p.classList.contains("sd")||p.classList.contains("sig")||p.querySelector("button,input,svg"))return;
    const t=p.textContent.replace(/\s+/g," ").trim(); if(!t)return;
-   const parts=t.match(/(?:[^.!?]|\.(?=\d))+(?:[.!?]+["”’)]*|$)/g)||[t];
+   const parts=t.match(/(?:Dee-Lish!|Yum!|[^.!?]|\.(?=\d))+(?:[.!?]+["”’)]*|$)/g)||[t];
    const N=S.notes[R()];
    p.innerHTML=parts.map(x=>{x=x.trim(); const k=hsh(src+"|"+x), h=N.hl[k];
      return `<span class="sn" data-k="${k}" data-src="${esc(src)}" data-q="${q}"${h?` style="background:${HLC[h.c]}"`:""}>${esc(x)}</span>`;}).join(" ");

@@ -761,7 +761,8 @@ function splitSentences(text){
         const word = (text.slice(Math.max(0, i - 12), i).match(/([A-Za-z.]+)$/) || ["",""])[1].toLowerCase().replace(/^\.+/, "");
         const pre = text[i - word.length - 1] || "";
         const initial = /^[a-z]$/i.test(word) && !/['\u2019\w]/.test(pre);   // "Oduya, B." but not "don't."
-        const isAbbr = ch === "." && (ABBR.has(word) || initial || /^([a-z]\.)+[a-z]$/i.test(word));
+        const isAbbr = (ch === "." && (ABBR.has(word) || initial || /^([a-z]\.)+[a-z]$/i.test(word)))
+                    || (ch === "!" && /(?:Dee-Lish|Yum)$/.test(text.slice(Math.max(0, i - 8), i)));   // brand names with "!"
         if (!isAbbr && (next === "\n" || /[A-Z0-9\u00C0-\u024F\u201C\u2018"(\[\u2014\u2013\u20AC\u00A3$-]/.test(next))) { push(j); let m = j; while (m < n && /[ \t]/.test(text[m])) m++; push(m); i = m; continue; }
       }
       i = j; continue;
@@ -1275,7 +1276,7 @@ function tabListening(){
   const n = L.questions.length, right = done ? L.questions.filter((q,i) => st.mcq[i] === key[i]).length : 0;
   $("#main").innerHTML = `
     ${L.src
-      ? `<p>Listen to <b>${esc(L.name)}</b> (you can play it twice) and answer while you listen${key ? ", then press <b>Check my answers</b>" : ""}.</p>
+      ? `<p>${SOLO ? "Listen to" : "Your teacher may play this to the whole room. If not, listen on your own device, with headphones:"} <b>${esc(L.name)}</b> (you can play it twice) and answer while you listen${key ? ", then press <b>Check my answers</b>" : ""}.</p>
          <audio controls preload="none" src="${esc(L.src)}" style="width:100%"></audio>
          <p class="muted small">If the player doesn't work: <a href="${esc(L.src)}" target="_blank" rel="noopener">open the MP3</a>.</p>`
       : `<p>Your teacher will play <b>${esc(L.name)}</b>. Answer while you listen${key ? ", then press <b>Check my answers</b>" : " — your teacher will go through the answers afterwards"}.</p>`}

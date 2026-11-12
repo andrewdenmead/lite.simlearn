@@ -406,7 +406,7 @@ const WIT={
  dot:{name:"Dorothea Winslow",role:"Senior Advisor, on the Executive Committee",voice:"female, late 60s, standard Southern British, composed, a little guarded",
   account:`<p class="sd">[A quiet study. A clock ticks in the background.]</p><p>I've sat on the Executive Committee for eleven years, so let me tell you how it looked from the inside. The audit was one input among many. It said “medium-high”, not “critical”, and the evidence was early. Meanwhile the royalties were paying for new looms at the mill.</p><p>Nobody in that room could have known a streetwear craze was coming. Hindsight is a wonderful thing.</p>`,
   qs:[["Did the audit give the committee a deadline?","It recommended a pullback within eighteen months, yes. A recommendation, mind you, not an instruction. Committees get dozens of those."],
-      ["Were new licences approved after the audit?","[pause] Some. About a dozen new budget licences the following year. And the licensee audits went to once a year."],
+      ["Were new licences approved after the audit?","Er… some. About a dozen new budget licences the following year. And the licensee audits went to once a year."],
       ["Why did licensing keep growing?","Royalties. No factories to build, no stock to hold. Every board likes income like that."]]},
  kenny:{name:"Kenny Lomax",role:"Managing Director, Pennine Rainwear (Bolton)",voice:"male, 50s, Lancashire accent, cheerful and blunt",
   account:`<p class="sd">[A warehouse. A forklift beeps somewhere behind him.]</p><p>Kenny Lomax, Pennine Rainwear. We make the budget raincoats and umbrellas with your check: eleven pounds a raincoat, sold in supermarkets up and down the country. We've held the licence for nine years and never missed a royalty payment.</p><p>Your lot came round once a year to check the stitching, and nobody ever asked us to sell less. My contract's up for renewal in the spring, by the way.</p>`,
@@ -562,7 +562,7 @@ function wrapSentences(root){
   box.querySelectorAll("p").forEach(p=>{
    if(p.dataset.w||p.closest("[data-src]")!==box||p.classList.contains("sd")||p.classList.contains("sig")||p.querySelector("button,input,svg"))return;
    const t=p.textContent.replace(/\s+/g," ").trim(); if(!t)return;
-   const parts=t.match(/(?:[^.!?]|\.(?=\d))+(?:[.!?]+["”’)]*|$)/g)||[t];
+   const parts=t.match(/(?:Dee-Lish!|Yum!|[^.!?]|\.(?=\d))+(?:[.!?]+["”’)]*|$)/g)||[t];
    const N=S.notes[R()];
    p.innerHTML=parts.map(x=>{x=x.trim(); const k=hsh(src+"|"+x), h=N.hl[k];
      return `<span class="sn" data-k="${k}" data-src="${esc(src)}" data-q="${q}"${h?` style="background:${HLC[h.c]}"`:""}>${esc(x)}</span>`;}).join(" ");

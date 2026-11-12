@@ -437,7 +437,7 @@ const WIT={
  arjun:{name:"Arjun Mehta",role:"Key Account Director, Kaveri Precision",voice:"male, Indian English, smooth and reassuring",
   account:`<p class="sd">[Phone line. A quiet office, a ceiling fan.]</p><p>First, let me say that Halstead has been a valued partner of Kaveri for fifteen years, and we take this very seriously. The flooding was severe, but our people have worked day and night.</p><p>We will be shipping again in six weeks. I have told your head office the same thing. All our customers will be treated fairly, and I see no reason for Halstead to spend large sums on emergency measures.</p>`,
   qs:[["Will Halstead get priority when you restart?","Our largest customers have framework agreements, and restored output follows those agreements. Without one, a customer waits its turn. A visit to agree a schedule would of course be welcome."],
-      ["What exactly happens in six weeks?","[pause] In six weeks, Line 1 restarts. Lines 2 and 3 follow. Full volume, realistically, is weeks ten to twelve."],
+      ["What exactly happens in six weeks?","Er… in six weeks, Line 1 restarts. Lines 2 and 3 follow. Full volume, realistically, is weeks ten to twelve."],
       ["Why does head office think you'll be back to normal in six weeks?","Six weeks is the date I gave for restarting. Perhaps it was summarised. I can't control how your colleagues report it."]]},
  farah:{name:"Farah Ismail",role:"Managing Director, Straits Valve Works",voice:"female, Malaysian English, direct and practical",
   account:`<p class="sd">[A busy machine shop. A forklift beeps in the background.]</p><p>We passed Mei Lin's audit, and I'm proud of that. Our machining is as good as anyone's. But I won't promise what we can't do. We run one shift, we can't add a second before next year, and that means about 40% of Halstead's volume.</p><p>Our discount stands until the end of the month. After that, it's our standard rate. I'd like your business, but I'd rather do one job properly than three badly.</p>`,
@@ -588,7 +588,7 @@ function wrapSentences(root){
   box.querySelectorAll("p").forEach(p=>{
    if(p.dataset.w||p.closest("[data-src]")!==box||p.classList.contains("sd")||p.classList.contains("sig")||p.querySelector("button,input,svg"))return;
    const t=p.textContent.replace(/\s+/g," ").trim(); if(!t)return;
-   const parts=t.match(/(?:[^.!?]|\.(?=\d))+(?:[.!?]+["”’)]*|$)/g)||[t];
+   const parts=t.match(/(?:Dee-Lish!|Yum!|[^.!?]|\.(?=\d))+(?:[.!?]+["”’)]*|$)/g)||[t];
    const N=S.notes[R()];
    p.innerHTML=parts.map(x=>{x=x.trim(); const k=hsh(src+"|"+x), h=N.hl[k];
      return `<span class="sn" data-k="${k}" data-src="${esc(src)}" data-q="${q}"${h?` style="background:${HLC[h.c]}"`:""}>${esc(x)}</span>`;}).join(" ");

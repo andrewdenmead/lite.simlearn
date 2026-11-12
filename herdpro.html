@@ -406,7 +406,7 @@ const WIT={
   account:`<p class="sd">[Phone line. Bright and fast, a salesman's energy.]</p><p>Honestly, this is the most exciting carton we've ever made. Paper all the way through, no foil, and it prints like a dream. Clio's team love it.</p><p>Shelf life's designed for nine months, same as you've got now, and the certification is basically a formality. The first brand in the aisle with this carton wins the story. I'd hate to see one of your competitors get there before Herd.</p>`,
   qs:[["Why does it cost more?","It's a new material, made in small volumes. Eighteen per cent is a launch price. It'll come down as more brands switch."],
       ["When will the recyclability certificate arrive?","We expect it in about ten weeks. It's a formality, really."],
-      ["Where has the carton run at full speed?","[pause] So far, on our pilot line in Glenrothes. The first full-speed trial on a customer's line is booked for six weeks from now. The pilot results have been very encouraging."]]},
+      ["Where has the carton run at full speed?","Er… so far, on our pilot line in Glenrothes. The first full-speed trial on a customer's line is booked for six weeks from now. The pilot results have been very encouraging."]]},
  clio:{name:"Clio Marten",role:"Creative Director, Marrow Studio",voice:"female, London accent, warm but guarded",
   account:`<p class="sd">[Design studio. Music faintly in the background.]</p><p>Everyone at Herd thinks I killed the Bloom Line with bold packs. I've had more than a year of that. The packs were good. They won an award, and people photographed them in the aisle. What went wrong happened in Bellamy's systems, not in shoppers' heads.</p><p>Would I love to do a custom range for Herd? Of course. The Barista Blend illustration we've drawn is the best thing we've made. But I've learned to ask what happens behind the shelf.</p>`,
   qs:[["Did shoppers like the Bloom Line packs?","They loved them. It won a design award, and sales in the first few weeks were strong."],
@@ -575,7 +575,7 @@ function wrapSentences(root){
   box.querySelectorAll("p").forEach(p=>{
    if(p.dataset.w||p.closest("[data-src]")!==box||p.classList.contains("sd")||p.classList.contains("sig")||p.querySelector("button,input,svg"))return;
    const t=p.textContent.replace(/\s+/g," ").trim(); if(!t)return;
-   const parts=t.match(/(?:[^.!?]|\.(?=\d))+(?:[.!?]+["”’)]*|$)/g)||[t];
+   const parts=t.match(/(?:Dee-Lish!|Yum!|[^.!?]|\.(?=\d))+(?:[.!?]+["”’)]*|$)/g)||[t];
    const N=S.notes[R()];
    p.innerHTML=parts.map(x=>{x=x.trim(); const k=hsh(src+"|"+x), h=N.hl[k];
      return `<span class="sn" data-k="${k}" data-src="${esc(src)}" data-q="${q}"${h?` style="background:${HLC[h.c]}"`:""}>${esc(x)}</span>`;}).join(" ");
