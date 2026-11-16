@@ -662,7 +662,7 @@ function renderSoloStart(){
   <div class="wrap start">
     <h1>${esc(S.title)}</h1>
     <p class="lede">You work for ${esc(S.org)}, <b>on your own</b>. You read ${AE2 ? "the papers" : "the emails"}, make ${num(S.decisions.length)} decisions and write ${S.writing && S.writing.label ? "a " + esc(S.writing.label) : "your text"}. Take your time: everything you need is on this page.</p>
-    ${S.practice && S.mock_link ? `<div class="ack" style="border-color:#c98a00;background:#fff8e6"><b>⚠ This is not a practice exam</b>
+    ${S.practice && S.mock_link ? `<div class="ack" style="border-color:#c98a00;background:#fff8e6"><b>⚠ This is not a FULL practice exam.</b>
       <p>This practice simulation has fewer listening and reading questions than the real exam: it practises the exam's <b>writing task</b>, with a model answer. For a full practice exam with the real number of questions and timings, use the mock exam: <a href="${esc(S.mock_link.code)}.html">${esc(S.mock_link.title)}</a>.</p></div>` : ""}
     ${S.ack_disclaimer ? `<div class="ack"><b>Before you start</b><p>${esc(S.disclaimer)}</p>
       <label><input type="checkbox" id="ack" ${st.ack ? "checked" : ""}> I understand</label></div>` : ""}
