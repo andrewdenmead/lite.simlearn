@@ -345,6 +345,16 @@ footer{border-top:1px solid var(--line);padding:18px 0 40px;font-size:.85rem;col
 .whop.other{opacity:.62}
 .whoav{flex:none;width:56px;height:56px;border-radius:50%;object-fit:cover;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1.05rem}
 .whotag{display:inline-block;font-size:.78rem;padding:1px 8px;border-radius:99px;background:var(--panel);color:var(--ink-2);font-weight:600}
+.whotag.mine{background:#fdf0d5;color:#8a5a00}.whotag.boss{background:#e3ecf7;color:#2c5282}
+.whorel{display:inline-block;font-size:.78rem;font-weight:700;padding:1px 9px;border-radius:99px;background:#e3ecf7;color:#2c5282;margin-left:6px;vertical-align:2px}
+.whowhat{margin:0 0 10px;color:var(--ink-2)}
+.whoorg.team{border-left:4px solid #2c5282;padding-left:12px}
+.wholine{display:block;margin-top:3px}
+.whoov{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.whoov div{border:1px solid var(--line);border-radius:10px;padding:6px 10px;background:#fff;min-width:0}
+.whoov div.team{border-color:#2c5282}
+.whoov small{display:block;color:var(--ink-2)}
+.whoalso{margin:4px 0 0;padding-left:1.1rem}.whoalso li{margin:3px 0}
 </style>
 </head>
 <body>
@@ -652,6 +662,8 @@ function renderSoloStart(){
   <div class="wrap start">
     <h1>${esc(S.title)}</h1>
     <p class="lede">You work for ${esc(S.org)}, <b>on your own</b>. You read ${AE2 ? "the papers" : "the emails"}, make ${num(S.decisions.length)} decisions and write ${S.writing && S.writing.label ? "a " + esc(S.writing.label) : "your text"}. Take your time: everything you need is on this page.</p>
+    ${S.practice && S.mock_link ? `<div class="ack" style="border-color:#c98a00;background:#fff8e6"><b>⚠ This is not a FULL practice exam.</b>
+      <p>This practice simulation has fewer listening and reading questions than the real exam: it practises the exam's <b>writing task</b>, with a model answer. For a full practice exam with the real number of questions and timings, use the mock exam: <a href="${esc(S.mock_link.code)}.html">${esc(S.mock_link.title)}</a>.</p></div>` : ""}
     ${S.ack_disclaimer ? `<div class="ack"><b>Before you start</b><p>${esc(S.disclaimer)}</p>
       <label><input type="checkbox" id="ack" ${st.ack ? "checked" : ""}> I understand</label></div>` : ""}
     <button type="button" class="btn" id="go">Start</button>
@@ -1924,6 +1936,7 @@ function tabSubmit(){
 /* ---------- Who's who (11 Nov 2026): everyone who writes to the team, grouped by organisation; a photo from the
    shared face library when there is one, else initials. Your own contacts first, the others' greyed. ---------- */
 function tabWho(){
+  if ((S.who || {}).detail) return tabWhoDetail();
   const W = S.who, mine = st.role, roleOf = id => (S.roles.find(r => r.id === id) || {});
   const myNames = new Set(((role() || {}).characters || []).map(c => c && c.name)), isMine = p => myNames.has(p.name);   // also two-player
   const orgs = W.groups.map(g => ({...g, people: [...g.people].sort((a, b) => isMine(b) - isMine(a))}));
@@ -1940,6 +1953,34 @@ function tabWho(){
           <div><b>${esc(p.name)}</b><br><span class="small">${esc(p.title)}</span>
           ${SOLO ? "" : `<br><span class="small ${own ? "whotag" : "muted"}">${own ? (AE2 ? "In your research" : "In your inbox") : (pair() ? (AE2 ? "Your partner's research" : "Your partner's inbox") : esc(others.map(r => r.dept && !W.party ? r.label + " · " + r.dept : r.label || "").join("; ")))}</span>`}</div></div>`;
       }).join("")}</div></section>`).join("")}`;
+}
+
+/* A hand-written Who's who (16 Nov 2026, like Pro's: build.py who_detail): what each organisation is and how it
+   relates to the team, a line about each person, and "Also mentioned". */
+function tabWhoDetail(){
+  const W = S.who, mine = st.role, roleOf = id => (S.roles.find(r => r.id === id) || {});
+  const isMine = p => (p.roles || []).includes(mine);
+  const rank = p => p.tag === "boss" ? 0 : isMine(p) ? 1 : !(p.roles || []).length ? 2 : 3;
+  const ini = n => n.replace(/^(Dr|Prof|Professor|Sir|Dame)\.? /, "").split(/\s+/).map(w => w[0]).filter(Boolean).slice(0, 2).join("").toUpperCase();
+  const hue = id => [...id].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 360, 7);
+  const person = p => {
+    const own = isMine(p), others = (p.roles || []).filter(x => x !== mine).map(roleOf), tags = [];
+    if (p.tag === "boss") tags.push(`<span class="whotag boss">${esc(p.badge || "Your boss")}</span>`);
+    if (!SOLO && own) tags.push(`<span class="whotag mine">${AE2 ? "In your research" : "In your inbox"}</span>`);
+    else if (!SOLO && others.length) tags.push(`<span class="whotag">${pair() ? (AE2 ? "Your partner's research" : "Your partner's inbox") : esc(others.map(r => r.label + (r.dept ? " · " + r.dept : "")).join("; "))}</span>`);
+    return `<div class="whop${own || SOLO || !others.length ? "" : " other"}">
+      ${p.photo ? `<img class="whoav" src="${p.photo}" alt="">` : `<span class="whoav" style="background:hsl(${hue(p.id)} 45% 42%)">${esc(ini(p.name))}</span>`}
+      <div><b>${esc(p.name)}</b><br><span class="small muted">${esc(p.title || "")}</span>${p.line ? `<span class="small wholine">${esc(p.line)}</span>` : ""}
+      ${tags.length ? `<div style="margin-top:4px">${tags.join(" ")}</div>` : ""}</div></div>`;
+  };
+  const [team, ...out] = W.orgs;
+  $("#main").innerHTML = `<h2>Who's who</h2>
+    <p class="small muted">The organisations in this case and the people in each. ${SOLO ? "" : (pair() ? "Your partner hears from" : W.party ? "The other sides hear from" : "Your teammates hear from") + " the greyed-out people."}</p>
+    <div class="whoov"><div class="team"><b>${esc(team.name)}</b><small>${esc(team.rel || "")}</small></div>${out.map(o => `<div><b>${esc(o.short || o.name)}</b><small>${esc(o.rel || "")}</small></div>`).join("")}</div>
+    ${W.orgs.map((o, i) => `<section class="whoorg${i ? "" : " team"}"><h3>${esc(o.name)}<span class="whorel">${esc(o.rel || "")}</span></h3>
+      ${o.what ? `<p class="whowhat small">${esc(o.what)}</p>` : ""}
+      ${o.people.length ? `<div class="whogrid">${[...o.people].sort((a, b) => rank(a) - rank(b)).map(person).join("")}</div>` : ""}</section>`).join("")}
+    ${W.also.length ? `<section class="whoorg"><h3>Also mentioned</h3><ul class="whoalso small">${W.also.map(([n, l]) => `<li><b>${esc(n)}</b>: ${esc(l)}</li>`).join("")}</ul></section>` : ""}`;
 }
 
 /* ---------- What happened next (11 Nov 2026: moved here from the teacher's feedback, so students read the story
@@ -2053,6 +2094,20 @@ function makePdf({title, subtitle, body, note, footer, block, fileName}){
   para(body, "R", 11, 15.5);
   y -= 18;
   para(note, "R", 8, 11, true);
+  // The block again, as printed text (17 Nov 2026: an iPhone's Print → Save as PDF drops the attached file and the
+  // document info, so the teacher tool had nothing to read). Base64 between two markers, in small grey type at the
+  // end; submission_files.block_from_pdf reads it only when the attachment is missing. It holds exactly the block
+  // (no text without AI consent), never the page's own text.
+  if (block) {
+    const u8 = new TextEncoder().encode(block); let bin = "";
+    for (let i = 0; i < u8.length; i += 8192) bin += String.fromCharCode.apply(null, u8.subarray(i, i + 8192));   // no huge spread (Safari)
+    const b64 = btoa(bin);
+    y -= 16;
+    para("For your teacher's SimLearn tool (please leave this as it is):", "R", 6.5, 9, true);
+    para("SIMLEARN-DATA-BEGIN", "R", 6, 8, true);
+    for (let i = 0; i < b64.length; i += 96) para(b64.slice(i, i + 96), "R", 6, 8, true);
+    para("SIMLEARN-DATA-END", "R", 6, 8, true);
+  }
   newPage();
   // objects: 1 catalog, 2 pages, 3 font R, 4 font B, 5 embedded file, 6 filespec, 7 info, then page/content pairs
   const objs = [];
