@@ -334,6 +334,7 @@ footer{border-top:1px solid var(--line);padding:18px 0 40px;font-size:.85rem;col
 .model .ms.on{background:var(--amber-bg);box-shadow:inset 0 -2px 0 var(--amber)}
 .model.all .ms[data-c="0"]{background:#e3ecf8}.model.all .ms[data-c="1"]{background:#e3f3e6}.model.all .ms[data-c="2"]{background:#fbe7d3}
 .model.all .ms[data-c="3"]{background:#efe5f6}.model.all .ms[data-c="4"]{background:#f6f1d5}
+.model.all .ms[data-mc]{background:color-mix(in srgb,var(--mc) 16%,#fff);border-bottom:2px solid var(--mc)}
 .model .mnote{font-family:var(--sans);font-size:.92rem;background:var(--panel);border-left:4px solid var(--amber);border-radius:6px;padding:8px 12px;margin:-.3em 0 .9em}
 .model .mnote b{display:block}
 .model .mcrit{display:inline-block;font-size:.75rem;font-weight:600;padding:1px 8px;border-radius:999px;background:#fff;border:1px solid var(--line);margin-top:4px}
@@ -1891,9 +1892,9 @@ function tabSubmit(){
   const W = roleWriting();
   $("#main").innerHTML = `
     <h2 style="margin-top:0">Your ${esc(W.label)}${W.addressee ? ` to ${esc(W.addressee)}` : ""}${EXAM && EX.points ? ` <span class="ptsbadge">one overall grade</span>` : ""}</h2>
-    ${EXAM && EX.points ? (S.rubric ? `<p class="small muted">Graded as a whole, with one grade. The five criteria under "What makes a strong ${esc(W.label)}" show what the examiner looks for; they are not points, and the word count isn't marked. Any choice you state and justify reasonably gets credit.</p>`
-      : `<p class="small muted">Graded as a whole, with one grade. The examiner looks at the task, how you use the sources, the argument, organisation and language; these are not points, and the word count isn't marked. Any choice you state and justify reasonably gets credit.</p>`) : ""}
-    ${W.exam_practice ? `<p class="small muted">Exam practice: this is the written exam's task. Your teacher gives you one provisional grade, with the exam's five criteria (the task, how you use the sources, the argument, organisation and language) as labels that show what to work on.</p>` : ""}
+    ${EXAM && EX.points ? (S.rubric ? `<p class="small muted">Graded as a whole, with one grade. The eight argument moves under "What makes a strong ${esc(W.label)}" are what the examiner looks for: the more of them you make, and the better your sources, the better the grade. The word count isn't marked. Any choice you state and justify reasonably gets credit.</p>`
+      : `<p class="small muted">Graded as a whole, with one grade. The examiner looks for the argument moves: a clear position, reasons, evidence from the sources, the other side and your answer to it, and a conclusion. The word count isn't marked. Any choice you state and justify reasonably gets credit.</p>`) : ""}
+    ${W.exam_practice ? `<p class="small muted">Exam practice: this is the written exam's task. Your feedback shows which of the exam's eight argument moves you made and how well, with one provisional grade.</p>` : ""}
     ${W.question ? `<p><b>${esc(W.question)}</b></p>` : ""}
     ${W.section ? `<p>About ${W.words} words. ${esc(W.section.task)}</p>`
       : `<p>About ${W.words} words. Your ${esc(W.label)} should:</p>
@@ -1901,8 +1902,9 @@ function tabSubmit(){
     ${W.reader ? `<p><b>Your reader:</b> ${esc(W.reader)}</p>` : ""}
     ${W.genre ? genreHTML(W) : ""}
     ${S.rubric ? `<details class="rubric" id="rubric" ${st.rubricOpen ? "open" : ""}><summary>What makes a strong ${esc(W.label)}</summary>
-      ${S.rubric.map(c => `<h3>${esc(c.name)}</h3><p class="aim small">${esc(c.aim)}</p><ul class="small">${c.look_for.map(x => `<li>${esc(x)}</li>`).join("")}</ul>`).join("")}
-      <p class="small muted">Your teacher uses these same criteria for feedback and for exams. They show what to work on; they are not points, and the grade is one overall judgement of your text.</p></details>` : ""}
+      <p class="small">The eight argument moves. Your feedback and your exam grade come from which ones you make, and how well. Your own reasoning is good, a source from the texts is better, the best source in the texts is best.</p>
+      ${S.rubric.map(c => `<h3>${c.colour ? `<span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${esc(c.colour)};margin-right:6px"></span>` : ""}${esc(c.name)}${c.core === false ? ` <span class="small muted">(an extra)</span>` : ""}</h3><p class="aim small">${esc(c.aim)}</p><ul class="small">${c.look_for.map(x => `<li>${esc(x)}</li>`).join("")}</ul>`).join("")}
+      <p class="small muted">Practise them in Write It Well: extras.simlearn.online/exam-writing/. The extras can make up for a gap elsewhere; the order and the word count don't matter.</p></details>` : ""}
     <div class="writegrid"><div>
       <textarea class="memo" id="memo" placeholder="Write here. Your text is kept in this tab until you close it.">${esc(st.memo)}</textarea>
       <div class="count" id="count"></div></div>
@@ -2244,15 +2246,17 @@ function showModel(){
   const M = S.model, box = $("#model");
   if (!M || !box) return;
   const crits = [...new Set(M.paragraphs.flat().map(x => x.crit))];
+  const MC = Object.fromEntries((S.rubric || []).filter(c => c.colour).map(c => [c.name, c.colour]));   // the argument moves' colours (18 Nov 2026)
+  const col = (c, i) => MC[c] || CRIT_COL[i % 5];
   let n = 0;
   box.innerHTML = `
     <h2>A model answer</h2>
     ${M.intro ? `<p>${esc(M.intro)}</p>` : ""}
     ${M.argues ? `<p class="small"><b>It argues:</b> ${esc(M.argues)}</p>` : ""}
     <p class="small muted">Tap any sentence to see what it is doing. Then look at your own text: where does it do the same?</p>
-    <p><label class="small"><input type="checkbox" id="mall"> Colour every sentence by exam criterion</label></p>
-    <div class="mkey" id="mkey" hidden>${crits.map((c, i) => `<span style="background:${CRIT_COL[i % 5]}">${esc(c)}</span>`).join("")}</div>
-    <div class="mtext">${M.paragraphs.map((p, pi) => `${(M.parts || [])[pi] ? `<div class="mpart">${pi + 1} · ${esc(M.parts[pi])}</div>` : ""}<p data-p="${pi}">${p.map(x => `<span class="ms" tabindex="0" role="button" data-i="${n++}" data-c="${crits.indexOf(x.crit) % 5}">${esc(x.t)}</span>`).join(" ")}</p>`).join("")}</div>
+    <p><label class="small"><input type="checkbox" id="mall"> Colour every sentence by argument move</label></p>
+    <div class="mkey" id="mkey" hidden>${crits.map((c, i) => `<span style="background:${MC[c] ? `color-mix(in srgb,${MC[c]} 22%,#fff)` : CRIT_COL[i % 5]}">${esc(c)}</span>`).join("")}</div>
+    <div class="mtext">${M.paragraphs.map((p, pi) => `${(M.parts || [])[pi] ? `<div class="mpart">${pi + 1} · ${esc(M.parts[pi])}</div>` : ""}<p data-p="${pi}">${p.map(x => `<span class="ms" tabindex="0" role="button" data-i="${n++}" data-c="${crits.indexOf(x.crit) % 5}"${MC[x.crit] ? ` data-mc style="--mc:${MC[x.crit]}"` : ""}>${esc(x.t)}</span>`).join(" ")}</p>`).join("")}</div>
     ${M.after ? `<p class="small">${esc(M.after)}</p>` : ""}`;
   const flat = M.paragraphs.flatMap((p, pi) => p.map(x => [pi, x]));
   const open = el => {
