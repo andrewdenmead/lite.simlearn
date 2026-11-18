@@ -1885,7 +1885,14 @@ function genreHTML(W){
 // group's report (one decision), with its own label, word guide and task; otherwise the whole-report task.
 function roleWriting(){
   const W = S.writing, r = role(), t = W.by_role && !W.exam_practice && !EXAM && r && W.by_role[r.id];
-  return t ? Object.assign({}, W, {label: t.label || W.label, words: t.words || W.words, instructions: [t.task], section: t}) : W;
+  return t ? Object.assign({}, W, {label: t.label || W.label, words: t.words || W.words, words_range: t.words_range || W.words_range, instructions: [t.task], section: t}) : W;
+}
+
+// The word guide (18 Nov 2026): about 150 words per decision, flexible; the range comes from blocks.standard_words.
+function wordGuide(W){
+  if (!W.words_range) return `About ${W.words} words.`;
+  const per = W.section ? "" : (W.words_per_decision && W.words !== W.words_per_decision ? `, about ${W.words_per_decision} per decision` : "");
+  return `About ${W.words} words${per} (anything from ${W.words_range[0]} to ${W.words_range[1]} is fine).`;
 }
 
 function tabSubmit(){
@@ -1894,10 +1901,10 @@ function tabSubmit(){
     <h2 style="margin-top:0">Your ${esc(W.label)}${W.addressee ? ` to ${esc(W.addressee)}` : ""}${EXAM && EX.points ? ` <span class="ptsbadge">one overall grade</span>` : ""}</h2>
     ${EXAM && EX.points ? (S.rubric ? `<p class="small muted">Graded as a whole, with one grade. The eight argument moves under "What makes a strong ${esc(W.label)}" are what the examiner looks for: the more of them you make, and the better your sources, the better the grade. The word count isn't marked. Any choice you state and justify reasonably gets credit.</p>`
       : `<p class="small muted">Graded as a whole, with one grade. The examiner looks for the argument moves: a clear position, reasons, evidence from the sources, the other side and your answer to it, and a conclusion. The word count isn't marked. Any choice you state and justify reasonably gets credit.</p>`) : ""}
-    ${W.exam_practice ? `<p class="small muted">Exam practice: this is the written exam's task. Your feedback shows which of the exam's eight argument moves you made and how well, with one provisional grade.</p>` : ""}
+    ${W.exam_practice ? `<p class="small muted">Exam practice: this is the written exam's task. Your feedback shows your text rewritten, with what to add marked in colour, a few tips and one provisional grade.</p>` : ""}
     ${W.question ? `<p><b>${esc(W.question)}</b></p>` : ""}
-    ${W.section ? `<p>About ${W.words} words. ${esc(W.section.task)}</p>`
-      : `<p>About ${W.words} words. Your ${esc(W.label)} should:</p>
+    ${W.section ? `<p>${wordGuide(W)} ${esc(W.section.task)}</p>`
+      : `<p>${wordGuide(W)} Your ${esc(W.label)} should:</p>
     <ul>${W.instructions.map(i => `<li>${esc(i)}</li>`).join("")}</ul>`}
     ${W.reader ? `<p><b>Your reader:</b> ${esc(W.reader)}</p>` : ""}
     ${W.genre ? genreHTML(W) : ""}
