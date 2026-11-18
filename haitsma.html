@@ -1904,6 +1904,7 @@ function tabSubmit(){
     ${S.rubric ? `<details class="rubric" id="rubric" ${st.rubricOpen ? "open" : ""}><summary>What makes a strong ${esc(W.label)}</summary>
       <p class="small">The eight argument moves. Your feedback and your exam grade come from which ones you make, and how well. Your own reasoning is good, a source from the texts is better, the best source in the texts is best.</p>
       ${S.rubric.map(c => `<h3>${c.colour ? `<span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${esc(c.colour)};margin-right:6px"></span>` : ""}${esc(c.name)}${c.core === false ? ` <span class="small muted">(an extra)</span>` : ""}</h3><p class="aim small">${esc(c.aim)}</p><ul class="small">${c.look_for.map(x => `<li>${esc(x)}</li>`).join("")}</ul>`).join("")}
+      ${S.referencing ? `<h3>${esc(S.referencing.name)} <span class="small muted">(academic writing)</span></h3><p class="aim small">${esc(S.referencing.aim)}</p>` : ""}
       <p class="small muted">Practise them in Write It Well: extras.simlearn.online/exam-writing/. The extras can make up for a gap elsewhere; the order and the word count don't matter.</p></details>` : ""}
     <div class="writegrid"><div>
       <textarea class="memo" id="memo" placeholder="Write here. Your text is kept in this tab until you close it.">${esc(st.memo)}</textarea>
