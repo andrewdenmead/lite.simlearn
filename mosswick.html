@@ -722,10 +722,21 @@ function renderStart(){
 
 /* ---------- highlighter: tap a sentence, give it a colour; nothing is right or wrong ---------- */
 // Lives only in this tab (sessionStorage, as the rest of the state). Never part of the submission block.
-const HL = [["yellow","Yellow","#FFF176"],["green","Green","#B9F6CA"],["pink","Pink","#F8BBD0"],
-            ["blue","Blue","#B3E5FC"],["orange","Orange","#FFE0B2"],["purple","Purple","#E1BEE7"]];
+// Each colour starts as one of the argument moves you can find in the sources (Andrew, 19 Nov 2026); Evidence,
+// Reasoning, Counter-argument and Source check are near their feedback-sheet colours (the six highlighter colours
+// can't match all eight). Students can rename any of them. ae2 keeps its own hints (Supports A/B…); speaking exams
+// are marked on the speaking rubric, so they keep the old hints too.
+const HL_MOVES = S.format !== "ae2" && S.format !== "speaking";
+const HL = HL_MOVES
+  ? [["green","Green","#B9F6CA"],["purple","Purple","#E1BEE7"],["pink","Pink","#F8BBD0"],
+     ["blue","Blue","#B3E5FC"],["orange","Orange","#FFE0B2"],["yellow","Yellow","#FFF176"]]
+  : [["yellow","Yellow","#FFF176"],["green","Green","#B9F6CA"],["pink","Pink","#F8BBD0"],
+     ["blue","Blue","#B3E5FC"],["orange","Orange","#FFE0B2"],["purple","Purple","#E1BEE7"]];
+const HL_DEFAULT = HL_MOVES ? {green:"Evidence", purple:"Reasoning", pink:"Counter-argument", blue:"Response",
+                               orange:"Source check", yellow:"Trade-off"} : {};
 const HLC = Object.fromEntries(HL.map(([k,,c]) => [k, c]));
-const HL_HINT = S.format === "ae2" ? ["Supports A","Supports B","Weak spot","Key number","Question","Use in my writing"]
+const HL_HINT = HL_MOVES ? HL.map(([k]) => HL_DEFAULT[k])
+             : S.format === "ae2" ? ["Supports A","Supports B","Weak spot","Key number","Question","Use in my writing"]
              : ({AE:["Position","Evidence","Reasoning","Counter-argument","Weak spot","Use in my brief"],
                   EFD:["Constraint","User need","Idea","Risk","Question","Use in my pitch"]})[S.course]
                 || ["Number","Risk","Opportunity","Deadline","Question","Use in my memo"];
@@ -747,7 +758,7 @@ function tagChips(k){
   return bits.length ? `<span class="tags">${bits.map(b => `<span>${esc(b)}</span>`).join("")}</span>` : "";
 }
 const hlName = k => { const i = HL.findIndex(x => x[0] === k); return i < 0 ? k : HL[i][1]; };
-const hlLabel = k => ((st.hlLabels || {})[k] || "").trim();
+const hlLabel = k => ((st.hlLabels || {})[k] || "").trim() || HL_DEFAULT[k] || "";
 const ABBR = new Set("e.g i.e dr prof mr mrs ms st etc vs cf approx no nos fig figs p pp jr sr inc ltd co corp dept est al ca vol vols ed eds op mt ft gen col lt sgt rev govt univ assn bros nr tel ref".split(" "));
 const OPEN_Q = "\u201C\u2018\"", CLOSE_Q = "\u201D\u2019\"'", OPEN_B = "([", CLOSE_B = ")]";
 // Split text into sentences: returns [{s, gap}] where gap is the whitespace before the sentence (text = all joined).
@@ -1063,7 +1074,7 @@ function decStripHTML(){
 }
 document.addEventListener("toggle", e => { if (e.target.id === "decstrip") { st.decOpen = e.target.open; save(); } }, true);
 function colourCodeHTML(){
-  const set = HL.filter(([k]) => hlLabel(k)).length;
+  const set = HL.filter(([k]) => ((st.hlLabels || {})[k] || "").trim()).length;   // labels the student wrote
   return `<details class="cc"><summary>${HL.map(([,,c]) => `<i style="background:${c}"></i>`).join("")}<span>My colour code${set ? "" : " — tap any sentence to highlight it"}</span></summary>
     <div class="grid">${HL.map(([k, name, c], i) => `<label><i style="background:${c}"></i><span class="sr" style="position:absolute;left:-9999px">${name}</span><input type="text" data-cc="${k}" maxlength="24" value="${esc(hlLabel(k))}" placeholder="${esc(HL_HINT[i])}" aria-label="${name} means"></label>`).join("")}</div></details>`;
 }
