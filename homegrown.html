@@ -468,6 +468,8 @@ const PRINTED_AS = {"Show me the data": "The data behind it", "Give me a counter
 const AE2 = S.format === "ae2";   // new AE format: drawers, tags, "which is the better argument?"
 const EXAM = S.format === "exam", EX = S.exam || null;   // written exam: one candidate, questions, no answers in the page
 const SPEAK = S.format === "speaking", SP = S.speaking || null;
+// A real written exam (not a mock) asks no AI consent (Andrew, 19 Nov 2026): the text always goes in the hand-in.
+const NO_CONSENT = EXAM && !S.mock;
 // Role sections (19 Nov 2026): under every answered "one more thing" (any tier, so it gives nothing away), a tip that
 // an answer building on something unread is in a teammate's emails.
 const ROLE_SECTIONS = !!(S.writing && S.writing.by_role && !S.writing.exam_practice && !EXAM && !SPEAK);
@@ -1951,11 +1953,11 @@ function tabSubmit(){
       <details class="nbpanel" id="nbpanel" ${st.nbClosed ? "" : "open"}><summary id="nbhead">${NB_TITLE}<span id="nbcount"></span></summary><p id="nblive" class="small muted" aria-live="polite"></p><section class="nb" data-nb="submit"></section></details>
     </div>
 
-    <div class="consent">
+    ${NO_CONSENT ? `<p class="small muted">Your teacher marks your text, possibly with the help of an AI system that gets your text and your decisions, never your name. Your teacher always decides your grade.</p>` : `<div class="consent">
       <b>Can your teacher check your text with AI?</b>
       <p class="small">Your teacher may use the SimLearn teacher tool, which can ask an AI system (Claude, by Anthropic) to suggest feedback on your writing. Only your text and ${EXAM || SOLO ? "your decisions" : "your group's choices"} would be sent — not your name. Your teacher always makes the final decision about your grade. If you say no, your teacher marks your text by hand. Saying no has no effect on your grade.</p>
       <label><input type="checkbox" id="consent" ${st.consent?"checked":""}> Yes, my teacher may check my text with AI.</label>
-    </div>
+    </div>`}
 
     <div id="issues" class="issues"></div>
     <button type="button" class="btn" id="make">Create my submission</button>
@@ -1970,7 +1972,7 @@ function tabSubmit(){
   $("#nbpanel").ontoggle = e => { st.nbClosed = !e.target.open; save(); };
   const rb = $("#rubric"); if (rb) rb.ontoggle = () => { st.rubricOpen = rb.open; save(); };
   const gb = $("#genre"); if (gb) gb.ontoggle = () => { st.genreOpen = gb.open; save(); };
-  $("#consent").onchange = e => { st.consent = e.target.checked; save(); $("#out").innerHTML = ""; };
+  if ($("#consent")) $("#consent").onchange = e => { st.consent = e.target.checked; save(); $("#out").innerHTML = ""; };
   $("#make").onclick = makeSubmission;
   showEnding();
 }
@@ -2201,7 +2203,7 @@ function makeSubmission(){
   $("#issues").innerHTML = missing.map(m => `<p>${esc(m)}</p>`).join("");
   if (openDec.length || words(st.memo) < 50) { $("#out").innerHTML = ""; return; }
 
-  const ai = st.consent ? "yes" : "no";
+  const ai = NO_CONSENT || st.consent ? "yes" : "no";
   const choices = r.characters.map(c => `${c.id}=${(AE2 ? (PRACTICE ? c.offers.map(o => o.id).join("") : (st.opened || {})[c.id]) : st.choices[c.id]) || "-"}`).join(", ");   // ae2: the drawers opened, e.g. "ac"
   const decisions = B ? B.items.map(it => `${it.id}=${budgetVal(it.id)}`).join(", ")
                       : S.decisions.map(d => `${d.id}=${st.decisions[d.id]}`).join(", ");
@@ -2247,7 +2249,9 @@ function makeSubmission(){
       title: cap,
       subtitle: `${S.title} · ${EXAM ? "Written exam" : "Role " + r.id + (r.dept ? " (" + r.dept + ")" : "")} · ${words(memoText)} words · ${today}`,
       body: memoText,
-      note: EXAM ? (ai === "yes"
+      note: EXAM ? (NO_CONSENT
+        ? "This file also carries your exam answers for your teacher's SimLearn tool: your reading and listening answers, your decisions and a copy of your text."
+        : ai === "yes"
         ? "This file also carries your exam answers for your teacher's SimLearn tool: your reading and listening answers, your decisions and a copy of your text. You agreed that your teacher may check your text with AI."
         : "This file also carries your exam answers for your teacher's SimLearn tool: your reading and listening answers and your decisions, but not your text. You did not agree to an AI check, so your teacher will mark your text by hand.")
         + ` Check code: ${code}.` : (ai === "yes"
