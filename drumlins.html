@@ -1903,7 +1903,7 @@ function tabSubmit(){
       : `<p class="small muted">Graded as a whole, with one grade. The examiner looks for the argument moves: a clear position, reasons, evidence from the sources, the other side and your answer to it, and a conclusion. The word count isn't marked. Any choice you state and justify reasonably gets credit.</p>`) : ""}
     ${W.exam_practice ? `<p class="small muted">Exam practice: this is the written exam's task. Your feedback shows your text rewritten, with what to add marked in colour, a few tips and one provisional grade.</p>` : ""}
     ${W.question ? `<p><b>${esc(W.question)}</b></p>` : ""}
-    ${W.section ? `<p>${wordGuide(W)} ${esc(W.section.task)}</p><p class="small muted">Your own inbox has what you need for a solid section (about 2,0). To go higher, talk to your team: bring in what only your teammates know, and link your choice to the team's other decisions.</p>`
+    ${W.section ? `<p>${wordGuide(W)} ${esc(W.section.task)}</p><p class="small muted">Your own inbox has what you need for a solid section (about 2,0). To go higher, talk to your team: one real link is enough, such as tying your choice to what the team decided elsewhere, or answering an objection from another role.</p>`
       : `<p>${wordGuide(W)} Your ${esc(W.label)} should:</p>
     <ul>${W.instructions.map(i => `<li>${esc(i)}</li>`).join("")}</ul>`}
     ${W.reader ? `<p><b>Your reader:</b> ${esc(W.reader)}</p>` : ""}
