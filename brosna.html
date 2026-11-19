@@ -477,6 +477,7 @@ let st = fresh();
 try { const raw = sessionStorage.getItem(STORE); if (raw) st = Object.assign(st, JSON.parse(raw)); } catch(e) {}
 if (!Array.isArray(st.notes)) st.notes = [];   // (older tabs kept notes:"")
 if (!st.hlNotes || typeof st.hlNotes !== "object" || Array.isArray(st.hlNotes)) st.hlNotes = {};
+if (!st.rnotes || typeof st.rnotes !== "object" || Array.isArray(st.rnotes)) st.rnotes = {};   // round-up notes (speaking)
 if (location.hash === "#handover" && !st.handover) {   // opened to take a hand-over: start empty, whatever was copied in
   let reload = false; try { reload = performance.getEntriesByType("navigation")[0].type === "reload"; } catch(e) {}
   if (!reload) st = fresh();
@@ -1635,7 +1636,23 @@ function tabDeal(){
       ${it.options ? `<p class="small muted">For example:</p><ul>${it.options.map(o => `<li>${esc(o)}</li>`).join("")}</ul>` : ""}
       ${set ? `<p class="small"><b>Already settled for a group of ${num(spGroup().length)}: ${esc(set)}.</b></p>` : ""}</div>`; }).join("")}
     ${Array.isArray(fixed) && fixed.length ? `<div class="note"><b>Already settled for a group of ${num(spGroup().length)}</b><ul>${fixed.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>` : ""}
-    <p class="small muted">Think about which option your client needs on each decision, what you could give up, and what you need from the others.</p>`;
+    <p class="small muted">Think about which option your client needs on each decision, what you could give up, and what you need from the others.</p>
+    ${roundupNotesHTML()}`;
+  wireRoundupNotes();
+}
+// Round-up notes (19 Nov 2026): one box per argument move, kept in this tab only, never handed in. The examiner asks
+// about them at the end ("So what is your final position?", "What is the best reason for this?"…).
+function roundupNotesHTML(){
+  const R = S.roundup_notes;
+  if (!R || SPEAK_SOLO) return "";
+  const n = st.rnotes || {};
+  return `<section class="note"><h3 style="margin-top:0">Your round-up notes</h3><p class="small">${esc(R.intro)}</p>
+    ${R.items.map(it => `<label style="display:block;margin:8px 0"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${esc(it.colour)};margin-right:6px"></span><b>${esc(it.name)}</b>: <span class="small">${esc(it.prompt)}</span>
+      <textarea data-rn="${esc(it.move)}" rows="2" maxlength="300" style="width:100%;box-sizing:border-box">${esc(n[it.move] || "")}</textarea></label>`).join("")}</section>`;
+}
+function wireRoundupNotes(){
+  document.querySelectorAll("textarea[data-rn]").forEach(t => t.addEventListener("input", () => {
+    st.rnotes = st.rnotes || {}; st.rnotes[t.dataset.rn] = t.value; save(); }));
 }
 function tabSpeakSubmit(){
   $("#main").innerHTML = `
