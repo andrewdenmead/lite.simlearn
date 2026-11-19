@@ -468,6 +468,9 @@ const PRINTED_AS = {"Show me the data": "The data behind it", "Give me a counter
 const AE2 = S.format === "ae2";   // new AE format: drawers, tags, "which is the better argument?"
 const EXAM = S.format === "exam", EX = S.exam || null;   // written exam: one candidate, questions, no answers in the page
 const SPEAK = S.format === "speaking", SP = S.speaking || null;
+// Role sections (19 Nov 2026): under every answered "one more thing" (any tier, so it gives nothing away), a tip that
+// an answer building on something unread is in a teammate's emails.
+const ROLE_SECTIONS = !!(S.writing && S.writing.by_role && !S.writing.exam_practice && !EXAM && !SPEAK);
 const SOLO = !!S.solo;   // one researcher on their own (e.g. coursework): one role, no group, no hand-over   // speaking exam: roles prepared alone, listening marked by the tool
 const TAGS = !S.budget && (S.decisions || []).length > 0;   // highlights can be tagged with the decisions they matter for
 
@@ -1758,6 +1761,7 @@ function mailHTML(c){
           <audio controls preload="none" src="${esc(o.src)}" style="width:100%"></audio>
           ${o.text ? `<details class="vmtext" ${(st.heard || {})[c.id] ? "" : "hidden"}><summary class="small">Show the text</summary><div class="prose">${hlHTML(unscramble(o.text, `${S.salt}|${c.id}|${o.id}`), c.id, "opt")}</div></details>` : ""}`
           : `<div class="prose">${hlHTML(unscramble(o.text, `${S.salt}|${c.id}|${o.id}`), c.id, "opt")}</div>`}</div>
+        ${ROLE_SECTIONS ? `<p class="small muted">Does this answer build on something you haven't read? Then it's in a teammate's emails: ask them, and use both in your section.</p>` : ""}
         ${c.offers.filter(x => x.id !== chosen).map(x => `<div class="offer closed" aria-disabled="true">${esc(x.title)}</div>`).join("")}
       </div>`;
   } else {
