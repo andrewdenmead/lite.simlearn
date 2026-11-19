@@ -1519,7 +1519,7 @@ function renderSpeakStart(){
       <li><b>Deal sheet</b>: the points ${SPEAK_SOLO ? "you discuss in the exam room" : "your group has to agree on"}.</li>
       ${SPEAK_LISTEN ? `<li><b>Hand in</b> your listening answers before the speaking part.</li>` : `<li>Nothing to hand in: the ${SPEAK_SOLO ? "examiners mark" : "examiner marks"} how you speak in the exam room.</li>`}
     </ul>
-    ${!P.listening && P.speaking ? `<p><b>How it is graded:</b> your speaking gets <b>one overall grade</b> in the exam room. The five criteria under "What the ${SPEAK_SOLO ? "examiners listen" : "examiner listens"} for" show what counts; they are not points.</p>` : ""}
+    ${!P.listening && P.speaking ? `<p><b>How it is graded:</b> your speaking gets <b>one overall grade</b> in the exam room. The five criteria under "What the ${SPEAK_SOLO ? "examiners listen" : "examiner listens"} for" show what counts${S.roundup && !SPEAK_SOLO ? ", and with your round-up's argument moves they make up the grade (half each)" : ""}.</p>` : ""}
     ${P.listening ? `<p><b>How it is graded:</b> listening ${pts(P.listening)} (one per question, here), turned into a grade · speaking: <b>one overall grade</b> (in the exam room). ${shareLine({listening: P.listening, speaking: P.speaking})}</p>` : ""}
     ${S.ack_disclaimer ? `<div class="ack"><b>Before you start</b><p>${esc(S.disclaimer)}</p>
       <label><input type="checkbox" id="ack" ${st.ack ? "checked" : ""}> I understand</label></div>` : `<p class="muted small">${esc(S.disclaimer)}</p>`}
@@ -1761,7 +1761,7 @@ function mailHTML(c){
           <audio controls preload="none" src="${esc(o.src)}" style="width:100%"></audio>
           ${o.text ? `<details class="vmtext" ${(st.heard || {})[c.id] ? "" : "hidden"}><summary class="small">Show the text</summary><div class="prose">${hlHTML(unscramble(o.text, `${S.salt}|${c.id}|${o.id}`), c.id, "opt")}</div></details>` : ""}`
           : `<div class="prose">${hlHTML(unscramble(o.text, `${S.salt}|${c.id}|${o.id}`), c.id, "opt")}</div>`}</div>
-        ${ROLE_SECTIONS ? `<p class="small muted">Does this answer build on something you haven't read? Then it's in a teammate's emails: ask them, and use both in your section.</p>` : ""}
+        ${ROLE_SECTIONS ? `<p class="small muted">Does this answer build on something you haven't read? Then it's in a teammate's emails: ask them, and use both in your writing later.</p>` : ""}
         ${c.offers.filter(x => x.id !== chosen).map(x => `<div class="offer closed" aria-disabled="true">${esc(x.title)}</div>`).join("")}
       </div>`;
   } else {
