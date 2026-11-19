@@ -1544,7 +1544,7 @@ function tabSpeakBrief(){
       ${SP.room ? `${SP.room.intro ? `<p>${esc(SP.room.intro)}</p>` : ""}<ol class="steps">${SP.room.steps.map(s => `<li>${s}</li>`).join("")}</ol>` : `<ol class="steps">
         <li><b>Your opening</b> (about one minute each): who you represent, what they want and the most important thing you've found out.</li>
         <li><b>The negotiation</b>: agree on the deal sheet together. Something new may come up while you talk.</li>
-        <li><b>Questions from the examiner</b> about the deal you made.</li>
+        ${S.roundup && !SPEAK_SOLO ? `<li>${S.roundup}</li>` : `<li><b>Questions from the examiner</b> about the deal you made.</li>`}
       </ol>`}
       <p class="small muted">Use your own words: pass on what you read, don't read it out. You can bring short notes (key words and numbers), not full sentences.</p></div></details>
     ${S.speaking_rubric ? `<details class="mail spmore"><summary><span class="subj">What the ${SPEAK_SOLO ? "examiners listen" : "examiner listens"} for</span></summary><div class="body"><ul>${S.speaking_rubric.map(c => `<li><b>${esc(c.name)}</b>: ${esc(c.aim)}</li>`).join("")}</ul></div></details>` : ""}`;
@@ -1903,7 +1903,7 @@ function tabSubmit(){
       : `<p class="small muted">Graded as a whole, with one grade. The examiner looks for the argument moves: a clear position, reasons, evidence from the sources, the other side and your answer to it, and a conclusion. The word count isn't marked. Any choice you state and justify reasonably gets credit.</p>`) : ""}
     ${W.exam_practice ? `<p class="small muted">Exam practice: this is the written exam's task. Your feedback shows your text rewritten, with what to add marked in colour, a few tips and one provisional grade.</p>` : ""}
     ${W.question ? `<p><b>${esc(W.question)}</b></p>` : ""}
-    ${W.section ? `<p>${wordGuide(W)} ${esc(W.section.task)}</p>`
+    ${W.section ? `<p>${wordGuide(W)} ${esc(W.section.task)}</p><p class="small muted">Your own inbox has what you need for a solid section (about 2,0). To go higher, talk to your team: bring in what only your teammates know, and link your choice to the team's other decisions.</p>`
       : `<p>${wordGuide(W)} Your ${esc(W.label)} should:</p>
     <ul>${W.instructions.map(i => `<li>${esc(i)}</li>`).join("")}</ul>`}
     ${W.reader ? `<p><b>Your reader:</b> ${esc(W.reader)}</p>` : ""}
