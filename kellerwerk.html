@@ -728,18 +728,18 @@ function renderStart(){
 
 /* ---------- highlighter: tap a sentence, give it a colour; nothing is right or wrong ---------- */
 // Lives only in this tab (sessionStorage, as the rest of the state). Never part of the submission block.
-// Each colour starts as one of the argument moves you can find in the sources (Andrew, 19 Nov 2026); Evidence,
-// Reasoning, Counter-argument and Source check are near their feedback-sheet colours (the six highlighter colours
-// can't match all eight). Students can rename any of them. ae2 keeps its own hints (Supports A/B…); speaking exams
+// Each colour starts as one of the argument moves you can find in the sources (Andrew, 19 Nov 2026); Position added
+// (23 Nov 2026: a student asked for it), so seven colours, each near its feedback-sheet colour; Conclusion has none
+// (it's the student's own). Students can rename any of them. ae2 keeps its own hints (Supports A/B…); speaking exams
 // are marked on the speaking rubric, so they keep the old hints too.
 const HL_MOVES = S.format !== "ae2" && S.format !== "speaking";
-const HL = HL_MOVES
-  ? [["green","Green","#B9F6CA"],["purple","Purple","#E1BEE7"],["pink","Pink","#F8BBD0"],
-     ["blue","Blue","#B3E5FC"],["orange","Orange","#FFE0B2"],["yellow","Yellow","#FFF176"]]
+const HL = HL_MOVES   // in the order of the moves; red added for Position's sake (23 Nov 2026)
+  ? [["blue","Blue","#B3E5FC"],["purple","Purple","#E1BEE7"],["green","Green","#B9F6CA"],["orange","Orange","#FFE0B2"],
+     ["red","Red","#FF9E9E"],["pink","Pink","#F8BBD0"],["yellow","Yellow","#FFF176"]]
   : [["yellow","Yellow","#FFF176"],["green","Green","#B9F6CA"],["pink","Pink","#F8BBD0"],
      ["blue","Blue","#B3E5FC"],["orange","Orange","#FFE0B2"],["purple","Purple","#E1BEE7"]];
-const HL_DEFAULT = HL_MOVES ? {green:"Evidence", purple:"Reasoning", pink:"Counter-argument", blue:"Response",
-                               orange:"Source check", yellow:"Trade-off"} : {};
+const HL_DEFAULT = HL_MOVES ? {blue:"Position", purple:"Reasoning", green:"Evidence", orange:"Source check",
+                               red:"Counter-argument", pink:"Response", yellow:"Trade-off"} : {};
 const HLC = Object.fromEntries(HL.map(([k,,c]) => [k, c]));
 const HL_HINT = HL_MOVES ? HL.map(([k]) => HL_DEFAULT[k])
              : S.format === "ae2" ? ["Supports A","Supports B","Weak spot","Key number","Question","Use in my writing"]
@@ -1937,7 +1937,7 @@ function tabSubmit(){
       : `<p class="small muted">Graded as a whole, with one grade. The examiner looks for the argument moves: a clear position, reasons, evidence from the sources, the other side and your answer to it, and a conclusion. The word count isn't marked. Any choice you state and justify reasonably gets credit.</p>`) : ""}
     ${W.exam_practice ? `<p class="small muted">Exam practice: this is the written exam's task. Your feedback shows your text rewritten, with what to add marked in colour, a few tips and one provisional grade.</p>` : ""}
     ${W.question ? `<p><b>${esc(W.question)}</b></p>` : ""}
-    ${W.section ? `<p>${wordGuide(W)} ${esc(W.section.task)}</p><p class="small muted">Your own inbox has what you need for a good section. For a better one, listen to your team: a fact or an objection from a teammate's contacts, or a link to what the team decided elsewhere, takes it higher.</p>`
+    ${W.section ? `<p>${wordGuide(W)} ${esc(W.section.task)}</p><p class="small muted">Your own inbox has what you need for a good section. For a better one, listen to your ${pair() ? "partner" : "team"}: a fact or an objection from ${pair() ? "your partner's" : "a teammate's"} contacts, or a link to what the ${pair() ? "two of you" : "team"} decided elsewhere, takes it higher.</p>`
       : `<p>${wordGuide(W)} Your ${esc(W.label)} should:</p>
     <ul>${W.instructions.map(i => `<li>${esc(i)}</li>`).join("")}</ul>`}
     ${W.reader ? `<p><b>Your reader:</b> ${esc(W.reader)}</p>` : ""}
