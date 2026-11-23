@@ -2003,7 +2003,9 @@ function tabWho(){
    relates to the team, a line about each person, and "Also mentioned". */
 function tabWhoDetail(){
   const W = S.who, mine = st.role, roleOf = id => (S.roles.find(r => r.id === id) || {});
-  const isMine = p => (p.roles || []).includes(mine);
+  // two-player (23 Nov 2026): st.role is a pair role, not one of p.roles, so match your contacts by name, as tabWho does
+  const myNames = new Set(((role() || {}).characters || []).filter(Boolean).map(c => c.name));
+  const isMine = p => pair() ? myNames.has(p.name) : (p.roles || []).includes(mine);
   const rank = p => p.tag === "boss" ? 0 : isMine(p) ? 1 : !(p.roles || []).length ? 2 : 3;
   const ini = n => n.replace(/^(Dr|Prof|Professor|Sir|Dame)\.? /, "").split(/\s+/).map(w => w[0]).filter(Boolean).slice(0, 2).join("").toUpperCase();
   const hue = id => [...id].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 360, 7);
