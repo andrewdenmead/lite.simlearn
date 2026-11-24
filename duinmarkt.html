@@ -231,6 +231,10 @@ textarea.memo{width:100%;min-height:340px;border:1px solid var(--line);border-ra
 .gapopts li{margin:4px 0}
 .qcount{font-size:.9rem;color:var(--ink-2)}
 .examq{margin:0 0 18px}
+.sectask{position:relative}
+.dectip{border-bottom:1px dotted currentColor;cursor:help;white-space:nowrap;font-weight:600}
+.dectip .dectipbox{display:none;position:absolute;left:0;right:0;margin-top:1.5em;z-index:20;max-width:420px;white-space:normal;font-weight:400;font-size:.88rem;line-height:1.4;background:var(--paper,#fff);color:inherit;border:1px solid var(--line);border-radius:8px;padding:8px 10px;box-shadow:0 4px 14px rgba(0,0,0,.15)}
+.dectip:hover .dectipbox,.dectip:focus .dectipbox,.dectip:focus-within .dectipbox{display:block}
 .ptsbadge{font-family:var(--sans);font-size:.8rem;font-weight:600;color:var(--pine);border:1px solid var(--line);border-radius:999px;padding:1px 8px;margin-left:6px;vertical-align:middle;white-space:nowrap}
 .pn{display:inline-block;min-width:1.4em;color:var(--ink-2);font-family:var(--sans);font-size:.85rem}
 .examstart .times{margin:12px 0 20px;padding-left:1.2rem}
@@ -1922,6 +1926,23 @@ function roleWriting(){
   return t ? Object.assign({}, W, {label: t.label || W.label, words: t.words || W.words, words_range: t.words_range || W.words_range, instructions: [t.task], section: t}) : W;
 }
 
+// Which decision a section is on (Andrew, 24 Nov 2026: "make it clear which decision it is … some kind of hoverover
+// that shows the decision"): "(Decision 1)" after the task's "the decision on …", hover or tap for the decision and
+// its two options; a line above the task when the wording doesn't name it.
+function decTag(sec){
+  const d = sec && sec.decision && (S.decisions || []).find(x => x.id === sec.decision);
+  if (!d) return "";
+  const n = (d.id.match(/\d+/) || [""])[0], title = String(d.title || "").replace(/^Decision\s*\d+\s*[—–-]\s*/, "");
+  const opt = k => d[k] ? `<br><b>${k}</b>: ${esc(typeof d[k] === "string" ? d[k] : (d[k].text || d[k].label || ""))}` : "";
+  return `<span class="dectip" tabindex="0">Decision ${n}<span class="dectipbox"><b>Decision ${n}: ${esc(title)}</b>${opt("A")}${opt("B")}</span></span>`;
+}
+function sectionTaskHTML(sec){
+  const tag = decTag(sec), t = String(sec.task || "");
+  if (!tag) return esc(t);
+  const m = t.match(/the decision on [^.:;]+/), i = m ? t.indexOf(m[0]) : -1;
+  return m ? `${esc(t.slice(0, i + m[0].length))} (${tag})${esc(t.slice(i + m[0].length))}` : `Your decision: ${tag}. ${esc(t)}`;
+}
+
 // The word guide (18 Nov 2026): about 150 words per decision, flexible; the range comes from blocks.standard_words.
 function wordGuide(W){
   if (!W.words_range) return `About ${W.words} words.`;
@@ -1937,7 +1958,7 @@ function tabSubmit(){
       : `<p class="small muted">Graded as a whole, with one grade. The examiner looks for the argument moves: a clear position, reasons, evidence from the sources, the other side and your answer to it, and a conclusion. The word count isn't marked. Any choice you state and justify reasonably gets credit.</p>`) : ""}
     ${W.exam_practice ? `<p class="small muted">Exam practice: this is the written exam's task. Your feedback shows your text rewritten, with what to add marked in colour, a few tips and one provisional grade.</p>` : ""}
     ${W.question ? `<p><b>${esc(W.question)}</b></p>` : ""}
-    ${W.section ? `<p>${wordGuide(W)} ${esc(W.section.task)}</p><p class="small muted">Your own inbox has what you need for a good section. For a better one, listen to your ${pair() ? "partner" : "team"}: a fact or an objection from ${pair() ? "your partner's" : "a teammate's"} contacts, or a link to what the ${pair() ? "two of you" : "team"} decided elsewhere, takes it higher.</p>`
+    ${W.section ? `<p class="sectask">${wordGuide(W)} ${sectionTaskHTML(W.section)}</p><p class="small muted">Your own inbox has what you need for a good section. For a better one, listen to your ${pair() ? "partner" : "team"}: a fact or an objection from ${pair() ? "your partner's" : "a teammate's"} contacts, or a link to what the ${pair() ? "two of you" : "team"} decided elsewhere, takes it higher.</p>`
       : `<p>${wordGuide(W)} Your ${esc(W.label)} should:</p>
     <ul>${W.instructions.map(i => `<li>${esc(i)}</li>`).join("")}</ul>`}
     ${W.reader ? `<p><b>Your reader:</b> ${esc(W.reader)}</p>` : ""}
