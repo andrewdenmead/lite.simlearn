@@ -232,6 +232,9 @@ textarea.memo{width:100%;min-height:340px;border:1px solid var(--line);border-ra
 .qcount{font-size:.9rem;color:var(--ink-2)}
 .examq{margin:0 0 18px}
 .sectask{position:relative}
+.teachbar{margin:8px 0;padding:8px 10px;border:1px dashed #b45309;border-radius:8px;background:#fff7ed;font-size:.9rem;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.teachbar .tbtn{font:inherit;font-size:.85rem;padding:3px 8px;border:1px solid #d6b48a;border-radius:6px;background:#fff;cursor:pointer}
+.teachbar .tbtn[aria-pressed=true]{background:#b45309;color:#fff;border-color:#b45309}
 .dectip{border-bottom:1px dotted currentColor;cursor:help;white-space:nowrap;font-weight:600}
 .dectip .dectipbox{display:none;position:absolute;left:0;right:0;margin-top:1.5em;z-index:20;max-width:420px;white-space:normal;font-weight:400;font-size:.88rem;line-height:1.4;background:var(--paper,#fff);color:inherit;border:1px solid var(--line);border-radius:8px;padding:8px 10px;box-shadow:0 4px 14px rgba(0,0,0,.15)}
 .dectip:hover .dectipbox,.dectip:focus .dectipbox,.dectip:focus-within .dectipbox{display:block}
@@ -458,7 +461,10 @@ footer{border-top:1px solid var(--line);padding:18px 0 40px;font-size:.85rem;col
   if (saved) finish(b64(saved)).catch(() => { try { sessionStorage.removeItem(KEY); } catch (e) {} cover(); });
   else {
     const hadLink = /^#t=/.test(location.hash), expired = "This teacher link has expired. Get a new one from the teacher tool, or type the class code.";
-    teacherLink().then(raw => raw ? finish(raw) : cover(hadLink ? expired : "")).catch(() => cover(hadLink ? expired : ""));
+    teacherLink().then(raw => {
+      if (raw) { window.SL_TEACHER = true; try { sessionStorage.setItem("simlearn-teacher:" + location.pathname, "1"); } catch (e) {} return finish(raw); }
+      cover(hadLink ? expired : "");
+    }).catch(() => cover(hadLink ? expired : ""));
   }
 })();
 </script>
@@ -472,6 +478,9 @@ const PRINTED_AS = {"Show me the data": "The data behind it", "Give me a counter
 const AE2 = S.format === "ae2";   // new AE format: drawers, tags, "which is the better argument?"
 const EXAM = S.format === "exam", EX = S.exam || null;   // written exam: one candidate, questions, no answers in the page
 const SPEAK = S.format === "speaking", SP = S.speaking || null;
+// Opened with the teacher tool's link (Andrew, 24 Nov 2026: '"open as teacher" should have everything unlocked and
+// perhaps have a button to switch roles'): every follow-up answer and drawer open, no play limit, a role switcher.
+const TEACH = (() => { try { return !!window.SL_TEACHER || sessionStorage.getItem("simlearn-teacher:" + location.pathname) === "1"; } catch (e) { return !!window.SL_TEACHER; } })();
 // A real written exam (not a mock) asks no AI consent (Andrew, 19 Nov 2026): the text always goes in the hand-in.
 const NO_CONSENT = EXAM && !S.mock;
 // Role sections (19 Nov 2026): under every answered "one more thing" (any tier, so it gives nothing away), a tip that
@@ -610,6 +619,12 @@ function words(t){ return (t.trim().match(/\S+/g) || []).length; }
 const CHAR = Object.fromEntries(S.roles.flatMap(r => r.characters.map(c => [c.id, c])));
 const TWO = S.two_player ? S.two_player.roles.map(r => ({...r, characters: r.characters.map(id => CHAR[id])})) : null;
 const roles = () => (st.mode === "2" && TWO) ? TWO : S.roles;
+function teacherBar(){
+  const btn = (mode, r) => `<button type="button" class="tbtn" data-trole="${mode}|${r.id}" aria-pressed="${st.mode === mode && st.role === r.id}">${esc(r.dept ? r.id + ": " + r.dept : r.label)}</button>`;
+  const three = (S.roles || []).length > 1 ? S.roles.map(r => btn("3", r)).join("") : "";
+  const two = TWO ? TWO.map(r => btn("2", r)).join("") : "";
+  return `<div class="wrap"><div class="teachbar"><b>Teacher view</b> · everything is open${three ? ` · <span class="small">Role:</span> ${three}` : ""}${two ? ` · <span class="small">Two players:</span> ${two}` : ""}</div></div>`;
+}
 const role = () => roles().find(r => r.id === st.role);
 const pair = () => st.mode === "2";
 const num = n => ["zero","one","two","three","four","five","six"][n] || String(n);
@@ -1172,6 +1187,7 @@ function render(){
   closePalette(false);
   document.querySelectorAll("audio").forEach(x => x.pause());   // a recording stops (and remembers where) when the tab changes
   $("#app").classList.toggle("wide", !!st.role && !SPEAK && (st.tab === "submit" || st.tab === "decisions" || st.tab === "reading" || st.tab === "article"));
+  if (!st.role && TEACH && S.roles && S.roles.length) { st.mode = "3"; st.role = S.roles[0].id; st.tab = "context"; }
   if (!st.role) { document.title = S.title; return renderStart(); }
   const HO = st.handover, tabs = TABS.filter(([k]) => !(HO && k === "submit"));   // no submitting from a hand-over tab
   if (!tabs.some(([k]) => k === st.tab)) st.tab = "context";
@@ -1188,6 +1204,7 @@ function render(){
   ${HO ? `<div class="wrap"><div class="handbanner"><b>Hand-over from ${esc(hoName)}</b> (${esc(roleName(r))})${handoverWhen(HO.made) ? ", saved " + esc(handoverWhen(HO.made)) : ""}.
     This tab shows their ${AE2 ? "papers" : "emails"}, what they chose and their highlights. Use it to tell your group what they found.
     Their own writing isn't included. You can't submit from this tab, and changes here don't count.${HO.older ? " The simulation has been updated since they saved this, so some highlights may be missing." : ""}</div></div>` : ""}
+  ${TEACH ? teacherBar() : ""}
   <main class="wrap" id="main"></main>
   <footer class="wrap">${esc(S.disclaimer)}<br>Nothing you type here leaves this browser tab unless you copy it yourself.<br>
     ${HO || EXAM || SPEAK || SOLO ? "" : `<button type="button" class="linkish" id="hoOut">Leaving early? Hand over your work</button>
@@ -1202,6 +1219,9 @@ function render(){
   document.querySelectorAll(".tab").forEach(b => b.onclick = () => { st.tab = b.dataset.tab; save(); render(); window.scrollTo(0,0); });
   keepTabInView(tabScroll);
   $("#reset").onclick = () => { $("#resetAsk").hidden = false; $("#reset").hidden = true; };
+  document.querySelectorAll("[data-trole]").forEach(b => b.onclick = () => {
+    const [mode, id] = b.dataset.trole.split("|"); st.mode = mode; st.role = id; save(); render();
+  });
   const hoOut = $("#hoOut");
   if (hoOut) hoOut.onclick = () => { $("#hoPanel").hidden = !$("#hoPanel").hidden; if (!$("#hoPanel").hidden) $("#hoName").focus(); };
   const hoGo = $("#hoGo");
@@ -1580,7 +1600,7 @@ function tabSpeakEmails(){
   r.characters.filter(c => c.offers.length).forEach(wireMail);   // the sims' "one more thing" (good, better, best)
   refreshNotebook();
 }
-const PLAYS = () => SP.listening.plays || 2;
+const PLAYS = () => TEACH ? 99 : (SP.listening.plays || 2);
 const timesWord = n => n === 1 ? "once" : n === 2 ? "twice" : num(n) + " times";
 // where a paused (or interrupted) recording stopped: kept in the page only, so a student can check an email and
 // carry on without losing a play. Leaving the tab removes the player, so the position is kept here.
@@ -1743,7 +1763,7 @@ function sourceHTML(c){   // ae2: a primary text with three drawers the student 
       ${c.offers.map(o => `<h3 class="ptext">${esc(PRINTED_AS[o.title] || o.title)}</h3>
         <div class="prose">${hlHTML(unscramble(o.text, `${S.salt}|${c.id}|${o.id}`), c.id, "d" + o.id)}</div>
         <p class="cite"><b>Reference:</b> ${esc(o.citation)}</p>`).join("")}</div></details>`;
-  const isOpen = o => !!(st.drawOpen || {})[c.id + "|" + o.id];
+  const isOpen = o => TEACH || !!(st.drawOpen || {})[c.id + "|" + o.id];
   return `<details class="mail paper" id="m_${c.id}" open>
     <summary><span><span class="ptitle">${esc(c.subject)}</span><br><span class="pauth">${esc(c.name)}</span> <span class="muted small">· ${esc(c.title)}</span></span></summary>
     <div class="body"><div class="prose">${hlHTML(c.email, c.id, "email")}</div>${c.citation ? `<p class="cite"><b>Reference:</b> ${esc(c.citation)}</p>` : ""}
@@ -1759,7 +1779,11 @@ function mailHTML(c){
   const chosen = st.choices[c.id];
   const open = !chosen;
   let offers;
-  if (chosen) {
+  if (TEACH) {   // the teacher sees every answer, voice messages with their text
+    offers = `<div class="offers done">${c.offers.map(o => `<div class="opened"><p class="t">${esc(o.title)}</p>${o.src ? `
+          <audio controls preload="none" src="${esc(o.src)}" style="width:100%"></audio>` : ""}
+          ${o.text ? `<div class="prose">${hlHTML(unscramble(o.text, `${S.salt}|${c.id}|${o.id}`), c.id, "opt")}</div>` : ""}</div>`).join("")}</div>`;
+  } else if (chosen) {
     const o = c.offers.find(x => x.id === chosen);
     offers = `<div class="offers done">
         <div class="opened"><p class="t">${esc(o.title)}</p>${o.src ? `
